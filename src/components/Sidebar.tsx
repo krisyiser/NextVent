@@ -1,9 +1,8 @@
 import { useState } from 'react';
 import Link from 'next/link';
-import { LayoutDashboard, ShoppingCart, Package, User, PieChart, MessageCircle, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, ShoppingCart, Package, User, PieChart, Settings, LogOut } from 'lucide-react';
 import { closeShift, getActiveShift } from '@/lib/storage';
 import { SettingsModal } from './SettingsModal';
-import { MessageModal } from './MessageModal';
 
 type SidebarProps = {
   activeModule?: 'pos' | 'inventory' | 'customers' | 'reports' | 'history';
@@ -11,7 +10,6 @@ type SidebarProps = {
 
 export const Sidebar = ({ activeModule = 'pos' }: SidebarProps) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isMessageOpen, setIsMessageOpen] = useState(false);
 
   const handleCloseShift = async () => {
     const shift = await getActiveShift();
@@ -40,10 +38,7 @@ export const Sidebar = ({ activeModule = 'pos' }: SidebarProps) => {
         <User size={24} />
       </Link>
       
-      <button className="nav-item" style={{ border: 'none', background: 'none', marginTop: 'auto' }} onClick={() => setIsMessageOpen(true)} title="Enviar Mensaje a Cliente">
-        <MessageCircle size={24} className="text-success" />
-      </button>
-      <button className="nav-item" style={{ border: 'none', background: 'none' }} onClick={() => setIsSettingsOpen(true)} title="Configuración">
+      <button className="nav-item" style={{ border: 'none', background: 'none', marginTop: 'auto' }} onClick={() => setIsSettingsOpen(true)} title="Configuración">
         <Settings size={24} />
       </button>
       <button 
@@ -62,7 +57,6 @@ export const Sidebar = ({ activeModule = 'pos' }: SidebarProps) => {
 
       {/* Renderizamos Mods aquí para que estén en todas las páginas donde esté Sidebar */}
       <SettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
-      <MessageModal isOpen={isMessageOpen} onClose={() => setIsMessageOpen(false)} />
     </nav>
   );
 };

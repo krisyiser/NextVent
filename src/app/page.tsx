@@ -266,13 +266,14 @@ export default function POS() {
           </section>
 
           <TicketSection 
-            ticket={ticket}
+            ticket={ticketData.items}
             ticketTotal={ticketData.total}
             ticketCount={ticketData.count}
             updateQuantity={updateQuantity}
             onCompleteSale={() => setIsCheckoutOpen(true)}
             onClearTicket={clearTicket}
           />
+
         </div>
       </main>
 

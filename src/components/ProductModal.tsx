@@ -14,14 +14,14 @@ type ProductModalProps = {
 };
 
 export const ProductModal = ({ isOpen, onClose, onSave, product, title }: ProductModalProps) => {
-  const [formData, setFormData] = useState<Product>({
+  const [formData, setFormData] = useState<any>({
     id: '',
     name: '',
-    cost: 0,
-    price: 0,
-    wholesalePrice: 0,
-    wholesaleThreshold: 0,
-    stock: 0,
+    cost: '',
+    price: '',
+    wholesalePrice: '',
+    wholesaleThreshold: '',
+    stock: '',
     category: 'Abarrotes',
     unit: 'Pza',
     barcode: ''
@@ -39,11 +39,11 @@ export const ProductModal = ({ isOpen, onClose, onSave, product, title }: Produc
         setFormData({
           id: ``,
           name: '',
-          cost: 0,
-          price: 0,
-          wholesalePrice: 0,
-          wholesaleThreshold: 0,
-          stock: 0,
+          cost: '',
+          price: '',
+          wholesalePrice: '',
+          wholesaleThreshold: '',
+          stock: '',
           category: 'Abarrotes',
           unit: 'Pza',
           barcode: ''
@@ -62,7 +62,15 @@ export const ProductModal = ({ isOpen, onClose, onSave, product, title }: Produc
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave(formData);
+    const finalData = {
+      ...formData,
+      cost: formData.cost === '' ? 0 : formData.cost,
+      price: formData.price === '' ? 0 : formData.price,
+      wholesalePrice: formData.wholesalePrice === '' ? 0 : formData.wholesalePrice,
+      wholesaleThreshold: formData.wholesaleThreshold === '' ? 0 : formData.wholesaleThreshold,
+      stock: formData.stock === '' ? 0 : formData.stock,
+    };
+    onSave(finalData);
   };
 
   const handleScanClick = () => {
@@ -201,7 +209,7 @@ export const ProductModal = ({ isOpen, onClose, onSave, product, title }: Produc
                   value={formData.cost}
                   onFocus={handleFocus}
                   onClick={handleClick}
-                  onChange={e => setFormData({ ...formData, cost: parseFloat(e.target.value) || 0 })}
+                  onChange={e => setFormData({ ...formData, cost: e.target.value === '' ? '' : parseFloat(e.target.value) })}
                   style={{ width: '100%', padding: '12px 0', backgroundColor: 'transparent', border: 'none', color: '#fff', fontSize: '16px', outline: 'none' }}
                 />
               </div>
@@ -218,7 +226,7 @@ export const ProductModal = ({ isOpen, onClose, onSave, product, title }: Produc
                   value={formData.price}
                   onFocus={handleFocus}
                   onClick={handleClick}
-                  onChange={e => setFormData({ ...formData, price: parseFloat(e.target.value) || 0 })}
+                  onChange={e => setFormData({ ...formData, price: e.target.value === '' ? '' : parseFloat(e.target.value) })}
                   style={{ width: '100%', padding: '12px 0', backgroundColor: 'transparent', border: 'none', color: '#fff', fontSize: '16px', outline: 'none' }}
                 />
               </div>
@@ -231,10 +239,10 @@ export const ProductModal = ({ isOpen, onClose, onSave, product, title }: Produc
                 <span style={{ color: 'var(--accent-warning)', marginRight: '8px' }}>$</span>
                 <input 
                   type="number" step="0.01"
-                  value={formData.wholesalePrice || 0}
+                  value={formData.wholesalePrice}
                   onFocus={handleFocus}
                   onClick={handleClick}
-                  onChange={e => setFormData({ ...formData, wholesalePrice: parseFloat(e.target.value) || 0 })}
+                  onChange={e => setFormData({ ...formData, wholesalePrice: e.target.value === '' ? '' : parseFloat(e.target.value) })}
                   style={{ width: '100%', padding: '12px 0', backgroundColor: 'transparent', border: 'none', color: '#fff', fontSize: '16px', outline: 'none' }}
                 />
               </div>
@@ -245,10 +253,10 @@ export const ProductModal = ({ isOpen, onClose, onSave, product, title }: Produc
               <label style={{ display: 'block', fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '8px' }}>Cant. para Mayoreo</label>
               <input 
                 type="number"
-                value={formData.wholesaleThreshold || 0}
+                value={formData.wholesaleThreshold}
                 onFocus={handleFocus}
                 onClick={handleClick}
-                onChange={e => setFormData({ ...formData, wholesaleThreshold: parseInt(e.target.value) || 0 })}
+                onChange={e => setFormData({ ...formData, wholesaleThreshold: e.target.value === '' ? '' : parseInt(e.target.value) })}
                 style={{ width: '100%', padding: '12px 16px', backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', color: '#fff', fontSize: '16px', outline: 'none' }}
               />
             </div>
@@ -263,7 +271,7 @@ export const ProductModal = ({ isOpen, onClose, onSave, product, title }: Produc
                   value={formData.stock}
                   onFocus={handleFocus}
                   onClick={handleClick}
-                  onChange={e => setFormData({ ...formData, stock: parseFloat(e.target.value) || 0 })}
+                  onChange={e => setFormData({ ...formData, stock: e.target.value === '' ? '' : parseFloat(e.target.value) })}
                   style={{ width: '100%', padding: '12px 0', backgroundColor: 'transparent', border: 'none', color: '#fff', fontSize: '16px', outline: 'none' }}
                 />
 
@@ -275,7 +283,7 @@ export const ProductModal = ({ isOpen, onClose, onSave, product, title }: Produc
                <div style={{ textAlign: 'center' }}>
                   <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Ganancia x Unidad</div>
                   <div style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--accent-success)' }}>
-                    ${(formData.price - formData.cost).toFixed(2)}
+                    ${((parseFloat(formData.price as string) || 0) - (parseFloat(formData.cost as string) || 0)).toFixed(2)}
                   </div>
                </div>
             </div>

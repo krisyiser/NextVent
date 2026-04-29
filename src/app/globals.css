@@ -49,7 +49,18 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Hide Number Input Arrows */
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
 /* Base Layout */
+
 .app-container {
   display: flex;
   height: 100vh;
@@ -217,6 +228,7 @@ body {
   overflow-x: auto;
   padding-bottom: 16px;
   margin-bottom: 8px;
+  flex-shrink: 0;
   scrollbar-width: none; /* Firefox */
 }
 .categories::-webkit-scrollbar {

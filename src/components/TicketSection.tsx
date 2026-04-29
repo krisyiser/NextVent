@@ -1,17 +1,18 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ShoppingCart, Minus, Plus, Trash2, Wallet } from 'lucide-react';
 import { TicketItem } from '@/types';
 
 type TicketSectionProps = {
-  ticket: TicketItem[];
+  ticket: (TicketItem & { priceToUse?: number })[];
   ticketTotal: number;
   ticketCount: number;
   updateQuantity: (id: string, delta: number) => void;
   onCompleteSale: () => void;
   onClearTicket: () => void;
 };
+
 
 export const TicketSection = ({
   ticket,
@@ -21,11 +22,17 @@ export const TicketSection = ({
   onCompleteSale,
   onClearTicket
 }: TicketSectionProps) => {
+  const [ticketId, setTicketId] = useState<string>('----');
+
+  useEffect(() => {
+    setTicketId(`${Math.floor(1000 + Math.random() * 9000)}`);
+  }, []);
+
   return (
     <aside className="ticket-section">
       <div className="ticket-header">
         <div className="ticket-title">Ticket de Venta</div>
-        <div className="ticket-id">#TKT-{Math.floor(1000 + Math.random() * 9000)}</div>
+        <div className="ticket-id">#TKT-{ticketId}</div>
       </div>
 
       <div className="ticket-items">
@@ -56,12 +63,18 @@ export const TicketSection = ({
 
               <div className="ticket-item-price-container">
                 <div className="ticket-item-total">
-                  ${(item.price * item.quantity).toFixed(2)}
+                  ${((item.priceToUse || item.price) * item.quantity).toFixed(2)}
                 </div>
                 <div className="ticket-item-unit">
-                  ${item.price.toFixed(2)} x {item.unit}
+                  {item.priceToUse && item.priceToUse < item.price && (
+                    <span style={{ textDecoration: 'line-through', fontSize: '10px', opacity: 0.5, marginRight: 4 }}>
+                        ${item.price.toFixed(2)}
+                    </span>
+                  )}
+                  ${(item.priceToUse || item.price).toFixed(2)} x {item.unit}
                 </div>
               </div>
+
             </div>
           ))
         )}
@@ -78,8 +91,9 @@ export const TicketSection = ({
         </div>
         <div className="summary-row" style={{ color: 'var(--accent-danger)' }}>
           <span>Descuentos</span>
-          <span>-$0.00</span>
+          <span>-${ticket.reduce((acc, item) => acc + (item.price - (item.priceToUse || item.price)) * item.quantity, 0).toFixed(2)}</span>
         </div>
+
 
         <div className="summary-total">
           <span>TOTAL</span>
