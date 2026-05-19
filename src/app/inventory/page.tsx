@@ -108,8 +108,25 @@ export default function Inventory() {
                     ) : '---'}
                   </td>
                   <td style={{ padding: '16px' }}>
-                    <div style={{ color: p.stock <= 5 ? 'var(--accent-danger)' : 'inherit' }}>
-                      {p.stock} <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{p.unit}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <div style={{ color: p.stock <= 5 ? 'var(--accent-danger)' : 'inherit' }}>
+                        {p.stock} <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{p.unit}</span>
+                        </div>
+                        <button 
+                            className="qty-btn" 
+                            style={{ width: '24px', height: '24px', fontSize: '12px', borderRadius: '4px' }}
+                            onClick={() => {
+                                const val = prompt(`Agregar stock para ${p.name}:`);
+                                if (val) {
+                                    const amount = parseFloat(val);
+                                    if (!isNaN(amount)) {
+                                        handleSaveProduct({ ...p, stock: p.stock + amount });
+                                    }
+                                }
+                            }}
+                        >
+                            <Plus size={14} />
+                        </button>
                     </div>
                   </td>
                   <td style={{ padding: '16px' }}>

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import { Sidebar } from '@/components/Sidebar';
-import { getSalesHistory, getTopSellingProducts, getShiftHistory } from '@/lib/storage';
+import { getSalesHistory, getTopSellingProducts, getShiftHistory, cancelSale } from '@/lib/storage';
 import { Sale, Shift } from '@/types';
 import { 
   PieChart, Clock, Calendar, ChevronDown, ChevronUp, TrendingUp, 
@@ -16,6 +16,8 @@ export default function History() {
   const [view, setView] = useState<'sales' | 'shifts'>('sales');
   const [topSellings, setTopSellings] = useState<any[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [dateFilter, setDateFilter] = useState<'today' | 'week' | 'all'>('all');
+  const [cancelConfirmId, setCancelConfirmId] = useState<string | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -26,6 +28,20 @@ export default function History() {
     load();
   }, []);
 
+  const filteredHistory = useMemo(() => {
+    if (dateFilter === 'all') return history;
+    const now = new Date();
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
+
+    return history.filter(sale => {
+        const saleDate = new Date(sale.date);
+        if (dateFilter === 'today') return saleDate >= startOfToday;
+        if (dateFilter === 'week') return saleDate >= startOfWeek;
+        return true;
+    });
+  }, [history, dateFilter]);
+
   const stats = useMemo(() => {
     return history.reduce((acc, sale) => {
       if (sale.isCancelled) return acc;
@@ -33,18 +49,19 @@ export default function History() {
       acc.totalProfit += sale.profit;
       acc.totalCost += sale.totalCost;
       if (sale.isCredit) acc.totalCredits += sale.total;
+      
+      const method = sale.paymentMethod || 'Cash';
+      acc.byMethod[method] = (acc.byMethod[method] || 0) + sale.total;
+      
       return acc;
-    }, { totalSales: 0, totalProfit: 0, totalCost: 0, totalCredits: 0 });
+    }, { totalSales: 0, totalProfit: 0, totalCost: 0, totalCredits: 0, byMethod: {} as Record<string, number> });
   }, [history]);
 
-  const handleCancelSale = async (id: string, e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (confirm("¿Estás seguro de cancelar esta venta? Esto devolverá los productos al stock y anulará la transacción.")) {
-        const libs = await import('@/lib/storage');
-        await libs.cancelSale(id);
-        setHistory(await libs.getSalesHistory());
-        setTopSellings(await libs.getTopSellingProducts(5));
-    }
+  const handleCancelSale = async (id: string) => {
+    await cancelSale(id);
+    setCancelConfirmId(null);
+    setHistory(await getSalesHistory());
+    setTopSellings(await getTopSellingProducts(5));
   };
 
   const formatDate = (isoStr: string) => {
@@ -93,21 +110,32 @@ export default function History() {
                 <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '20px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '16px' }}>
                     <div style={{ padding: '12px', backgroundColor: 'rgba(59, 130, 246, 0.1)', color: 'var(--accent-primary)', borderRadius: 'var(--radius-md)' }}><DollarSign size={24} /></div>
                     <div>
-                      <div style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>VENTAS NO ANULADAS</div>
+                      <div style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>VENTAS TOTALES</div>
                       <div style={{ fontSize: '20px', fontWeight: 'bold' }}>${stats.totalSales.toFixed(2)}</div>
                     </div>
                 </div>
                 <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '20px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '16px' }}>
                     <div style={{ padding: '12px', backgroundColor: 'rgba(16, 185, 129, 0.1)', color: 'var(--accent-success)', borderRadius: 'var(--radius-md)' }}><TrendingUp size={24} /></div>
                     <div>
-                      <div style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>UTILIDAD NETA FINAL</div>
+                      <div style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>UTILIDAD NETA</div>
                       <div style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--accent-success)' }}>${stats.totalProfit.toFixed(2)}</div>
                     </div>
                 </div>
+                
+                {/* Payment Method Breakdown */}
+                <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '20px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div style={{ color: 'var(--text-secondary)', fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase' }}>Por Método de Pago</div>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px' }}>
+                        <div style={{ fontSize: '13px' }}>💵 <span style={{ color: 'var(--text-muted)' }}>Efec:</span> <b>${(stats.byMethod['Cash'] || 0).toFixed(0)}</b></div>
+                        <div style={{ fontSize: '13px' }}>💳 <span style={{ color: 'var(--text-muted)' }}>Tarj:</span> <b>${(stats.byMethod['Card'] || 0).toFixed(0)}</b></div>
+                        <div style={{ fontSize: '13px' }}>📱 <span style={{ color: 'var(--text-muted)' }}>Trans:</span> <b>${(stats.byMethod['Transfer'] || 0).toFixed(0)}</b></div>
+                    </div>
+                </div>
+
                 <div style={{ backgroundColor: 'var(--bg-secondary)', padding: '20px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '16px' }}>
                     <div style={{ padding: '12px', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--accent-danger)', borderRadius: 'var(--radius-md)' }}><User size={24} /></div>
                     <div>
-                      <div style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>DEUDAS POR COBRAR</div>
+                      <div style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>POR COBRAR (FIADO)</div>
                       <div style={{ fontSize: '20px', fontWeight: 'bold', color: 'var(--accent-danger)' }}>${stats.totalCredits.toFixed(2)}</div>
                     </div>
                 </div>
@@ -139,14 +167,29 @@ export default function History() {
                 </div>
               </div>
 
+              <div style={{ maxWidth: '800px', margin: '0 auto 16px', display: 'flex', justifyContent: 'center', gap: '12px' }}>
+                <button 
+                    onClick={() => setDateFilter('today')}
+                    style={{ fontSize: '12px', padding: '6px 12px', borderRadius: '20px', border: '1px solid var(--border-color)', backgroundColor: dateFilter === 'today' ? 'var(--accent-primary)' : 'transparent', color: '#fff', cursor: 'pointer' }}
+                >Hoy</button>
+                <button 
+                    onClick={() => setDateFilter('week')}
+                    style={{ fontSize: '12px', padding: '6px 12px', borderRadius: '20px', border: '1px solid var(--border-color)', backgroundColor: dateFilter === 'week' ? 'var(--accent-primary)' : 'transparent', color: '#fff', cursor: 'pointer' }}
+                >Semana</button>
+                <button 
+                    onClick={() => setDateFilter('all')}
+                    style={{ fontSize: '12px', padding: '6px 12px', borderRadius: '20px', border: '1px solid var(--border-color)', backgroundColor: dateFilter === 'all' ? 'var(--accent-primary)' : 'transparent', color: '#fff', cursor: 'pointer' }}
+                >Todo</button>
+              </div>
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxWidth: '800px', margin: '0 auto' }}>
-                {history.length === 0 ? (
+                {filteredHistory.length === 0 ? (
                   <div className="empty-ticket" style={{ marginTop: '100px' }}>
                     <PieChart size={64} className="empty-icon text-muted" />
-                    <p>No hay ventas registradas todavía.</p>
+                    <p>No hay ventas registradas para este periodo.</p>
                   </div>
                 ) : (
-                  history.map(sale => (
+                  filteredHistory.map(sale => (
                     <div key={sale.id} 
                          style={{ 
                            backgroundColor: 'var(--bg-secondary)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-color)',
@@ -168,6 +211,9 @@ export default function History() {
                             <Calendar size={14} />
                             {formatDate(sale.date)}
                             {sale.isCancelled && <span style={{ marginLeft: '12px' }}>({formatDate(sale.cancelledAt!)})</span>}
+                            <span style={{ marginLeft: '12px', fontSize: '14px' }}>
+                                {sale.paymentMethod === 'Cash' ? '💵' : sale.paymentMethod === 'Card' ? '💳' : sale.paymentMethod === 'Transfer' ? '📱' : '📝'}
+                            </span>
                           </div>
                         </div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
@@ -191,12 +237,20 @@ export default function History() {
                         <div style={{ marginTop: '20px', paddingTop: '20px', borderTop: '1px dashed var(--border-color)' }}>
                             {!sale.isCancelled && (
                                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '16px' }}>
-                                    <button className="checkout-btn" 
-                                            style={{ backgroundColor: 'transparent', border: '1px solid var(--accent-danger)', color: 'var(--accent-danger)', fontSize: '12px', padding: '8px 16px', margin: 0, width: 'auto' }}
-                                            onClick={(e) => handleCancelSale(sale.id, e)}
-                                    >
-                                        ANULAR ESTA VENTA
-                                    </button>
+                                    {cancelConfirmId === sale.id ? (
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', backgroundColor: 'rgba(239, 68, 68, 0.1)', padding: '8px 16px', borderRadius: 'var(--radius-md)' }}>
+                                            <span style={{ fontSize: '12px', color: 'var(--accent-danger)', fontWeight: 'bold' }}>¿Anular venta?</span>
+                                            <button onClick={() => setCancelConfirmId(null)} style={{ fontSize: '12px', background: 'none', border: 'none', color: 'var(--text-secondary)', cursor: 'pointer' }}>No</button>
+                                            <button onClick={() => handleCancelSale(sale.id)} style={{ fontSize: '12px', background: 'var(--accent-danger)', border: 'none', color: '#fff', padding: '4px 12px', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}>SÍ, ANULAR</button>
+                                        </div>
+                                    ) : (
+                                        <button className="checkout-btn" 
+                                                style={{ backgroundColor: 'transparent', border: '1px solid var(--accent-danger)', color: 'var(--accent-danger)', fontSize: '12px', padding: '8px 16px', margin: 0, width: 'auto' }}
+                                                onClick={(e) => { e.stopPropagation(); setCancelConfirmId(sale.id); }}
+                                        >
+                                            ANULAR ESTA VENTA
+                                        </button>
+                                    )}
                                 </div>
                             )}
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '16px' }}>

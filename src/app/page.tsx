@@ -6,11 +6,14 @@ import { TopBar } from '@/components/TopBar';
 import { ProductCard } from '@/components/ProductCard';
 import { TicketSection } from '@/components/TicketSection';
 import { CheckoutModal } from '@/components/CheckoutModal';
+import { DiscountModal } from '@/components/DiscountModal';
 import { QuantityModal } from '@/components/QuantityModal';
 import { ShiftModal } from '@/components/ShiftModal';
 import { CATEGORIES } from '@/constants';
 import { Product, TicketItem, Sale, Shift } from '@/types';
-import { getProducts, saveSale, getActiveShift } from '@/lib/storage';
+import { getProducts, saveSale, getActiveShift, getPromotions } from '@/lib/storage';
+
+import { ReceiptTemplate } from '@/components/ReceiptTemplate';
 
 export type TopBarProps = {
   searchQuery: string;
@@ -32,18 +35,84 @@ export default function POS() {
   const [scanBuffer, setScanBuffer] = useState('');
   const [isScannerDetected, setIsScannerDetected] = useState(false);
   const [currentShift, setCurrentShift] = useState<Shift | null>(null);
+  const [lastSale, setLastSale] = useState<Sale | null>(null);
+  const [globalDiscount, setGlobalDiscount] = useState(0);
+  const [isKioskMode, setIsKioskMode] = useState(false);
+  const [promotions, setPromotions] = useState<any[]>([]);
+  const [lastAddedId, setLastAddedId] = useState<string | null>(null);
+
+  const playBeep = (type: 'success' | 'error' = 'success') => {
+    try {
+        const audioCtx = new (window.AudioContext || (window as any).webkitAudioContext)();
+        const oscillator = audioCtx.createOscillator();
+        const gainNode = audioCtx.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+
+        oscillator.type = 'sine';
+        oscillator.frequency.setValueAtTime(type === 'success' ? 880 : 220, audioCtx.currentTime);
+        gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+
+        oscillator.start();
+        oscillator.stop(audioCtx.currentTime + 0.1);
+    } catch (e) {
+        console.error("Audio feedback failed", e);
+    }
+  };
 
 
   // Modals state
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [isDiscountModalOpen, setIsDiscountModalOpen] = useState(false);
   const [isQuantityOpen, setIsQuantityOpen] = useState(false);
   const [isShiftOpen, setIsShiftOpen] = useState(false);
   const [pendingProduct, setPendingProduct] = useState<Product | null>(null);
+
+  // Parked Orders state
+  const [parkedOrders, setParkedOrders] = useState<{ id: string, items: TicketItem[], timestamp: string }[]>([]);
+
+  useEffect(() => {
+    const saved = localStorage.getItem('parked_orders');
+    if (saved) {
+      setParkedOrders(JSON.parse(saved));
+    }
+  }, []);
+
+  const parkCurrentSale = () => {
+    if (ticket.length === 0) return;
+    const newOrder = {
+      id: `ORDER-${Date.now()}`,
+      items: [...ticket],
+      timestamp: new Date().toLocaleTimeString()
+    };
+    const updated = [newOrder, ...parkedOrders];
+    setParkedOrders(updated);
+    localStorage.setItem('parked_orders', JSON.stringify(updated));
+    setTicket([]);
+  };
+
+  const resumeOrder = (orderId: string) => {
+    const order = parkedOrders.find(o => o.id === orderId);
+    if (order) {
+      if (ticket.length > 0) {
+        // Option 1: Merge. Option 2: Park current then resume.
+        // Let's Park current if not empty
+        parkCurrentSale();
+      }
+      setTicket(order.items);
+      const updated = parkedOrders.filter(o => o.id !== orderId);
+      setParkedOrders(updated);
+      localStorage.setItem('parked_orders', JSON.stringify(updated));
+    }
+  };
   
   // Persistence Loading
   useEffect(() => {
     const load = async () => {
         setProducts(await getProducts());
+        setPromotions(await getPromotions());
         const shift = await getActiveShift();
         if (!shift) {
             setIsShiftOpen(true);
@@ -146,27 +215,65 @@ export default function POS() {
     let totalCost = 0;
     let count = 0;
 
+    const alerts: { type: 'info' | 'success', message: string }[] = [];
+
     const items = ticket.map(item => {
       let priceToUse = item.price;
-      if (item.wholesalePrice && item.wholesaleThreshold && item.quantity >= item.wholesaleThreshold) {
+      let multiBuyDiscount = 0;
+      
+      // 1. Check for Active Promotions
+      const activePromos = promotions.filter(p => p.isActive);
+      
+      // Specific product promo (Regular or Multi-buy)
+      const productPromo = activePromos.find(p => (p.type === 'product' || p.type === 'multibuy') && p.targetId === item.id);
+      // Category promo
+      const categoryPromo = activePromos.find(p => p.type === 'category' && p.targetId === item.category);
+
+      if (productPromo) {
+        if (productPromo.type === 'multibuy') {
+          const sets = Math.floor(item.quantity / productPromo.buyQty);
+          if (sets > 0) {
+            multiBuyDiscount = (item.price * (productPromo.buyQty - productPromo.payQty)) * sets;
+            alerts.push({ type: 'success', message: `¡Promoción ${productPromo.buyQty}x${productPromo.payQty} aplicada en ${item.name}!` });
+          } else if (item.quantity === productPromo.buyQty - 1) {
+            alerts.push({ type: 'info', message: `¡Agrega 1 ${item.name} más para aplicar la promo ${productPromo.buyQty}x${productPromo.payQty}!` });
+          }
+        } else {
+          if (productPromo.discountType === 'percent') {
+            priceToUse = item.price * (1 - productPromo.discountValue / 100);
+          } else {
+            priceToUse = Math.max(0, item.price - productPromo.discountValue);
+          }
+          alerts.push({ type: 'success', message: `Descuento aplicado en ${item.name}` });
+        }
+      } else if (categoryPromo) {
+        if (categoryPromo.discountType === 'percent') {
+          priceToUse = item.price * (1 - categoryPromo.discountValue / 100);
+        } else {
+          priceToUse = Math.max(0, item.price - categoryPromo.discountValue);
+        }
+      } else if (item.wholesalePrice && item.wholesaleThreshold && item.quantity >= item.wholesaleThreshold) {
         priceToUse = item.wholesalePrice;
       }
       
-      total += priceToUse * item.quantity;
+      total += (priceToUse * item.quantity) - multiBuyDiscount;
       totalCost += item.cost * item.quantity;
       count += item.unit === 'Kg' ? 1 : item.quantity;
 
-      return { ...item, priceToUse };
+      return { ...item, priceToUse, multiBuyDiscount };
     });
 
-    return { total, totalCost, count, items };
-  }, [ticket]);
+    const finalTotal = Math.max(0, total - globalDiscount);
+
+    return { total: finalTotal, rawTotal: total, totalCost, count, items, alerts };
+  }, [ticket, globalDiscount, promotions]);
 
   const handleProductSelect = (product: Product) => {
     const existing = ticket.find(item => item.id === product.id);
     const currentQty = existing ? existing.quantity : 0;
 
     if (currentQty >= product.stock || product.stock <= 0) {
+      playBeep('error');
       alert(`No puedes agregar más. Stock agotado para ${product.name} (${product.stock} ${product.unit} disponibles).`);
       return;
     }
@@ -175,6 +282,7 @@ export default function POS() {
       setPendingProduct(product);
       setIsQuantityOpen(true);
     } else {
+      playBeep('success');
       addToTicket(product, 1);
     }
     setSearchQuery('');
@@ -189,6 +297,7 @@ export default function POS() {
       if (currentQty + quantity > product.stock) {
         // Silently return if already at limit to avoid multiple alerts from scanner
         if (currentQty < product.stock) {
+            playBeep('error');
             alert(`Stock agotado. No puedes agregar más de ${product.stock} ${product.unit} de este producto.`);
         }
         return prev;
@@ -196,6 +305,9 @@ export default function POS() {
 
 
       setSearchQuery(''); 
+      setLastAddedId(product.id);
+      setTimeout(() => setLastAddedId(null), 1000);
+
       if (existing) {
         return prev.map(item => item.id === product.id ? { ...item, quantity: item.quantity + quantity } : item);
       }
@@ -215,16 +327,27 @@ export default function POS() {
 
   const clearTicket = () => setTicket([]);
 
+  const handleApplyDiscount = (val: number) => {
+    setGlobalDiscount(val);
+  };
+
   const onCompleteSale = async (sale: Sale) => {
     await saveSale(sale);
     setProducts(await getProducts());
+    setLastSale(sale);
     clearTicket();
     setIsCheckoutOpen(false);
-    alert(`¡Venta #${sale.id} exitosa!\nCambio para cliente: $${sale.changeAmount.toFixed(2)}\n\n✅ Venta procesada y stock actualizado correctamente.`);
+    
+    // Trigger print after modal closes and lastSale renders
+    setTimeout(() => {
+        window.print();
+    }, 500);
+
+    alert(`¡Venta #${sale.id.split('-')[1]} exitosa!\nCambio para cliente: $${sale.changeAmount.toFixed(2)}\n\n✅ Venta procesada y stock actualizado correctamente.`);
   };
 
   return (
-    <>
+    <div className={isKioskMode ? 'kiosk-mode' : ''} style={{ display: 'flex', width: '100%', height: '100vh' }}>
       <Sidebar activeModule="pos" />
 
       <main className="main-content">
@@ -235,6 +358,8 @@ export default function POS() {
           isMobileMode={isMobileMode}
           setIsMobileMode={setIsMobileMode}
           isScannerDetected={isScannerDetected}
+          toggleKiosk={() => setIsKioskMode(!isKioskMode)}
+          isKioskMode={isKioskMode}
         />
 
 
@@ -271,7 +396,14 @@ export default function POS() {
             ticketCount={ticketData.count}
             updateQuantity={updateQuantity}
             onCompleteSale={() => setIsCheckoutOpen(true)}
-            onClearTicket={clearTicket}
+            onClearTicket={() => { clearTicket(); setGlobalDiscount(0); }}
+            parkedOrders={parkedOrders}
+            onParkSale={parkCurrentSale}
+            onResumeOrder={resumeOrder}
+            globalDiscount={globalDiscount}
+            onOpenDiscount={() => setIsDiscountModalOpen(true)}
+            lastAddedId={lastAddedId}
+            alerts={ticketData.alerts}
           />
 
         </div>
@@ -284,6 +416,14 @@ export default function POS() {
         totalCost={ticketData.totalCost}
         items={ticket}
         onComplete={onCompleteSale}
+      />
+
+      <DiscountModal 
+        isOpen={isDiscountModalOpen}
+        onClose={() => setIsDiscountModalOpen(false)}
+        currentDiscount={globalDiscount}
+        subtotal={ticketData.rawTotal}
+        onApply={setGlobalDiscount}
       />
 
       <QuantityModal 
@@ -300,6 +440,8 @@ export default function POS() {
             setIsShiftOpen(false);
         }}
       />
-    </>
+
+      {lastSale && <ReceiptTemplate sale={lastSale} />}
+    </div>
   );
 }

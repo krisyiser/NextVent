@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import Link from 'next/link';
-import { LayoutDashboard, ShoppingCart, Package, User, PieChart, Settings, LogOut } from 'lucide-react';
+import { LayoutDashboard, ShoppingCart, Package, User, PieChart, Settings, LogOut, Tag } from 'lucide-react';
 import { closeShift, getActiveShift } from '@/lib/storage';
 import { SettingsModal } from './SettingsModal';
 
 type SidebarProps = {
-  activeModule?: 'pos' | 'inventory' | 'customers' | 'reports' | 'history';
+  activeModule?: 'pos' | 'inventory' | 'customers' | 'reports' | 'history' | 'promotions';
 };
 
 export const Sidebar = ({ activeModule = 'pos' }: SidebarProps) => {
@@ -34,8 +34,11 @@ export const Sidebar = ({ activeModule = 'pos' }: SidebarProps) => {
       <Link href="/history" className={`nav-item ${activeModule === 'history' ? 'active' : ''}`}>
         <PieChart size={24} />
       </Link>
-      <Link href="/customers" className={`nav-item ${activeModule === 'customers' ? 'active' : ''}`}>
+      <Link href="/customers" className={`nav-item ${activeModule === 'customers' ? 'active' : ''}`} title="Clientes">
         <User size={24} />
+      </Link>
+      <Link href="/promotions" className={`nav-item ${activeModule === 'promotions' ? 'active' : ''}`} title="Promociones">
+        <Tag size={24} />
       </Link>
       
       <button className="nav-item" style={{ border: 'none', background: 'none', marginTop: 'auto' }} onClick={() => setIsSettingsOpen(true)} title="Configuración">

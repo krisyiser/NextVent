@@ -42,6 +42,8 @@ export type Customer = {
   payments: CustomerPayment[];
 };
 
+export type PaymentMethod = 'Cash' | 'Card' | 'Transfer' | 'Credit';
+
 export type Sale = {
   id: string;
   date: string;
@@ -51,6 +53,7 @@ export type Sale = {
   profit: number;
   paidAmount: number;
   changeAmount: number;
+  paymentMethod: PaymentMethod;
   customerId?: string;
   isCredit: boolean;
   isCancelled?: boolean;

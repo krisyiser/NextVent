@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { ShoppingCart, Minus, Plus, Trash2, Wallet } from 'lucide-react';
+import { ShoppingCart, Minus, Plus, Trash2, Wallet, Pause, Percent, Tag, CheckCircle2 } from 'lucide-react';
 import { TicketItem } from '@/types';
 
 type TicketSectionProps = {
@@ -11,6 +11,11 @@ type TicketSectionProps = {
   updateQuantity: (id: string, delta: number) => void;
   onCompleteSale: () => void;
   onClearTicket: () => void;
+  parkedOrders: { id: string, timestamp: string, items: any[] }[];
+  onParkSale: () => void;
+  onOpenDiscount: () => void;
+  lastAddedId: string | null;
+  alerts?: { type: 'info' | 'success', message: string }[];
 };
 
 
@@ -20,7 +25,14 @@ export const TicketSection = ({
   ticketCount,
   updateQuantity,
   onCompleteSale,
-  onClearTicket
+  onClearTicket,
+  parkedOrders,
+  onParkSale,
+  onResumeOrder,
+  globalDiscount,
+  onOpenDiscount,
+  lastAddedId,
+  alerts = []
 }: TicketSectionProps) => {
   const [ticketId, setTicketId] = useState<string>('----');
 
@@ -31,19 +43,48 @@ export const TicketSection = ({
   return (
     <aside className="ticket-section">
       <div className="ticket-header">
-        <div className="ticket-title">Ticket de Venta</div>
-        <div className="ticket-id">#TKT-{ticketId}</div>
+        <div>
+            <div className="ticket-title">Ticket de Venta</div>
+            <div className="ticket-id">#TKT-{ticketId}</div>
+        </div>
+        {parkedOrders.length > 0 && (
+            <div style={{ backgroundColor: 'var(--accent-primary)', color: '#fff', padding: '4px 8px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold' }}>
+                {parkedOrders.length} Pendientes
+            </div>
+        )}
       </div>
 
       <div className="ticket-items">
-        {ticket.length === 0 ? (
+        {ticket.length === 0 && parkedOrders.length > 0 && (
+            <div className="parked-orders-list" style={{ padding: '16px' }}>
+                <p style={{ fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '12px' }}>Ventas en espera:</p>
+                {parkedOrders.map(order => (
+                    <div 
+                        key={order.id} 
+                        onClick={() => onResumeOrder(order.id)}
+                        style={{ 
+                            backgroundColor: 'var(--bg-tertiary)', padding: '12px', borderRadius: 'var(--radius-md)', marginBottom: '8px', 
+                            cursor: 'pointer', border: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center'
+                        }}
+                    >
+                        <div>
+                            <div style={{ fontWeight: 'bold', fontSize: '14px' }}>Pedido {order.timestamp}</div>
+                            <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{order.items.length} productos</div>
+                        </div>
+                        <Plus size={16} color="var(--accent-primary)" />
+                    </div>
+                ))}
+            </div>
+        )}
+
+        {ticket.length === 0 && parkedOrders.length === 0 ? (
           <div className="empty-ticket">
             <ShoppingCart size={48} className="empty-icon text-muted" />
             <p>Escanea o selecciona un producto para comenzar a cobrar.</p>
           </div>
         ) : (
           ticket.map(item => (
-            <div key={item.id} className="ticket-item">
+            <div key={item.id} className={`ticket-item ${lastAddedId === item.id ? 'item-flash' : ''}`}>
               <div className="ticket-item-info">
                 <div className="ticket-item-name">{item.name}</div>
                 <div className="ticket-item-qty-controls">
@@ -81,19 +122,42 @@ export const TicketSection = ({
       </div>
 
       <div className="ticket-summary">
+        {/* Alertas de Promociones */}
+        {alerts.length > 0 && (
+          <div style={{ marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {Array.from(new Set(alerts.map(a => a.message))).map(msg => {
+                  const alert = alerts.find(a => a.message === msg);
+                  return (
+                      <div key={msg} style={{ 
+                          padding: '10px 14px', borderRadius: 'var(--radius-md)', fontSize: '13px', fontWeight: 'bold',
+                          display: 'flex', alignItems: 'center', gap: '8px',
+                          backgroundColor: alert?.type === 'success' ? 'rgba(34, 197, 94, 0.15)' : 'rgba(234, 179, 8, 0.15)',
+                          color: alert?.type === 'success' ? '#22c55e' : '#eab308',
+                          border: `1px solid ${alert?.type === 'success' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(234, 179, 8, 0.2)'}`,
+                          animation: 'slideIn 0.3s ease-out'
+                      }}>
+                          {alert?.type === 'success' ? <CheckCircle2 size={16} /> : <Tag size={16} />}
+                          {msg}
+                      </div>
+                  );
+              })}
+          </div>
+        )}
+
         <div className="summary-row">
           <span>Subtotal ({ticketCount} art.)</span>
-          <span>${ticketTotal.toFixed(2)}</span>
-        </div>
-        <div className="summary-row">
-          <span>IVA (16%)</span>
-          <span>$0.00</span>
+          <span>${(ticketTotal + globalDiscount).toFixed(2)}</span>
         </div>
         <div className="summary-row" style={{ color: 'var(--accent-danger)' }}>
-          <span>Descuentos</span>
+          <span>Descuentos Mayoreo</span>
           <span>-${ticket.reduce((acc, item) => acc + (item.price - (item.priceToUse || item.price)) * item.quantity, 0).toFixed(2)}</span>
         </div>
-
+        {globalDiscount > 0 && (
+            <div className="summary-row" style={{ color: 'var(--accent-warning)', borderTop: '1px dashed var(--border-color)', paddingTop: '8px', marginTop: '8px' }}>
+                <span>Descuento Global</span>
+                <span>-${globalDiscount.toFixed(2)}</span>
+            </div>
+        )}
 
         <div className="summary-total">
           <span>TOTAL</span>
@@ -115,6 +179,37 @@ export const TicketSection = ({
           >
             <Trash2 size={20} />
           </button>
+          
+          <button
+            className="icon-btn"
+            onClick={onParkSale}
+            disabled={ticket.length === 0}
+            title="Poner en Espera (Park)"
+            style={{ 
+              opacity: ticket.length === 0 ? 0.5 : 1, 
+              cursor: ticket.length === 0 ? 'not-allowed' : 'pointer',
+              color: 'var(--accent-warning)',
+              backgroundColor: 'var(--bg-tertiary)'
+            }}
+          >
+            <Pause size={20} />
+          </button>
+
+          <button
+            className="icon-btn"
+            onClick={onOpenDiscount}
+            disabled={ticket.length === 0}
+            title="Aplicar Descuento Global"
+            style={{ 
+              opacity: ticket.length === 0 ? 0.5 : 1, 
+              cursor: ticket.length === 0 ? 'not-allowed' : 'pointer',
+              color: 'var(--accent-primary)',
+              backgroundColor: 'var(--bg-tertiary)'
+            }}
+          >
+            <Percent size={20} />
+          </button>
+
           <button
             className="checkout-btn"
             onClick={onCompleteSale}

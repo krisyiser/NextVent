@@ -12,6 +12,7 @@ export default function CustomersPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const [paymentAmount, setPaymentAmount] = useState('');
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   
   // New Customer Form
   const [newName, setNewName] = useState('');
@@ -49,10 +50,10 @@ export default function CustomersPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (confirm('¿Estás seguro de eliminar este cliente? Se borrará todo su historial de deuda.')) {
-      await deleteCustomer(id);
-      loadCustomers();
-    }
+    await deleteCustomer(id);
+    setDeleteConfirmId(null);
+    setSelectedCustomer(null);
+    loadCustomers();
   };
 
   const handlePayment = async (e: React.FormEvent) => {
@@ -182,12 +183,28 @@ export default function CustomersPage() {
                 </div>
 
                 <div className="ticket-summary">
-                   <button 
-                     onClick={() => handleDelete(selectedCustomer.id)}
-                     style={{ width: '100%', padding: '12px', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--accent-danger)', border: '1px solid var(--accent-danger)', borderRadius: 'var(--radius-md)', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
-                   >
-                     <Trash2 size={16} /> ELIMINAR CLIENTE
-                   </button>
+                   {deleteConfirmId === selectedCustomer.id ? (
+                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <p style={{ fontSize: '12px', color: 'var(--accent-danger)', textAlign: 'center', fontWeight: 'bold' }}>¿Confirmar eliminación total?</p>
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                            <button 
+                                onClick={() => setDeleteConfirmId(null)}
+                                style={{ flex: 1, padding: '10px', backgroundColor: 'var(--bg-tertiary)', color: '#fff', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer' }}
+                            >Cancelar</button>
+                            <button 
+                                onClick={() => handleDelete(selectedCustomer.id)}
+                                style={{ flex: 1, padding: '10px', backgroundColor: 'var(--accent-danger)', color: '#fff', border: 'none', borderRadius: 'var(--radius-md)', fontWeight: 'bold', cursor: 'pointer' }}
+                            >SÍ, ELIMINAR</button>
+                        </div>
+                     </div>
+                   ) : (
+                    <button 
+                      onClick={() => setDeleteConfirmId(selectedCustomer.id)}
+                      style={{ width: '100%', padding: '12px', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--accent-danger)', border: '1px solid var(--accent-danger)', borderRadius: 'var(--radius-md)', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                    >
+                      <Trash2 size={16} /> ELIMINAR CLIENTE
+                    </button>
+                   )}
                 </div>
               </div>
             ) : (

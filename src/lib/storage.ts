@@ -72,10 +72,25 @@ export const initDB = async () => {
                 profit REAL NOT NULL,
                 paid_amount REAL NOT NULL,
                 change_amount REAL NOT NULL,
+                payment_method TEXT DEFAULT 'Cash',
                 customer_id TEXT,
                 is_credit INTEGER DEFAULT 0,
                 is_cancelled INTEGER DEFAULT 0,
                 cancelled_at TEXT
+            )
+        `);
+
+        await dbInstance.execute(`
+            CREATE TABLE IF NOT EXISTS promotions (
+                id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                type TEXT NOT NULL,
+                target_id TEXT,
+                discount_value REAL NOT NULL,
+                discount_type TEXT NOT NULL,
+                buy_qty INTEGER DEFAULT 1,
+                pay_qty INTEGER DEFAULT 1,
+                is_active INTEGER DEFAULT 1
             )
         `);
 
@@ -93,6 +108,13 @@ export const initDB = async () => {
                 is_open INTEGER DEFAULT 1
             )
         `);
+
+        // Migrations
+        try {
+            await dbInstance.execute("ALTER TABLE sales ADD COLUMN payment_method TEXT DEFAULT 'Cash'");
+        } catch (e) {
+            // Column probably already exists
+        }
 
         // Bootstrap products if empty
         const count: any = await dbInstance.select("SELECT COUNT(*) as count FROM products");
@@ -266,6 +288,7 @@ export const getSalesHistory = async (): Promise<Sale[]> => {
         return rows.map(r => ({
             ...r,
             items: JSON.parse(r.items_json),
+            paymentMethod: r.payment_method || 'Cash',
             isCredit: r.is_credit === 1,
             isCancelled: r.is_cancelled === 1,
             customerId: r.customer_id
@@ -279,8 +302,8 @@ export const saveSale = async (sale: Sale) => {
     const db = await initDB();
     if (db) {
         await db.execute(
-            "INSERT INTO sales (id, date, items_json, total, total_cost, profit, paid_amount, change_amount, customer_id, is_credit, is_cancelled) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            [sale.id, sale.date, JSON.stringify(sale.items), sale.total, sale.totalCost, sale.profit, sale.paidAmount, sale.changeAmount, sale.customerId || null, sale.isCredit ? 1 : 0, 0]
+            "INSERT INTO sales (id, date, items_json, total, total_cost, profit, paid_amount, change_amount, payment_method, customer_id, is_credit, is_cancelled) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [sale.id, sale.date, JSON.stringify(sale.items), sale.total, sale.totalCost, sale.profit, sale.paidAmount, sale.changeAmount, sale.paymentMethod, sale.customerId || null, sale.isCredit ? 1 : 0, 0]
         );
 
         // Stock deduction
@@ -491,4 +514,50 @@ export const getTopSellingProducts = async (limit = 5) => {
     return Object.values(salesMap)
       .sort((a,b) => b.qty - a.qty)
       .slice(0, limit);
+};
+
+export const getPromotions = async () => {
+    const db = await initDB();
+    if (db) {
+        const rows: any[] = await db.select("SELECT * FROM promotions");
+        return rows.map(r => ({
+            id: r.id,
+            name: r.name,
+            type: r.type,
+            targetId: r.target_id,
+            discountValue: r.discount_value,
+            discountType: r.discount_type,
+            buyQty: r.buy_qty || 1,
+            payQty: r.pay_qty || 1,
+            isActive: r.is_active === 1
+        }));
+    } else {
+        return getBrowserStore('promotions') || [];
+    }
+};
+
+export const savePromotion = async (promo: any) => {
+    const db = await initDB();
+    if (db) {
+        await db.execute(
+            "INSERT OR REPLACE INTO promotions (id, name, type, target_id, discount_value, discount_type, buy_qty, pay_qty, is_active) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            [promo.id, promo.name, promo.type, promo.targetId, promo.discountValue, promo.discountType, promo.buyQty || 1, promo.payQty || 1, promo.isActive ? 1 : 0]
+        );
+    } else {
+        const promos = await getPromotions();
+        const index = promos.findIndex((p: any) => p.id === promo.id);
+        if (index >= 0) promos[index] = promo;
+        else promos.push(promo);
+        setBrowserStore('promotions', promos);
+    }
+};
+
+export const deletePromotion = async (id: string) => {
+    const db = await initDB();
+    if (db) {
+        await db.execute("DELETE FROM promotions WHERE id = ?", [id]);
+    } else {
+        const promos = await getPromotions();
+        setBrowserStore('promotions', promos.filter((p: any) => p.id !== id));
+    }
 };

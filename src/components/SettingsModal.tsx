@@ -12,12 +12,18 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
   const [storeName, setStoreName] = useState('Mi Tienda POS');
   const [address, setAddress] = useState('Av. Principal #123');
   const [phone, setPhone] = useState('555-123-4567');
+  const [footerMessage, setFooterMessage] = useState('¡Gracias por su compra!');
+  const [paperWidth, setPaperWidth] = useState('80mm');
+  const [fontSize, setFontSize] = useState('12px');
 
   useEffect(() => {
     if (isOpen) {
       setStoreName(localStorage.getItem('pos_store_name') || 'Mi Tienda POS');
       setAddress(localStorage.getItem('pos_store_address') || 'Av. Principal #123');
       setPhone(localStorage.getItem('pos_store_phone') || '555-123-4567');
+      setFooterMessage(localStorage.getItem('pos_ticket_footer') || '¡Gracias por su compra!');
+      setPaperWidth(localStorage.getItem('pos_ticket_width') || '80mm');
+      setFontSize(localStorage.getItem('pos_ticket_font') || '12px');
     }
   }, [isOpen]);
 
@@ -26,6 +32,9 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
     localStorage.setItem('pos_store_name', storeName);
     localStorage.setItem('pos_store_address', address);
     localStorage.setItem('pos_store_phone', phone);
+    localStorage.setItem('pos_ticket_footer', footerMessage);
+    localStorage.setItem('pos_ticket_width', paperWidth);
+    localStorage.setItem('pos_ticket_font', fontSize);
     alert('Configuración guardada correctamente.');
     onClose();
   };
@@ -79,6 +88,48 @@ export const SettingsModal = ({ isOpen, onClose }: SettingsModalProps) => {
               onChange={e => setPhone(e.target.value)} 
               className="search-input" 
               style={{ backgroundColor: 'var(--bg-primary)' }} 
+            />
+          </div>
+
+          <div style={{ marginTop: '16px', marginBottom: '8px', borderBottom: '1px solid var(--border-color)', paddingBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+             <Printer size={20} className="text-accent" />
+             <h3 style={{ fontSize: '18px', fontWeight: 'bold' }}>Diseño y Formato del Ticket</h3>
+          </div>
+
+          <div className="form-group" style={{ display: 'flex', gap: '16px' }}>
+            <div style={{ flex: 1 }}>
+                <label style={{ color: 'var(--text-secondary)', marginBottom: '8px', display: 'block' }}>Ancho de Papel</label>
+                <select 
+                    value={paperWidth} 
+                    onChange={e => setPaperWidth(e.target.value)} 
+                    style={{ width: '100%', padding: '12px', backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', color: '#fff', outline: 'none' }}
+                >
+                    <option value="80mm">80mm (Estándar)</option>
+                    <option value="58mm">58mm (Pequeño)</option>
+                </select>
+            </div>
+            <div style={{ flex: 1 }}>
+                <label style={{ color: 'var(--text-secondary)', marginBottom: '8px', display: 'block' }}>Tamaño de Letra</label>
+                <select 
+                    value={fontSize} 
+                    onChange={e => setFontSize(e.target.value)} 
+                    style={{ width: '100%', padding: '12px', backgroundColor: 'var(--bg-primary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', color: '#fff', outline: 'none' }}
+                >
+                    <option value="10px">Pequeña (10px)</option>
+                    <option value="12px">Normal (12px)</option>
+                    <option value="14px">Grande (14px)</option>
+                </select>
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label style={{ color: 'var(--text-secondary)', marginBottom: '8px' }}>Mensaje de Despedida (Pie de ticket)</label>
+            <input 
+              value={footerMessage} 
+              onChange={e => setFooterMessage(e.target.value)} 
+              className="search-input" 
+              style={{ backgroundColor: 'var(--bg-primary)' }} 
+              placeholder="Ej: ¡Gracias por su compra! Vuelva pronto."
             />
           </div>
 

@@ -11,10 +11,21 @@ type TopBarProps = {
   isMobileMode: boolean;
   setIsMobileMode: (mode: boolean) => void;
   isScannerDetected: boolean;
+  toggleKiosk: () => void;
+  isKioskMode: boolean;
 };
 
 
-export const TopBar = ({ searchQuery, setSearchQuery, onScan, isMobileMode, setIsMobileMode, isScannerDetected }: TopBarProps) => {
+export const TopBar = ({ 
+    searchQuery, 
+    setSearchQuery, 
+    onScan, 
+    isMobileMode, 
+    setIsMobileMode, 
+    isScannerDetected,
+    toggleKiosk,
+    isKioskMode
+}: TopBarProps) => {
 
   const [isUserOpen, setIsUserOpen] = useState(false);
   const [userName, setUserName] = useState('Administrador');
@@ -33,6 +44,10 @@ export const TopBar = ({ searchQuery, setSearchQuery, onScan, isMobileMode, setI
             e.preventDefault();
             barcodeRef.current?.focus();
         }
+        if (e.key === 'F11') {
+            e.preventDefault();
+            toggleKiosk();
+        }
     };
 
     window.addEventListener('keydown', handleKeyDown);
@@ -42,17 +57,9 @@ export const TopBar = ({ searchQuery, setSearchQuery, onScan, isMobileMode, setI
         window.removeEventListener('keydown', handleKeyDown);
         window.removeEventListener('storage', updateInfo);
     };
-  }, [isUserOpen]);
+  }, [isUserOpen, toggleKiosk]);
 
 
-
-  const toggleFullscreen = () => {
-    if (!document.fullscreenElement) {
-        document.documentElement.requestFullscreen().catch(() => {});
-    } else {
-        document.exitFullscreen().catch(() => {});
-    }
-  };
 
   const handleBarcodeSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -106,6 +113,15 @@ export const TopBar = ({ searchQuery, setSearchQuery, onScan, isMobileMode, setI
           <div className="status-dot"></div>
           {userName}
         </div>
+
+        <button 
+            className="icon-btn" 
+            title={isKioskMode ? "Salir de Modo Kiosko (F11)" : "Modo Kiosko (F11)"}
+            onClick={toggleKiosk}
+            style={{ backgroundColor: isKioskMode ? 'var(--accent-primary)' : 'transparent', color: isKioskMode ? '#fff' : 'inherit' }}
+        >
+          <Maximize size={20} />
+        </button>
 
         <button className="icon-btn" title="Perfil de Usuario" onClick={() => setIsUserOpen(true)}>
           <User size={20} />
