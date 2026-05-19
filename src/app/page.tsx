@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Sidebar } from '@/components/Sidebar';
 import { TopBar } from '@/components/TopBar';
 import { ProductCard } from '@/components/ProductCard';
@@ -38,6 +38,11 @@ export default function POS() {
   const [lastSale, setLastSale] = useState<Sale | null>(null);
   const [globalDiscount, setGlobalDiscount] = useState(0);
   const [isKioskMode, setIsKioskMode] = useState(false);
+  
+  const toggleKiosk = useCallback(() => {
+    setIsKioskMode(prev => !prev);
+  }, []);
+
   const [promotions, setPromotions] = useState<any[]>([]);
   const [lastAddedId, setLastAddedId] = useState<string | null>(null);
 
@@ -139,7 +144,7 @@ export default function POS() {
       // Detect scanner (extremely fast burst of keys)
       const isFastBurst = diff < 25 && diff > 0;
       if (isFastBurst) {
-          setIsScannerDetected(true);
+          setIsScannerDetected(prev => prev ? prev : true);
       }
 
       // If user is typing manually in another input, ignore global scan
@@ -358,7 +363,7 @@ export default function POS() {
           isMobileMode={isMobileMode}
           setIsMobileMode={setIsMobileMode}
           isScannerDetected={isScannerDetected}
-          toggleKiosk={() => setIsKioskMode(!isKioskMode)}
+          toggleKiosk={toggleKiosk}
           isKioskMode={isKioskMode}
         />
 

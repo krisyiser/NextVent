@@ -154,7 +154,22 @@ export const getProducts = async (): Promise<Product[]> => {
             setBrowserStore('products', INITIAL_PRODUCTS);
             return INITIAL_PRODUCTS;
         }
-        return products;
+        // Sanitize retrieved products to auto-heal any duplicate or empty IDs
+        let needsSave = false;
+        const seenIds = new Set<string>();
+        const sanitized = products.map((p: Product, idx: number) => {
+            let id = p.id;
+            if (!id || id === '' || seenIds.has(id)) {
+                id = `PROD-${Date.now()}-${idx}-${Math.floor(1000 + Math.random() * 9000)}`;
+                needsSave = true;
+            }
+            seenIds.add(id);
+            return { ...p, id };
+        });
+        if (needsSave) {
+            setBrowserStore('products', sanitized);
+        }
+        return sanitized;
     }
 };
 
@@ -187,15 +202,19 @@ export const updateProduct = async (product: Product) => {
 };
 
 export const addProduct = async (product: Product) => {
+    const finalProduct = {
+        ...product,
+        id: product.id && product.id !== '' ? product.id : `PROD-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`
+    };
     const db = await initDB();
     if (db) {
         await db.execute(
             "INSERT INTO products (id, name, cost, price, wholesale_price, wholesale_threshold, stock, category, unit, barcode) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            [product.id, product.name, product.cost, product.price, product.wholesalePrice || null, product.wholesaleThreshold || null, product.stock, product.category, product.unit, product.barcode || null]
+            [finalProduct.id, finalProduct.name, finalProduct.cost, finalProduct.price, finalProduct.wholesalePrice || null, finalProduct.wholesaleThreshold || null, finalProduct.stock, finalProduct.category, finalProduct.unit, finalProduct.barcode || null]
         );
     } else {
         const products = await getProducts();
-        setBrowserStore('products', [product, ...products]);
+        setBrowserStore('products', [finalProduct, ...products]);
     }
 };
 

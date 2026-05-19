@@ -32,13 +32,20 @@ export const TopBar = ({
   const [barcodeInput, setBarcodeInput] = useState('');
   const barcodeRef = useRef<HTMLInputElement>(null);
 
+  // Sync user name from localStorage
   useEffect(() => {
     const updateInfo = () => {
         setUserName(localStorage.getItem('pos_user_name') || 'Administrador');
     };
-    
     updateInfo();
-    
+    window.addEventListener('storage', updateInfo);
+    return () => {
+        window.removeEventListener('storage', updateInfo);
+    };
+  }, [isUserOpen]);
+
+  // Handle global F1/F11 key down shortcuts
+  useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
         if (e.key === 'F1') {
             e.preventDefault();
@@ -49,15 +56,11 @@ export const TopBar = ({
             toggleKiosk();
         }
     };
-
     window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('storage', updateInfo);
-    
     return () => {
         window.removeEventListener('keydown', handleKeyDown);
-        window.removeEventListener('storage', updateInfo);
     };
-  }, [isUserOpen, toggleKiosk]);
+  }, [toggleKiosk]);
 
 
 
