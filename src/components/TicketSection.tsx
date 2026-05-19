@@ -13,6 +13,8 @@ type TicketSectionProps = {
   onClearTicket: () => void;
   parkedOrders: { id: string, timestamp: string, items: any[] }[];
   onParkSale: () => void;
+  onResumeOrder: (orderId: string) => void;
+  globalDiscount: number;
   onOpenDiscount: () => void;
   lastAddedId: string | null;
   alerts?: { type: 'info' | 'success', message: string }[];
