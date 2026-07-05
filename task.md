@@ -1,0 +1,10 @@
+- [ ] Wrap application with AuthProvider in src/app/layout.tsx
+- [ ] Replace all native alert() calls with ModalAlert component
+- [ ] Add dark‑mode toggle (persisted in localStorage) and apply CSS classes
+- [ ] Integrate BackupExport UI (button in POS page)
+- [ ] Add unit tests for new Auth flow and ModalAlert
+- [ ] Update README with setup instructions
+- [ ] Verify Jest configuration runs (npm test)
+- [ ] Run dev server and perform manual UI sanity check
+- [ ] Fix any TypeScript compile errors after auth/provider integration
+- [ ] Clean up unused imports / dead code

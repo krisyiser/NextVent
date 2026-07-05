@@ -1,0 +1,16 @@
+TÉRMINOS Y CONDICIONES DE USO DE NEXTVENT POS
+
+1. ACEPTACIÓN DE LOS TÉRMINOS
+Al instalar y utilizar este software, usted acepta cumplir con estos términos.
+
+2. LICENCIA DE USO
+Se otorga una licencia de uso local para el sistema de punto de venta.
+
+3. PRIVACIDAD Y DATOS
+NextVent es una aplicación "Local-First". Todos los datos financieros y de inventario se almacenan exclusivamente en su dispositivo local.
+
+4. LIMITACIÓN DE RESPONSABILIDAD
+El software se proporciona "tal cual". Zima Technologies no se hace responsable por la pérdida de datos derivada de fallos de hardware o mal uso.
+
+5. JURISDICCIÓN
+Cualquier disputa será resuelta de acuerdo con las leyes locales.

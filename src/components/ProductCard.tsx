@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ShoppingCart, Package } from 'lucide-react';
+import { ShoppingCart, Package } from 'phosphor-react';
 import { Product } from '@/types';
 
 type ProductCardProps = {
@@ -18,20 +18,23 @@ const ShoppingBag = ({ size }: { size: number }) => (
   </svg>
 );
 
-export const ProductCard = ({ product, onAdd }: ProductCardProps) => {
+export const ProductCard = React.memo(({ product, onAdd }: ProductCardProps) => {
   return (
     <div className="product-card" onClick={() => onAdd(product)}>
-      <div className="product-icon">
-        {product.category === 'Bebidas' ? <ShoppingBag size={24} /> :
-          product.category === 'Farmacia' ? <Package size={24} /> :
-            <ShoppingCart size={24} />}
-      </div>
-      <div className="product-name">{product.name}</div>
-      <div className="product-price">${product.price.toFixed(2)}</div>
-      <div className={`product-stock ${product.stock <= 5 ? 'low' : ''}`}>
-        Stock: {product.stock} {product.unit}
-        {product.expiresSoon && <span className="text-warning" style={{ marginLeft: 8, fontSize: 10 }}>⚠️ Próx. a caducar</span>}
+      <div className="nv-product-card-body" style={{ display: 'contents' }}>
+        <div className="product-icon">
+          {product.category === 'Bebidas' ? <ShoppingBag size={24} /> :
+            product.category === 'Farmacia' ? <Package size={24} weight="regular" /> :
+              <ShoppingCart size={24} weight="regular" />}
+        </div>
+        <div className="product-name">{product.name}</div>
+        <div className="product-price">${product.price.toFixed(2)}</div>
+        <div className={`product-stock ${product.stock <= 5 ? 'low' : ''}`}>
+          Stock: {product.stock} {product.unit}
+          {product.expiresSoon && <span className="text-warning" style={{ marginLeft: 8, fontSize: 10 }}>⚠️ Próx. a caducar</span>}
+        </div>
       </div>
     </div>
   );
-};
+});
+ProductCard.displayName = 'ProductCard';

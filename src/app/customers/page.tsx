@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { Sidebar } from '@/components/Sidebar';
-import { Search, Plus, User, Phone, CreditCard, History, Trash2, CheckCircle2, X } from 'lucide-react';
+import { AppShell } from '@/components/ui';
+import { MagnifyingGlass, Plus, User, Phone, CreditCard, ClockCounterClockwise, Trash, CheckCircle, X } from 'phosphor-react';
 import { Customer } from '@/types';
-import { getCustomers, addCustomer, deleteCustomer, registerPayment } from '@/lib/storage';
+import { getCustomers, addCustomer, deleteCustomer, addCustomerPayment, getClienteFiscal, saveClienteFiscal, ClienteFiscal } from '@/lib/storage';
+import { toast } from 'sonner';
 
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -17,6 +18,11 @@ export default function CustomersPage() {
   // New Customer Form
   const [newName, setNewName] = useState('');
   const [newPhone, setNewPhone] = useState('');
+
+  // Fiscal Data Modal
+  const [isFiscalModalOpen, setIsFiscalModalOpen] = useState(false);
+  const [fiscalData, setFiscalData] = useState<Partial<ClienteFiscal>>({});
+  const [isLoadingFiscal, setIsLoadingFiscal] = useState(false);
 
   useEffect(() => {
     loadCustomers();
@@ -63,24 +69,71 @@ export default function CustomersPage() {
     const amount = parseFloat(paymentAmount);
     if (isNaN(amount) || amount <= 0) return;
 
-    await registerPayment(selectedCustomer.id, amount);
+    await addCustomerPayment(selectedCustomer.id, amount);
     setPaymentAmount('');
     setSelectedCustomer(null);
     loadCustomers();
-    alert('Abono registrado correctamente.');
+    toast.success('Abono registrado correctamente.');
+  };
+
+  const handleOpenFiscalModal = async () => {
+    if (!selectedCustomer) return;
+    setIsLoadingFiscal(true);
+    setIsFiscalModalOpen(true);
+    try {
+      const data = await getClienteFiscal(selectedCustomer.id);
+      if (data) {
+        setFiscalData(data);
+      } else {
+        setFiscalData({ id: selectedCustomer.id });
+      }
+    } catch (e) {
+      console.error(e);
+      toast.error('Error al cargar datos fiscales.');
+    } finally {
+      setIsLoadingFiscal(false);
+    }
+  };
+
+  const handleSaveFiscal = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedCustomer) return;
+    
+    // RFC Regex validation for Mexico (Physical or Moral person)
+    const rfcRegex = /^([A-ZÑ&]{3,4}) ?(?:- ?)?(\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])) ?(?:- ?)?([A-Z\d]{2})([A\d])$/;
+    if (fiscalData.rfc && !rfcRegex.test(fiscalData.rfc.toUpperCase())) {
+       toast.error("RFC no válido. Verifica el formato.");
+       return;
+    }
+
+    try {
+       await saveClienteFiscal({
+          id: selectedCustomer.id,
+          rfc: (fiscalData.rfc || '').toUpperCase(),
+          razon_social: (fiscalData.razon_social || '').toUpperCase(),
+          codigo_postal: fiscalData.codigo_postal || '',
+          regimen_fiscal: fiscalData.regimen_fiscal || '',
+          uso_cfdi: fiscalData.uso_cfdi || '',
+       });
+       toast.success("Datos fiscales guardados correctamente.");
+       setIsFiscalModalOpen(false);
+    } catch (e) {
+       toast.error("Error al guardar datos fiscales.");
+    }
   };
 
   return (
     <>
-      <Sidebar activeModule="customers" />
-
-      <main className="main-content">
+      <AppShell activeModule="customers">
         <header className="top-bar">
-          <h1 className="page-title">Directorio de Clientes</h1>
+          <div className="ticket-title" style={{ fontSize: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <User size={28} className="text-accent" weight="regular" />
+            Directorio de Clientes
+          </div>
           
           <div className="top-bar-actions">
              <button className="checkout-btn" style={{ margin: 0 }} onClick={() => setIsModalOpen(true)}>
-               <Plus size={20} /> NUEVO CLIENTE
+               <Plus size={20} weight="bold" /> NUEVO CLIENTE
              </button>
           </div>
         </header>
@@ -90,7 +143,7 @@ export default function CustomersPage() {
           {/* Main List */}
           <section className="products-section" style={{ height: 'calc(100vh - 120px)' }}>
              <div className="search-container" style={{ marginBottom: '20px', width: '100%' }}>
-                <Search size={18} color="var(--text-muted)" />
+                <MagnifyingGlass size={18} color="var(--text-muted)" weight="regular" />
                 <input
                   type="text"
                   className="search-input"
@@ -110,12 +163,12 @@ export default function CustomersPage() {
                   >
                     <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                        <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: 'rgba(59, 130, 246, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                          <User size={24} className="text-accent-primary" />
+                          <User size={24} className="text-accent-primary" weight="regular" />
                        </div>
                        <div style={{ flex: 1 }}>
                           <h3 style={{ fontSize: '18px', fontWeight: 'bold' }}>{customer.name}</h3>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '13px', color: 'var(--text-muted)' }}>
-                             <Phone size={12} /> {customer.phone || 'Sin teléfono'}
+                              <Phone size={12} weight="regular" /> {customer.phone || 'Sin teléfono'}
                           </div>
                        </div>
                     </div>
@@ -141,14 +194,14 @@ export default function CustomersPage() {
 
                 <div className="ticket-items" style={{ flex: 1, overflowY: 'auto', padding: '0 4px' }}>
                    <div style={{ textAlign: 'center', padding: '24px 0' }}>
-                      <User size={64} className="text-accent-primary" style={{ margin: '0 auto 16px' }} />
+                      <User size={64} className="text-accent-primary" style={{ margin: '0 auto 16px' }} weight="regular" />
                       <h2 style={{ fontSize: '22px', fontWeight: 'bold' }}>{selectedCustomer.name}</h2>
                       <p style={{ color: 'var(--text-muted)' }}>{selectedCustomer.phone}</p>
                    </div>
 
                    <div style={{ marginBottom: '24px' }}>
                       <h4 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <History size={16} /> ÚLTIMOS ABONOS
+                        <ClockCounterClockwise size={16} weight="regular" /> ÚLTIMOS ABONOS
                       </h4>
                       {selectedCustomer.payments && selectedCustomer.payments.length > 0 ? (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -180,6 +233,16 @@ export default function CustomersPage() {
                         </div>
                      </form>
                    )}
+
+                   <div style={{ marginBottom: '24px' }}>
+                      <button 
+                         onClick={handleOpenFiscalModal}
+                         className="checkout-btn" 
+                         style={{ width: '100%', margin: 0, backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-primary)', border: '1px solid var(--border-color)' }}
+                      >
+                         DATOS FISCALES / CFDI 4.0
+                      </button>
+                   </div>
                 </div>
 
                 <div className="ticket-summary">
@@ -189,11 +252,11 @@ export default function CustomersPage() {
                         <div style={{ display: 'flex', gap: '8px' }}>
                             <button 
                                 onClick={() => setDeleteConfirmId(null)}
-                                style={{ flex: 1, padding: '10px', backgroundColor: 'var(--bg-tertiary)', color: '#fff', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer' }}
+                                style={{ flex: 1, padding: '10px', backgroundColor: 'var(--bg-tertiary)', color: 'var(--text-primary)', border: 'none', borderRadius: 'var(--radius-md)', cursor: 'pointer' }}
                             >Cancelar</button>
                             <button 
                                 onClick={() => handleDelete(selectedCustomer.id)}
-                                style={{ flex: 1, padding: '10px', backgroundColor: 'var(--accent-danger)', color: '#fff', border: 'none', borderRadius: 'var(--radius-md)', fontWeight: 'bold', cursor: 'pointer' }}
+                                style={{ flex: 1, padding: '10px', backgroundColor: 'var(--accent-danger)', color: 'var(--text-on-danger)', border: 'none', borderRadius: 'var(--radius-md)', fontWeight: 'bold', cursor: 'pointer' }}
                             >SÍ, ELIMINAR</button>
                         </div>
                      </div>
@@ -202,30 +265,29 @@ export default function CustomersPage() {
                       onClick={() => setDeleteConfirmId(selectedCustomer.id)}
                       style={{ width: '100%', padding: '12px', backgroundColor: 'rgba(239, 68, 68, 0.1)', color: 'var(--accent-danger)', border: '1px solid var(--accent-danger)', borderRadius: 'var(--radius-md)', fontWeight: 'bold', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
                     >
-                      <Trash2 size={16} /> ELIMINAR CLIENTE
+                      <Trash size={16} weight="regular" /> ELIMINAR CLIENTE
                     </button>
                    )}
                 </div>
               </div>
             ) : (
               <div className="empty-ticket">
-                <User size={48} className="empty-icon text-muted" />
+                <User size={48} className="empty-icon text-muted" weight="regular" />
                 <p>Selecciona un cliente para ver su historial y saldar deudas.</p>
               </div>
             )}
           </aside>
         </div>
-      </main>
-
+      </AppShell>
       {/* New Customer Modal */}
       {isModalOpen && (
         <div className="modal-overlay" style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 1200, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)' }}>
            <div className="modal-content" style={{ backgroundColor: 'var(--bg-secondary)', padding: '32px', borderRadius: 'var(--radius-lg)', width: '100%', maxWidth: '400px', border: '1px solid var(--border-color)' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
                 <h2 style={{ fontSize: '24px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <Plus className="text-accent-primary" /> Nuevo Cliente
+                  <Plus className="text-accent-primary" weight="bold" /> Nuevo Cliente
                 </h2>
-                <button onClick={() => setIsModalOpen(false)} className="icon-btn"><X size={24} /></button>
+                <button onClick={() => setIsModalOpen(false)} className="icon-btn"><X size={24} weight="regular" /></button>
               </div>
 
               <form onSubmit={handleAddCustomer} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -252,9 +314,71 @@ export default function CustomersPage() {
                  </div>
 
                  <button type="submit" className="checkout-btn" style={{ width: '100%', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: 'bold', marginTop: '12px' }}>
-                    <CheckCircle2 size={20} /> GUARDAR CLIENTE
+                    <CheckCircle size={20} weight="regular" /> GUARDAR CLIENTE
                  </button>
               </form>
+           </div>
+        </div>
+      )}
+
+      {/* Fiscal Data Modal */}
+      {isFiscalModalOpen && (
+        <div className="modal-overlay" style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(0,0,0,0.8)', zIndex: 1200, display: 'flex', alignItems: 'center', justifyContent: 'center', backdropFilter: 'blur(8px)' }}>
+           <div className="modal-content" style={{ backgroundColor: 'var(--bg-secondary)', padding: '32px', borderRadius: 'var(--radius-lg)', width: '100%', maxWidth: '500px', border: '1px solid var(--border-color)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <h2 style={{ fontSize: '20px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  Datos Fiscales CFDI 4.0
+                </h2>
+                <button onClick={() => setIsFiscalModalOpen(false)} className="icon-btn"><X size={24} weight="regular" /></button>
+              </div>
+
+              {isLoadingFiscal ? (
+                 <p style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Cargando...</p>
+              ) : (
+                 <form onSubmit={handleSaveFiscal} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                       <div>
+                          <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '8px' }}>RFC (Obligatorio)</label>
+                          <input required type="text" className="search-input" placeholder="Ej. EKU9003173C9" value={fiscalData.rfc || ''} onChange={e => setFiscalData({...fiscalData, rfc: e.target.value})} style={{ textTransform: 'uppercase' }} />
+                       </div>
+                       <div>
+                          <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '8px' }}>Código Postal</label>
+                          <input required type="text" className="search-input" placeholder="Ej. 11000" value={fiscalData.codigo_postal || ''} onChange={e => setFiscalData({...fiscalData, codigo_postal: e.target.value})} maxLength={5} />
+                       </div>
+                    </div>
+
+                    <div>
+                       <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '8px' }}>Razón Social (Exacto a Constancia)</label>
+                       <input required type="text" className="search-input" placeholder="Ej. EMPRESA DE PRUEBA" value={fiscalData.razon_social || ''} onChange={e => setFiscalData({...fiscalData, razon_social: e.target.value})} style={{ textTransform: 'uppercase' }} />
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                       <div>
+                          <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '8px' }}>Régimen Fiscal</label>
+                          <select required className="search-input" value={fiscalData.regimen_fiscal || ''} onChange={e => setFiscalData({...fiscalData, regimen_fiscal: e.target.value})} style={{ backgroundColor: 'var(--bg-secondary)' }}>
+                             <option value="">Seleccione...</option>
+                             <option value="601">601 - General de Ley Personas Morales</option>
+                             <option value="612">612 - Personas Físicas con Actividades Empresariales</option>
+                             <option value="626">626 - RESICO</option>
+                             <option value="616">616 - Sin obligaciones fiscales (Público Gral)</option>
+                          </select>
+                       </div>
+                       <div>
+                          <label style={{ display: 'block', fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '8px' }}>Uso de CFDI</label>
+                          <select required className="search-input" value={fiscalData.uso_cfdi || ''} onChange={e => setFiscalData({...fiscalData, uso_cfdi: e.target.value})} style={{ backgroundColor: 'var(--bg-secondary)' }}>
+                             <option value="">Seleccione...</option>
+                             <option value="G01">G01 - Adquisición de mercancías</option>
+                             <option value="G03">G03 - Gastos en general</option>
+                             <option value="S01">S01 - Sin efectos fiscales</option>
+                          </select>
+                       </div>
+                    </div>
+
+                    <button type="submit" className="checkout-btn" style={{ width: '100%', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', fontWeight: 'bold', marginTop: '12px' }}>
+                       <CheckCircle size={20} weight="regular" /> GUARDAR DATOS FISCALES
+                    </button>
+                 </form>
+              )}
            </div>
         </div>
       )}

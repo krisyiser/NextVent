@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import { ShoppingCart, Minus, Plus, Trash2, Wallet, Pause, Percent, Tag, CheckCircle2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { ShoppingCart, Minus, Plus, Trash, Wallet, Pause, Percent, Tag, CheckCircle } from 'phosphor-react';
 import { TicketItem } from '@/types';
+import { useTheme } from './ThemeProvider';
 
 type TicketSectionProps = {
   ticket: (TicketItem & { priceToUse?: number })[];
@@ -36,21 +37,25 @@ export const TicketSection = ({
   lastAddedId,
   alerts = []
 }: TicketSectionProps) => {
-  const [ticketId, setTicketId] = useState<string>('----');
-
-  useEffect(() => {
-    setTicketId(`${Math.floor(1000 + Math.random() * 9000)}`);
-  }, []);
+  const [ticketId] = useState<string>(() => `${Math.floor(1000 + Math.random() * 9000)}`);
+  const { logo } = useTheme();
 
   return (
     <aside className="ticket-section">
       <div className="ticket-header">
-        <div>
-            <div className="ticket-title">Ticket de Venta</div>
-            <div className="ticket-id">#TKT-{ticketId}</div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {logo && (
+            <div style={{ width: '36px', height: '36px', borderRadius: '4px', overflow: 'hidden', backgroundColor: 'rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border-color)', flexShrink: 0 }}>
+              <img src={logo} alt="Logo" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+            </div>
+          )}
+          <div>
+              <div className="ticket-title">Ticket de Venta</div>
+              <div className="ticket-id">#TKT-{ticketId}</div>
+          </div>
         </div>
         {parkedOrders.length > 0 && (
-            <div style={{ backgroundColor: 'var(--accent-primary)', color: '#fff', padding: '4px 8px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold' }}>
+            <div style={{ backgroundColor: 'var(--accent-primary)', color: 'var(--text-on-accent)', padding: '4px 8px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold' }}>
                 {parkedOrders.length} Pendientes
             </div>
         )}
@@ -73,7 +78,7 @@ export const TicketSection = ({
                             <div style={{ fontWeight: 'bold', fontSize: '14px' }}>Pedido {order.timestamp}</div>
                             <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{order.items.length} productos</div>
                         </div>
-                        <Plus size={16} color="var(--accent-primary)" />
+                        <Plus size={16} color="var(--accent-primary)" weight="bold" />
                     </div>
                 ))}
             </div>
@@ -81,7 +86,7 @@ export const TicketSection = ({
 
         {ticket.length === 0 && parkedOrders.length === 0 ? (
           <div className="empty-ticket">
-            <ShoppingCart size={48} className="empty-icon text-muted" />
+            <ShoppingCart size={48} className="empty-icon text-muted" weight="regular" />
             <p>Escanea o selecciona un producto para comenzar a cobrar.</p>
           </div>
         ) : (
@@ -91,15 +96,15 @@ export const TicketSection = ({
                 <div className="ticket-item-name">{item.name}</div>
                 <div className="ticket-item-qty-controls">
                   <button className="qty-btn" onClick={() => updateQuantity(item.id, -1)}>
-                    <Minus size={14} />
+                    <Minus size={14} weight="bold" />
                   </button>
                   <span className="qty-value">{item.quantity}</span>
                   <button className="qty-btn" onClick={() => updateQuantity(item.id, 1)}>
-                    <Plus size={14} />
+                    <Plus size={14} weight="bold" />
                   </button>
                 </div>
                 <button className="ticket-item-remove" onClick={() => updateQuantity(item.id, -item.quantity)}>
-                  <Trash2 size={12} style={{ display: 'inline', marginRight: 4 }} />
+                  <Trash size={12} style={{ display: 'inline', marginRight: 4 }} weight="regular" />
                   ELIMINAR
                 </button>
               </div>
@@ -138,7 +143,7 @@ export const TicketSection = ({
                           border: `1px solid ${alert?.type === 'success' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(234, 179, 8, 0.2)'}`,
                           animation: 'slideIn 0.3s ease-out'
                       }}>
-                          {alert?.type === 'success' ? <CheckCircle2 size={16} /> : <Tag size={16} />}
+                          {alert?.type === 'success' ? <CheckCircle size={16} weight="regular" /> : <Tag size={16} weight="regular" />}
                           {msg}
                       </div>
                   );
@@ -179,7 +184,7 @@ export const TicketSection = ({
               backgroundColor: 'var(--bg-tertiary)'
             }}
           >
-            <Trash2 size={20} />
+            <Trash size={20} weight="regular" />
           </button>
           
           <button
@@ -194,7 +199,7 @@ export const TicketSection = ({
               backgroundColor: 'var(--bg-tertiary)'
             }}
           >
-            <Pause size={20} />
+            <Pause size={20} weight="regular" />
           </button>
 
           <button
@@ -209,7 +214,7 @@ export const TicketSection = ({
               backgroundColor: 'var(--bg-tertiary)'
             }}
           >
-            <Percent size={20} />
+            <Percent size={20} weight="regular" />
           </button>
 
           <button
@@ -218,7 +223,7 @@ export const TicketSection = ({
             disabled={ticket.length === 0}
             style={{ flex: 1, margin: 0, opacity: ticket.length === 0 ? 0.5 : 1, cursor: ticket.length === 0 ? 'not-allowed' : 'pointer' }}
           >
-            <Wallet size={20} />
+            <Wallet size={20} weight="regular" />
             COBRAR AHORA
           </button>
         </div>

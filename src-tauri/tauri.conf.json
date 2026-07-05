@@ -12,11 +12,25 @@
   "app": {
     "windows": [
       {
-        "title": "NextVent",
-        "width": 800,
-        "height": 600,
+        "label": "main",
+        "title": "NextVent POS",
+        "width": 1280,
+        "height": 720,
         "resizable": true,
+        "visible": false,
         "fullscreen": false
+      },
+      {
+        "label": "splashscreen",
+        "title": "Cargando...",
+        "width": 500,
+        "height": 300,
+        "resizable": false,
+        "decorations": false,
+        "transparent": true,
+        "alwaysOnTop": true,
+        "center": true,
+        "url": "/splash.html"
       }
     ],
     "security": {
@@ -26,12 +40,23 @@
   "bundle": {
     "active": true,
     "targets": "all",
+    "licenseFile": "./installer/licencia.txt",
+    "resources": ["productos_base.db"],
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "windows": {
+      "nsis": {
+        "headerImage": "./installer/header.bmp",
+        "sidebarImage": "./installer/sidebar.bmp",
+        "installerIcon": "./installer/installerIcon.ico",
+        "installMode": "currentUser",
+        "displayLanguageSelector": true
+      }
+    }
   }
 }

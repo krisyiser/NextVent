@@ -7,7 +7,24 @@
   ],
   "permissions": [
     "core:default",
-    "sql:default",
-    "log:default"
+    "log:default",
+    {
+      "identifier": "sql:allow-load",
+      "scope": {
+        "allow": ["sqlite:app.db"]
+      }
+    },
+    {
+      "identifier": "sql:allow-execute",
+      "scope": {
+        "allow": ["sqlite:app.db"]
+      }
+    },
+    {
+      "identifier": "sql:allow-select",
+      "scope": {
+        "allow": ["sqlite:app.db"]
+      }
+    }
   ]
 }

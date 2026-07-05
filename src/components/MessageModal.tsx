@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, MessageCircle, Send, Users } from 'lucide-react';
+import { X, ChatCircle, PaperPlaneTilt, UsersThree } from 'phosphor-react';
 import { getCustomers } from '@/lib/storage';
 import { Customer } from '@/types';
+import { toast } from 'sonner';
 
 type MessageModalProps = {
   isOpen: boolean;
@@ -31,7 +32,7 @@ export const MessageModal = ({ isOpen, onClose }: MessageModalProps) => {
     }
     
     if (!customer.phone) {
-        alert('El cliente seleccionado no tiene un número de teléfono registrado.');
+        toast.error('El cliente seleccionado no tiene un número de teléfono registrado.');
         return;
     }
 
@@ -53,7 +54,7 @@ export const MessageModal = ({ isOpen, onClose }: MessageModalProps) => {
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
           <h2 style={{ fontSize: '24px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <MessageCircle size={28} className="text-success" /> Enviar Mensaje
+            <ChatCircle size={28} weight="regular" className="text-success" /> Enviar Mensaje
           </h2>
           <button onClick={onClose} className="icon-btn"><X size={24} /></button>
         </div>
@@ -61,7 +62,7 @@ export const MessageModal = ({ isOpen, onClose }: MessageModalProps) => {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
           <div className="form-group">
             <label style={{ color: 'var(--text-secondary)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '4px' }}>
-              <Users size={16} /> Seleccionar Cliente (Opcional)
+              <UsersThree size={16} weight="regular" /> Seleccionar Cliente (Opcional)
             </label>
             <select 
               value={selectedCustomerId} 
@@ -99,7 +100,7 @@ export const MessageModal = ({ isOpen, onClose }: MessageModalProps) => {
           </div>
 
           <button onClick={handleSend} className="checkout-btn" style={{ marginTop: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', backgroundColor: 'var(--accent-success)' }}>
-            <Send size={20} /> ABRIR EN WHATSAPP
+            <PaperPlaneTilt size={20} weight="regular" /> ABRIR EN WHATSAPP
           </button>
         </div>
       </div>

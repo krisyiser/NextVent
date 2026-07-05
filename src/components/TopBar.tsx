@@ -1,8 +1,9 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import { Search, Maximize, User, Barcode, Scan } from 'lucide-react';
-import { UserModal } from './UserModal';
+import React, { useState, useRef } from 'react';
+import { MagnifyingGlass, CornersOut, Barcode, ShoppingCart } from 'phosphor-react';
+import { SignOut } from 'phosphor-react';
+import { useAuth } from '@/auth/AuthProvider';
 
 type TopBarProps = {
   searchQuery: string;
@@ -15,54 +16,19 @@ type TopBarProps = {
   isKioskMode: boolean;
 };
 
-
 export const TopBar = ({ 
     searchQuery, 
     setSearchQuery, 
     onScan, 
-    isMobileMode, 
-    setIsMobileMode, 
     isScannerDetected,
     toggleKiosk,
     isKioskMode
 }: TopBarProps) => {
 
-  const [isUserOpen, setIsUserOpen] = useState(false);
-  const [userName, setUserName] = useState('Administrador');
+  const { auth, logout } = useAuth();
+  const userName = auth.user || 'Administrador';
   const [barcodeInput, setBarcodeInput] = useState('');
   const barcodeRef = useRef<HTMLInputElement>(null);
-
-  // Sync user name from localStorage
-  useEffect(() => {
-    const updateInfo = () => {
-        setUserName(localStorage.getItem('pos_user_name') || 'Administrador');
-    };
-    updateInfo();
-    window.addEventListener('storage', updateInfo);
-    return () => {
-        window.removeEventListener('storage', updateInfo);
-    };
-  }, [isUserOpen]);
-
-  // Handle global F1/F11 key down shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-        if (e.key === 'F1') {
-            e.preventDefault();
-            barcodeRef.current?.focus();
-        }
-        if (e.key === 'F11') {
-            e.preventDefault();
-            toggleKiosk();
-        }
-    };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => {
-        window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [toggleKiosk]);
-
-
 
   const handleBarcodeSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -74,12 +40,17 @@ export const TopBar = ({
 
   return (
     <header className="top-bar">
+      <div className="ticket-title" style={{ fontSize: '24px', display: 'flex', alignItems: 'center', gap: '12px', minWidth: 'max-content' }}>
+        <ShoppingCart size={28} className="text-accent" weight="regular" />
+        Punto de Venta
+      </div>
       <div style={{ display: 'flex', gap: '16px', flex: 1, maxWidth: '1000px' }}>
         
         {/* Search Input */}
         <div className="search-container" style={{ flex: 3 }}>
-            <Search size={18} color="var(--text-muted)" />
+            <MagnifyingGlass size={18} color="var(--text-muted)" weight="regular" />
             <input
+            id="pos-search-input"
             type="text"
             className="search-input"
             placeholder="Buscar por nombre (Ej. Coca Cola)..."
@@ -96,7 +67,7 @@ export const TopBar = ({
             transition: 'all 0.3s ease',
             cursor: 'pointer'
         }} onClick={() => barcodeRef.current?.focus()}>
-            <Barcode size={22} color={isScannerDetected ? 'var(--accent-success)' : 'var(--text-muted)'} />
+            <Barcode size={22} color={isScannerDetected ? 'var(--accent-success)' : 'var(--text-muted)'} weight="regular" />
             <input
             ref={barcodeRef}
             type="text"
@@ -107,7 +78,6 @@ export const TopBar = ({
             />
             <button type="submit" style={{ display: 'none' }} />
         </form>
-
 
       </div>
 
@@ -123,17 +93,14 @@ export const TopBar = ({
             onClick={toggleKiosk}
             style={{ backgroundColor: isKioskMode ? 'var(--accent-primary)' : 'transparent', color: isKioskMode ? '#fff' : 'inherit' }}
         >
-          <Maximize size={20} />
+          <CornersOut size={20} weight="regular" />
         </button>
 
-        <button className="icon-btn" title="Perfil de Usuario" onClick={() => setIsUserOpen(true)}>
-          <User size={20} />
+        <button className="icon-btn" title="Cerrar Sesión" onClick={logout} style={{ color: 'var(--accent-danger)' }}>
+          <SignOut size={20} weight="regular" />
         </button>
       </div>
 
-
-      <UserModal isOpen={isUserOpen} onClose={() => setIsUserOpen(false)} />
     </header>
   );
-
 };

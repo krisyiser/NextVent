@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { ShoppingCart, Banknote, CheckCircle2 } from 'lucide-react';
+import { ShoppingCart, Money, CheckCircle } from 'phosphor-react';
 import { openShift } from '@/lib/storage';
 
 type ShiftModalProps = {
@@ -30,7 +30,7 @@ export const ShiftModal = ({ isOpen, onOpened }: ShiftModalProps) => {
         width: '100%', maxWidth: '450px', border: '1px solid var(--border-color)', textAlign: 'center'
       }}>
         <div style={{ padding: '20px', backgroundColor: 'rgba(59, 130, 246, 0.1)', borderRadius: '50%', width: 'fit-content', margin: '0 auto 24px', color: 'var(--accent-primary)' }}>
-          <ShoppingCart size={48} />
+          <ShoppingCart size={48} weight="regular" />
         </div>
         
         <h2 style={{ fontSize: '28px', fontWeight: 'bold', marginBottom: '8px' }}>Apertura de Caja</h2>
@@ -39,7 +39,7 @@ export const ShiftModal = ({ isOpen, onOpened }: ShiftModalProps) => {
         <div style={{ marginBottom: '32px' }}>
           <label style={{ display: 'block', fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '12px' }}>Fondo de Caja (Cambio):</label>
           <div style={{ display: 'flex', alignItems: 'center', backgroundColor: 'var(--bg-tertiary)', borderRadius: 'var(--radius-md)', padding: '0 24px', border: '1px solid var(--border-color)' }}>
-            <Banknote size={24} color="var(--text-muted)" />
+            <Money size={24} color="var(--text-muted)" weight="regular" />
             <span style={{ fontSize: '32px', marginLeft: '12px', fontWeight: 'bold' }}>$</span>
             <input 
               autoFocus
@@ -47,7 +47,7 @@ export const ShiftModal = ({ isOpen, onOpened }: ShiftModalProps) => {
               value={openingBalance}
               onChange={e => setOpeningBalance(e.target.value)}
               style={{
-                width: '100%', padding: '24px 12px', backgroundColor: 'transparent', border: 'none', color: '#fff', fontSize: '32px', outline: 'none', fontWeight: 'bold'
+                width: '100%', padding: '24px 12px', backgroundColor: 'transparent', border: 'none', color: 'var(--text-primary)', fontSize: '32px', outline: 'none', fontWeight: 'bold'
               }}
             />
           </div>
@@ -57,12 +57,12 @@ export const ShiftModal = ({ isOpen, onOpened }: ShiftModalProps) => {
           onClick={handleOpenShift}
           style={{
             width: '100%', padding: '20px', borderRadius: 'var(--radius-md)', border: 'none',
-            backgroundColor: 'var(--accent-primary)', color: '#fff', fontSize: '18px', fontWeight: 'bold', cursor: 'pointer',
+            backgroundColor: 'var(--accent-primary)', color: 'var(--text-on-accent)', fontSize: '18px', fontWeight: 'bold', cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', transition: 'var(--transition)',
             boxShadow: 'var(--shadow-glow)'
           }}
         >
-          <CheckCircle2 size={24} />
+          <CheckCircle size={24} weight="regular" />
           INICIAR TURNO
         </button>
       </div>

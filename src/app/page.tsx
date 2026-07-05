@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo, useEffect, useCallback } from 'react';
-import { Sidebar } from '@/components/Sidebar';
+import { AppShell } from '@/components/ui';
 import { TopBar } from '@/components/TopBar';
 import { ProductCard } from '@/components/ProductCard';
 import { TicketSection } from '@/components/TicketSection';
@@ -11,25 +11,31 @@ import { QuantityModal } from '@/components/QuantityModal';
 import { ShiftModal } from '@/components/ShiftModal';
 import { CATEGORIES } from '@/constants';
 import { Product, TicketItem, Sale, Shift } from '@/types';
-import { getProducts, saveSale, getActiveShift, getPromotions } from '@/lib/storage';
-
+import { getProducts, saveSale, getActiveShift, getPromotions, getParkedOrders, saveParkedOrder, deleteParkedOrder, getComboRecommendation, type Promotion } from '@/lib/storage';
 import { ReceiptTemplate } from '@/components/ReceiptTemplate';
-
-export type TopBarProps = {
-  searchQuery: string;
-  setSearchQuery: (query: string) => void;
-  onScan: (barcode: string) => void;
-  isMobileMode: boolean;
-  setIsMobileMode: (mode: boolean) => void;
-  isScannerDetected: boolean;
-};
-
-
+import { toast } from 'sonner';
+import { invoke } from '@tauri-apps/api/core';
+import { useAuth } from '@/auth/AuthProvider';
+import { ManagerOverrideModal } from '@/components/ManagerOverrideModal';
 
 export default function POS() {
   const [activeCategory, setActiveCategory] = useState('Todos');
   const [searchQuery, setSearchQuery] = useState('');
   const [ticket, setTicket] = useState<TicketItem[]>([]);
+  const [total, setTotal] = useState(0);
+  const [totalCost, setTotalCost] = useState(0);
+
+  // Broadcast cart for second screen
+  useEffect(() => {
+      const broadcast = async () => {
+          try {
+              await invoke('broadcast_cart', { cartJson: JSON.stringify(ticket) });
+          } catch (e) {
+              // Ignore if not running in Tauri
+          }
+      };
+      broadcast();
+  }, [ticket]);
   const [isMobileMode, setIsMobileMode] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [scanBuffer, setScanBuffer] = useState('');
@@ -39,11 +45,35 @@ export default function POS() {
   const [globalDiscount, setGlobalDiscount] = useState(0);
   const [isKioskMode, setIsKioskMode] = useState(false);
   
-  const toggleKiosk = useCallback(() => {
-    setIsKioskMode(prev => !prev);
+  const { auth } = useAuth();
+  const role = auth.role || 'CAJERO';
+
+  const [isOverrideModalOpen, setIsOverrideModalOpen] = useState(false);
+  const [overrideAction, setOverrideAction] = useState<{name: string, callback: () => void} | null>(null);
+
+  const handleRequireOverride = (actionName: string, callback: () => void) => {
+      if (role === 'CAJERO') {
+          setOverrideAction({ name: actionName, callback });
+          setIsOverrideModalOpen(true);
+      } else {
+          callback();
+      }
+  };
+
+  const toggleKiosk = useCallback(async () => {
+    try {
+      const { getCurrentWindow } = await import('@tauri-apps/api/window');
+      const appWindow = getCurrentWindow();
+      const isFS = await appWindow.isFullscreen();
+      await appWindow.setFullscreen(!isFS);
+      setIsKioskMode(!isFS);
+    } catch (e) {
+      console.warn("Tauri fullscreen not available, using fallback", e);
+      setIsKioskMode(prev => !prev);
+    }
   }, []);
 
-  const [promotions, setPromotions] = useState<any[]>([]);
+  const [promotions, setPromotions] = useState<Promotion[]>([]);
   const [lastAddedId, setLastAddedId] = useState<string | null>(null);
 
   const playBeep = (type: 'success' | 'error' = 'success') => {
@@ -75,17 +105,19 @@ export default function POS() {
   const [isShiftOpen, setIsShiftOpen] = useState(false);
   const [pendingProduct, setPendingProduct] = useState<Product | null>(null);
 
-  // Parked Orders state
+  // Parked Orders state (SQLite-backed)
   const [parkedOrders, setParkedOrders] = useState<{ id: string, items: TicketItem[], timestamp: string }[]>([]);
 
   useEffect(() => {
-    const saved = localStorage.getItem('parked_orders');
-    if (saved) {
-      setParkedOrders(JSON.parse(saved));
-    }
+    (async () => {
+      try {
+        const orders = await getParkedOrders();
+        setParkedOrders(orders);
+      } catch (_) { /* DB not ready */ }
+    })();
   }, []);
 
-  const parkCurrentSale = () => {
+  const parkCurrentSale = async () => {
     if (ticket.length === 0) return;
     const newOrder = {
       id: `ORDER-${Date.now()}`,
@@ -94,35 +126,49 @@ export default function POS() {
     };
     const updated = [newOrder, ...parkedOrders];
     setParkedOrders(updated);
-    localStorage.setItem('parked_orders', JSON.stringify(updated));
+    await saveParkedOrder(newOrder);
     setTicket([]);
+    toast.info('Venta pausada');
   };
 
-  const resumeOrder = (orderId: string) => {
+  const resumeOrder = async (orderId: string) => {
     const order = parkedOrders.find(o => o.id === orderId);
     if (order) {
       if (ticket.length > 0) {
-        // Option 1: Merge. Option 2: Park current then resume.
-        // Let's Park current if not empty
-        parkCurrentSale();
+        await parkCurrentSale();
       }
       setTicket(order.items);
       const updated = parkedOrders.filter(o => o.id !== orderId);
       setParkedOrders(updated);
-      localStorage.setItem('parked_orders', JSON.stringify(updated));
+      await deleteParkedOrder(orderId);
+      toast.info('Venta reanudada');
     }
   };
   
   // Persistence Loading
   useEffect(() => {
     const load = async () => {
-        setProducts(await getProducts());
-        setPromotions(await getPromotions());
-        const shift = await getActiveShift();
-        if (!shift) {
-            setIsShiftOpen(true);
-        } else {
-            setCurrentShift(shift);
+        try {
+            const prods = await getProducts();
+            setProducts(prods);
+        } catch (err: any) {
+            toast.error(`Error cargando productos: ${err.message || err}`);
+            console.error(err);
+        }
+        try {
+            setPromotions(await getPromotions());
+        } catch (err: any) {
+            toast.error(`Error cargando promociones: ${err.message || err}`);
+        }
+        try {
+            const shift = await getActiveShift();
+            if (!shift) {
+                setIsShiftOpen(true);
+            } else {
+                setCurrentShift(shift);
+            }
+        } catch (err: any) {
+            toast.error(`Error cargando turno: ${err.message || err}`);
         }
     };
     load();
@@ -152,6 +198,13 @@ export default function POS() {
       if (!isFastBurst && diff >= 25 && (document.activeElement?.tagName === 'INPUT' || document.activeElement?.tagName === 'SELECT')) {
           return;
       }
+
+      // Zero-mouse shortcuts
+      if (e.key === 'F1') { e.preventDefault(); document.getElementById('pos-search-input')?.focus(); return; }
+      if (e.key === 'F11') { e.preventDefault(); toggleKiosk(); return; }
+      if (e.key === 'F5') { e.preventDefault(); if (ticket.length > 0) setIsCheckoutOpen(true); return; }
+      if (e.key === '+') { e.preventDefault(); if (lastAddedId) updateQuantityRequest(lastAddedId, 1); return; }
+      if (e.key === '-') { e.preventDefault(); if (lastAddedId) updateQuantityRequest(lastAddedId, -1); return; }
 
       if (e.key === 'Enter') {
         if (currentBuffer.length >= 3) {
@@ -273,13 +326,54 @@ export default function POS() {
     return { total: finalTotal, rawTotal: total, totalCost, count, items, alerts };
   }, [ticket, globalDiscount, promotions]);
 
-  const handleProductSelect = (product: Product) => {
+  const checkCombos = useCallback(async (productId: string) => {
+    try {
+      const rec = await getComboRecommendation(productId);
+      if (rec && rec.frequency >= 5) {
+        const recProduct = products.find(p => p.id === rec.recommendedId);
+        if (recProduct) {
+          toast(`💡 Combo detectado: Recomienda ofrecer ${recProduct.name}`, { duration: 4000 });
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, [products]);
+
+  const addToTicket = useCallback((product: Product, quantity: number) => {
+    setTicket(prev => {
+      const existing = prev.find(item => item.id === product.id);
+      const currentQty = existing ? existing.quantity : 0;
+      
+      if (currentQty + quantity > product.stock) {
+        // Silently return if already at limit to avoid multiple alerts from scanner
+        if (currentQty < product.stock) {
+            playBeep('error');
+            toast.error(`Stock agotado. Máximo ${product.stock} ${product.unit} disponibles.`);
+        }
+        return prev;
+      }
+
+
+      setSearchQuery(''); 
+      setLastAddedId(product.id);
+      setTimeout(() => setLastAddedId(null), 2000); // give 2 seconds for +/- shortcuts
+      checkCombos(product.id);
+
+      if (existing) {
+        return prev.map(item => item.id === product.id ? { ...item, quantity: item.quantity + quantity } : item);
+      }
+      return [...prev, { ...product, quantity }];
+    });
+  }, [checkCombos]);
+
+  const handleProductSelect = useCallback((product: Product) => {
     const existing = ticket.find(item => item.id === product.id);
     const currentQty = existing ? existing.quantity : 0;
 
     if (currentQty >= product.stock || product.stock <= 0) {
       playBeep('error');
-      alert(`No puedes agregar más. Stock agotado para ${product.name} (${product.stock} ${product.unit} disponibles).`);
+      toast.error(`Stock agotado para ${product.name} (${product.stock} ${product.unit} disponibles)`);
       return;
     }
 
@@ -291,36 +385,20 @@ export default function POS() {
       addToTicket(product, 1);
     }
     setSearchQuery('');
+  }, [ticket, addToTicket]);
+
+  const updateQuantityRequest = (id: string, delta: number) => {
+    if (delta < 0 && role === 'CAJERO') {
+      const item = ticket.find(i => i.id === id);
+      if (item) {
+        handleRequireOverride(`Eliminar 1 ${item.name}`, () => updateQuantityCore(id, delta));
+        return;
+      }
+    }
+    updateQuantityCore(id, delta);
   };
 
-
-  const addToTicket = (product: Product, quantity: number) => {
-    setTicket(prev => {
-      const existing = prev.find(item => item.id === product.id);
-      const currentQty = existing ? existing.quantity : 0;
-      
-      if (currentQty + quantity > product.stock) {
-        // Silently return if already at limit to avoid multiple alerts from scanner
-        if (currentQty < product.stock) {
-            playBeep('error');
-            alert(`Stock agotado. No puedes agregar más de ${product.stock} ${product.unit} de este producto.`);
-        }
-        return prev;
-      }
-
-
-      setSearchQuery(''); 
-      setLastAddedId(product.id);
-      setTimeout(() => setLastAddedId(null), 1000);
-
-      if (existing) {
-        return prev.map(item => item.id === product.id ? { ...item, quantity: item.quantity + quantity } : item);
-      }
-      return [...prev, { ...product, quantity }];
-    });
-  };
-
-  const updateQuantity = (id: string, delta: number) => {
+  const updateQuantityCore = (id: string, delta: number) => {
     setTicket(prev => prev.map(item => {
       if (item.id === id) {
         const newQty = Math.max(0, item.quantity + delta);
@@ -330,7 +408,15 @@ export default function POS() {
     }).filter(item => item.quantity > 0));
   };
 
-  const clearTicket = () => setTicket([]);
+  const clearTicketRequest = () => {
+    if (role === 'CAJERO') {
+      handleRequireOverride('Cancelar Ticket Completo', clearTicketCore);
+      return;
+    }
+    clearTicketCore();
+  };
+
+  const clearTicketCore = () => setTicket([]);
 
   const handleApplyDiscount = (val: number) => {
     setGlobalDiscount(val);
@@ -340,22 +426,35 @@ export default function POS() {
     await saveSale(sale);
     setProducts(await getProducts());
     setLastSale(sale);
-    clearTicket();
+    clearTicketCore();
     setIsCheckoutOpen(false);
     
     // Trigger print after modal closes and lastSale renders
     setTimeout(() => {
-        window.print();
+        // window.print(); // Disabled to allow the WA toast action
     }, 500);
 
-    alert(`¡Venta #${sale.id.split('-')[1]} exitosa!\nCambio para cliente: $${sale.changeAmount.toFixed(2)}\n\n✅ Venta procesada y stock actualizado correctamente.`);
+    const ticketText = `*TICKET DE COMPRA*\nNextVent POS\n\n` + 
+                       sale.items.map(i => `${i.quantity}x ${i.name} - $${i.total.toFixed(2)}`).join('\n') +
+                       `\n\n*Total: $${sale.total.toFixed(2)}*\nGracias por su compra.`;
+
+    toast.success(`¡Venta #${sale.id.split('-')[1]} exitosa! Cambio: $${sale.changeAmount.toFixed(2)}`, {
+      duration: 10000,
+      action: {
+        label: '📱 Enviar WhatsApp',
+        onClick: () => {
+          // Si es fiado y tiene cliente, se asume que podemos buscar su teléfono, pero por ahora pedimos el número o abre el chat genérico.
+          // Para simplificar, abre el chat sin número para que el usuario elija el contacto, o usa Tauri IPC
+          invoke('set_whatsapp_layout', { open: true, width: 450.0, pinned: true });
+          invoke('send_whatsapp_message', { phone: '', text: ticketText });
+        }
+      }
+    });
   };
 
   return (
-    <div className={isKioskMode ? 'kiosk-mode' : ''} style={{ display: 'flex', width: '100%', height: '100vh' }}>
-      <Sidebar activeModule="pos" />
-
-      <main className="main-content">
+    <>
+      <AppShell activeModule="pos">
         <TopBar 
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
@@ -399,9 +498,9 @@ export default function POS() {
             ticket={ticketData.items}
             ticketTotal={ticketData.total}
             ticketCount={ticketData.count}
-            updateQuantity={updateQuantity}
+            updateQuantity={updateQuantityRequest}
             onCompleteSale={() => setIsCheckoutOpen(true)}
-            onClearTicket={() => { clearTicket(); setGlobalDiscount(0); }}
+            onClearTicket={clearTicketRequest}
             parkedOrders={parkedOrders}
             onParkSale={parkCurrentSale}
             onResumeOrder={resumeOrder}
@@ -412,8 +511,7 @@ export default function POS() {
           />
 
         </div>
-      </main>
-
+      </AppShell>
       <CheckoutModal 
         isOpen={isCheckoutOpen}
         onClose={() => setIsCheckoutOpen(false)}
@@ -446,7 +544,16 @@ export default function POS() {
         }}
       />
 
+      {isOverrideModalOpen && overrideAction && (
+        <ManagerOverrideModal 
+          isOpen={isOverrideModalOpen} 
+          actionName={overrideAction.name}
+          onCancel={() => { setIsOverrideModalOpen(false); setOverrideAction(null); }}
+          onSuccess={() => { setIsOverrideModalOpen(false); overrideAction.callback(); setOverrideAction(null); }}
+        />
+      )}
+
       {lastSale && <ReceiptTemplate sale={lastSale} />}
-    </div>
+    </>
   );
 }

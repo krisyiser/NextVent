@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Banknote, CreditCard, User, UserPlus, CheckCircle2 } from 'lucide-react';
+import { X, Money, CreditCard, User, UserPlus, CheckCircle } from 'phosphor-react';
 import { Customer, TicketItem, Sale } from '@/types';
-import { getCustomers, addCustomer } from '@/lib/storage';
+import { getCustomers, addCustomer, updateCustomerPoints } from '@/lib/storage';
+import { toast } from 'sonner';
 
 type CheckoutModalProps = {
   isOpen: boolean;
@@ -21,6 +22,16 @@ export const CheckoutModal = ({ isOpen, onClose, total, totalCost, items, onComp
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newCustName, setNewCustName] = useState('');
+  
+  // Anti-Comission Shield
+  const [terminal, setTerminal] = useState('Ninguna');
+  const [usePoints, setUsePoints] = useState(false);
+  const terminals = {
+    'Mercado Pago': 0.035,
+    'Clip': 0.036,
+    'Terminal Bancaria': 0.02,
+    'Ninguna': 0
+  };
 
   useEffect(() => {
     if (isOpen) {
@@ -31,6 +42,7 @@ export const CheckoutModal = ({ isOpen, onClose, total, totalCost, items, onComp
       setSelectedCustomerId('');
       setShowAddForm(false);
       setNewCustName('');
+      setUsePoints(false);
     }
   }, [isOpen]);
 
@@ -46,20 +58,29 @@ export const CheckoutModal = ({ isOpen, onClose, total, totalCost, items, onComp
         setNewCustName('');
     } catch (e) {
         console.error("Error adding customer", e);
-        alert("No se pudo agregar el cliente. Intente de nuevo.");
+        toast.error('No se pudo agregar el cliente. Intente de nuevo.');
     }
   };
 
   if (!isOpen) return null;
 
   const isCredit = paymentMethod === 'Credit';
-  const change = Math.max(0, parseFloat(paidAmount || '0') - total);
-  const isPaidEnough = parseFloat(paidAmount || '0') >= total || isCredit || paymentMethod === 'Card' || paymentMethod === 'Transfer';
+  const selectedCustomer = customers.find(c => c.id === selectedCustomerId);
+  
+  // Calculate Points Discount
+  const pointsAvailable = selectedCustomer?.puntos_saldo || 0;
+  const pointsDiscount = usePoints ? Math.min(total, pointsAvailable) : 0;
+  const totalAfterPoints = Math.max(0, total - pointsDiscount);
+  
+  const currentComission = paymentMethod === 'Card' ? terminals[terminal as keyof typeof terminals] * totalAfterPoints : 0;
+  const totalWithComission = totalAfterPoints + currentComission;
+  const change = Math.max(0, parseFloat(paidAmount || '0') - totalWithComission);
+  const isPaidEnough = parseFloat(paidAmount || '0') >= totalWithComission || isCredit || paymentMethod === 'Card' || paymentMethod === 'Transfer';
 
   const handleFinalize = () => {
     if (!isPaidEnough) return;
     if (isCredit && !selectedCustomerId) {
-      alert("Selecciona un cliente para el fiado");
+      toast.error('Selecciona un cliente para el fiado');
       return;
     }
 
@@ -84,22 +105,33 @@ export const CheckoutModal = ({ isOpen, onClose, total, totalCost, items, onComp
       };
     });
 
-    const totalCost = snapshotItems.reduce((acc, item) => acc + (item.cost * item.quantity), 0);
+    const calculatedCost = snapshotItems.reduce((acc, item) => acc + (item.cost * item.quantity), 0);
 
     const sale: Sale = {
       id: `SALE-${Date.now()}`,
       date: new Date().toISOString(),
       items: snapshotItems,
-      total,
-      totalCost,
-      profit: total - totalCost,
-      paidAmount: (paymentMethod === 'Cash') ? parseFloat(paidAmount || '0') : total,
+      total: totalWithComission,
+      totalCost: calculatedCost,
+      profit: total - calculatedCost, // Note: profit excludes commission since it goes to terminal
+      paidAmount: (paymentMethod === 'Cash') ? parseFloat(paidAmount || '0') : totalWithComission,
       changeAmount: (paymentMethod === 'Cash') ? change : 0,
       paymentMethod,
       customerId: isCredit ? selectedCustomerId : undefined,
       isCredit,
       isCancelled: false
     };
+    
+    // Process Points
+    if (selectedCustomerId) {
+        if (usePoints) {
+             // Deduct points used
+             updateCustomerPoints(selectedCustomerId, -pointsDiscount);
+        } else {
+             // Add points (1% of total)
+             updateCustomerPoints(selectedCustomerId, total * 0.01);
+        }
+    }
 
     onComplete(sale);
   };
@@ -121,7 +153,7 @@ export const CheckoutModal = ({ isOpen, onClose, total, totalCost, items, onComp
 
         <div style={{ textAlign: 'center', marginBottom: '32px', padding: '20px', backgroundColor: 'var(--bg-primary)', borderRadius: 'var(--radius-md)' }}>
           <div style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '8px' }}>TOTAL A COBRAR</div>
-          <div style={{ fontSize: '48px', fontWeight: 'bold', color: 'var(--accent-success)' }}>${total.toFixed(2)}</div>
+          <div style={{ fontSize: '48px', fontWeight: 'bold', color: 'var(--accent-success)' }}>${totalWithComission.toFixed(2)}</div>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', marginBottom: '24px' }}>
@@ -129,17 +161,19 @@ export const CheckoutModal = ({ isOpen, onClose, total, totalCost, items, onComp
             onClick={() => setPaymentMethod('Cash')}
             style={{
               padding: '16px', borderRadius: 'var(--radius-md)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
-              backgroundColor: paymentMethod === 'Cash' ? 'var(--accent-primary)' : 'var(--bg-tertiary)', border: 'none', color: '#fff', cursor: 'pointer', transition: 'var(--transition)'
+              backgroundColor: paymentMethod === 'Cash' ? 'var(--accent-primary)' : 'var(--bg-tertiary)', border: 'none', 
+              color: paymentMethod === 'Cash' ? 'var(--text-on-accent)' : 'var(--text-secondary)', cursor: 'pointer', transition: 'var(--transition)'
             }}
           >
-            <Banknote size={24} />
+            <Money size={24} />
             Efectivo
           </button>
           <button 
             onClick={() => setPaymentMethod('Card')}
             style={{
               padding: '16px', borderRadius: 'var(--radius-md)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
-              backgroundColor: paymentMethod === 'Card' ? 'var(--accent-primary)' : 'var(--bg-tertiary)', border: 'none', color: '#fff', cursor: 'pointer', transition: 'var(--transition)'
+              backgroundColor: paymentMethod === 'Card' ? 'var(--accent-primary)' : 'var(--bg-tertiary)', border: 'none', 
+              color: paymentMethod === 'Card' ? 'var(--text-on-accent)' : 'var(--text-secondary)', cursor: 'pointer', transition: 'var(--transition)'
             }}
           >
             <CreditCard size={24} />
@@ -149,17 +183,19 @@ export const CheckoutModal = ({ isOpen, onClose, total, totalCost, items, onComp
             onClick={() => setPaymentMethod('Transfer')}
             style={{
               padding: '16px', borderRadius: 'var(--radius-md)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
-              backgroundColor: paymentMethod === 'Transfer' ? 'var(--accent-primary)' : 'var(--bg-tertiary)', border: 'none', color: '#fff', cursor: 'pointer', transition: 'var(--transition)'
+              backgroundColor: paymentMethod === 'Transfer' ? 'var(--accent-primary)' : 'var(--bg-tertiary)', border: 'none', 
+              color: paymentMethod === 'Transfer' ? 'var(--text-on-accent)' : 'var(--text-secondary)', cursor: 'pointer', transition: 'var(--transition)'
             }}
           >
-            <CheckCircle2 size={24} />
+            <CheckCircle size={24} />
             Transferencia
           </button>
           <button 
             onClick={() => setPaymentMethod('Credit')}
             style={{
               padding: '16px', borderRadius: 'var(--radius-md)', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px',
-              backgroundColor: paymentMethod === 'Credit' ? 'var(--accent-danger)' : 'var(--bg-tertiary)', border: 'none', color: '#fff', cursor: 'pointer', transition: 'var(--transition)'
+              backgroundColor: paymentMethod === 'Credit' ? 'var(--accent-danger)' : 'var(--bg-tertiary)', border: 'none', 
+              color: paymentMethod === 'Credit' ? 'var(--text-on-danger)' : 'var(--text-secondary)', cursor: 'pointer', transition: 'var(--transition)'
             }}
           >
             <User size={24} />
@@ -167,7 +203,25 @@ export const CheckoutModal = ({ isOpen, onClose, total, totalCost, items, onComp
           </button>
         </div>
 
-        {!isCredit ? (
+        {paymentMethod === 'Card' && (
+          <div style={{ marginBottom: '24px' }}>
+            <label style={{ display: 'block', fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '8px' }}>Terminal de Cobro (Escudo Anti-Comisiones):</label>
+            <select value={terminal} onChange={e => setTerminal(e.target.value)} style={{width: '100%', padding: '16px', backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', color: 'var(--text-primary)', outline: 'none'}}>
+              <option value="Ninguna">Sin comisión adicional</option>
+              <option value="Mercado Pago">Mercado Pago (+3.5%)</option>
+              <option value="Clip">Clip (+3.6%)</option>
+              <option value="Terminal Bancaria">Terminal Bancaria (+2.0%)</option>
+            </select>
+            {terminal !== 'Ninguna' && (
+              <div style={{ marginTop: '12px', padding: '12px', backgroundColor: 'var(--bg-primary)', borderRadius: 'var(--radius-md)', borderLeft: '4px solid var(--accent-warning)'}}>
+                <div style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>Monto exacto a cobrar en terminal: <strong style={{ color: 'var(--text-primary)'}}>${totalWithComission.toFixed(2)}</strong></div>
+                <div style={{ fontSize: '14px', color: 'var(--accent-success)' }}>Tu ganancia neta protegida: <strong>${total.toFixed(2)}</strong></div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {paymentMethod === 'Cash' && (
           <div style={{ marginBottom: '24px' }}>
             <label style={{ display: 'block', fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '8px' }}>Paga con:</label>
             <div style={{ display: 'flex', alignItems: 'center', backgroundColor: 'var(--bg-tertiary)', borderRadius: 'var(--radius-md)', padding: '0 16px' }}>
@@ -178,7 +232,7 @@ export const CheckoutModal = ({ isOpen, onClose, total, totalCost, items, onComp
                 value={paidAmount}
                 onChange={e => setPaidAmount(e.target.value)}
                 style={{
-                  width: '100%', padding: '16px', backgroundColor: 'transparent', border: 'none', color: '#fff', fontSize: '24px', outline: 'none'
+                  width: '100%', padding: '16px', backgroundColor: 'transparent', border: 'none', color: 'var(--text-primary)', fontSize: '24px', outline: 'none'
                 }}
                 placeholder="0.00"
               />
@@ -192,20 +246,22 @@ export const CheckoutModal = ({ isOpen, onClose, total, totalCost, items, onComp
               </div>
             )}
           </div>
-        ) : (
+        )}
+        
+        {isCredit && (
           <div style={{ marginBottom: '24px' }}>
-            <label style={{ display: 'block', fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '8px' }}>Cliente:</label>
+            <label style={{ display: 'block', fontSize: '14px', color: 'var(--text-secondary)', marginBottom: '8px' }}>Cliente (Fiado / Puntos):</label>
             <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
                 <select 
                   value={selectedCustomerId}
-                  onChange={e => setSelectedCustomerId(e.target.value)}
+                  onChange={e => { setSelectedCustomerId(e.target.value); setUsePoints(false); }}
                   style={{
-                    flex: 1, padding: '16px', backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', color: '#fff', outline: 'none'
+                    flex: 1, padding: '16px', backgroundColor: 'var(--bg-tertiary)', border: '1px solid var(--border-color)', borderRadius: 'var(--radius-md)', color: 'var(--text-primary)', outline: 'none'
                   }}
                 >
                   <option value="">Seleccionar cliente...</option>
                   {customers.map(c => (
-                    <option key={c.id} value={c.id}>{c.name} (Saldo: ${c.debt.toFixed(2)})</option>
+                    <option key={c.id} value={c.id}>{c.name} (Deuda: ${c.debt.toFixed(2)} | Puntos: ${c.puntos_saldo?.toFixed(2) || '0.00'})</option>
                   ))}
                 </select>
                 <button 
@@ -225,13 +281,13 @@ export const CheckoutModal = ({ isOpen, onClose, total, totalCost, items, onComp
                         placeholder="Nombre completo"
                         value={newCustName}
                         onChange={e => setNewCustName(e.target.value)}
-                        style={{ width: '100%', padding: '8px', backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '4px', color: '#fff', marginBottom: '8px', outline: 'none' }}
+                        style={{ width: '100%', padding: '8px', backgroundColor: 'var(--bg-secondary)', border: '1px solid var(--border-color)', borderRadius: '4px', color: 'var(--text-primary)', marginBottom: '8px', outline: 'none' }}
                     />
                     <div style={{ display: 'flex', gap: '8px' }}>
                         <button 
                             type="button"
                             onClick={handleQuickAddCustomer}
-                            style={{ flex: 2, padding: '8px', backgroundColor: 'var(--accent-primary)', border: 'none', borderRadius: '4px', color: '#fff', fontWeight: 'bold', cursor: 'pointer' }}
+                            style={{ flex: 2, padding: '8px', backgroundColor: 'var(--accent-primary)', border: 'none', borderRadius: '4px', color: 'var(--text-on-accent)', fontWeight: 'bold', cursor: 'pointer' }}
                         >GUARDAR</button>
                         <button 
                             type="button"
@@ -241,6 +297,19 @@ export const CheckoutModal = ({ isOpen, onClose, total, totalCost, items, onComp
                     </div>
                 </div>
             )}
+
+            {selectedCustomer && selectedCustomer.puntos_saldo && selectedCustomer.puntos_saldo > 0 ? (
+                <div style={{ padding: '12px', backgroundColor: 'var(--bg-primary)', borderRadius: 'var(--radius-md)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: '1px solid var(--accent-success)' }}>
+                    <div>
+                        <div style={{ fontSize: '14px', fontWeight: 'bold', color: 'var(--accent-success)' }}>Monedero Electrónico</div>
+                        <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Saldo disponible: ${selectedCustomer.puntos_saldo.toFixed(2)}</div>
+                    </div>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                        <input type="checkbox" checked={usePoints} onChange={e => setUsePoints(e.target.checked)} style={{ transform: 'scale(1.5)', accentColor: 'var(--accent-success)' }} />
+                        <span style={{ fontSize: '14px', fontWeight: 'bold' }}>Usar Puntos</span>
+                    </label>
+                </div>
+            ) : null}
           </div>
         )}
 
@@ -250,11 +319,11 @@ export const CheckoutModal = ({ isOpen, onClose, total, totalCost, items, onComp
           style={{
             width: '100%', padding: '20px', borderRadius: 'var(--radius-md)', border: 'none',
             backgroundColor: isPaidEnough ? 'var(--accent-success)' : 'var(--bg-tertiary)',
-            color: '#fff', fontSize: '18px', fontWeight: 'bold', cursor: isPaidEnough ? 'pointer' : 'not-allowed',
+            color: isPaidEnough ? 'var(--text-on-success)' : 'var(--text-muted)', fontSize: '18px', fontWeight: 'bold', cursor: isPaidEnough ? 'pointer' : 'not-allowed',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', transition: 'var(--transition)'
           }}
         >
-          <CheckCircle2 size={24} />
+          <CheckCircle size={24} weight="regular" />
           {isCredit ? 'REGISTRAR DEUDA' : 'FINALIZAR Y COBRAR'}
         </button>
       </div>

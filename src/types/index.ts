@@ -39,6 +39,7 @@ export type Customer = {
   name: string;
   phone?: string;
   debt: number;
+  puntos_saldo?: number;
   payments: CustomerPayment[];
 };
 

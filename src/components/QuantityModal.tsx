@@ -1,8 +1,9 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Scale, Calculator, CheckCircle2 } from 'lucide-react';
+import { X, Scales, Calculator, CheckCircle } from 'phosphor-react';
 import { Product } from '@/types';
+import { toast } from 'sonner';
 
 type QuantityModalProps = {
   isOpen: boolean;
@@ -31,7 +32,7 @@ export const QuantityModal = ({ isOpen, onClose, product, onConfirm }: QuantityM
       onConfirm(q);
       onClose();
     } else {
-      alert("La cantidad debe ser mayor a cero");
+      toast.error('La cantidad debe ser mayor a cero');
     }
   };
 
@@ -47,7 +48,7 @@ export const QuantityModal = ({ isOpen, onClose, product, onConfirm }: QuantityM
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
           <h2 style={{ fontSize: '20px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Scale size={20} className="text-accent" />
+            <Scales size={20} weight="regular" className="text-accent" />
             Venta por {product.unit}
           </h2>
           <button onClick={onClose} className="icon-btn"><X size={20} /></button>
@@ -71,7 +72,7 @@ export const QuantityModal = ({ isOpen, onClose, product, onConfirm }: QuantityM
                 value={quantity}
                 onChange={e => setQuantity(e.target.value)}
                 style={{
-                  width: '100%', padding: '16px', backgroundColor: 'transparent', border: 'none', color: '#fff', fontSize: '24px', outline: 'none', textAlign: 'center'
+                  width: '100%', padding: '16px', backgroundColor: 'transparent', border: 'none', color: 'var(--text-primary)', fontSize: '24px', outline: 'none', textAlign: 'center'
                 }}
                 placeholder="0.00"
               />
@@ -88,11 +89,11 @@ export const QuantityModal = ({ isOpen, onClose, product, onConfirm }: QuantityM
             disabled={!parseFloat(quantity || '0')}
             style={{
               width: '100%', padding: '18px', borderRadius: 'var(--radius-md)', border: 'none',
-              backgroundColor: 'var(--accent-primary)', color: '#fff', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer',
+              backgroundColor: 'var(--accent-primary)', color: 'var(--text-on-accent)', fontSize: '16px', fontWeight: 'bold', cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
             }}
           >
-            <CheckCircle2 size={20} />
+            <CheckCircle size={20} weight="regular" />
             AGREGAR {quantity} {product.unit}
           </button>
         </form>

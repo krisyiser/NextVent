@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Percent, DollarSign, CheckCircle2 } from 'lucide-react';
+import { X, Percent, CurrencyDollar, CheckCircle } from 'phosphor-react';
 
 type DiscountModalProps = {
   isOpen: boolean;
@@ -38,7 +38,7 @@ export const DiscountModal = ({ isOpen, onClose, onApply, currentDiscount, subto
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
           <h2 style={{ fontSize: '20px', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <Percent className="text-accent-primary" /> Descuento Global
+            <Percent className="text-accent-primary" weight="regular" /> Descuento Global
           </h2>
           <button onClick={onClose} className="icon-btn"><X size={24} /></button>
         </div>
@@ -49,7 +49,7 @@ export const DiscountModal = ({ isOpen, onClose, onApply, currentDiscount, subto
             style={{ 
                 flex: 1, padding: '10px', borderRadius: 'var(--radius-sm)', border: 'none', cursor: 'pointer',
                 backgroundColor: type === 'fixed' ? 'var(--accent-primary)' : 'transparent',
-                color: '#fff', fontWeight: 'bold', transition: 'var(--transition)'
+                color: type === 'fixed' ? 'var(--text-on-accent)' : 'var(--text-secondary)', fontWeight: 'bold', transition: 'var(--transition)'
             }}
           >
             MONTO ($)
@@ -59,7 +59,7 @@ export const DiscountModal = ({ isOpen, onClose, onApply, currentDiscount, subto
             style={{ 
                 flex: 1, padding: '10px', borderRadius: 'var(--radius-sm)', border: 'none', cursor: 'pointer',
                 backgroundColor: type === 'percent' ? 'var(--accent-primary)' : 'transparent',
-                color: '#fff', fontWeight: 'bold', transition: 'var(--transition)'
+                color: type === 'percent' ? 'var(--text-on-accent)' : 'var(--text-secondary)', fontWeight: 'bold', transition: 'var(--transition)'
             }}
           >
             PORCENTAJE (%)
@@ -68,13 +68,13 @@ export const DiscountModal = ({ isOpen, onClose, onApply, currentDiscount, subto
 
         <div style={{ marginBottom: '32px' }}>
           <div style={{ display: 'flex', alignItems: 'center', backgroundColor: 'var(--bg-tertiary)', borderRadius: 'var(--radius-md)', padding: '0 16px', border: '1px solid var(--border-color)' }}>
-            {type === 'fixed' ? <DollarSign size={20} className="text-muted" /> : <Percent size={20} className="text-muted" />}
+            {type === 'fixed' ? <CurrencyDollar size={20} className="text-muted" weight="regular" /> : <Percent size={20} className="text-muted" weight="regular" />}
             <input 
               autoFocus
               type="number"
               value={amount}
               onChange={e => setAmount(e.target.value)}
-              style={{ width: '100%', padding: '16px', backgroundColor: 'transparent', border: 'none', color: '#fff', fontSize: '24px', outline: 'none' }}
+              style={{ width: '100%', padding: '16px', backgroundColor: 'transparent', border: 'none', color: 'var(--text-primary)', fontSize: '24px', outline: 'none' }}
               placeholder="0.00"
             />
           </div>
@@ -88,12 +88,12 @@ export const DiscountModal = ({ isOpen, onClose, onApply, currentDiscount, subto
         <button 
           onClick={handleSave}
           style={{ 
-            width: '100%', padding: '20px', backgroundColor: 'var(--accent-success)', color: '#fff', 
+            width: '100%', padding: '20px', backgroundColor: 'var(--accent-success)', color: 'var(--text-on-success)', 
             border: 'none', borderRadius: 'var(--radius-md)', fontWeight: 'bold', fontSize: '16px',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '12px', cursor: 'pointer'
           }}
         >
-          <CheckCircle2 size={24} /> APLICAR DESCUENTO
+          <CheckCircle size={24} weight="regular" /> APLICAR DESCUENTO
         </button>
       </div>
     </div>
