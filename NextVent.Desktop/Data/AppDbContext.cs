@@ -26,6 +26,7 @@ public class AppDbContext : DbContext
     public DbSet<ProductAttributeEntity> ProductAttributes => Set<ProductAttributeEntity>();
     public DbSet<ShiftNoteEntity> ShiftNotes => Set<ShiftNoteEntity>();
     public DbSet<ShiftMovementEntity> ShiftMovements => Set<ShiftMovementEntity>();
+    public DbSet<SystemAlertEntity> SystemAlerts => Set<SystemAlertEntity>();
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 

@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -5,7 +6,7 @@ namespace NextVent.Data.Entities;
 
 /// <summary>
 /// Product catalog entity. Maps to legacy 'products' SQLite table.
-/// Tracks inventory items with cost/price/wholesale tiers and stock levels.
+/// Tracks inventory items with cost/price/wholesale tiers, stock levels, kits, and supplier links.
 /// </summary>
 [Table("products")]
 public class ProductEntity
@@ -51,6 +52,12 @@ public class ProductEntity
     [Column("minStock")]
     public double MinStock { get; set; }
 
+    [Column("is_kit")]
+    public bool IsKit { get; set; } = false;
+
+    [Column("default_supplier_id")]
+    public string? DefaultSupplierId { get; set; }
+
     [Column("points_rewarded")]
     public double PointsRewarded { get; set; } = 1.0;
 
@@ -68,4 +75,28 @@ public class ProductEntity
 
     [Column("created_at")]
     public string? CreatedAt { get; set; }
+
+    [NotMapped]
+    public decimal CostPrice
+    {
+        get => (decimal)Cost;
+        set => Cost = (double)value;
+    }
+
+    [NotMapped]
+    public decimal StockDecimal
+    {
+        get => (decimal)Stock;
+        set => Stock = (double)value;
+    }
+
+    [NotMapped]
+    public decimal MinStockDecimal
+    {
+        get => (decimal)MinStock;
+        set => MinStock = (double)value;
+    }
+
+    [ForeignKey(nameof(DefaultSupplierId))]
+    public SupplierEntity? DefaultSupplier { get; set; }
 }

@@ -21,7 +21,8 @@ public record ProductDto(
     double ReorderQuantity = 10.0,
     string LocationRack = "Pasillo 1 - Anaquel A",
     string ClaveSat = "50202306",
-    string UnidadSat = "H87"
+    string UnidadSat = "H87",
+    double MinStock = 5.0
 )
 {
     public double CostPrice => Cost;

@@ -187,7 +187,7 @@ public sealed class ProductService : IProductService
         e.Id, e.Barcode, e.Name, e.Cost, e.Price,
         e.WholesalePrice, e.WholesaleThreshold,
         e.Stock, e.Category, e.Unit, e.ExpiresSoon, e.CreatedAt,
-        e.PointsRewarded, e.ReorderQuantity, e.LocationRack, e.ClaveSat, e.UnidadSat);
+        e.PointsRewarded, e.ReorderQuantity, e.LocationRack, e.ClaveSat, e.UnidadSat, e.MinStock);
 
     private static ProductEntity MapToEntity(ProductDto d) => new()
     {
@@ -199,6 +199,7 @@ public sealed class ProductService : IProductService
         WholesalePrice = d.WholesalePrice,
         WholesaleThreshold = d.WholesaleThreshold,
         Stock = d.Stock,
+        MinStock = d.MinStock,
         Category = d.Category,
         Unit = d.Unit,
         ExpiresSoon = d.ExpiresSoon,

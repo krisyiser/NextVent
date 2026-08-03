@@ -190,4 +190,47 @@ public partial class SuppliersViewModel : ObservableObject
             FeedbackMessage = "Error al procesar la entrada de mercancía";
         }
     }
+
+    [RelayCommand]
+    private async Task GenerateSuggestedPurchaseOrderAsync(string supplierId)
+    {
+        var targetSupplier = Suppliers.FirstOrDefault(s => s.Id == supplierId) ?? SelectedSupplierForPurchase;
+        if (targetSupplier != null)
+        {
+            SelectedSupplierForPurchase = targetSupplier;
+        }
+
+        var lowStockProducts = AvailableProducts
+            .Where(p => p.Stock <= p.MinStock)
+            .ToList();
+
+        if (lowStockProducts.Count == 0)
+        {
+            FeedbackMessage = "No hay productos con stock por debajo del mínimo.";
+            return;
+        }
+
+        DraftPurchaseItems.Clear();
+
+        foreach (var p in lowStockProducts)
+        {
+            double qtyToOrder = Math.Max(10.0, (p.MinStock * 2) - p.Stock);
+            double itemTotal = p.Cost * qtyToOrder;
+
+            DraftPurchaseItems.Add(new PurchaseItemDto(
+                Guid.NewGuid().ToString(),
+                string.Empty,
+                p.Id,
+                p.Name,
+                p.Cost,
+                qtyToOrder,
+                itemTotal
+            ));
+        }
+
+        TotalPurchaseCost = DraftPurchaseItems.Sum(i => i.TotalPrice);
+        IsRegisteringPurchase = true;
+        FeedbackMessage = $"¡Orden sugerida generada con {DraftPurchaseItems.Count} productos con stock crítico!";
+        await Task.CompletedTask;
+    }
 }

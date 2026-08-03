@@ -66,15 +66,60 @@ public sealed class SaleService : ISaleService
 
             _ctx.Sales.Add(entity);
 
-            // Deduct stock for each item
+            // Deduct inventory in cascade (Combo/Kit support) & compute true COGS
+            double totalTicketCogs = 0.0;
             foreach (var item in sale.Items)
             {
-                var product = await _ctx.Products.FindAsync(item.Id);
+                var product = await _ctx.Products.FirstOrDefaultAsync(p => p.Id == item.ProductId);
                 if (product is not null)
                 {
-                    product.Stock = Math.Max(0, Math.Round(product.Stock - item.Quantity, 3));
+                    if (product.IsKit)
+                    {
+                        // 1. HANDLE COMBO / KIT: DEDUCT INGREDIENT COMPONENTS IN CASCADE
+                        var kit = await _ctx.ItemKits
+                            .Include(k => k.Components)
+                            .FirstOrDefaultAsync(k => k.ParentProductId == product.Id || k.Id == product.Id);
+
+                        if (kit != null && kit.Components.Count > 0)
+                        {
+                            double kitUnitCogs = 0.0;
+                            foreach (var comp in kit.Components)
+                            {
+                                var ingredient = await _ctx.Products.FirstOrDefaultAsync(p => p.Id == comp.ProductId);
+                                if (ingredient == null) continue;
+
+                                double totalIngredientConsumed = item.Quantity * comp.Quantity;
+                                ingredient.Stock = Math.Max(0.0, Math.Round(ingredient.Stock - totalIngredientConsumed, 3));
+                                _ctx.Products.Update(ingredient);
+
+                                kitUnitCogs += comp.Quantity * ingredient.Cost;
+                                await CheckAndFlagLowStockAsync(ingredient);
+                            }
+                            totalTicketCogs += kitUnitCogs * item.Quantity;
+                        }
+                        else
+                        {
+                            product.Stock = Math.Max(0.0, Math.Round(product.Stock - item.Quantity, 3));
+                            _ctx.Products.Update(product);
+                            totalTicketCogs += product.Cost * item.Quantity;
+                            await CheckAndFlagLowStockAsync(product);
+                        }
+                    }
+                    else
+                    {
+                        // 2. HANDLE STANDARD PRODUCT
+                        product.Stock = Math.Max(0.0, Math.Round(product.Stock - item.Quantity, 3));
+                        _ctx.Products.Update(product);
+                        totalTicketCogs += product.Cost * item.Quantity;
+                        await CheckAndFlagLowStockAsync(product);
+                    }
                 }
             }
+
+            totalCost = Math.Round(totalTicketCogs, 2);
+            profit = Math.Round(total - totalCost, 2);
+            entity.TotalCost = totalCost;
+            entity.Profit = profit;
 
             // If customer linked, validate credit constraints & update debt or accrue/deduct loyalty points
             if (!string.IsNullOrEmpty(sale.CustomerId))
@@ -386,6 +431,30 @@ public sealed class SaleService : ISaleService
         {
             Serilog.Log.Error(ex, "Error generating cashier performance report");
             return [];
+        }
+    }
+
+    private async Task CheckAndFlagLowStockAsync(ProductEntity product)
+    {
+        if (product.Stock <= product.MinStock)
+        {
+            bool alertExists = await _ctx.SystemAlerts
+                .AnyAsync(a => a.ProductId == product.Id && !a.IsResolved);
+
+            if (!alertExists)
+            {
+                var alert = new SystemAlertEntity
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    ProductId = product.Id,
+                    SupplierId = product.DefaultSupplierId,
+                    Title = $"Stock Crítico: {product.Name}",
+                    Message = $"Stock actual ({product.Stock}) por debajo del mínimo permitido ({product.MinStock}).",
+                    CreatedAt = DateTime.UtcNow.ToString("s"),
+                    IsResolved = false
+                };
+                _ctx.SystemAlerts.Add(alert);
+            }
         }
     }
 
