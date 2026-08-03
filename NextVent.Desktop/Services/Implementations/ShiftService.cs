@@ -64,10 +64,25 @@ public sealed class ShiftService : IShiftService
             .Where(m => m.ShiftId == entity.Id && m.MovementType == NextVent.Core.Enums.MovementType.AbonoCliente)
             .SumAsync(m => m.Amount);
 
+        var cashExpenses = await _ctx.ShiftMovements
+            .AsNoTracking()
+            .Where(m => m.ShiftId == entity.Id && m.MovementType == NextVent.Core.Enums.MovementType.GastoOperativo)
+            .SumAsync(m => m.Amount);
+
+        var cashPurchases = await _ctx.ShiftMovements
+            .AsNoTracking()
+            .Where(m => m.ShiftId == entity.Id && m.MovementType == NextVent.Core.Enums.MovementType.CompraEfectivo)
+            .SumAsync(m => m.Amount);
+
+        var cashReturns = await _ctx.ShiftMovements
+            .AsNoTracking()
+            .Where(m => m.ShiftId == entity.Id && m.MovementType == NextVent.Core.Enums.MovementType.DevolucionCliente)
+            .SumAsync(m => m.Amount);
+
         entity.EndTime = DateTimeOffset.UtcNow.ToString("o");
         entity.TotalCashSales = cashSales;
         entity.TotalCreditSales = creditSales;
-        entity.ExpectedBalance = entity.OpeningBalance + cashSales + customerAbonosCash;
+        entity.ExpectedBalance = entity.OpeningBalance + cashSales + customerAbonosCash - cashExpenses - cashPurchases - cashReturns;
         entity.ActualBalance = actualBalance;
         entity.Diff = actualBalance - entity.ExpectedBalance;
         entity.IsOpen = 0;

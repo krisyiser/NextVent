@@ -27,20 +27,49 @@ public class ExpenseService : IExpenseService
 
     public async Task<ExpenseDto> CreateAsync(ExpenseDto dto)
     {
-        var entity = new ExpenseEntity
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
         {
-            Id = string.IsNullOrEmpty(dto.Id) ? Guid.NewGuid().ToString() : dto.Id,
-            Category = string.IsNullOrEmpty(dto.Category) ? "General" : dto.Category,
-            Amount = dto.Amount,
-            Date = string.IsNullOrEmpty(dto.Date) ? DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") : dto.Date,
-            Description = dto.Description,
-            PaymentMethod = dto.PaymentMethod,
-            RegisteredByUser = string.IsNullOrEmpty(dto.RegisteredByUser) ? "admin" : dto.RegisteredByUser
-        };
+            var activeShift = await _context.Shifts.FirstOrDefaultAsync(s => s.IsOpen == 1);
 
-        _context.Expenses.Add(entity);
-        await _context.SaveChangesAsync();
-        return MapToDto(entity);
+            var entity = new ExpenseEntity
+            {
+                Id = string.IsNullOrEmpty(dto.Id) ? Guid.NewGuid().ToString() : dto.Id,
+                Category = string.IsNullOrEmpty(dto.Category) ? "General" : dto.Category,
+                Amount = dto.Amount,
+                Date = string.IsNullOrEmpty(dto.Date) ? DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") : dto.Date,
+                Description = dto.Description,
+                PaymentMethod = dto.PaymentMethod,
+                RegisteredByUser = string.IsNullOrEmpty(dto.RegisteredByUser) ? "admin" : dto.RegisteredByUser
+            };
+
+            _context.Expenses.Add(entity);
+
+            // Inject Cash Outflow Movement to Active Shift Drawer if Paid in Cash
+            if (activeShift != null && (dto.PaymentMethod.Equals("Efectivo", StringComparison.OrdinalIgnoreCase) || dto.PaymentMethod.Equals("Cash", StringComparison.OrdinalIgnoreCase)))
+            {
+                var outflow = new ShiftMovementEntity
+                {
+                    ShiftId = activeShift.Id,
+                    MovementType = NextVent.Core.Enums.MovementType.GastoOperativo,
+                    Amount = dto.Amount,
+                    IsOutflow = true,
+                    Description = $"Gasto: {entity.Category} - {entity.Description}",
+                    ReferenceId = entity.Id,
+                    Timestamp = DateTime.UtcNow.ToString("s")
+                };
+                _context.ShiftMovements.Add(outflow);
+            }
+
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+            return MapToDto(entity);
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
     public async Task<bool> DeleteAsync(string id)
@@ -67,6 +96,42 @@ public class ExpenseService : IExpenseService
         double netProfit = grossProfit - totalExpenses;
 
         return new FinancialSummaryDto(totalRevenue, totalCostOfGoodsSold, grossProfit, totalExpenses, netProfit);
+    }
+
+    public async Task<NextVent.Core.Models.NetProfitReportModel> CalculateTrueNetProfitAsync(DateTime startDate, DateTime endDate)
+    {
+        var validSales = _context.Sales
+            .AsNoTracking()
+            .Where(s => s.IsCancelled == 0);
+
+        decimal grossSales = (decimal)(await validSales.SumAsync(s => (double?)s.Total) ?? 0.0);
+        decimal totalCogs = (decimal)(await validSales.SumAsync(s => (double?)s.TotalCost) ?? 0.0);
+
+        var validReturns = _context.Returns.AsNoTracking();
+        decimal totalRefunds = (decimal)(await validReturns.SumAsync(r => (double?)r.TotalRefunded) ?? 0.0);
+        decimal cogsReversed = (decimal)(await validReturns.SumAsync(r => (double?)r.CogsReversed) ?? 0.0);
+
+        decimal operatingExpenses = (decimal)(await _context.Expenses.SumAsync(e => (double?)e.Amount) ?? 0.0);
+
+        decimal netSales = grossSales - totalRefunds;
+        decimal effectiveCogs = totalCogs - cogsReversed;
+        decimal grossProfit = netSales - effectiveCogs;
+        decimal netProfit = grossProfit - operatingExpenses;
+
+        return new NextVent.Core.Models.NetProfitReportModel
+        {
+            StartDate = startDate,
+            EndDate = endDate,
+            GrossSales = grossSales,
+            TotalRefunds = totalRefunds,
+            NetSales = netSales,
+            CostOfGoodsSold = effectiveCogs,
+            GrossProfit = grossProfit,
+            GrossMarginPercentage = netSales > 0 ? Math.Round((grossProfit / netSales) * 100m, 2) : 0m,
+            OperatingExpenses = operatingExpenses,
+            NetProfit = netProfit,
+            NetProfitPercentage = netSales > 0 ? Math.Round((netProfit / netSales) * 100m, 2) : 0m
+        };
     }
 
     private static ExpenseDto MapToDto(ExpenseEntity e) =>

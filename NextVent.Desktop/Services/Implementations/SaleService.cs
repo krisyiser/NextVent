@@ -357,6 +357,36 @@ public sealed class SaleService : ISaleService
 
             sale.ItemsJson = JsonSerializer.Serialize(updatedItems, JsonOpts);
 
+            // Record Return Audit Entity
+            var returnEntity = new ReturnEntity
+            {
+                Id = Guid.NewGuid().ToString(),
+                OriginalSaleId = sale.Id,
+                CashierUserId = null,
+                TotalRefunded = refundedAmount,
+                CogsReversed = refundedCost,
+                RefundMethod = refundMethod,
+                Reason = reason,
+                CreatedAt = DateTimeOffset.UtcNow.ToString("o")
+            };
+            _ctx.Returns.Add(returnEntity);
+
+            // Inject Physical Cash Outflow to Active Shift Drawer if Refunded in Cash
+            var activeShift = await _ctx.Shifts.FirstOrDefaultAsync(s => s.IsOpen == 1);
+            if (activeShift != null && (refundMethod.Equals("Efectivo", StringComparison.OrdinalIgnoreCase) || refundMethod.Equals("Cash", StringComparison.OrdinalIgnoreCase)))
+            {
+                _ctx.ShiftMovements.Add(new ShiftMovementEntity
+                {
+                    ShiftId = activeShift.Id,
+                    MovementType = NextVent.Core.Enums.MovementType.DevolucionCliente,
+                    Amount = refundedAmount,
+                    IsOutflow = true,
+                    Description = $"Devolución Ticket #{sale.Id} - {reason}",
+                    ReferenceId = returnEntity.Id,
+                    Timestamp = DateTime.UtcNow.ToString("s")
+                });
+            }
+
             await _ctx.SaveChangesAsync();
             await transaction.CommitAsync();
 

@@ -22,8 +22,14 @@ public class ShiftMovementEntity
     [Column("amount")]
     public double Amount { get; set; }
 
+    [Column("is_outflow")]
+    public bool IsOutflow { get; set; } = false;
+
     [Column("description")]
     public string Description { get; set; } = string.Empty;
+
+    [Column("reference_id")]
+    public string ReferenceId { get; set; } = string.Empty;
 
     [Column("timestamp")]
     public string Timestamp { get; set; } = DateTime.UtcNow.ToString("s");

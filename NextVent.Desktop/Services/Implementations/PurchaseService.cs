@@ -106,6 +106,24 @@ public class PurchaseService : IPurchaseService
             };
 
             _context.Purchases.Add(purchaseEntity);
+
+            // Inject Cash Outflow Movement to Active Shift Drawer
+            var activeShift = await _context.Shifts.FirstOrDefaultAsync(s => s.IsOpen == 1);
+            if (activeShift != null)
+            {
+                var outflow = new ShiftMovementEntity
+                {
+                    ShiftId = activeShift.Id,
+                    MovementType = NextVent.Core.Enums.MovementType.CompraEfectivo,
+                    Amount = totalCost,
+                    IsOutflow = true,
+                    Description = $"Compra Proveedor: {dto.SupplierName} - Factura: {dto.InvoiceNumber}",
+                    ReferenceId = purchaseId,
+                    Timestamp = DateTime.UtcNow.ToString("s")
+                };
+                _context.ShiftMovements.Add(outflow);
+            }
+
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
 
