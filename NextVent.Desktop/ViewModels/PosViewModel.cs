@@ -76,6 +76,7 @@ public partial class PosViewModel : ObservableObject
     private readonly ISessionManager? _sessionManager;
     private readonly IUserRepository? _userRepository;
     private readonly IPromotionService? _promotionService;
+    private readonly IAuditService? _auditService;
     private readonly DispatcherTimer _debounceTimer;
 
     public ObservableCollection<ShiftNoteDto> ActiveShiftNotes { get; } = [];
@@ -100,7 +101,8 @@ public partial class PosViewModel : ObservableObject
         ICustomerService? customerService = null,
         ISessionManager? sessionManager = null,
         IUserRepository? userRepository = null,
-        IPromotionService? promotionService = null)
+        IPromotionService? promotionService = null,
+        IAuditService? auditService = null)
     {
         _productService = productService;
         _db = db;
@@ -110,6 +112,7 @@ public partial class PosViewModel : ObservableObject
         _sessionManager = sessionManager;
         _userRepository = userRepository;
         _promotionService = promotionService;
+        _auditService = auditService;
 
         _debounceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(150) };
         _debounceTimer.Tick += async (s, e) =>
@@ -449,20 +452,67 @@ public partial class PosViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void RemoveFromCart(CartItemDto item)
+    private async Task RemoveFromCartAsync(CartItemDto item)
     {
         if (item == null) return;
+
+        double itemTotalValue = (item.OriginalUnitPrice > 0 ? item.OriginalUnitPrice : item.UnitPrice) * item.Quantity;
+        var currentUserId = _sessionManager?.CurrentCashier?.Id.ToString() ?? "cajero_matriz";
+
+        if (_auditService != null)
+        {
+            var auditEntry = new AuditLogEntity
+            {
+                UserId = currentUserId,
+                ActionType = NextVent.Core.Enums.AuditActionType.CartItemRemoved,
+                RiskLevel = itemTotalValue > 500.0 ? NextVent.Core.Enums.RiskLevel.HighRisk : NextVent.Core.Enums.RiskLevel.Warning,
+                EntityName = nameof(CartItemDto),
+                EntityId = item.ProductId,
+                OldValue = $"Qty: {item.Quantity:N2}, Price: {item.OriginalUnitPrice:C}",
+                NewValue = "REMOVED_FROM_CART",
+                FinancialImpact = itemTotalValue,
+                Reason = $"Eliminación de producto '{item.Name}' del carrito antes de cobro"
+            };
+            await _auditService.LogAsync(auditEntry);
+        }
+
         CartItems.Remove(item);
         RecalculateTotal();
     }
 
+    private void RemoveFromCart(CartItemDto item) => _ = RemoveFromCartAsync(item);
+
     [RelayCommand]
-    public void ClearCart()
+    public async Task ClearCartAsync()
     {
+        if (CartItems.Count == 0) return;
+
+        double totalCartValue = CartItems.Sum(i => i.TotalPrice);
+        var currentUserId = _sessionManager?.CurrentCashier?.Id.ToString() ?? "cajero_matriz";
+
+        if (_auditService != null)
+        {
+            var auditEntry = new AuditLogEntity
+            {
+                UserId = currentUserId,
+                ActionType = NextVent.Core.Enums.AuditActionType.CartCleared,
+                RiskLevel = totalCartValue > 500.0 ? NextVent.Core.Enums.RiskLevel.HighRisk : NextVent.Core.Enums.RiskLevel.Warning,
+                EntityName = "CartTicket",
+                EntityId = "CART_CLEAR",
+                OldValue = $"ItemCount: {CartItems.Count}, Total: {totalCartValue:C}",
+                NewValue = "CART_CLEARED",
+                FinancialImpact = totalCartValue,
+                Reason = "Vaciado total del ticket antes de cobro"
+            };
+            await _auditService.LogAsync(auditEntry);
+        }
+
         CartItems.Clear();
         RecalculateTotal();
         FeedbackMessage = "Carrito limpiado";
     }
+
+    public void ClearCart() => _ = ClearCartAsync();
 
     [RelayCommand]
     private void SwitchCashier()
@@ -532,14 +582,36 @@ public partial class PosViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void DiscardParkedTicket(ParkedTicketModel? ticket)
+    private async Task DiscardParkedTicketAsync(ParkedTicketModel? ticket)
     {
         if (ticket is null) return;
+
+        var currentUserId = _sessionManager?.CurrentCashier?.Id.ToString() ?? "cajero_matriz";
+
+        if (_auditService != null)
+        {
+            var auditEntry = new AuditLogEntity
+            {
+                UserId = currentUserId,
+                ActionType = NextVent.Core.Enums.AuditActionType.ParkedOrderCancelled,
+                RiskLevel = ticket.TotalAmount > 500.0 ? NextVent.Core.Enums.RiskLevel.HighRisk : NextVent.Core.Enums.RiskLevel.Warning,
+                EntityName = nameof(ParkedTicketModel),
+                EntityId = ticket.TicketId,
+                OldValue = $"Lines: {ticket.Lines.Count}, Total: {ticket.TotalAmount:C}",
+                NewValue = "PARKED_TICKET_DISCARDED",
+                FinancialImpact = ticket.TotalAmount,
+                Reason = $"Venta en espera '{ticket.TicketId}' descartada"
+            };
+            await _auditService.LogAsync(auditEntry);
+        }
+
         ParkedTickets.Remove(ticket);
         ParkedOrdersCount = ParkedTickets.Count;
         OnPropertyChanged(nameof(HasParkedTickets));
         FeedbackMessage = "Venta pausada descartada";
     }
+
+    private void DiscardParkedTicket(ParkedTicketModel? ticket) => _ = DiscardParkedTicketAsync(ticket);
 
     [RelayCommand]
     private async Task ParkCurrentCartAsync()

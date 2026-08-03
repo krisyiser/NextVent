@@ -28,6 +28,7 @@ public class AppDbContext : DbContext
     public DbSet<ShiftMovementEntity> ShiftMovements => Set<ShiftMovementEntity>();
     public DbSet<SystemAlertEntity> SystemAlerts => Set<SystemAlertEntity>();
     public DbSet<ReturnEntity> Returns => Set<ReturnEntity>();
+    public DbSet<AuditLogEntity> AuditLogs => Set<AuditLogEntity>();
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 

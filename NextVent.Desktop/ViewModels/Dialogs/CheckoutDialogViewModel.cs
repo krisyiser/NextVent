@@ -1,8 +1,11 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using NextVent.Data.Dtos;
+using NextVent.Data.Entities;
 using NextVent.Services.Implementations;
 using NextVent.Services.Interfaces;
+using NextVent.Services.Security;
+using NextVent.Core.Models;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -364,5 +367,50 @@ public partial class CheckoutDialogViewModel : ObservableObject
             Log.Error(ex, "Error processing payment in CheckoutDialogViewModel");
             ErrorMessage = ex.Message;
         }
+    }
+
+    public async Task<bool> ApplyManualDiscountAsync(double requestedDiscountPercentage, string reason, ISecurityInterceptionService? securityService = null, IAuditService? auditService = null, UserModel? currentUser = null)
+    {
+        double maxAllowed = currentUser?.Role == SystemRole.CAJERO ? 5.0 : 100.0;
+        string? supervisorId = null;
+
+        if (requestedDiscountPercentage > maxAllowed)
+        {
+            if (securityService != null)
+            {
+                var authResult = await securityService.AuthorizeHighRiskActionAsync(
+                    "Autorización de Descuento Especial",
+                    $"El descuento del {requestedDiscountPercentage:N2}% supera el límite permitido para cajeros ({maxAllowed:N2}%).");
+
+                if (!authResult.IsAuthorized) return false;
+                supervisorId = authResult.SupervisorId;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
+        double subtotalBase = TotalToPay;
+        double discountAmount = Math.Round(subtotalBase * (requestedDiscountPercentage / 100.0), 2);
+        TotalToPay = Math.Max(0.0, subtotalBase - discountAmount);
+
+        if (auditService != null)
+        {
+            await auditService.LogAsync(new AuditLogEntity
+            {
+                UserId = currentUser?.Id.ToString() ?? "cajero_matriz",
+                AuthorizedBySupervisorId = supervisorId,
+                ActionType = NextVent.Core.Enums.AuditActionType.ManualDiscountExceeded,
+                RiskLevel = NextVent.Core.Enums.RiskLevel.HighRisk,
+                EntityName = "CheckoutTicket",
+                OldValue = "0%",
+                NewValue = $"{requestedDiscountPercentage:N2}%",
+                FinancialImpact = discountAmount,
+                Reason = reason
+            });
+        }
+
+        return true;
     }
 }

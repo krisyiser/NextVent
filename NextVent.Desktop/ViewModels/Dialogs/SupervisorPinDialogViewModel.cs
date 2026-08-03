@@ -1,6 +1,7 @@
 using System;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using NextVent.Core.Models;
 using NextVent.Core.Repositories;
 
 namespace NextVent.ViewModels.Dialogs;
@@ -8,13 +9,13 @@ namespace NextVent.ViewModels.Dialogs;
 public partial class SupervisorPinDialogViewModel : ObservableObject
 {
     private readonly IUserRepository _userRepository;
-    private readonly Action<bool> _callback;
+    private readonly Action<bool, UserModel?> _callback;
 
     [ObservableProperty] private string _enteredPin = string.Empty;
     [ObservableProperty] private string _errorMessage = string.Empty;
     [ObservableProperty] private string _actionTitle = "Autorización de Supervisor Requerida";
 
-    public SupervisorPinDialogViewModel(IUserRepository userRepository, string actionTitle, Action<bool> callback)
+    public SupervisorPinDialogViewModel(IUserRepository userRepository, string actionTitle, Action<bool, UserModel?> callback)
     {
         _userRepository = userRepository;
         ActionTitle = actionTitle;
@@ -45,15 +46,15 @@ public partial class SupervisorPinDialogViewModel : ObservableObject
     [RelayCommand]
     private void Cancel()
     {
-        _callback?.Invoke(false);
+        _callback?.Invoke(false, null);
     }
 
     private async void ValidateAdminAsync()
     {
-        bool isAdmin = await _userRepository.ValidateAdminPinAsync(EnteredPin);
-        if (isAdmin)
+        var user = await _userRepository.ValidateAnyPinAsync(EnteredPin);
+        if (user != null && user.Role == SystemRole.ADMIN)
         {
-            _callback?.Invoke(true);
+            _callback?.Invoke(true, user);
         }
         else
         {

@@ -7,6 +7,8 @@ using NextVent.Data;
 using NextVent.Services;
 using NextVent.Services.Implementations;
 using NextVent.Services.Interfaces;
+using NextVent.Services.Audit;
+using NextVent.Services.Security;
 using NextVent.ViewModels.Dialogs;
 using NextVent.Core.Models;
 using NextVent.Core.Repositories;
@@ -75,8 +77,17 @@ public partial class MainWindowViewModel : ObservableObject
 
         var userRepository = new UserRepository(_db);
         var sessionManager = new SessionManager();
+        var auditService = new AuditService(_db);
+        var securityService = new SecurityInterceptionService(userRepository);
 
-        _posVm = new PosViewModel(_productService, _db, shiftNoteService, kitService, _customerService, sessionManager, userRepository, _promotionService);
+        securityService.RequestSupervisorPinDialog += (title, callback) =>
+        {
+            var dialog = new SupervisorPinDialogViewModel(userRepository, title, callback);
+            ActiveDialogViewModel = dialog;
+            IsDialogOverlayOpen = true;
+        };
+
+        _posVm = new PosViewModel(_productService, _db, shiftNoteService, kitService, _customerService, sessionManager, userRepository, _promotionService, auditService);
         _inventoryVm = new InventoryViewModel(_productService, purchaseService);
         _customersVm = new CustomersViewModel(_customerService);
         _historyVm = new HistoryViewModel(_saleService, _printerService);
@@ -108,7 +119,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         _posVm.OpenSupervisorPinRequested += (title, callback) =>
         {
-            var dialog = new SupervisorPinDialogViewModel(userRepository, title, (authorized) =>
+            var dialog = new SupervisorPinDialogViewModel(userRepository, title, (authorized, user) =>
             {
                 CloseDialog();
                 callback?.Invoke(authorized);

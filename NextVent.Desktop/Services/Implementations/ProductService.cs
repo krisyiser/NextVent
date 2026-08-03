@@ -183,6 +183,67 @@ public sealed class ProductService : IProductService
         return await ImportFromCsvTextAsync(text);
     }
 
+    public async Task<bool> AdjustStockManuallyAsync(string productId, double newPhysicalStock, string reason, string userId, NextVent.Services.Security.ISecurityInterceptionService? securityService = null, IAuditService? auditService = null)
+    {
+        using var transaction = await _ctx.Database.BeginTransactionAsync();
+        try
+        {
+            var product = await _ctx.Products.FindAsync(productId)
+                ?? throw new InvalidOperationException($"Producto {productId} no encontrado.");
+
+            double oldStock = product.Stock;
+            double deltaStock = newPhysicalStock - oldStock;
+
+            if (Math.Abs(deltaStock) < 0.001) return true;
+
+            double financialLoss = Math.Abs(deltaStock) * product.Cost;
+            string? supervisorId = null;
+
+            if (deltaStock < 0 && financialLoss >= 100.0 && securityService != null)
+            {
+                var auth = await securityService.AuthorizeHighRiskActionAsync(
+                    "Ajuste de Merma / Faltante de Stock",
+                    $"Pérdida detectada de {Math.Abs(deltaStock):N2} unidades de '{product.Name}'. Impacto: ${financialLoss:N2}");
+
+                if (!auth.IsAuthorized)
+                {
+                    throw new UnauthorizedAccessException("Ajuste cancelado por falta de autorización del supervisor.");
+                }
+
+                supervisorId = auth.SupervisorId;
+            }
+
+            product.Stock = newPhysicalStock;
+            _ctx.Products.Update(product);
+
+            if (auditService != null)
+            {
+                await auditService.LogAsync(new AuditLogEntity
+                {
+                    UserId = userId,
+                    AuthorizedBySupervisorId = supervisorId,
+                    ActionType = NextVent.Core.Enums.AuditActionType.InventoryStockAdjustment,
+                    RiskLevel = deltaStock < 0 ? NextVent.Core.Enums.RiskLevel.HighRisk : NextVent.Core.Enums.RiskLevel.Info,
+                    EntityName = nameof(ProductEntity),
+                    EntityId = product.Id,
+                    OldValue = oldStock.ToString("F2"),
+                    NewValue = newPhysicalStock.ToString("F2"),
+                    FinancialImpact = deltaStock < 0 ? financialLoss : 0.0,
+                    Reason = reason
+                });
+            }
+
+            await _ctx.SaveChangesAsync();
+            await transaction.CommitAsync();
+            return true;
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
+    }
+
     private static ProductDto MapToDto(ProductEntity e) => new(
         e.Id, e.Barcode, e.Name, e.Cost, e.Price,
         e.WholesalePrice, e.WholesaleThreshold,

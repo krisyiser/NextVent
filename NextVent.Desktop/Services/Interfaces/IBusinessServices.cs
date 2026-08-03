@@ -41,10 +41,12 @@ Task SetAsync(string key, string value);
 Task<Dictionary<string, string>> GetAllAsync();
 }
 
-/// <summary>System audit log writer.</summary>
+/// <summary>System audit log writer for tamper-evident security tracking.</summary>
 public interface IAuditService
 {
-Task LogAsync(string level, string message, string? meta = null);
+    Task LogAsync(NextVent.Data.Entities.AuditLogEntity log);
+    Task LogAsync(string level, string message, string? meta = null);
+    Task<List<NextVent.Data.Entities.AuditLogEntity>> GetRecentLogsAsync(int limit = 100);
 }
 
 /// <summary>Product co-occurrence engine for combo recommendations.</summary>

@@ -1,32 +1,50 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using NextVent.Core.Enums;
 
 namespace NextVent.Data.Entities;
 
-/// <summary>
-/// System audit log entry for security and operational tracking.
-/// Maps to legacy 'audit_log' SQLite table with autoincrement PK.
-/// </summary>
-[Table("audit_log")]
+[Table("audit_logs")]
 public class AuditLogEntity
 {
     [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     [Column("id")]
-    public int Id { get; set; }
+    public string Id { get; set; } = Guid.NewGuid().ToString();
 
-    [Required]
     [Column("timestamp")]
-    public string Timestamp { get; set; } = string.Empty;
+    public string Timestamp { get; set; } = DateTime.UtcNow.ToString("s");
 
-    [Required]
-    [Column("level")]
-    public string Level { get; set; } = "info";
+    [Column("user_id")]
+    public string UserId { get; set; } = string.Empty;
 
-    [Required]
-    [Column("message")]
-    public string Message { get; set; } = string.Empty;
+    [Column("authorized_by_supervisor_id")]
+    public string? AuthorizedBySupervisorId { get; set; }
 
-    [Column("meta")]
-    public string? Meta { get; set; }
+    [Column("action_type")]
+    public AuditActionType ActionType { get; set; }
+
+    [Column("risk_level")]
+    public RiskLevel RiskLevel { get; set; }
+
+    [Column("entity_name")]
+    public string EntityName { get; set; } = string.Empty;
+
+    [Column("entity_id")]
+    public string EntityId { get; set; } = string.Empty;
+
+    [Column("old_value")]
+    public string OldValue { get; set; } = string.Empty;
+
+    [Column("new_value")]
+    public string NewValue { get; set; } = string.Empty;
+
+    [Column("financial_impact")]
+    public double FinancialImpact { get; set; } = 0.0;
+
+    [Column("reason")]
+    public string Reason { get; set; } = string.Empty;
+
+    [Column("terminal_name")]
+    public string TerminalName { get; set; } = Environment.MachineName;
 }
