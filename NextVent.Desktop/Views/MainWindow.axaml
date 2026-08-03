@@ -1,0 +1,233 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:NextVent.ViewModels"
+        xmlns:vmDialogs="using:NextVent.ViewModels.Dialogs"
+        xmlns:v="using:NextVent.Views"
+        xmlns:vDialogs="using:NextVent.Views.Dialogs"
+        xmlns:mi="using:Material.Icons.Avalonia"
+        x:Class="NextVent.Views.MainWindow"
+        x:DataType="vm:MainWindowViewModel"
+        Title="NextVent POS — Sistema Nactivo Enterprise"
+        Width="1280" Height="800"
+        MinWidth="1024" MinHeight="680"
+        WindowStartupLocation="CenterScreen"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaTitleBarHeightHint="-1">
+
+    <Window.KeyBindings>
+        <KeyBinding Gesture="F2" Command="{Binding NavigateToCommand}" CommandParameter="pos" />
+        <KeyBinding Gesture="F3" Command="{Binding NavigateToCommand}" CommandParameter="inventory" />
+        <KeyBinding Gesture="F4" Command="{Binding NavigateToCommand}" CommandParameter="customers" />
+        <KeyBinding Gesture="F5" Command="{Binding NavigateToCommand}" CommandParameter="suppliers" />
+        <KeyBinding Gesture="F6" Command="{Binding NavigateToCommand}" CommandParameter="expenses" />
+        <KeyBinding Gesture="F7" Command="{Binding NavigateToCommand}" CommandParameter="history" />
+        <KeyBinding Gesture="F8" Command="{Binding NavigateToCommand}" CommandParameter="promotions" />
+        <KeyBinding Gesture="F9" Command="{Binding NavigateToCommand}" CommandParameter="fiscal" />
+        <KeyBinding Gesture="F10" Command="{Binding NavigateToCommand}" CommandParameter="settings" />
+        <KeyBinding Gesture="F12" Command="{Binding TriggerPosCheckoutCommand}" />
+    </Window.KeyBindings>
+
+    <Window.DataTemplates>
+        <!-- Module View Templates -->
+        <DataTemplate DataType="vm:PosViewModel">
+            <v:PosView />
+        </DataTemplate>
+        <DataTemplate DataType="vm:InventoryViewModel">
+            <v:InventoryView />
+        </DataTemplate>
+        <DataTemplate DataType="vm:CustomersViewModel">
+            <v:CustomersView />
+        </DataTemplate>
+        <DataTemplate DataType="vm:SuppliersViewModel">
+            <v:SuppliersView />
+        </DataTemplate>
+        <DataTemplate DataType="vm:ExpensesViewModel">
+            <v:ExpensesView />
+        </DataTemplate>
+        <DataTemplate DataType="vm:HistoryViewModel">
+            <v:HistoryView />
+        </DataTemplate>
+        <DataTemplate DataType="vm:PromotionsViewModel">
+            <v:PromotionsView />
+        </DataTemplate>
+        <DataTemplate DataType="vm:FiscalViewModel">
+            <v:FiscalView />
+        </DataTemplate>
+        <DataTemplate DataType="vm:SettingsViewModel">
+            <v:SettingsView />
+        </DataTemplate>
+        <DataTemplate DataType="vm:LoginViewModel">
+            <v:LoginView />
+        </DataTemplate>
+
+        <!-- Modal Dialog Templates -->
+        <DataTemplate DataType="vmDialogs:CheckoutDialogViewModel">
+            <vDialogs:CheckoutDialog />
+        </DataTemplate>
+        <DataTemplate DataType="vmDialogs:ProductDialogViewModel">
+            <vDialogs:ProductDialog />
+        </DataTemplate>
+        <DataTemplate DataType="vmDialogs:CustomerDialogViewModel">
+            <vDialogs:CustomerDialog />
+        </DataTemplate>
+        <DataTemplate DataType="vmDialogs:PromotionDialogViewModel">
+            <vDialogs:PromotionDialog />
+        </DataTemplate>
+        <DataTemplate DataType="vmDialogs:PaymentDialogViewModel">
+            <vDialogs:PaymentDialog />
+        </DataTemplate>
+        <DataTemplate DataType="vmDialogs:CashupDialogViewModel">
+            <vDialogs:CashupDialog />
+        </DataTemplate>
+        <DataTemplate DataType="vmDialogs:CustomerStatementDialogViewModel">
+            <vDialogs:CustomerStatementDialog />
+        </DataTemplate>
+        <DataTemplate DataType="vmDialogs:ItemKitDialogViewModel">
+            <vDialogs:ItemKitDialog />
+        </DataTemplate>
+        <DataTemplate DataType="vmDialogs:ReturnDialogViewModel">
+            <vDialogs:ReturnDialog />
+        </DataTemplate>
+        <DataTemplate DataType="vmDialogs:ShiftNotesDialogViewModel">
+            <vDialogs:ShiftNotesDialog />
+        </DataTemplate>
+        <DataTemplate DataType="vmDialogs:SwitchUserPinDialogViewModel">
+            <vDialogs:SwitchUserPinDialog />
+        </DataTemplate>
+        <DataTemplate DataType="vmDialogs:LockScreenDialogViewModel">
+            <vDialogs:LockScreenDialog />
+        </DataTemplate>
+        <DataTemplate DataType="vmDialogs:SupervisorPinDialogViewModel">
+            <vDialogs:SupervisorPinDialog />
+        </DataTemplate>
+    </Window.DataTemplates>
+
+    <Panel>
+        <DockPanel LastChildFill="True" Margin="0,30,0,0"> <!-- Margin for extended TitleBar -->
+
+            <!-- ═══ SIDEBAR NAVIGATION ═══ -->
+            <Border DockPanel.Dock="{Binding SidebarDockPosition}"
+                    Width="{Binding SidebarWidth}"
+                    Height="{Binding SidebarHeight}"
+                    Background="{DynamicResource SidebarBgBrush}"
+                    Padding="0,0,0,0">
+                <DockPanel LastChildFill="False">
+                    <StackPanel DockPanel.Dock="Top" Orientation="{Binding SidebarOrientation}" Spacing="10" Margin="8,8,8,8"
+                                HorizontalAlignment="Center" VerticalAlignment="Center">
+
+                        <!-- Dynamic Logo Badge -->
+                        <Border Width="{DynamicResource AppLogoHeight}" Height="{DynamicResource AppLogoHeight}" CornerRadius="{DynamicResource AppCornerRadius}"
+                                Background="{DynamicResource AccentPrimaryBrush}" Margin="4"
+                                HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <TextBlock Text="NV" FontSize="16" FontWeight="Bold"
+                                       Foreground="White"
+                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+
+                        <!-- Nav: POS (F2) -->
+                        <Button Classes="nav-item"
+                                Command="{Binding NavigateToCommand}" CommandParameter="pos"
+                                ToolTip.Tip="Punto de Venta (F2)">
+                            <StackPanel Spacing="2">
+                                <mi:MaterialIcon Kind="PointOfSale" Width="22" Height="22" HorizontalAlignment="Center" />
+                                <TextBlock Text="F2" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Nav: Inventory (F3) -->
+                        <Button Classes="nav-item"
+                                Command="{Binding NavigateToCommand}" CommandParameter="inventory"
+                                ToolTip.Tip="Inventario (F3)">
+                            <StackPanel Spacing="2">
+                                <mi:MaterialIcon Kind="PackageVariantClosed" Width="22" Height="22" HorizontalAlignment="Center" />
+                                <TextBlock Text="F3" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Nav: Customers (F4) -->
+                        <Button Classes="nav-item"
+                                Command="{Binding NavigateToCommand}" CommandParameter="customers"
+                                ToolTip.Tip="Clientes y Crédito (F4)">
+                            <StackPanel Spacing="2">
+                                <mi:MaterialIcon Kind="AccountGroup" Width="22" Height="22" HorizontalAlignment="Center" />
+                                <TextBlock Text="F4" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Nav: Suppliers (F5) -->
+                        <Button Classes="nav-item"
+                                Command="{Binding NavigateToCommand}" CommandParameter="suppliers"
+                                ToolTip.Tip="Proveedores y Compras (F5)">
+                            <StackPanel Spacing="2">
+                                <mi:MaterialIcon Kind="TruckDelivery" Width="22" Height="22" HorizontalAlignment="Center" />
+                                <TextBlock Text="F5" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Nav: Expenses (F6) -->
+                        <Button Classes="nav-item"
+                                Command="{Binding NavigateToCommand}" CommandParameter="expenses"
+                                ToolTip.Tip="Gastos y Utilidad Neta (F6)">
+                            <StackPanel Spacing="2">
+                                <mi:MaterialIcon Kind="CashMinus" Width="22" Height="22" HorizontalAlignment="Center" />
+                                <TextBlock Text="F6" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Nav: History (F7) -->
+                        <Button Classes="nav-item"
+                                Command="{Binding NavigateToCommand}" CommandParameter="history"
+                                ToolTip.Tip="Historial de Ventas (F7)">
+                            <StackPanel Spacing="2">
+                                <mi:MaterialIcon Kind="History" Width="22" Height="22" HorizontalAlignment="Center" />
+                                <TextBlock Text="F7" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Nav: Promotions (F8) -->
+                        <Button Classes="nav-item"
+                                Command="{Binding NavigateToCommand}" CommandParameter="promotions"
+                                ToolTip.Tip="Promociones (F8)">
+                            <StackPanel Spacing="2">
+                                <mi:MaterialIcon Kind="TagMultiple" Width="22" Height="22" HorizontalAlignment="Center" />
+                                <TextBlock Text="F8" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Nav: Fiscal (F9) -->
+                        <Button Classes="nav-item"
+                                Command="{Binding NavigateToCommand}" CommandParameter="fiscal"
+                                ToolTip.Tip="Facturación SAT (F9)">
+                            <StackPanel Spacing="2">
+                                <mi:MaterialIcon Kind="ReceiptTextOutline" Width="22" Height="22" HorizontalAlignment="Center" />
+                                <TextBlock Text="F9" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <!-- Nav: Settings (F10) -->
+                        <Button Classes="nav-item"
+                                Command="{Binding NavigateToCommand}" CommandParameter="settings"
+                                ToolTip.Tip="Configuración (F10)">
+                            <StackPanel Spacing="2">
+                                <mi:MaterialIcon Kind="CogOutline" Width="22" Height="22" HorizontalAlignment="Center" />
+                                <TextBlock Text="F10" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <!-- ═══ MAIN CONTENT AREA ═══ -->
+            <DockPanel LastChildFill="True">
+                <!-- Active Module Content -->
+                <ContentControl Content="{Binding ActiveViewModel}" />
+            </DockPanel>
+        </DockPanel>
+
+        <!-- ═══ MODAL DIALOG OVERLAY ═══ -->
+        <Grid IsVisible="{Binding IsDialogOverlayOpen}" Background="#80000000">
+            <ContentControl Content="{Binding ActiveDialogViewModel}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Grid>
+    </Panel>
+</Window>

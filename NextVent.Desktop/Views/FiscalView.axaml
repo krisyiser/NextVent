@@ -1,0 +1,21 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NextVent.ViewModels"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             x:Class="NextVent.Views.FiscalView"
+             x:DataType="vm:FiscalViewModel">
+
+    <DockPanel LastChildFill="True" Margin="16">
+        <Border DockPanel.Dock="Top" Margin="0,0,0,16" Padding="16,12"
+                Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8">
+            <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                <mi:MaterialIcon Kind="ReceiptTextOutline" Width="22" Height="22" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                <TextBlock Text="Facturación Electrónica SAT CFDI 4.0" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+            </StackPanel>
+        </Border>
+
+        <Border Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+            <TextBlock Text="Módulo CFDI 4.0 listo para TIMBRADO SAT." FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Border>
+    </DockPanel>
+</UserControl>

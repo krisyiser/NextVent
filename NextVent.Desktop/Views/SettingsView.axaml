@@ -1,0 +1,176 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NextVent.ViewModels"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             xmlns:settings="using:NextVent.Views.Settings"
+             x:Class="NextVent.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel">
+
+    <Grid Background="{DynamicResource BgPrimaryBrush}" Margin="16">
+        <!-- Main Container Card -->
+        <Border Background="{DynamicResource BgSecondaryBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1"
+                CornerRadius="{DynamicResource AppCornerRadius}"
+                ClipToBounds="True">
+            <DockPanel LastChildFill="True">
+
+                <!-- ═══ 1. TOP TITLE BAR ═══ -->
+                <Border DockPanel.Dock="Top" Height="56"
+                        Background="{DynamicResource BgSecondaryBrush}"
+                        BorderBrush="{DynamicResource BorderBrush}"
+                        BorderThickness="0,0,0,1"
+                        Padding="20,0">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                            <mi:MaterialIcon Kind="CogOutline" Width="22" Height="22" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                            <TextBlock Text="Configuración General del Sistema" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                        </StackPanel>
+
+                        <Button Grid.Column="1" Command="{Binding CloseCommand}" Width="36" Height="36" Padding="0" Background="Transparent" BorderThickness="0" CornerRadius="{DynamicResource AppCornerRadius}" Cursor="Hand">
+                            <mi:MaterialIcon Kind="Close" Width="20" Height="20" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <!-- ═══ 2. BOTTOM ACTION FOOTER ═══ -->
+                <Border DockPanel.Dock="Bottom" Height="64"
+                        Background="{DynamicResource BgPrimaryBrush}"
+                        BorderBrush="{DynamicResource BorderBrush}"
+                        BorderThickness="0,1,0,0"
+                        Padding="20,12">
+                    <Grid ColumnDefinitions="*,Auto,Auto">
+                        <TextBlock Text="{Binding FeedbackMessage}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource AccentSuccessBrush}" VerticalAlignment="Center" />
+
+                        <Button Grid.Column="1" Command="{Binding CloseCommand}" Content="Cancelar" Padding="20,10" Margin="0,0,12,0"
+                                Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                                Foreground="{DynamicResource TextPrimaryBrush}" FontSize="13" FontWeight="SemiBold" CornerRadius="{DynamicResource AppCornerRadius}" Cursor="Hand" />
+
+                        <Button Grid.Column="2" Command="{Binding SaveAllSettingsCommand}" Padding="20,10" Classes="primary-action" FontSize="13" FontWeight="Bold" CornerRadius="{DynamicResource AppCornerRadius}" Cursor="Hand">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <mi:MaterialIcon Kind="ContentSave" Width="18" Height="18" />
+                                <TextBlock Text="GUARDAR TODO" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <!-- ═══ 3. MAIN BODY (MODULAR LEFT NAVIGATION + ISOLATED RIGHT SUB-VIEWS) ═══ -->
+                <Grid ColumnDefinitions="220,*">
+
+                    <!-- ─── LEFT SIDEBAR NAVIGATION (10 CATEGORIES) ─── -->
+                    <Border Grid.Column="0" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,1,0">
+                        <DockPanel LastChildFill="True">
+                            <Border DockPanel.Dock="Bottom" Padding="16,14" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0">
+                                <StackPanel HorizontalAlignment="Center" Spacing="2">
+                                    <TextBlock Text="NextVent POS v3.0" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="Zima Technologies" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Border>
+
+                            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                <StackPanel Spacing="4" Margin="8">
+                                    <!-- 1. Empresa -->
+                                    <Button Command="{Binding SelectMainTabCommand}" CommandParameter="empresa" Padding="12,10" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch">
+                                        <StackPanel Orientation="Horizontal" Spacing="10">
+                                            <mi:MaterialIcon Kind="Domain" Width="18" Height="18" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                            <TextBlock Text="Empresa" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+
+                                    <!-- 2. Interfaz -->
+                                    <Button Command="{Binding SelectMainTabCommand}" CommandParameter="interfaz" Padding="12,10" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch">
+                                        <StackPanel Orientation="Horizontal" Spacing="10">
+                                            <mi:MaterialIcon Kind="PaletteOutline" Width="18" Height="18" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                            <TextBlock Text="Interfaz" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+
+                                    <!-- 3. Ticket -->
+                                    <Button Command="{Binding SelectMainTabCommand}" CommandParameter="ticket" Padding="12,10" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch">
+                                        <StackPanel Orientation="Horizontal" Spacing="10">
+                                            <mi:MaterialIcon Kind="PrinterOutline" Width="18" Height="18" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                            <TextBlock Text="Ticket" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+
+                                    <!-- 4. Conexiones -->
+                                    <Button Command="{Binding SelectMainTabCommand}" CommandParameter="conexiones" Padding="12,10" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch">
+                                        <StackPanel Orientation="Horizontal" Spacing="10">
+                                            <mi:MaterialIcon Kind="Lan" Width="18" Height="18" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                            <TextBlock Text="Conexiones" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+
+                                    <!-- 5. Seguridad -->
+                                    <Button Command="{Binding SelectMainTabCommand}" CommandParameter="seguridad" Padding="12,10" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch">
+                                        <StackPanel Orientation="Horizontal" Spacing="10">
+                                            <mi:MaterialIcon Kind="ShieldCheckOutline" Width="18" Height="18" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                            <TextBlock Text="Seguridad" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+
+                                    <!-- 6. Datos -->
+                                    <Button Command="{Binding SelectMainTabCommand}" CommandParameter="datos" Padding="12,10" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch">
+                                        <StackPanel Orientation="Horizontal" Spacing="10">
+                                            <mi:MaterialIcon Kind="DatabaseOutline" Width="18" Height="18" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                            <TextBlock Text="Datos" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+
+                                    <!-- 7. Alertas -->
+                                    <Button Command="{Binding SelectMainTabCommand}" CommandParameter="alertas" Padding="12,10" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch">
+                                        <StackPanel Orientation="Horizontal" Spacing="10">
+                                            <mi:MaterialIcon Kind="BellOutline" Width="18" Height="18" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                            <TextBlock Text="Alertas" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+
+                                    <!-- 8. Usuarios y Roles -->
+                                    <Button Command="{Binding SelectMainTabCommand}" CommandParameter="usuarios" Padding="12,10" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch">
+                                        <StackPanel Orientation="Horizontal" Spacing="10">
+                                            <mi:MaterialIcon Kind="AccountGroupOutline" Width="18" Height="18" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                            <TextBlock Text="Usuarios y Roles" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+
+                                    <!-- 9. Atajos -->
+                                    <Button Command="{Binding SelectMainTabCommand}" CommandParameter="atajos" Padding="12,10" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch">
+                                        <StackPanel Orientation="Horizontal" Spacing="10">
+                                            <mi:MaterialIcon Kind="KeyboardOutline" Width="18" Height="18" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                            <TextBlock Text="Atajos" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+
+                                    <!-- 10. Acerca de -->
+                                    <Button Command="{Binding SelectMainTabCommand}" CommandParameter="acercade" Padding="12,10" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch">
+                                        <StackPanel Orientation="Horizontal" Spacing="10">
+                                            <mi:MaterialIcon Kind="InformationOutline" Width="18" Height="18" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                            <TextBlock Text="Acerca de" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+                                </StackPanel>
+                            </ScrollViewer>
+                        </DockPanel>
+                    </Border>
+
+                    <!-- ─── ISOLATED MODULAR SUB-VIEW HOST ─── -->
+                    <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
+                        <Grid Margin="20">
+                            <settings:EmpresaSettingsView IsVisible="{Binding IsEmpresaTab}" />
+                            <settings:InterfazSettingsView IsVisible="{Binding IsInterfazTab}" />
+                            <settings:TicketSettingsView IsVisible="{Binding IsTicketTab}" />
+                            <settings:ConexionesSettingsView IsVisible="{Binding IsConexionesTab}" />
+                            <settings:SeguridadSettingsView IsVisible="{Binding IsSeguridadTab}" />
+                            <settings:DatosSettingsView IsVisible="{Binding IsDatosTab}" />
+                            <settings:AlertasSettingsView IsVisible="{Binding IsAlertasTab}" />
+                            <settings:UsuariosSettingsView IsVisible="{Binding IsUsuariosTab}" />
+                            <settings:AtajosSettingsView IsVisible="{Binding IsAtajosTab}" />
+                            <settings:AcercaDeSettingsView IsVisible="{Binding IsAcercaDeTab}" />
+                        </Grid>
+                    </ScrollViewer>
+                </Grid>
+            </DockPanel>
+        </Border>
+    </Grid>
+</UserControl>

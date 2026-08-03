@@ -1,0 +1,32 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NextVent.ViewModels"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             x:Class="NextVent.Views.LoginView"
+             x:DataType="vm:LoginViewModel">
+
+    <Grid Background="{DynamicResource BgPrimaryBrush}">
+        <Border Width="400" Padding="32" CornerRadius="12"
+                Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                HorizontalAlignment="Center" VerticalAlignment="Center">
+            <StackPanel Spacing="20">
+                <StackPanel HorizontalAlignment="Center" Spacing="8">
+                    <Border Width="56" Height="56" CornerRadius="8" Background="{DynamicResource AccentPrimaryBrush}" HorizontalAlignment="Center">
+                        <TextBlock Text="NV" FontSize="22" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <TextBlock Text="NextVent POS v3.0" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" />
+                    <TextBlock Text="Ingrese sus credenciales de cajero" FontSize="13" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" />
+                </StackPanel>
+
+                <StackPanel Spacing="12">
+                    <TextBox Text="{Binding Username, Mode=TwoWay}" Watermark="Usuario" Background="{DynamicResource BgTertiaryBrush}" Padding="12" />
+                    <TextBox Text="{Binding Password, Mode=TwoWay}" PasswordChar="•" Watermark="Contraseña" Background="{DynamicResource BgTertiaryBrush}" Padding="12" />
+                </StackPanel>
+
+                <Button Command="{Binding LoginCommand}" Classes="primary-action" Height="44" HorizontalAlignment="Stretch">
+                    <TextBlock Text="INICIAR SESIÓN" FontWeight="Bold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Button>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

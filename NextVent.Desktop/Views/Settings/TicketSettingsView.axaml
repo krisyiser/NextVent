@@ -1,0 +1,45 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NextVent.ViewModels"
+             x:Class="NextVent.Views.Settings.TicketSettingsView"
+             x:DataType="vm:SettingsViewModel">
+
+    <StackPanel Spacing="18">
+        <TextBlock Text="Configuración de Formato e Impresión de Ticket Térmico ESC/POS" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+
+        <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="*,*">
+            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,12" Spacing="6">
+                <TextBlock Text="Ancho del Papel" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <ComboBox ItemsSource="{Binding PaperWidths}" SelectedItem="{Binding SelectedPaperWidth, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="10,8" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,12" Spacing="6">
+                <TextBlock Text="Opciones de Impresión" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <StackPanel Orientation="Horizontal" Spacing="16">
+                    <ToggleSwitch IsChecked="{Binding AutoPrintTicketOnCheckout, Mode=TwoWay}" OffContent="Impresión Auto" OnContent="Impresión Auto" />
+                    <ToggleSwitch IsChecked="{Binding AutoCutPaper, Mode=TwoWay}" OffContent="Autocorte" OnContent="Autocorte" />
+                </StackPanel>
+            </StackPanel>
+
+            <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,12" Spacing="6">
+                <TextBlock Text="Encabezado Línea 1" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <TextBox Text="{Binding TicketHeaderLine1, Mode=TwoWay}" Padding="10,8" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,12" Spacing="6">
+                <TextBlock Text="Encabezado Línea 2" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <TextBox Text="{Binding TicketHeaderLine2, Mode=TwoWay}" Padding="10,8" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,8,0" Spacing="6">
+                <TextBlock Text="Pie de Página Línea 1" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <TextBox Text="{Binding TicketFooterLine1, Mode=TwoWay}" Padding="10,8" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="2" Grid.Column="1" Margin="8,0,0,0" Spacing="6">
+                <TextBlock Text="Pie de Página Línea 2" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <TextBox Text="{Binding TicketFooterLine2, Mode=TwoWay}" Padding="10,8" />
+            </StackPanel>
+        </Grid>
+    </StackPanel>
+</UserControl>

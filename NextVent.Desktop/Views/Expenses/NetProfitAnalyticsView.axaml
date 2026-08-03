@@ -1,0 +1,44 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NextVent.ViewModels"
+             x:Class="NextVent.Views.Expenses.NetProfitAnalyticsView"
+             x:DataType="vm:ExpensesViewModel">
+
+    <!-- Financial Metrics Cards (Ventas, Costos, Utilidad Bruta, Gastos, UTILIDAD NETA) -->
+    <UniformGrid Columns="5">
+        <Border Margin="0,0,6,0" Padding="12" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
+            <StackPanel Spacing="4">
+                <TextBlock Text="Ventas Totales" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" />
+                <TextBlock Text="{Binding TotalRevenue, StringFormat='${0:N2}'}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+            </StackPanel>
+        </Border>
+
+        <Border Margin="3,0" Padding="12" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
+            <StackPanel Spacing="4">
+                <TextBlock Text="Costo de Ventas" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" />
+                <TextBlock Text="{Binding TotalCostOfGoods, StringFormat='${0:N2}'}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+            </StackPanel>
+        </Border>
+
+        <Border Margin="3,0" Padding="12" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
+            <StackPanel Spacing="4">
+                <TextBlock Text="Utilidad Bruta" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" />
+                <TextBlock Text="{Binding GrossProfit, StringFormat='${0:N2}'}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+            </StackPanel>
+        </Border>
+
+        <Border Margin="3,0" Padding="12" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
+            <StackPanel Spacing="4">
+                <TextBlock Text="Gastos Operativos" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" />
+                <TextBlock Text="{Binding TotalExpenses, StringFormat='${0:N2}'}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource AccentDangerBrush}" />
+            </StackPanel>
+        </Border>
+
+        <Border Margin="6,0,0,0" Padding="12" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource AccentSuccessBrush}" BorderThickness="2" CornerRadius="{DynamicResource AppCornerRadius}">
+            <StackPanel Spacing="4">
+                <TextBlock Text="UTILIDAD NETA REAL" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentSuccessBrush}" />
+                <TextBlock Text="{Binding NetProfit, StringFormat='${0:N2}'}" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource AccentSuccessBrush}" />
+            </StackPanel>
+        </Border>
+    </UniformGrid>
+</UserControl>

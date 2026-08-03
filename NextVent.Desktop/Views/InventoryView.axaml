@@ -1,0 +1,89 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NextVent.ViewModels"
+             xmlns:dto="using:NextVent.Data.Dtos"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             x:Class="NextVent.Views.InventoryView"
+             x:DataType="vm:InventoryViewModel">
+
+    <Grid RowDefinitions="Auto,Auto,*" Margin="16">
+
+        <!-- ═══ TOP FUNCTION BANNER BAR ═══ -->
+        <Border Grid.Row="0" Margin="0,0,0,16" Padding="16,12"
+                Background="{DynamicResource BgSecondaryBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8">
+            <Grid ColumnDefinitions="Auto,*">
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <Border Width="36" Height="36" CornerRadius="6" Background="{DynamicResource AccentPrimaryBrush}">
+                        <mi:MaterialIcon Kind="PackageVariant" Width="22" Height="22" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Catálogo e Inventario General" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        <TextBlock Text="Control de Stock, Precios y Promedio Ponderado" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Action Buttons Header (WrapPanel avoids overlapping) -->
+                <WrapPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button Command="{Binding GenerateAutoPurchaseOrdersCommand}" Margin="0,2,6,2" Padding="10,6" CornerRadius="6" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource AccentWarningBrush}" BorderThickness="1" ToolTip.Tip="Generar borradores de orden de compra en Compras para productos agotados">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <mi:MaterialIcon Kind="TruckFast" Width="16" Height="16" Foreground="{DynamicResource AccentWarningBrush}" />
+                            <TextBlock Text="AUTO-REABASTECIMIENTO" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentWarningBrush}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <Button Command="{Binding ToggleLowStockFilterCommand}" Margin="0,2,6,2" Padding="10,6" CornerRadius="6" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource AccentDangerBrush}" BorderThickness="1">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <mi:MaterialIcon Kind="AlertCircleOutline" Width="16" Height="16" Foreground="{DynamicResource AccentDangerBrush}" />
+                            <TextBlock Text="STOCK MÍNIMO" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentDangerBrush}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <Button Command="{Binding ImportCsvCatalogCommand}" Margin="0,2,6,2" Padding="10,6" CornerRadius="6" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <mi:MaterialIcon Kind="FileImport" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                            <TextBlock Text="IMPORTAR CSV" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <Button Command="{Binding OpenAddProductDialogCommand}" Classes="primary-action" Margin="0,2,0,2" Padding="12,6">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <mi:MaterialIcon Kind="Plus" Width="16" Height="16" />
+                            <TextBlock Text="+ NUEVO PRODUCTO" FontWeight="Bold" FontSize="12" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </WrapPanel>
+            </Grid>
+        </Border>
+
+        <!-- Search Bar -->
+        <Border Grid.Row="1" Margin="0,0,0,16" Padding="12,8"
+                Background="{DynamicResource BgSecondaryBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8">
+            <Grid ColumnDefinitions="*,Auto">
+                <Border CornerRadius="4" Padding="12,6"
+                        Background="{DynamicResource BgTertiaryBrush}"
+                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                    <Grid ColumnDefinitions="Auto,*">
+                        <mi:MaterialIcon Kind="Magnify" Width="18" Height="18" Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                        <TextBox Grid.Column="1" Text="{Binding SearchQuery, Mode=TwoWay}" Watermark="Buscar producto por SKU, código de barras o nombre..." Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="13" VerticalAlignment="Center" />
+                    </Grid>
+                </Border>
+            </Grid>
+        </Border>
+
+        <!-- Products DataGrid -->
+        <Border Grid.Row="2" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="1">
+            <DataGrid ItemsSource="{Binding FilteredProducts}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Código / SKU" Binding="{Binding Barcode}" Width="1.5*" />
+                    <DataGridTextColumn Header="Descripción" Binding="{Binding Name}" Width="3*" />
+                    <DataGridTextColumn Header="Categoría" Binding="{Binding Category}" Width="1.5*" />
+                    <DataGridTextColumn Header="Precio Costo Ponderado ($)" Binding="{Binding CostPrice, StringFormat='${0:N2}'}" Width="1.8*" />
+                    <DataGridTextColumn Header="Precio Venta ($)" Binding="{Binding SalePrice, StringFormat='${0:N2}'}" Width="1.5*" />
+                    <DataGridTextColumn Header="Stock Actual" Binding="{Binding Stock, StringFormat='{}{0:N2}'}" Width="1.2*" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
+</UserControl>

@@ -1,0 +1,48 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NextVent.ViewModels"
+             xmlns:dto="using:NextVent.Data.Dtos"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             x:Class="NextVent.Views.Pos.ShiftNotesView"
+             x:DataType="vm:PosViewModel">
+
+    <!-- Shift Notes & Cashier Hand-off Broadcast Card -->
+    <Border Padding="12" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}" Margin="0,0,0,12">
+        <StackPanel Spacing="8">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <mi:MaterialIcon Kind="NotebookOutline" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                    <TextBlock Text="Notas &amp; Avisos de Turno entre Cajeros" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                </StackPanel>
+
+                <Button Grid.Column="1" Command="{Binding AddShiftNoteCommand}" Padding="6,2" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource AccentPrimaryBrush}" Foreground="White" FontSize="10" FontWeight="Bold">
+                    <TextBlock Text="+ NUEVA NOTA" VerticalAlignment="Center" />
+                </Button>
+            </Grid>
+
+            <!-- Input Box for New Note -->
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBox Text="{Binding NewShiftNoteText, Mode=TwoWay}" Watermark="Escribir nota de entrega de turno (Ej. 'Quedan $200 en monedas de $5')..." Padding="8,6" FontSize="11" />
+            </Grid>
+
+            <!-- Active Shift Notes ScrollViewer -->
+            <ScrollViewer Height="65" VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding ActiveShiftNotes}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="dto:ShiftNoteDto">
+                            <Border Margin="0,0,0,3" Padding="8,4" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                <Grid ColumnDefinitions="Auto,*,Auto">
+                                    <TextBlock Grid.Column="0" Text="{Binding CashierName, StringFormat='[{0}]'}" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,6,0" />
+                                    <TextBlock Grid.Column="1" Text="{Binding NoteText}" FontSize="11" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                    <Button Grid.Column="2" Command="{Binding $parent[UserControl].((vm:PosViewModel)DataContext).ResolveShiftNoteCommand}" CommandParameter="{Binding}" Background="Transparent" BorderThickness="0" Padding="2">
+                                        <mi:MaterialIcon Kind="CheckCircleOutline" Width="14" Height="14" Foreground="{DynamicResource AccentSuccessBrush}" />
+                                    </Button>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </StackPanel>
+    </Border>
+</UserControl>

@@ -1,0 +1,74 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NextVent.ViewModels"
+             xmlns:dto="using:NextVent.Data.Dtos"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             x:Class="NextVent.Views.Expenses.ExpenseEntryView"
+             x:DataType="vm:ExpensesViewModel">
+
+    <!-- Main Workspace (Left: Register Expense Form, Right: Expenses Table) -->
+    <Grid ColumnDefinitions="360,*">
+        <!-- Left: Add Expense Form -->
+        <Border Grid.Column="0" Margin="0,0,16,0" Padding="16"
+                Background="{DynamicResource BgSecondaryBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
+            <StackPanel Spacing="12">
+                <TextBlock Text="Registrar Salida / Gasto de Caja" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                <Border Height="1" Background="{DynamicResource BorderBrush}" />
+
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Categoría de Gasto" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <ComboBox ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="8" />
+                </StackPanel>
+
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Monto ($ MXN) *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <TextBox Text="{Binding ExpenseAmount, Mode=TwoWay}" Watermark="0.00" Padding="10,8" FontSize="15" FontWeight="Bold" />
+                </StackPanel>
+
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Forma de Pago" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <TextBox Text="{Binding PaymentMethod, Mode=TwoWay}" Watermark="Efectivo / Transferencia" Padding="10,8" />
+                </StackPanel>
+
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Concepto / Descripción" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <TextBox Text="{Binding ExpenseDescription, Mode=TwoWay}" Watermark="Ej. Pago de luz local comercial mes en curso" AcceptsReturn="True" Height="70" Padding="10,8" />
+                </StackPanel>
+
+                <Button Command="{Binding AddExpenseCommand}" Content="REGISTRAR GASTO" Padding="16,12" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource AccentDangerBrush}" Foreground="White" FontWeight="Bold" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Margin="0,8,0,0" />
+            </StackPanel>
+        </Border>
+
+        <!-- Right: Expenses History Table -->
+        <Border Grid.Column="1" Padding="16"
+                Background="{DynamicResource BgSecondaryBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
+            <DockPanel LastChildFill="True">
+                <TextBlock DockPanel.Dock="Top" Text="Historial de Gastos Registrados" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,12" />
+
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding Expenses}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="dto:ExpenseDto">
+                                <Border Margin="0,0,0,6" Padding="14,10" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                    <Grid ColumnDefinitions="140,*,120,Auto">
+                                        <StackPanel Grid.Column="0" Spacing="2">
+                                            <TextBlock Text="{Binding Category}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                            <TextBlock Text="{Binding Date}" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" />
+                                        </StackPanel>
+                                        <TextBlock Grid.Column="1" Text="{Binding Description}" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="8,0" />
+                                        <TextBlock Grid.Column="2" Text="{Binding Amount, StringFormat='-${0:N2}'}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource AccentDangerBrush}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="8,0" />
+                                        <Button Grid.Column="3" Command="{Binding $parent[UserControl].((vm:ExpensesViewModel)DataContext).DeleteExpenseCommand}" CommandParameter="{Binding}" Background="Transparent" BorderThickness="0" Padding="4">
+                                            <mi:MaterialIcon Kind="TrashCanOutline" Width="18" Height="18" Foreground="{DynamicResource AccentDangerBrush}" />
+                                        </Button>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+    </Grid>
+</UserControl>

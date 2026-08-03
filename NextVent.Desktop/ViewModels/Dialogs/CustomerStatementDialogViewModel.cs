@@ -1,0 +1,75 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Microsoft.EntityFrameworkCore;
+using NextVent.Data;
+using NextVent.Data.Entities;
+using Serilog;
+using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace NextVent.ViewModels.Dialogs;
+
+public record CustomerLedgerEntryDto(string Date, string Concept, double Charge, double Payment, double Balance);
+
+public partial class CustomerStatementDialogViewModel : ObservableObject
+{
+    private readonly AppDbContext _db;
+    private readonly string _customerId;
+
+    [ObservableProperty] private string _customerName = string.Empty;
+    [ObservableProperty] private string _customerRfc = string.Empty;
+    [ObservableProperty] private double _currentDebt;
+
+    public ObservableCollection<CustomerLedgerEntryDto> LedgerEntries { get; } = [];
+
+    public event Action? RequestClose;
+
+    public CustomerStatementDialogViewModel(AppDbContext db, string customerId, string customerName, string rfc, double currentDebt)
+    {
+        _db = db;
+        _customerId = customerId;
+        CustomerName = customerName;
+        CustomerRfc = rfc;
+        CurrentDebt = currentDebt;
+
+        _ = LoadLedgerAsync();
+    }
+
+    public async Task LoadLedgerAsync()
+    {
+        try
+        {
+            var sales = await _db.Sales
+                .AsNoTracking()
+                .Where(s => s.CustomerId == _customerId)
+                .ToListAsync();
+
+            var payments = await _db.CustomerPayments
+                .AsNoTracking()
+                .Where(p => p.CustomerId == _customerId)
+                .ToListAsync();
+
+            var list = sales.Select(s => new { Date = s.Date, Concept = $"Compra Ticket #{s.Id[..Math.Min(8, s.Id.Length)]}", Charge = s.Total, Payment = 0.0 })
+                .Concat(payments.Select(p => new { Date = p.Date, Concept = "Abono a Cuenta de Crédito", Charge = 0.0, Payment = p.Amount }))
+                .OrderBy(x => x.Date)
+                .ToList();
+
+            LedgerEntries.Clear();
+            double runningBalance = 0.0;
+            foreach (var item in list)
+            {
+                runningBalance += item.Charge - item.Payment;
+                LedgerEntries.Add(new CustomerLedgerEntryDto(item.Date, item.Concept, item.Charge, item.Payment, runningBalance));
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error loading customer statement ledger");
+        }
+    }
+
+    [RelayCommand]
+    private void Close() => RequestClose?.Invoke();
+}

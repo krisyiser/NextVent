@@ -1,0 +1,66 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace NextVent.Data.Entities;
+
+[Table("cashups")]
+public class CashupEntity
+{
+    [Key]
+    [Column("id")]
+    public string Id { get; set; } = string.Empty;
+
+    [Column("shift_id")]
+    public string? ShiftId { get; set; }
+
+    [Column("open_cash_amount")]
+    public double OpenCashAmount { get; set; }
+
+    [Column("closed_cash_amount")]
+    public double ClosedCashAmount { get; set; }
+
+    [Column("count_1000")]
+    public int Count1000 { get; set; }
+
+    [Column("count_500")]
+    public int Count500 { get; set; }
+
+    [Column("count_200")]
+    public int Count200 { get; set; }
+
+    [Column("count_100")]
+    public int Count100 { get; set; }
+
+    [Column("count_50")]
+    public int Count50 { get; set; }
+
+    [Column("count_20")]
+    public int Count20 { get; set; }
+
+    [Column("count_10")]
+    public int Count10 { get; set; }
+
+    [Column("count_5")]
+    public int Count5 { get; set; }
+
+    [Column("count_2")]
+    public int Count2 { get; set; }
+
+    [Column("count_1")]
+    public int Count1 { get; set; }
+
+    [Column("count_050")]
+    public int Count050 { get; set; }
+
+    [Column("theoretical_cash")]
+    public double TheoreticalCash { get; set; }
+
+    [Column("difference")]
+    public double Difference { get; set; }
+
+    [Column("notes")]
+    public string Notes { get; set; } = string.Empty;
+
+    [Column("timestamp")]
+    public string Timestamp { get; set; } = string.Empty;
+}

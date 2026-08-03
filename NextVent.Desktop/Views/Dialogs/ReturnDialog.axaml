@@ -1,0 +1,69 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NextVent.ViewModels.Dialogs"
+             xmlns:dto="using:NextVent.Data.Dtos"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             x:Class="NextVent.Views.Dialogs.ReturnDialog"
+             x:DataType="vm:ReturnDialogViewModel">
+
+    <Grid Background="#80000000">
+        <Border Width="500" HorizontalAlignment="Center" VerticalAlignment="Center"
+                Background="{DynamicResource BgSecondaryBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                CornerRadius="{DynamicResource AppCornerRadius}" Padding="20">
+            <StackPanel Spacing="14">
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <mi:MaterialIcon Kind="KeyboardReturn" Width="22" Height="22" Foreground="{DynamicResource AccentDangerBrush}" />
+                        <TextBlock Text="Devolución Parcial de Producto" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                    </StackPanel>
+                    <Button Grid.Column="1" Command="{Binding CancelCommand}" Width="28" Height="28" Padding="0" Background="Transparent" BorderThickness="0">
+                        <mi:MaterialIcon Kind="Close" Width="18" Height="18" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    </Button>
+                </Grid>
+
+                <Border Height="1" Background="{DynamicResource BorderBrush}" />
+
+                <Grid ColumnDefinitions="*,*">
+                    <TextBlock Text="{Binding SaleId, StringFormat='Folio Venta: {0}'}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                    <TextBlock Grid.Column="1" Text="{Binding SaleDate, StringFormat='Fecha: {0}'}" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Right" />
+                </Grid>
+
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Seleccionar Producto del Ticket *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <ComboBox ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="8">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="dto:SaleItemSnapshotDto">
+                                <TextBlock Text="{Binding Name, StringFormat='{}{0} (Comprado: {1:N2} pza @ ${2:N2})'}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+
+                <Grid RowDefinitions="Auto" ColumnDefinitions="*,*">
+                    <StackPanel Grid.Column="0" Margin="0,0,4,0" Spacing="4">
+                        <TextBlock Text="Cantidad a Devolver *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBox Text="{Binding ReturnQuantity, Mode=TwoWay}" Watermark="1.0" Padding="8" FontSize="14" FontWeight="Bold" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Margin="4,0,0,0" Spacing="4">
+                        <TextBlock Text="Método de Reembolso *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <ComboBox ItemsSource="{Binding RefundMethods}" SelectedItem="{Binding RefundMethod, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="8" />
+                    </StackPanel>
+                </Grid>
+
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Motivo de la Devolución *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <ComboBox ItemsSource="{Binding Reasons}" SelectedItem="{Binding ReturnReason, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="8" />
+                </StackPanel>
+
+                <TextBlock Text="{Binding FeedbackMessage}" FontSize="12" Foreground="{DynamicResource AccentDangerBrush}" HorizontalAlignment="Center" />
+
+                <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right" Margin="0,8,0,0">
+                    <Button Command="{Binding CancelCommand}" Content="Cancelar" Padding="16,8" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" />
+                    <Button Command="{Binding ProcessReturnCommand}" Content="PROCESAR DEVOLUCIÓN" Padding="16,8" CornerRadius="{DynamicResource AppCornerRadius}" Classes="danger-action" FontWeight="Bold" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

@@ -1,0 +1,55 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NextVent.ViewModels.Dialogs"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             x:Class="NextVent.Views.Dialogs.CustomerStatementDialog"
+             x:DataType="vm:CustomerStatementDialogViewModel">
+
+    <Border Width="680" Height="520" Padding="24" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12">
+        <DockPanel LastChildFill="True">
+            <!-- Header -->
+            <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="0,0,0,16">
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <mi:MaterialIcon Kind="FileDocument" Width="22" Height="22" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                        <TextBlock Text="Estado de Cuenta y Movimientos" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                    </StackPanel>
+                    <Button Grid.Column="1" Command="{Binding CloseCommand}" Background="Transparent" BorderThickness="0" Padding="4">
+                        <mi:MaterialIcon Kind="Close" Width="20" Height="20" Foreground="{DynamicResource TextMutedBrush}" />
+                    </Button>
+                </Grid>
+
+                <Grid ColumnDefinitions="*,Auto" Margin="0,8,0,0">
+                    <StackPanel Spacing="2">
+                        <TextBlock Text="{Binding CustomerName, StringFormat='Cliente: {0}'}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        <TextBlock Text="{Binding CustomerRfc, StringFormat='RFC: {0}'}" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
+                    </StackPanel>
+                    <StackPanel Grid.Column="1" HorizontalAlignment="Right" Spacing="2">
+                        <TextBlock Text="Saldo Deudor Actual" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Right" />
+                        <TextBlock Text="{Binding CurrentDebt, StringFormat='${0:N2}'}" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource AccentDangerBrush}" HorizontalAlignment="Right" />
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+
+            <!-- Bottom Action Buttons -->
+            <StackPanel DockPanel.Dock="Bottom" Margin="0,16,0,0">
+                <Button Command="{Binding CloseCommand}" Content="CERRAR ESTADO DE CUENTA" Padding="12"
+                        Background="{DynamicResource BgPrimaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                        Foreground="{DynamicResource TextPrimaryBrush}" CornerRadius="6" HorizontalContentAlignment="Center" />
+            </StackPanel>
+
+            <!-- Ledger Table -->
+            <Border Background="{DynamicResource BgPrimaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="1">
+                <DataGrid ItemsSource="{Binding LedgerEntries}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Fecha / Hora" Binding="{Binding Date}" Width="1.8*" />
+                        <DataGridTextColumn Header="Concepto / Folio" Binding="{Binding Concept}" Width="3*" />
+                        <DataGridTextColumn Header="Cargo ($)" Binding="{Binding Charge, StringFormat='${0:N2}'}" Width="1.5*" />
+                        <DataGridTextColumn Header="Abono ($)" Binding="{Binding Payment, StringFormat='${0:N2}'}" Width="1.5*" />
+                        <DataGridTextColumn Header="Saldo ($)" Binding="{Binding Balance, StringFormat='${0:N2}'}" Width="1.5*" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+        </DockPanel>
+    </Border>
+</UserControl>

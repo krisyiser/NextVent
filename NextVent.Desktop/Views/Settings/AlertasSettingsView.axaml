@@ -1,0 +1,11 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NextVent.ViewModels"
+             x:Class="NextVent.Views.Settings.AlertasSettingsView"
+             x:DataType="vm:SettingsViewModel">
+
+    <StackPanel Spacing="18">
+        <TextBlock Text="Configuración de Alertas &amp; Notificaciones" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+        <TextBlock Text="Sistema de alertas automáticas para inventario bajo y notificaciones de turno." FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" />
+    </StackPanel>
+</UserControl>

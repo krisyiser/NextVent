@@ -1,0 +1,32 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NextVent.ViewModels"
+             x:Class="NextVent.Views.Settings.ConexionesSettingsView"
+             x:DataType="vm:SettingsViewModel">
+
+    <StackPanel Spacing="18">
+        <TextBlock Text="Conexiones &amp; Hardware Periférico POS" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+
+        <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,*">
+            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,12" Spacing="6">
+                <TextBlock Text="Puerto Impresora Térmica" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <TextBox Text="{Binding PrinterPort, Mode=TwoWay}" Padding="10,8" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,12" Spacing="6">
+                <TextBlock Text="Modo Escáner Barcode" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <TextBox Text="{Binding BarcodeScannerMode, Mode=TwoWay}" Padding="10,8" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,0" Spacing="6">
+                <TextBlock Text="Puerto Báscula Digital RS-232" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <TextBox Text="{Binding ScalePort, Mode=TwoWay}" Padding="10,8" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,0" Spacing="6">
+                <TextBlock Text="Puerto Cajón Dinero RJ11" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <TextBox Text="{Binding CashDrawerPort, Mode=TwoWay}" Padding="10,8" />
+            </StackPanel>
+        </Grid>
+    </StackPanel>
+</UserControl>

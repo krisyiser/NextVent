@@ -1,0 +1,93 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mi="using:Material.Icons.Avalonia"
+        x:Class="NextVent.Views.ClientDisplayWindow"
+        Title="Pantalla de Cliente - NextVent POS"
+        Width="1024" Height="768"
+        WindowStartupLocation="CenterScreen"
+        x:CompileBindings="False"
+        Background="{DynamicResource BgPrimaryBrush}"
+        FontFamily="{DynamicResource AppFontFamily}">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+        <!-- Header -->
+        <Border Grid.Row="0" Background="{DynamicResource SidebarBgBrush}" Padding="24,16">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <Border Width="40" Height="40" CornerRadius="6" Background="{DynamicResource AccentPrimaryBrush}">
+                        <TextBlock Text="NV" FontSize="18" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="NextVent Store" FontSize="20" FontWeight="Bold" Foreground="White" />
+                        <TextBlock Text="Gracias por su preferencia" FontSize="12" Foreground="#93C5FD" />
+                    </StackPanel>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <TextBlock Text="SU COMPRA" FontSize="12" FontWeight="Bold" Foreground="#93C5FD" HorizontalAlignment="Right" />
+                    <TextBlock Text="{Binding TotalItemsText, FallbackValue='0 Productos'}" FontSize="16" FontWeight="Bold" Foreground="White" HorizontalAlignment="Right" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Main Display Content -->
+        <Grid Grid.Row="1" ColumnDefinitions="2*,*">
+            <!-- Left: Transaction Summary / Promotional Slide -->
+            <Border Grid.Column="0" Margin="16" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="24">
+                <Grid RowDefinitions="*,Auto">
+                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="16">
+                        <mi:MaterialIcon Kind="StorefrontOutline" Width="96" Height="96" Foreground="{DynamicResource AccentPrimaryBrush}" HorizontalAlignment="Center" />
+                        <TextBlock Text="¡Bienvenidos a NextVent POS!" FontSize="28" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" />
+                        <TextBlock Text="Promoción del día: 10% de descuento en pagos con Tarjeta / Transferencia" FontSize="16" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" />
+                    </StackPanel>
+
+                    <Border Grid.Row="1" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="6" Padding="16" Margin="0,16,0,0">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="Último Producto Escaneado:" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="1" Text="{Binding LastScannedItem, FallbackValue='Esperando escaneo...'}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+
+            <!-- Right: Live Total Panel -->
+            <Border Grid.Column="1" Margin="0,16,16,16" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="24">
+                <DockPanel LastChildFill="True">
+                    <StackPanel DockPanel.Dock="Bottom" Spacing="16">
+                        <Border Height="1" Background="{DynamicResource BorderBrush}" />
+
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="Subtotal:" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <TextBlock Grid.Column="1" Text="{Binding SubtotalText, FallbackValue='$0.00'}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        </Grid>
+
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="IVA (16%):" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <TextBlock Grid.Column="1" Text="{Binding TaxText, FallbackValue='$0.00'}" FontSize="14" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        </Grid>
+
+                        <Border Height="1" Background="{DynamicResource BorderBrush}" />
+
+                        <StackPanel Spacing="4" Margin="0,8,0,0">
+                            <TextBlock Text="TOTAL A PAGAR" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <TextBlock Text="{Binding TotalText, FallbackValue='$0.00'}" FontSize="36" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="RESUMEN" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBlock Text="Por favor verifique los artículos ingresados en la pantalla." FontSize="13" Foreground="{DynamicResource TextMutedBrush}" TextWrapping="Wrap" />
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+        </Grid>
+
+        <!-- Footer -->
+        <Border Grid.Row="2" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0" Padding="24,12">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="Atendido por: Caja 01 - Matutino" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="NextVent POS v3.0 Native" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" />
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

@@ -1,0 +1,67 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NextVent.ViewModels"
+             xmlns:dto="using:NextVent.Data.Dtos"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             x:Class="NextVent.Views.History.HistorySalesTableView"
+             x:DataType="vm:HistoryViewModel">
+
+    <!-- ═══ MAIN TRANSACTIONS TABLE ═══ -->
+    <Border Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}" Padding="16">
+        <DockPanel LastChildFill="True">
+            <TextBlock DockPanel.Dock="Top" Text="Registro Chronológico de Ventas Procesadas" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,12" />
+
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding Sales}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="dto:SaleDto">
+                            <Border Margin="0,0,0,8" Padding="14,10" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                <Grid ColumnDefinitions="140,160,*,120,Auto">
+                                    <StackPanel Grid.Column="0" Spacing="2">
+                                        <TextBlock Text="{Binding Id, StringFormat='Folio: {0}'}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding Date}" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center" Margin="8,0">
+                                        <TextBlock Text="{Binding PaymentMethod, StringFormat='Pago: {0}'}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                        <TextBlock Text="{Binding EstadoFiscal}" FontSize="10" Foreground="{DynamicResource AccentSuccessBrush}" />
+                                    </StackPanel>
+
+                                    <TextBlock Grid.Column="2" Text="{Binding Items.Count, StringFormat='{}{0} Productos'}" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="8,0" />
+
+                                    <TextBlock Grid.Column="3" Text="{Binding Total, StringFormat='${0:N2}'}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" HorizontalAlignment="Right" Margin="8,0" />
+
+                                    <StackPanel Grid.Column="4" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                        <Button Command="{Binding $parent[UserControl].((vm:HistoryViewModel)DataContext).OpenReturnDialogCommand}"
+                                                CommandParameter="{Binding}"
+                                                Padding="10,6" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource AccentWarningBrush}" BorderThickness="1" ToolTip.Tip="Devolver producto individual del ticket">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <mi:MaterialIcon Kind="KeyboardReturn" Width="16" Height="16" Foreground="{DynamicResource AccentWarningBrush}" />
+                                                <TextBlock Text="DEVOLUCIÓN PARCIAL" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentWarningBrush}" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Button>
+
+                                        <Button Command="{Binding $parent[UserControl].((vm:HistoryViewModel)DataContext).RePrintTicketCommand}"
+                                                CommandParameter="{Binding}"
+                                                Padding="12,6" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="1">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <mi:MaterialIcon Kind="PrinterOutline" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                                <TextBlock Text="REIMPRIMIR TICKET" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Button>
+
+                                        <Button Command="{Binding $parent[UserControl].((vm:HistoryViewModel)DataContext).CancelSaleCommand}"
+                                                CommandParameter="{Binding}"
+                                                Padding="8,6" CornerRadius="{DynamicResource AppCornerRadius}" Background="Transparent" BorderBrush="{DynamicResource AccentDangerBrush}" BorderThickness="1">
+                                            <mi:MaterialIcon Kind="Cancel" Width="16" Height="16" Foreground="{DynamicResource AccentDangerBrush}" />
+                                        </Button>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </DockPanel>
+    </Border>
+</UserControl>

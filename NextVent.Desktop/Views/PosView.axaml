@@ -1,0 +1,20 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NextVent.ViewModels"
+             xmlns:pos="using:NextVent.Views.Pos"
+             x:Class="NextVent.Views.PosView"
+             x:DataType="vm:PosViewModel">
+
+    <Grid RowDefinitions="Auto,*" Margin="16">
+
+        <!-- ═══ 1. TOP FUNCTION BANNER BAR ═══ -->
+        <pos:PosHeaderBarView Grid.Row="0" Margin="0,0,0,16" />
+
+        <!-- ═══ 2. MAIN POS WORKSPACE WITH DYNAMIC CART POSITION (LEFT / RIGHT) ═══ -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,Auto">
+            <pos:PosProductCatalogView Grid.Column="{Binding ProductsGridColumn}" Margin="{Binding ProductsMargin}" />
+            <pos:PosCartTicketView Grid.Column="{Binding CartGridColumn}" />
+        </Grid>
+
+    </Grid>
+</UserControl>

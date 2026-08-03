@@ -1,0 +1,139 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NextVent.ViewModels.Dialogs"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             x:Class="NextVent.Views.Dialogs.CashupDialog"
+             x:DataType="vm:CashupDialogViewModel">
+
+    <Border Width="600" Padding="24" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12">
+        <DockPanel LastChildFill="True">
+            <!-- Header -->
+            <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="0,0,0,16">
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <mi:MaterialIcon Kind="CashMultiple" Width="22" Height="22" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                        <TextBlock Text="Arqueo y Cierre Físico de Caja" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                    </StackPanel>
+                    <Button Grid.Column="1" Command="{Binding CancelCommand}" Background="Transparent" BorderThickness="0" Padding="4">
+                        <mi:MaterialIcon Kind="Close" Width="20" Height="20" Foreground="{DynamicResource TextMutedBrush}" />
+                    </Button>
+                </Grid>
+                <TextBlock Text="Ingrese el conteo de billetes y monedas en cajón para calcular el arqueo de caja del turno." FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
+            </StackPanel>
+
+            <!-- Bottom Action Buttons -->
+            <StackPanel DockPanel.Dock="Bottom" Margin="0,16,0,0" Spacing="10">
+                <TextBlock Text="{Binding FeedbackMessage}" Foreground="{DynamicResource AccentSuccessBrush}" FontSize="12" FontWeight="Bold" HorizontalAlignment="Center" />
+
+                <Grid ColumnDefinitions="*,*">
+                    <Button Grid.Column="0" Command="{Binding CancelCommand}" Content="Cancelar (Esc)" Margin="0,0,6,0" Padding="12"
+                            Background="{DynamicResource BgPrimaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                            Foreground="{DynamicResource TextPrimaryBrush}" CornerRadius="6" HorizontalContentAlignment="Center" />
+
+                    <Button Grid.Column="1" Command="{Binding SaveCashupCommand}" Content="GUARDAR ARQUEO Y CORTE" Margin="6,0,0,0" Padding="12"
+                            Classes="success-action" FontWeight="Bold" CornerRadius="6" HorizontalContentAlignment="Center" />
+                </Grid>
+            </StackPanel>
+
+            <!-- Middle Denominations Matrix -->
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="14">
+                    <!-- Summary Comparison Banner -->
+                    <Border Background="{DynamicResource BgPrimaryBrush}" Padding="14" CornerRadius="6" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                        <Grid ColumnDefinitions="*,*,*">
+                            <StackPanel Grid.Column="0" Spacing="2">
+                                <TextBlock Text="Fondo Inicial:" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
+                                <TextBlock Text="{Binding OpenCashAmount, StringFormat='${0:N2}'}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Spacing="2">
+                                <TextBlock Text="Conteo Físico Total:" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
+                                <TextBlock Text="{Binding TotalPhysicalCash, StringFormat='${0:N2}'}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="2" Spacing="2">
+                                <TextBlock Text="Diferencia Arqueo:" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
+                                <TextBlock Text="{Binding DifferenceAmount, StringFormat='${0:N2}'}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource AccentSuccessBrush}" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Denomination Grid -->
+                    <TextBlock Text="Desglose Físico por Denominación" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+
+                    <UniformGrid Columns="2">
+                        <!-- Billetes -->
+                        <StackPanel Margin="4" Spacing="8">
+                            <TextBlock Text="💵 Billetes" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+
+                            <Grid ColumnDefinitions="80,*">
+                                <TextBlock Text="$1,000" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                <TextBox Grid.Column="1" Text="{Binding Count1000, Mode=TwoWay}" Watermark="Cant." Padding="4" />
+                            </Grid>
+
+                            <Grid ColumnDefinitions="80,*">
+                                <TextBlock Text="$500" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                <TextBox Grid.Column="1" Text="{Binding Count500, Mode=TwoWay}" Watermark="Cant." Padding="4" />
+                            </Grid>
+
+                            <Grid ColumnDefinitions="80,*">
+                                <TextBlock Text="$200" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                <TextBox Grid.Column="1" Text="{Binding Count200, Mode=TwoWay}" Watermark="Cant." Padding="4" />
+                            </Grid>
+
+                            <Grid ColumnDefinitions="80,*">
+                                <TextBlock Text="$100" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                <TextBox Grid.Column="1" Text="{Binding Count100, Mode=TwoWay}" Watermark="Cant." Padding="4" />
+                            </Grid>
+
+                            <Grid ColumnDefinitions="80,*">
+                                <TextBlock Text="$50" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                <TextBox Grid.Column="1" Text="{Binding Count50, Mode=TwoWay}" Watermark="Cant." Padding="4" />
+                            </Grid>
+
+                            <Grid ColumnDefinitions="80,*">
+                                <TextBlock Text="$20" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                <TextBox Grid.Column="1" Text="{Binding Count20, Mode=TwoWay}" Watermark="Cant." Padding="4" />
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Monedas -->
+                        <StackPanel Margin="4" Spacing="8">
+                            <TextBlock Text="🪙 Monedas" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource AccentWarningBrush}" />
+
+                            <Grid ColumnDefinitions="80,*">
+                                <TextBlock Text="$10" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                <TextBox Grid.Column="1" Text="{Binding Count10, Mode=TwoWay}" Watermark="Cant." Padding="4" />
+                            </Grid>
+
+                            <Grid ColumnDefinitions="80,*">
+                                <TextBlock Text="$5" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                <TextBox Grid.Column="1" Text="{Binding Count5, Mode=TwoWay}" Watermark="Cant." Padding="4" />
+                            </Grid>
+
+                            <Grid ColumnDefinitions="80,*">
+                                <TextBlock Text="$2" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                <TextBox Grid.Column="1" Text="{Binding Count2, Mode=TwoWay}" Watermark="Cant." Padding="4" />
+                            </Grid>
+
+                            <Grid ColumnDefinitions="80,*">
+                                <TextBlock Text="$1" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                <TextBox Grid.Column="1" Text="{Binding Count1, Mode=TwoWay}" Watermark="Cant." Padding="4" />
+                            </Grid>
+
+                            <Grid ColumnDefinitions="80,*">
+                                <TextBlock Text="$0.50" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                <TextBox Grid.Column="1" Text="{Binding Count050, Mode=TwoWay}" Watermark="Cant." Padding="4" />
+                            </Grid>
+                        </StackPanel>
+                    </UniformGrid>
+
+                    <StackPanel Spacing="4" Margin="0,8,0,0">
+                        <TextBlock Text="Notas / Observaciones de Cierre" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBox Text="{Binding Notes, Mode=TwoWay}" Watermark="Observaciones del corte de caja..." Height="60" AcceptsReturn="True" TextWrapping="Wrap" Padding="8" />
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+        </DockPanel>
+    </Border>
+</UserControl>

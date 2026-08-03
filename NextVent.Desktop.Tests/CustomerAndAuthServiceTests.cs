@@ -1,0 +1,118 @@
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
+using NextVent.Core.Helpers;
+using NextVent.Data;
+using NextVent.Data.Dtos;
+using NextVent.Services.Auth;
+using NextVent.Services.Implementations;
+using Xunit;
+
+namespace NextVent.Desktop.Tests;
+
+public sealed class CustomerAndAuthServiceTests : IDisposable
+{
+    private readonly SqliteConnection _connection;
+    private readonly AppDbContext _context;
+    private readonly CustomerService _customerService;
+    private readonly UserService _userService;
+    private readonly AuthService _authService;
+
+    public CustomerAndAuthServiceTests()
+    {
+        _connection = new SqliteConnection("DataSource=:memory:");
+        _connection.Open();
+
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseSqlite(_connection)
+            .Options;
+
+        _context = new AppDbContext(options);
+        _context.Database.EnsureCreated();
+
+        _customerService = new CustomerService(_context);
+        _userService = new UserService(_context);
+        _authService = new AuthService(_userService);
+    }
+
+    [Fact]
+    public async Task AddPaymentAsync_ShouldReduceDebtAtomically()
+    {
+        // Customer initial debt = 500
+        var customer = new CustomerDto("CUST-PAY-1", "Carlos M.", "5553334444", 500.0, 10.0);
+        await _customerService.AddAsync(customer);
+
+        // Make payment of 200
+        var payment = new CustomerPaymentDto("PAY-1", "CUST-PAY-1", DateTimeOffset.UtcNow.ToString("o"), 200.0);
+        await _customerService.AddPaymentAsync(payment);
+
+        // Verify remaining debt = 300
+        var updated = await _customerService.GetByIdAsync("CUST-PAY-1");
+        Assert.NotNull(updated);
+        Assert.Equal(300.0, updated.Debt);
+
+        var payments = await _customerService.GetPaymentsAsync("CUST-PAY-1");
+        Assert.Single(payments);
+        Assert.Equal(200.0, payments[0].Amount);
+    }
+
+    [Fact]
+    public async Task AuthService_Login_ShouldAuthenticateValidUserWithBCrypt()
+    {
+        var passwordHash = CryptoHelper.HashSecret("securePass123");
+        await _userService.SaveAsync("USR-001", "AdminUser", "ADMIN", passwordHash, null);
+
+        // Valid Login
+        var success = await _authService.LoginAsync("AdminUser", "securePass123");
+        Assert.True(success);
+        Assert.True(_authService.IsAuthenticated);
+        Assert.Equal("ADMIN", _authService.CurrentUser?.Rol);
+
+        // Invalid Login
+        var invalid = await _authService.LoginAsync("AdminUser", "wrongPass");
+        Assert.False(invalid);
+    }
+
+    [Fact]
+    public async Task AddPaymentAsync_ShouldThrowForZeroOrNegativeAmount()
+    {
+        var payment = new CustomerPaymentDto("PAY-INV", "CUST-PAY-1", DateTimeOffset.UtcNow.ToString("o"), 0.0);
+        await Assert.ThrowsAsync<ArgumentException>(() => _customerService.AddPaymentAsync(payment));
+    }
+
+    [Fact]
+    public async Task AuthService_Login_ShouldFailForInactiveUser()
+    {
+        var passwordHash = CryptoHelper.HashSecret("pass123");
+        await _userService.SaveAsync("USR-INACTIVE", "DisabledUser", "CAJERO", passwordHash, null);
+
+        // Deactivate user in DB
+        var userEntity = await _context.Users.FindAsync("USR-INACTIVE");
+        if (userEntity != null)
+        {
+            userEntity.Estatus = 0;
+            await _context.SaveChangesAsync();
+        }
+
+        var result = await _authService.LoginAsync("DisabledUser", "pass123");
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task AuthService_VerifyManagerPin_ShouldReturnTrueForValidPin()
+    {
+        var pinHash = CryptoHelper.HashSecret("9999");
+        await _userService.SaveAsync("USR-MGR", "Manager", "GERENTE", null, pinHash);
+
+        var valid = await _authService.VerifyManagerPinAsync("USR-MGR", "9999");
+        Assert.True(valid);
+
+        var invalid = await _authService.VerifyManagerPinAsync("USR-MGR", "0000");
+        Assert.False(invalid);
+    }
+
+    public void Dispose()
+    {
+        _context.Dispose();
+        _connection.Dispose();
+    }
+}

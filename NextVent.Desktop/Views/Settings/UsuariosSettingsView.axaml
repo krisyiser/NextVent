@@ -1,0 +1,64 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NextVent.ViewModels"
+             xmlns:dto="using:NextVent.Data.Dtos"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             x:Class="NextVent.Views.Settings.UsuariosSettingsView"
+             x:DataType="vm:SettingsViewModel">
+
+    <StackPanel Spacing="18">
+        <TextBlock Text="Administración de Usuarios &amp; Cajeros" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+
+        <!-- Register New User Form -->
+        <Border Padding="16" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+            <StackPanel Spacing="12">
+                <TextBlock Text="Registrar Nuevo Cajero / Usuario" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+
+                <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,*">
+                    <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,10" Spacing="4">
+                        <TextBlock Text="Nombre Completo" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBox Text="{Binding NewFullName, Mode=TwoWay}" Padding="8,6" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,10" Spacing="4">
+                        <TextBlock Text="Usuario de Acceso" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBox Text="{Binding NewUsername, Mode=TwoWay}" Padding="8,6" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,0" Spacing="4">
+                        <TextBlock Text="Rol de Sistema" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBox Text="{Binding NewRole, Mode=TwoWay}" Padding="8,6" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,0" Spacing="4">
+                        <TextBlock Text="PIN de Acceso (4 Dígitos)" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBox Text="{Binding NewPin, Mode=TwoWay}" PasswordChar="*" Padding="8,6" />
+                    </StackPanel>
+                </Grid>
+
+                <Button Command="{Binding SaveUserCommand}" Classes="primary-action" HorizontalAlignment="Right" Padding="14,8" CornerRadius="{DynamicResource AppCornerRadius}">
+                    <TextBlock Text="GUARDAR USUARIO" FontWeight="Bold" />
+                </Button>
+            </StackPanel>
+        </Border>
+
+        <!-- Registered Users Table -->
+        <TextBlock Text="Usuarios Registrados" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,8,0,0" />
+        <ItemsControl ItemsSource="{Binding Users}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="dto:UserDto">
+                    <Border Padding="12,8" Margin="0,0,0,6" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                        <Grid ColumnDefinitions="*,*,*,Auto">
+                            <TextBlock Grid.Column="0" Text="{Binding FullName}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="1" Text="{Binding Role}" FontSize="12" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
+                            <TextBlock Grid.Column="2" Text="{Binding Username, StringFormat='Usuario: {0}'}" FontSize="12" Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" />
+                            <Button Grid.Column="3" Command="{Binding $parent[UserControl].((vm:SettingsViewModel)DataContext).DeleteUserCommand}" CommandParameter="{Binding}" Padding="8,4" Background="Transparent" BorderThickness="0">
+                                <mi:MaterialIcon Kind="TrashCanOutline" Width="18" Height="18" Foreground="{DynamicResource AccentDangerBrush}" />
+                            </Button>
+                        </Grid>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </StackPanel>
+</UserControl>

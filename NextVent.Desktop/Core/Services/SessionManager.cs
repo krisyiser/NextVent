@@ -1,0 +1,54 @@
+using System;
+using NextVent.Core.Models;
+
+namespace NextVent.Core.Services;
+
+public interface ISessionManager
+{
+    UserModel? CurrentCashier { get; }
+    bool IsTerminalLocked { get; }
+    event Action<UserModel>? CashierChanged;
+    event Action<bool>? LockStateChanged;
+
+    void SwitchCashier(UserModel newUser);
+    void LockTerminal();
+    void UnlockTerminal();
+}
+
+public class SessionManager : ISessionManager
+{
+    public UserModel? CurrentCashier { get; private set; }
+    public bool IsTerminalLocked { get; private set; }
+
+    public event Action<UserModel>? CashierChanged;
+    public event Action<bool>? LockStateChanged;
+
+    public SessionManager()
+    {
+        CurrentCashier = new UserModel
+        {
+            FullName = "Alexa S. (Caja 01)",
+            Username = "alexa",
+            Role = SystemRole.CAJERO,
+            Pin4Digits = "4321"
+        };
+    }
+
+    public void SwitchCashier(UserModel newUser)
+    {
+        CurrentCashier = newUser;
+        CashierChanged?.Invoke(newUser);
+    }
+
+    public void LockTerminal()
+    {
+        IsTerminalLocked = true;
+        LockStateChanged?.Invoke(true);
+    }
+
+    public void UnlockTerminal()
+    {
+        IsTerminalLocked = false;
+        LockStateChanged?.Invoke(false);
+    }
+}

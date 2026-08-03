@@ -1,0 +1,53 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NextVent.ViewModels.Dialogs"
+             x:Class="NextVent.Views.Dialogs.PromotionDialog"
+             x:DataType="vm:PromotionDialogViewModel">
+
+    <Border Width="480" Padding="24" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8">
+        <DockPanel LastChildFill="True">
+            <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="0,0,0,20">
+                <TextBlock Text="Nueva Promoción / Oferta" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                <TextBlock Text="Defina el título, tipo de descuento y vigencia de la oferta." FontSize="12" Foreground="{DynamicResource TextMutedBrush}" />
+            </StackPanel>
+
+            <StackPanel DockPanel.Dock="Bottom" Margin="0,20,0,0" Spacing="12">
+                <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource AccentDangerBrush}" FontSize="13" TextWrapping="Wrap" HorizontalAlignment="Center" />
+
+                <Grid ColumnDefinitions="*,*">
+                    <Button Grid.Column="0" Command="{Binding CancelCommand}" Content="Cancelar" Margin="0,0,6,0" Padding="12"
+                            Background="{DynamicResource BgPrimaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                            Foreground="{DynamicResource TextPrimaryBrush}" CornerRadius="6" HorizontalContentAlignment="Center" />
+
+                    <Button Grid.Column="1" Command="{Binding SaveCommand}" Content="Guardar Oferta" Margin="6,0,0,0" Padding="12"
+                            Classes="primary-action" FontWeight="Bold" CornerRadius="6" HorizontalContentAlignment="Center" />
+                </Grid>
+            </StackPanel>
+
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <StackPanel Spacing="14">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Nombre de la Promoción *" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBox Text="{Binding Name, Mode=TwoWay}" Watermark="Ej. 2x1 en Bebidas o 15% Descuento" Background="{DynamicResource BgTertiaryBrush}" Padding="10" />
+                    </StackPanel>
+
+                    <Grid ColumnDefinitions="*,*">
+                        <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,6,0">
+                            <TextBlock Text="Tipo de Descuento" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <ComboBox SelectedIndex="0" HorizontalAlignment="Stretch" Padding="10" Background="{DynamicResource BgTertiaryBrush}">
+                                <ComboBoxItem Content="Porcentaje (%)" />
+                                <ComboBoxItem Content="Monto Fijo ($)" />
+                                <ComboBoxItem Content="2x1 Especial" />
+                            </ComboBox>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Spacing="4" Margin="6,0,0,0">
+                            <TextBlock Text="Valor Descuento *" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <TextBox Text="{Binding DiscountValue, Mode=TwoWay}" Watermark="Ej. 15.0" Background="{DynamicResource BgTertiaryBrush}" Padding="10" />
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </ScrollViewer>
+        </DockPanel>
+    </Border>
+</UserControl>

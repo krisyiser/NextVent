@@ -1,0 +1,52 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NextVent.ViewModels"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             xmlns:history="using:NextVent.Views.History"
+             x:Class="NextVent.Views.HistoryView"
+             x:DataType="vm:HistoryViewModel">
+
+    <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="16">
+
+        <!-- ═══ 1. TOP FUNCTION BANNER BAR ═══ -->
+        <Border Grid.Row="0" Margin="0,0,0,16" Padding="16,12"
+                Background="{DynamicResource BgSecondaryBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
+            <Grid ColumnDefinitions="Auto,*">
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center" Margin="0,0,16,0">
+                    <Border Width="36" Height="36" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource AccentPrimaryBrush}">
+                        <mi:MaterialIcon Kind="History" Width="22" Height="22" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Auditoría de Ventas, Hora Pico y Corte Z" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        <TextBlock Text="Historial Chronológico, Desglose por Hora e Impresión de Tickets" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Status Feedback & Action Buttons Header -->
+                <WrapPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <TextBlock Text="{Binding FeedbackMessage}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource AccentSuccessBrush}" VerticalAlignment="Center" Margin="0,4,12,4" />
+
+                    <!-- Sprint J: Cashup Audit Button -->
+                    <Button Command="{Binding PerformCashCutoffCommand}" Margin="0,2,0,2" Padding="12,6" CornerRadius="{DynamicResource AppCornerRadius}"
+                            Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource AccentWarningBrush}" BorderThickness="2" ToolTip.Tip="Abrir matriz de arqueo físico por billetes y monedas">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <mi:MaterialIcon Kind="CashMultiple" Width="16" Height="16" Foreground="{DynamicResource AccentWarningBrush}" />
+                            <TextBlock Text="CORTE DE CAJA (CASHUP)" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentWarningBrush}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </WrapPanel>
+            </Grid>
+        </Border>
+
+        <!-- ═══ 2. HOURLY SALES & PEAK HOUR CARD ═══ -->
+        <history:HistoryHourlyReportView Grid.Row="1" Margin="0,0,0,16" />
+
+        <!-- ═══ 3. CASHIER PERFORMANCE & COMMISSIONS CARD ═══ -->
+        <history:CashierPerformanceView Grid.Row="2" Margin="0,0,0,16" />
+
+        <!-- ═══ 4. MAIN TRANSACTIONS TABLE ═══ -->
+        <history:HistorySalesTableView Grid.Row="3" />
+
+    </Grid>
+</UserControl>

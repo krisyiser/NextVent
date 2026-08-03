@@ -1,0 +1,36 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NextVent.ViewModels"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             xmlns:suppliers="using:NextVent.Views.Suppliers"
+             x:Class="NextVent.Views.SuppliersView"
+             x:DataType="vm:SuppliersViewModel">
+
+    <Grid RowDefinitions="Auto,*" Margin="16">
+
+        <!-- Header Banner -->
+        <Border Grid.Row="0" Margin="0,0,0,16" Padding="16,12"
+                Background="{DynamicResource BgSecondaryBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                    <Border Width="36" Height="36" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource AccentPrimaryBrush}">
+                        <mi:MaterialIcon Kind="TruckDelivery" Width="22" Height="22" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Gestión de Proveedores y Órdenes de Compra" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        <TextBlock Text="Entradas de Mercancía y Reabastecimiento de Inventario" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
+                    </StackPanel>
+                </StackPanel>
+
+                <TextBlock Grid.Column="1" Text="{Binding FeedbackMessage}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource AccentSuccessBrush}" VerticalAlignment="Center" />
+            </Grid>
+        </Border>
+
+        <!-- Main Body (Left: Suppliers Directory, Right: New Purchase Order) -->
+        <Grid Grid.Row="1" ColumnDefinitions="*,*">
+            <suppliers:SuppliersDirectoryView Grid.Column="0" Margin="0,0,8,0" />
+            <suppliers:PurchaseOrderView Grid.Column="1" Margin="8,0,0,0" />
+        </Grid>
+    </Grid>
+</UserControl>

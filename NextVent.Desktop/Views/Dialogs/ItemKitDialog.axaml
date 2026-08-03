@@ -1,0 +1,90 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NextVent.ViewModels.Dialogs"
+             xmlns:dto="using:NextVent.Data.Dtos"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             x:Class="NextVent.Views.Dialogs.ItemKitDialog"
+             x:DataType="vm:ItemKitDialogViewModel">
+
+    <Grid Background="#80000000">
+        <Border Width="560" HorizontalAlignment="Center" VerticalAlignment="Center"
+                Background="{DynamicResource BgSecondaryBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                CornerRadius="{DynamicResource AppCornerRadius}" Padding="20">
+            <StackPanel Spacing="14">
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <mi:MaterialIcon Kind="PackageVariantClosed" Width="22" Height="22" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                        <TextBlock Text="Armar Nuevo Combo / Paquete (Item Kit)" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                    </StackPanel>
+                    <Button Grid.Column="1" Command="{Binding CancelCommand}" Width="28" Height="28" Padding="0" Background="Transparent" BorderThickness="0">
+                        <mi:MaterialIcon Kind="Close" Width="18" Height="18" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    </Button>
+                </Grid>
+
+                <Border Height="1" Background="{DynamicResource BorderBrush}" />
+
+                <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,*">
+                    <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,4,8" Spacing="4">
+                        <TextBlock Text="Código de Barras Combo *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBox Text="{Binding KitBarcode, Mode=TwoWay}" Watermark="Ej. 750999888" Padding="8" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="0" Grid.Column="1" Margin="4,0,0,8" Spacing="4">
+                        <TextBlock Text="Nombre del Combo *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBox Text="{Binding KitName, Mode=TwoWay}" Watermark="Ej. Combo Desayuno Completo" Padding="8" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,4,0" Spacing="4">
+                        <TextBlock Text="Precio Combo ($ MXN) *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBox Text="{Binding KitPrice, Mode=TwoWay}" Watermark="0.00" Padding="8" FontSize="14" FontWeight="Bold" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1" Grid.Column="1" Margin="4,0,0,0" Spacing="4">
+                        <TextBlock Text="Descripción" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBox Text="{Binding KitDescription, Mode=TwoWay}" Watermark="Incluye café 400ml y dona" Padding="8" />
+                    </StackPanel>
+                </Grid>
+
+                <TextBlock Text="Agregar Productos Ingredientes al Combo" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,6,0,0" />
+                <Grid ColumnDefinitions="*,80,Auto">
+                    <ComboBox Grid.Column="0" ItemsSource="{Binding AvailableProducts}" SelectedItem="{Binding SelectedProduct, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="8">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="dto:ProductDto">
+                                <TextBlock Text="{Binding Name}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <TextBox Grid.Column="1" Text="{Binding ItemQuantity, Mode=TwoWay}" Watermark="Cant." Margin="4,0" Padding="8" />
+                    <Button Grid.Column="2" Command="{Binding AddItemToDraftCommand}" Content="+ AGREGAR" Padding="10,8" CornerRadius="{DynamicResource AppCornerRadius}" Classes="primary-action" FontWeight="Bold" />
+                </Grid>
+
+                <!-- Ingredients Table -->
+                <ScrollViewer Height="140" VerticalScrollBarVisibility="Auto">
+                    <ItemsControl ItemsSource="{Binding DraftKitItems}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="dto:ItemKitItemDto">
+                                <Border Margin="0,0,0,4" Padding="10,6" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                    <Grid ColumnDefinitions="*,Auto,Auto">
+                                        <TextBlock Grid.Column="0" Text="{Binding ProductName}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                        <TextBlock Grid.Column="1" Text="{Binding Quantity, StringFormat='{}{0} Pza'}" FontSize="12" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" Margin="8,0" />
+                                        <Button Grid.Column="2" Command="{Binding $parent[UserControl].((vm:ItemKitDialogViewModel)DataContext).RemoveItemFromDraftCommand}" CommandParameter="{Binding}" Background="Transparent" BorderThickness="0" Padding="2">
+                                            <mi:MaterialIcon Kind="Close" Width="14" Height="14" Foreground="{DynamicResource AccentDangerBrush}" />
+                                        </Button>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <TextBlock Text="{Binding FeedbackMessage}" FontSize="12" Foreground="{DynamicResource AccentDangerBrush}" HorizontalAlignment="Center" />
+
+                <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right" Margin="0,6,0,0">
+                    <Button Command="{Binding CancelCommand}" Content="Cancelar" Padding="16,8" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" />
+                    <Button Command="{Binding SaveKitCommand}" Content="GUARDAR COMBO" Padding="16,8" CornerRadius="{DynamicResource AppCornerRadius}" Classes="success-action" FontWeight="Bold" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

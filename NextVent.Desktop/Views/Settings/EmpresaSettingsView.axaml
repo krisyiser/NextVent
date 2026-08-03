@@ -1,0 +1,228 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NextVent.ViewModels"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             x:Class="NextVent.Views.Settings.EmpresaSettingsView"
+             x:DataType="vm:SettingsViewModel">
+
+    <StackPanel Spacing="20">
+        <TextBlock Text="Datos &amp; Configuración de la Empresa" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+
+        <!-- Horizontal Sub-tab Navigation Bar -->
+        <Border Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="4">
+            <UniformGrid Columns="5">
+                <Button Command="{Binding SelectEmpresaSubTabCommand}" CommandParameter="generales" Padding="10,8" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgSecondaryBrush}">
+                    <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                        <mi:MaterialIcon Kind="Domain" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                        <TextBlock Text="Generales" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <Button Command="{Binding SelectEmpresaSubTabCommand}" CommandParameter="identidad" Padding="10,8" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgSecondaryBrush}">
+                    <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                        <mi:MaterialIcon Kind="PaletteOutline" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                        <TextBlock Text="Identidad" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <Button Command="{Binding SelectEmpresaSubTabCommand}" CommandParameter="fiscal" Padding="10,8" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgSecondaryBrush}">
+                    <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                        <mi:MaterialIcon Kind="ReceiptTextOutline" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                        <TextBlock Text="Fiscal / SAT" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <Button Command="{Binding SelectEmpresaSubTabCommand}" CommandParameter="sucursal" Padding="10,8" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgSecondaryBrush}">
+                    <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                        <mi:MaterialIcon Kind="MapMarkerOutline" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                        <TextBlock Text="Sucursal" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <Button Command="{Binding SelectEmpresaSubTabCommand}" CommandParameter="redes" Padding="10,8" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgSecondaryBrush}">
+                    <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                        <mi:MaterialIcon Kind="ShareVariantOutline" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                        <TextBlock Text="Redes &amp; Web" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </UniformGrid>
+        </Border>
+
+        <!-- 1.1 SUB-TAB GENERALES -->
+        <StackPanel IsVisible="{Binding IsSubEmpresaGenerales}" Spacing="16">
+            <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,*">
+                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,12" Spacing="6">
+                    <TextBlock Text="Nombre Comercial (Requerido)" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <TextBox Text="{Binding EmpresaNombreComercial, Mode=TwoWay}" Padding="10,8" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,12" Spacing="6">
+                    <TextBlock Text="Razón Social (Opcional)" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <TextBox Text="{Binding EmpresaRazonSocial, Mode=TwoWay}" Padding="10,8" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,12" Spacing="6">
+                    <TextBlock Text="Giro Comercial" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <ComboBox ItemsSource="{Binding EmpresaGiroOptions}" SelectedItem="{Binding EmpresaGiroComercial, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="10,8" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,12" Spacing="6">
+                    <TextBlock Text="Eslogan de Marca" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <TextBox Text="{Binding EmpresaEslogan, Mode=TwoWay}" Padding="10,8" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,8,0" Spacing="6">
+                    <TextBlock Text="Moneda Principal" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <ComboBox ItemsSource="{Binding MonedaOptions}" SelectedItem="{Binding EmpresaMonedaPrincipal, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="10,8" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="2" Grid.Column="1" Margin="8,0,0,0" Spacing="6">
+                    <TextBlock Text="Zona Horaria" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <ComboBox ItemsSource="{Binding ZonaHorariaOptions}" SelectedItem="{Binding EmpresaZonaHoraria, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="10,8" />
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+
+        <!-- 1.2 SUB-TAB IDENTIDAD -->
+        <StackPanel IsVisible="{Binding IsSubEmpresaIdentidad}" Spacing="16">
+            <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,*">
+                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,12" Spacing="6">
+                    <TextBlock Text="URL / Ruta Logo Principal" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <TextBox Text="{Binding EmpresaLogoPrincipalUrl, Mode=TwoWay}" Padding="10,8" Watermark="C:\Logos\empresa_full.png" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,12" Spacing="6">
+                    <TextBlock Text="URL / Ruta Isotipo" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <TextBox Text="{Binding EmpresaLogoIsotipoUrl, Mode=TwoWay}" Padding="10,8" Watermark="C:\Logos\icon.png" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,0" Spacing="6">
+                    <TextBlock Text="Logo Térmico (Monocromático Ticket)" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <TextBox Text="{Binding EmpresaLogoTermicoUrl, Mode=TwoWay}" Padding="10,8" Watermark="C:\Logos\ticket_bw.bmp" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,0" Spacing="6">
+                    <TextBlock Text="Umbral Dither Logo Térmico" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <Slider Minimum="0" Maximum="255" Value="{Binding EmpresaThermalLogoThreshold, Mode=TwoWay}" />
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+
+        <!-- 1.3 SUB-TAB FISCAL / SAT -->
+        <StackPanel IsVisible="{Binding IsSubEmpresaFiscal}" Spacing="16">
+            <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="*,*">
+                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,12" Spacing="6">
+                    <TextBlock Text="RFC de la Empresa" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <TextBox Text="{Binding EmpresaRfc, Mode=TwoWay}" Padding="10,8" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,12" Spacing="6">
+                    <TextBlock Text="Régimen Fiscal SAT" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <ComboBox ItemsSource="{Binding RegimenFiscalOptions}" SelectedItem="{Binding EmpresaRegimenFiscal, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="10,8" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,12" Spacing="6">
+                    <TextBlock Text="Código Postal Fiscal" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <TextBox Text="{Binding EmpresaCodigoPostalFiscal, Mode=TwoWay}" Padding="10,8" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,12" Spacing="6">
+                    <TextBlock Text="Uso CFDI por Defecto" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <ComboBox ItemsSource="{Binding UsoCfdiOptions}" SelectedItem="{Binding EmpresaUsoCfdiPorDefecto, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="10,8" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,8,12" Spacing="6">
+                    <TextBlock Text="Certificado CSD (.cer)" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <TextBox Text="{Binding EmpresaCertificadoCerPath, Mode=TwoWay}" Padding="10,8" Watermark="Ruta al archivo .cer" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="2" Grid.Column="1" Margin="8,0,0,12" Spacing="6">
+                    <TextBlock Text="Llave Privada CSD (.key)" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <TextBox Text="{Binding EmpresaCertificadoKeyPath, Mode=TwoWay}" Padding="10,8" Watermark="Ruta al archivo .key" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,8,0" Spacing="6">
+                    <TextBlock Text="Contraseña CSD" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <TextBox Text="{Binding EmpresaPasswordKeyCsd, Mode=TwoWay}" PasswordChar="*" Padding="10,8" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="3" Grid.Column="1" Margin="8,0,0,0" Spacing="6">
+                    <TextBlock Text="Estatus CSD SAT" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <Border Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="12,8">
+                        <TextBlock Text="{Binding CsdValidityStatus}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource AccentSuccessBrush}" HorizontalAlignment="Center" />
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+
+        <!-- 1.4 SUB-TAB SUCURSAL -->
+        <StackPanel IsVisible="{Binding IsSubEmpresaSucursal}" Spacing="16">
+            <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,*">
+                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,12" Spacing="6">
+                    <TextBlock Text="Nombre Sucursal" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <TextBox Text="{Binding EmpresaNombreSucursal, Mode=TwoWay}" Padding="10,8" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,12" Spacing="6">
+                    <TextBlock Text="Calle y Número" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <TextBox Text="{Binding EmpresaCalleYNumero, Mode=TwoWay}" Padding="10,8" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,12" Spacing="6">
+                    <TextBlock Text="Colonia" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <TextBox Text="{Binding EmpresaColonia, Mode=TwoWay}" Padding="10,8" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,12" Spacing="6">
+                    <TextBlock Text="Estado" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <ComboBox ItemsSource="{Binding MexicanStates}" SelectedItem="{Binding EmpresaEstado, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="10,8" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,8,0" Spacing="6">
+                    <TextBlock Text="Teléfono Fijo" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <TextBox Text="{Binding EmpresaTelefonoFijo, Mode=TwoWay}" Padding="10,8" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="2" Grid.Column="1" Margin="8,0,0,0" Spacing="6">
+                    <TextBlock Text="WhatsApp Contacto" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <TextBox Text="{Binding EmpresaWhatsappContacto, Mode=TwoWay}" Padding="10,8" />
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+
+        <!-- 1.5 SUB-TAB REDES & WEB -->
+        <StackPanel IsVisible="{Binding IsSubEmpresaRedes}" Spacing="16">
+            <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,*">
+                <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,12" Spacing="6">
+                    <TextBlock Text="Email Contacto" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <TextBox Text="{Binding EmpresaEmailContacto, Mode=TwoWay}" Padding="10,8" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,12" Spacing="6">
+                    <TextBlock Text="Sitio Web" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <TextBox Text="{Binding EmpresaSitioWeb, Mode=TwoWay}" Padding="10,8" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,12" Spacing="6">
+                    <TextBlock Text="Facebook" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <TextBox Text="{Binding EmpresaFacebook, Mode=TwoWay}" Padding="10,8" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,12" Spacing="6">
+                    <TextBlock Text="Instagram" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <TextBox Text="{Binding EmpresaInstagram, Mode=TwoWay}" Padding="10,8" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,8,0" Spacing="6">
+                    <TextBlock Text="Mensaje Pie Ticket" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <TextBox Text="{Binding EmpresaMensajeBienvenidaTicket, Mode=TwoWay}" Padding="10,8" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="2" Grid.Column="1" Margin="8,0,0,0" Spacing="6">
+                    <TextBlock Text="URL QR Redes" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <TextBox Text="{Binding EmpresaQrRedesUrl, Mode=TwoWay}" Padding="10,8" />
+                </StackPanel>
+            </Grid>
+        </StackPanel>
+    </StackPanel>
+</UserControl>
