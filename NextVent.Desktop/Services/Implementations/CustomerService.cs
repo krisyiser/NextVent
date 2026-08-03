@@ -14,8 +14,13 @@ namespace NextVent.Services.Implementations;
 public sealed class CustomerService : ICustomerService
 {
     private readonly AppDbContext _ctx;
+    private readonly IEscPosPrinterService? _printerService;
 
-    public CustomerService(AppDbContext ctx) => _ctx = ctx;
+    public CustomerService(AppDbContext ctx, IEscPosPrinterService? printerService = null)
+    {
+        _ctx = ctx;
+        _printerService = printerService;
+    }
 
     public async Task<List<CustomerDto>> GetAllAsync()
     {
@@ -103,7 +108,9 @@ public sealed class CustomerService : ICustomerService
             _ctx.CustomerPayments.Add(paymentRecord);
 
             // 4. INJECT PHYSICAL MONEY INTO SHIFT CASH LEDGER IF PAID IN CASH
-            if (activeShift != null && (method.Equals("Efectivo", StringComparison.OrdinalIgnoreCase) || method.Equals("Cash", StringComparison.OrdinalIgnoreCase)))
+            bool isCash = method.Equals("Efectivo", StringComparison.OrdinalIgnoreCase) || method.Equals("Cash", StringComparison.OrdinalIgnoreCase);
+
+            if (activeShift != null && isCash)
             {
                 var cashMovement = new ShiftMovementEntity
                 {
@@ -118,6 +125,22 @@ public sealed class CustomerService : ICustomerService
 
             await _ctx.SaveChangesAsync();
             await transaction.CommitAsync();
+
+            // 5. TRIGGER PHYSICAL DRAWER KICK AND AUDIT SLIP
+            if (isCash && _printerService != null)
+            {
+                _ = _printerService.OpenCashDrawerAsync("COM1");
+                _ = _printerService.PrintNonSaleCashMovementSlipAsync(new NextVent.Core.Models.ShiftMovementSlipModel
+                {
+                    Folio = paymentRecord.Id.Substring(0, Math.Min(8, paymentRecord.Id.Length)).ToUpper(),
+                    MovementTypeLabel = "ABONO DE CLIENTE - CUENTA CORRIENTE",
+                    Amount = roundedAmount,
+                    Description = $"Abono a cuenta corriente de {customer.Name}. Notas: {notes}",
+                    CashierName = "CAJERO EN TURNO",
+                    Timestamp = DateTime.Now
+                });
+            }
+
             return true;
         }
         catch

@@ -61,19 +61,19 @@ public partial class MainWindowViewModel : ObservableObject
 
         _db = new AppDbContext(options);
 
+        _printerService = new EscPosPrinterService();
         _productService = new ProductService(_db);
-        _customerService = new CustomerService(_db);
+        _customerService = new CustomerService(_db, _printerService);
         _saleService = new SaleService(_db);
         _promotionService = new PromotionService(_db);
         _giftcardService = new GiftcardService(_db);
         var supplierService = new SupplierService(_db);
         var purchaseService = new PurchaseService(_db);
-        var expenseService = new ExpenseService(_db);
+        var expenseService = new ExpenseService(_db, _printerService);
         var userService = new UserService(_db);
         var settingsService = new SettingsService(_db);
         var shiftNoteService = new ShiftNoteService(_db);
         var kitService = new ItemKitService(_db);
-        _printerService = new EscPosPrinterService();
 
         var userRepository = new UserRepository(_db);
         var sessionManager = new SessionManager();

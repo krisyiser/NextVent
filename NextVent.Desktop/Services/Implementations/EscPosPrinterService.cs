@@ -4,6 +4,7 @@ using System.IO.Ports;
 using System.Text;
 using System.Threading.Tasks;
 using NextVent.Data.Dtos;
+using NextVent.Core.Models;
 using NextVent.Services.Interfaces;
 using Serilog;
 
@@ -96,7 +97,30 @@ public class EscPosPrinterService : IEscPosPrinterService
         });
     }
 
-    public async Task<bool> OpenCashDrawerAsync(string printerPortOrName)
+    private static readonly byte[] DrawerPin2Command = [0x1B, 0x70, 0x00, 0x19, 0xFA];
+    private static readonly byte[] DrawerPin5Command = [0x1B, 0x70, 0x01, 0x19, 0xFA];
+
+    public async Task<bool> OpenCashDrawerAsync(string printerPortOrName = "COM1", int drawerPin = 0)
+    {
+        return await Task.Run(() =>
+        {
+            try
+            {
+                byte[] command = drawerPin == 1 ? DrawerPin5Command : DrawerPin2Command;
+                using var ms = new MemoryStream();
+                ms.Write(EscInit, 0, EscInit.Length);
+                ms.Write(command, 0, command.Length);
+                return SendRawBytesToPrinter(printerPortOrName, ms.ToArray());
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error sending pulse to cash drawer on pin {Pin}", drawerPin);
+                return false;
+            }
+        });
+    }
+
+    public async Task<bool> PrintNonSaleCashMovementSlipAsync(ShiftMovementSlipModel model, string printerPortOrName = "COM1")
     {
         return await Task.Run(() =>
         {
@@ -104,15 +128,49 @@ public class EscPosPrinterService : IEscPosPrinterService
             {
                 using var ms = new MemoryStream();
                 ms.Write(EscInit, 0, EscInit.Length);
-                ms.Write(OpenDrawerPulse, 0, OpenDrawerPulse.Length);
-                return SendRawBytesToPrinter(printerPortOrName, ms.ToArray());
+
+                // Header
+                ms.Write(AlignCenter, 0, AlignCenter.Length);
+                ms.Write(DoubleSizeOn, 0, DoubleSizeOn.Length);
+                ms.Write(BoldOn, 0, BoldOn.Length);
+                WriteString(ms, "COMPROBANTE DE CAJA\n");
+                ms.Write(DoubleSizeOff, 0, DoubleSizeOff.Length);
+                ms.Write(BoldOff, 0, BoldOff.Length);
+
+                WriteString(ms, "================================================\n");
+                ms.Write(AlignLeft, 0, AlignLeft.Length);
+                WriteString(ms, $"TIPO: {model.MovementTypeLabel.ToUpper()}\n");
+                WriteString(ms, $"FOLIO: {model.Folio}\n");
+                WriteString(ms, $"FECHA: {model.Timestamp:dd/MM/yyyy HH:mm}\n");
+                WriteString(ms, $"CAJERO: {model.CashierName}\n");
+                WriteString(ms, "------------------------------------------------\n");
+                WriteString(ms, "CONCEPTO:\n");
+                WriteString(ms, $"{model.Description}\n");
+                WriteString(ms, "------------------------------------------------\n");
+                ms.Write(AlignRight, 0, AlignRight.Length);
+                ms.Write(BoldOn, 0, BoldOn.Length);
+                WriteString(ms, $"MONTO: ${model.Amount:N2}\n");
+                ms.Write(BoldOff, 0, BoldOff.Length);
+                WriteString(ms, "================================================\n");
+                ms.Write(AlignCenter, 0, AlignCenter.Length);
+                WriteString(ms, "\n\n________________________________\n");
+                WriteString(ms, "FIRMA DE RECIBIDO\n\n\n");
+                ms.Write(PaperCut, 0, PaperCut.Length);
+
+                byte[] rawData = ms.ToArray();
+                return SendRawBytesToPrinter(printerPortOrName, rawData);
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error sending pulse to cash drawer");
+                Log.Error(ex, "Error printing non-sale cash movement slip");
                 return false;
             }
         });
+    }
+
+    public async Task<bool> IsPrinterOnlineAsync()
+    {
+        return await Task.FromResult(true);
     }
 
     public async Task<bool> PrintTestPageAsync(string printerPortOrName)

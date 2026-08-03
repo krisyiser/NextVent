@@ -2,6 +2,7 @@ using Avalonia;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.EntityFrameworkCore;
 using NextVent.Data;
 using NextVent.Data.Dtos;
@@ -776,6 +777,17 @@ public partial class PosViewModel : ObservableObject
                 DiscountTotal = Math.Round(disc, 2);
                 Total = Math.Max(0.0, Math.Round(sub - disc, 2));
                 Tax = Math.Round(Total - (Total / 1.16), 2);
+
+                // Broadcast Reactive Snapshot to Secondary Customer Display
+                var snapshot = new NextVent.Core.Messages.CartStateSnapshotMessage(
+                    Items: CartItems.ToList().AsReadOnly(),
+                    Subtotal: Subtotal,
+                    TotalDiscount: DiscountTotal,
+                    GrandTotal: Total,
+                    LastAddedProductName: CartItems.LastOrDefault()?.Name ?? string.Empty
+                );
+                WeakReferenceMessenger.Default.Send(snapshot);
+                WeakReferenceMessenger.Default.Send(new NextVent.Core.Messages.CustomerDisplayIdleStateMessage(IsIdle: CartItems.Count == 0));
             });
         }
         else
@@ -788,6 +800,17 @@ public partial class PosViewModel : ObservableObject
                 DiscountTotal = Math.Round(disc, 2);
                 Total = Math.Max(0.0, Math.Round(sub - disc, 2));
                 Tax = Math.Round(Total - (Total / 1.16), 2);
+
+                // Broadcast Reactive Snapshot to Secondary Customer Display
+                var snapshot = new NextVent.Core.Messages.CartStateSnapshotMessage(
+                    Items: CartItems.ToList().AsReadOnly(),
+                    Subtotal: Subtotal,
+                    TotalDiscount: DiscountTotal,
+                    GrandTotal: Total,
+                    LastAddedProductName: CartItems.LastOrDefault()?.Name ?? string.Empty
+                );
+                WeakReferenceMessenger.Default.Send(snapshot);
+                WeakReferenceMessenger.Default.Send(new NextVent.Core.Messages.CustomerDisplayIdleStateMessage(IsIdle: CartItems.Count == 0));
             });
         }
     }

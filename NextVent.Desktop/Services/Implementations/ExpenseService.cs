@@ -13,10 +13,12 @@ namespace NextVent.Services.Implementations;
 public class ExpenseService : IExpenseService
 {
     private readonly AppDbContext _context;
+    private readonly IEscPosPrinterService? _printerService;
 
-    public ExpenseService(AppDbContext context)
+    public ExpenseService(AppDbContext context, IEscPosPrinterService? printerService = null)
     {
         _context = context;
+        _printerService = printerService;
     }
 
     public async Task<List<ExpenseDto>> GetAllAsync()
@@ -46,7 +48,9 @@ public class ExpenseService : IExpenseService
             _context.Expenses.Add(entity);
 
             // Inject Cash Outflow Movement to Active Shift Drawer if Paid in Cash
-            if (activeShift != null && (dto.PaymentMethod.Equals("Efectivo", StringComparison.OrdinalIgnoreCase) || dto.PaymentMethod.Equals("Cash", StringComparison.OrdinalIgnoreCase)))
+            bool isCash = dto.PaymentMethod.Equals("Efectivo", StringComparison.OrdinalIgnoreCase) || dto.PaymentMethod.Equals("Cash", StringComparison.OrdinalIgnoreCase);
+
+            if (activeShift != null && isCash)
             {
                 var outflow = new ShiftMovementEntity
                 {
@@ -63,6 +67,22 @@ public class ExpenseService : IExpenseService
 
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
+
+            // Trigger Cash Drawer Kick & Thermal Audit Slip if Paid in Cash
+            if (isCash && _printerService != null)
+            {
+                _ = _printerService.OpenCashDrawerAsync("COM1");
+                _ = _printerService.PrintNonSaleCashMovementSlipAsync(new NextVent.Core.Models.ShiftMovementSlipModel
+                {
+                    Folio = entity.Id.Substring(0, Math.Min(8, entity.Id.Length)).ToUpper(),
+                    MovementTypeLabel = $"GASTO OPERATIVO - {entity.Category.ToUpper()}",
+                    Amount = dto.Amount,
+                    Description = dto.Description,
+                    CashierName = dto.RegisteredByUser ?? "CAJERO EN TURNO",
+                    Timestamp = DateTime.Now
+                });
+            }
+
             return MapToDto(entity);
         }
         catch
