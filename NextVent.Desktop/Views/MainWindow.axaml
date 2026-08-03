@@ -100,6 +100,9 @@
         <DataTemplate DataType="vmDialogs:SupervisorPinDialogViewModel">
             <vDialogs:SupervisorPinDialog />
         </DataTemplate>
+        <DataTemplate DataType="vmDialogs:ConfirmDialogViewModel">
+            <vDialogs:ConfirmDialog />
+        </DataTemplate>
     </Window.DataTemplates>
 
     <Panel>

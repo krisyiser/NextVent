@@ -58,6 +58,7 @@ public partial class PosViewModel : ObservableObject
     [ObservableProperty] private string _feedbackMessage = string.Empty;
     [ObservableProperty] private int _parkedOrdersCount = 0;
     [ObservableProperty] private double _cartWidthPx = 380;
+    [ObservableProperty] private string _initialPaymentMode = "Efectivo";
 
     // Hardware Telemetry & Cashier Status Badges
     [ObservableProperty] private string _activeCashierName = "Alexa S. (Caja 01)";
@@ -609,18 +610,58 @@ public partial class PosViewModel : ObservableObject
         }
     }
 
-    [ObservableProperty] private string _initialPaymentMode = "Efectivo";
+    public bool CanParkCurrentTicket => CartItems.Count > 0;
+    public bool HasParkedOrders => ParkedTickets.Count > 0;
+
+    [RelayCommand]
+    private async Task OpenCashCheckoutAsync()
+    {
+        if (CartItems.Count == 0) return;
+        InitialPaymentMode = "Efectivo";
+        OpenCheckoutRequested?.Invoke();
+        await Task.CompletedTask;
+    }
+
+    [RelayCommand]
+    private async Task OpenCardCheckoutAsync()
+    {
+        if (CartItems.Count == 0) return;
+        InitialPaymentMode = "Tarjeta Débito/Crédito";
+        OpenCheckoutRequested?.Invoke();
+        await Task.CompletedTask;
+    }
+
+    [RelayCommand]
+    private async Task OpenMixedCheckoutAsync()
+    {
+        if (CartItems.Count == 0) return;
+        InitialPaymentMode = "Mixto";
+        OpenCheckoutRequested?.Invoke();
+        await Task.CompletedTask;
+    }
+
+    [RelayCommand]
+    private async Task OpenDefaultCheckoutAsync()
+    {
+        if (CartItems.Count == 0) return;
+        InitialPaymentMode = "Efectivo";
+        OpenCheckoutRequested?.Invoke();
+        await Task.CompletedTask;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanParkCurrentTicket))]
+    private void ParkCurrentTicket()
+    {
+        _ = ParkCurrentCartAsync();
+        OnPropertyChanged(nameof(CanParkCurrentTicket));
+        OnPropertyChanged(nameof(HasParkedOrders));
+        OnPropertyChanged(nameof(HasParkedTickets));
+    }
 
     [RelayCommand]
     private void OpenCheckoutDialog()
     {
-        if (CartItems.Count == 0)
-        {
-            FeedbackMessage = "Agrega al menos un producto al carrito para cobrar";
-            return;
-        }
-        InitialPaymentMode = "Efectivo";
-        OpenCheckoutRequested?.Invoke();
+        _ = OpenDefaultCheckoutAsync();
     }
 
     [RelayCommand] private void ToggleFullscreen() => ToggleFullscreenRequested?.Invoke();

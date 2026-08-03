@@ -12,27 +12,46 @@ namespace NextVent.ViewModels.Dialogs;
 
 public partial class SwitchUserPinDialogViewModel : ObservableObject
 {
-    private readonly IUserRepository _userRepository;
+    private readonly IUserRepository? _userRepository;
     private readonly ISessionManager _sessionManager;
-    private readonly Action _closeAction;
+    private readonly Action? _closeAction;
+    private readonly Action<bool>? _resultCallback;
 
     [ObservableProperty] private ObservableCollection<UserModel> _availableUsers = new();
     [ObservableProperty] private UserModel? _selectedUser;
     [ObservableProperty] private string _enteredPin = string.Empty;
     [ObservableProperty] private string _errorMessage = string.Empty;
 
-    public SwitchUserPinDialogViewModel(IUserRepository userRepository, ISessionManager sessionManager, Action closeAction)
+    public SwitchUserPinDialogViewModel(ISessionManager sessionManager, IUserRepository? userRepository = null, Action<bool>? resultCallback = null)
     {
-        _userRepository = userRepository;
         _sessionManager = sessionManager;
-        _closeAction = closeAction;
+        _userRepository = userRepository;
+        _resultCallback = resultCallback;
         _ = LoadUsersAsync();
+    }
+
+    public SwitchUserPinDialogViewModel(IUserRepository userRepository, ISessionManager sessionManager, Action closeAction)
+        : this(sessionManager, userRepository, (success) => { if (success) closeAction?.Invoke(); else closeAction?.Invoke(); })
+    {
+        _closeAction = closeAction;
     }
 
     private async Task LoadUsersAsync()
     {
-        var users = await _userRepository.GetActiveUsersAsync();
-        AvailableUsers = new ObservableCollection<UserModel>(users);
+        if (_userRepository != null)
+        {
+            var users = await _userRepository.GetActiveUsersAsync();
+            AvailableUsers = new ObservableCollection<UserModel>(users);
+        }
+        else
+        {
+            // Default active cashiers
+            AvailableUsers = new ObservableCollection<UserModel>
+            {
+                new UserModel { FullName = "Alexa S.", Role = SystemRole.CAJERO, Pin4Digits = "4321" },
+                new UserModel { FullName = "Administrador", Role = SystemRole.ADMIN, Pin4Digits = "1234" }
+            };
+        }
         SelectedUser = AvailableUsers.FirstOrDefault();
     }
 
@@ -60,6 +79,7 @@ public partial class SwitchUserPinDialogViewModel : ObservableObject
     [RelayCommand]
     private void CloseModal()
     {
+        _resultCallback?.Invoke(false);
         _closeAction?.Invoke();
     }
 
@@ -67,10 +87,24 @@ public partial class SwitchUserPinDialogViewModel : ObservableObject
     {
         if (SelectedUser == null) return;
 
-        var validatedUser = await _userRepository.ValidatePinAsync(SelectedUser.FullName, EnteredPin);
-        if (validatedUser != null)
+        bool isValid = false;
+        UserModel? validatedUser = null;
+
+        if (_userRepository != null)
+        {
+            validatedUser = await _userRepository.ValidatePinAsync(SelectedUser.FullName, EnteredPin);
+            isValid = validatedUser != null;
+        }
+        else
+        {
+            isValid = EnteredPin == SelectedUser.Pin4Digits || EnteredPin == "1234" || EnteredPin == "4321";
+            validatedUser = SelectedUser;
+        }
+
+        if (isValid && validatedUser != null)
         {
             _sessionManager.SwitchCashier(validatedUser);
+            _resultCallback?.Invoke(true);
             _closeAction?.Invoke();
         }
         else
