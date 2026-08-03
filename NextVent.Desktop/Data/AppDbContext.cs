@@ -29,6 +29,7 @@ public class AppDbContext : DbContext
     public DbSet<SystemAlertEntity> SystemAlerts => Set<SystemAlertEntity>();
     public DbSet<ReturnEntity> Returns => Set<ReturnEntity>();
     public DbSet<AuditLogEntity> AuditLogs => Set<AuditLogEntity>();
+    public DbSet<AttendanceEntity> Attendances => Set<AttendanceEntity>();
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
@@ -55,5 +56,6 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<CashupEntity>().HasKey(c => c.Id);
         modelBuilder.Entity<ProductAttributeEntity>().HasKey(pa => pa.Id);
         modelBuilder.Entity<ShiftNoteEntity>().HasKey(sn => sn.Id);
+        modelBuilder.Entity<AttendanceEntity>().HasKey(a => a.Id);
     }
 }

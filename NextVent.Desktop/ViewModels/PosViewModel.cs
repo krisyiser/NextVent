@@ -78,6 +78,7 @@ public partial class PosViewModel : ObservableObject
     private readonly IUserRepository? _userRepository;
     private readonly IPromotionService? _promotionService;
     private readonly IAuditService? _auditService;
+    private readonly IAttendanceService? _attendanceService;
     private readonly DispatcherTimer _debounceTimer;
 
     public ObservableCollection<ShiftNoteDto> ActiveShiftNotes { get; } = [];
@@ -103,7 +104,8 @@ public partial class PosViewModel : ObservableObject
         ISessionManager? sessionManager = null,
         IUserRepository? userRepository = null,
         IPromotionService? promotionService = null,
-        IAuditService? auditService = null)
+        IAuditService? auditService = null,
+        IAttendanceService? attendanceService = null)
     {
         _productService = productService;
         _db = db;
@@ -114,6 +116,7 @@ public partial class PosViewModel : ObservableObject
         _userRepository = userRepository;
         _promotionService = promotionService;
         _auditService = auditService;
+        _attendanceService = attendanceService;
 
         _debounceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(150) };
         _debounceTimer.Tick += async (s, e) =>
@@ -697,40 +700,54 @@ public partial class PosViewModel : ObservableObject
     public bool CanParkCurrentTicket => CartItems.Count > 0;
     public bool HasParkedOrders => ParkedTickets.Count > 0;
 
+    private async Task<bool> VerifyAttendanceGuardAsync()
+    {
+        if (_attendanceService != null && _sessionManager?.CurrentCashier != null)
+        {
+            bool clockedIn = await _attendanceService.HasActiveClockInAsync(_sessionManager.CurrentCashier.Id.ToString());
+            if (!clockedIn)
+            {
+                FeedbackMessage = "Acceso Denegado: Debes registrar tu entrada en el control de asistencia antes de abrir la caja.";
+                return false;
+            }
+        }
+        return true;
+    }
+
     [RelayCommand]
     private async Task OpenCashCheckoutAsync()
     {
         if (CartItems.Count == 0) return;
+        if (!await VerifyAttendanceGuardAsync()) return;
         InitialPaymentMode = "Efectivo";
         OpenCheckoutRequested?.Invoke();
-        await Task.CompletedTask;
     }
 
     [RelayCommand]
     private async Task OpenCardCheckoutAsync()
     {
         if (CartItems.Count == 0) return;
+        if (!await VerifyAttendanceGuardAsync()) return;
         InitialPaymentMode = "Tarjeta Débito/Crédito";
         OpenCheckoutRequested?.Invoke();
-        await Task.CompletedTask;
     }
 
     [RelayCommand]
     private async Task OpenMixedCheckoutAsync()
     {
         if (CartItems.Count == 0) return;
+        if (!await VerifyAttendanceGuardAsync()) return;
         InitialPaymentMode = "Mixto";
         OpenCheckoutRequested?.Invoke();
-        await Task.CompletedTask;
     }
 
     [RelayCommand]
     private async Task OpenDefaultCheckoutAsync()
     {
         if (CartItems.Count == 0) return;
+        if (!await VerifyAttendanceGuardAsync()) return;
         InitialPaymentMode = "Efectivo";
         OpenCheckoutRequested?.Invoke();
-        await Task.CompletedTask;
     }
 
     [RelayCommand(CanExecute = nameof(CanParkCurrentTicket))]

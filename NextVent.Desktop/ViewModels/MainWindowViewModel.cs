@@ -42,6 +42,7 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly SettingsViewModel _settingsVm;
     private readonly SuppliersViewModel _suppliersVm;
     private readonly ExpensesViewModel _expensesVm;
+    private readonly CashierPerformanceViewModel _cashierPerformanceVm;
     private readonly LoginViewModel _loginVm;
 
     private readonly ISaleService _saleService;
@@ -79,6 +80,8 @@ public partial class MainWindowViewModel : ObservableObject
         var sessionManager = new SessionManager();
         var auditService = new AuditService(_db);
         var securityService = new SecurityInterceptionService(userRepository);
+        var attendanceService = new AttendanceService(_db);
+        var performanceAnalyticsService = new PerformanceAnalyticsService(_db);
 
         securityService.RequestSupervisorPinDialog += (title, callback) =>
         {
@@ -87,12 +90,13 @@ public partial class MainWindowViewModel : ObservableObject
             IsDialogOverlayOpen = true;
         };
 
-        _posVm = new PosViewModel(_productService, _db, shiftNoteService, kitService, _customerService, sessionManager, userRepository, _promotionService, auditService);
+        _posVm = new PosViewModel(_productService, _db, shiftNoteService, kitService, _customerService, sessionManager, userRepository, _promotionService, auditService, attendanceService);
         _inventoryVm = new InventoryViewModel(_productService, purchaseService);
         _customersVm = new CustomersViewModel(_customerService);
         _historyVm = new HistoryViewModel(_saleService, _printerService);
         _promotionsVm = new PromotionsViewModel(_promotionService);
         _fiscalVm = new FiscalViewModel();
+        _cashierPerformanceVm = new CashierPerformanceViewModel(performanceAnalyticsService, attendanceService);
         _settingsVm = new SettingsViewModel(userService, settingsService);
         _ = _settingsVm.LoadSavedSettingsAsync();
         _suppliersVm = new SuppliersViewModel(supplierService, purchaseService, _productService);
@@ -330,6 +334,9 @@ public partial class MainWindowViewModel : ObservableObject
             "promotions" => _promotionsVm,
             "fiscal" => _fiscalVm,
             "settings" => _settingsVm,
+            "performance" => _cashierPerformanceVm,
+            "rendimiento" => _cashierPerformanceVm,
+            "cashierperformance" => _cashierPerformanceVm,
             _ => _posVm
         };
 
@@ -341,5 +348,6 @@ public partial class MainWindowViewModel : ObservableObject
         else if (ActiveViewModel == _suppliersVm) _ = _suppliersVm.LoadDataAsync();
         else if (ActiveViewModel == _expensesVm) _ = _expensesVm.LoadExpensesAsync();
         else if (ActiveViewModel == _settingsVm) _ = _settingsVm.LoadUsersAsync();
+        else if (ActiveViewModel == _cashierPerformanceVm) _ = _cashierPerformanceVm.LoadReportsAsync();
     }
 }
