@@ -25,6 +25,7 @@ public class AppDbContext : DbContext
     public DbSet<CashupEntity> Cashups => Set<CashupEntity>();
     public DbSet<ProductAttributeEntity> ProductAttributes => Set<ProductAttributeEntity>();
     public DbSet<ShiftNoteEntity> ShiftNotes => Set<ShiftNoteEntity>();
+    public DbSet<ShiftMovementEntity> ShiftMovements => Set<ShiftMovementEntity>();
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 

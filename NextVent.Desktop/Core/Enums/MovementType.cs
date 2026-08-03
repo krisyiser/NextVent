@@ -1,10 +1,10 @@
 namespace NextVent.Core.Enums;
 
-/// <summary>
-/// Employee attendance clock movement types.
-/// </summary>
 public enum MovementType
 {
-    Entrada = 0,
-    Salida = 1
+    AbonoCliente = 0,
+    Venta = 1,
+    Gasto = 2,
+    Retiro = 3,
+    Deposito = 4
 }

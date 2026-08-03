@@ -4,6 +4,8 @@ using NextVent.Data;
 using NextVent.Data.Dtos;
 using NextVent.Data.Entities;
 using NextVent.Services.Interfaces;
+using NextVent.Core.Models;
+using NextVent.Core.Enums;
 using System.Text.Json;
 
 namespace NextVent.Services.Implementations;
@@ -74,7 +76,7 @@ public sealed class SaleService : ISaleService
                 }
             }
 
-            // If customer linked, update debt or accrue/deduct loyalty points
+            // If customer linked, validate credit constraints & update debt or accrue/deduct loyalty points
             if (!string.IsNullOrEmpty(sale.CustomerId))
             {
                 var customer = await _ctx.Customers.FindAsync(sale.CustomerId);
@@ -82,6 +84,19 @@ public sealed class SaleService : ISaleService
                 {
                     if (sale.IsCredit)
                     {
+                        if (customer.IsCreditBlocked)
+                        {
+                            throw new InvalidOperationException($"El crédito está bloqueado para el cliente: {customer.Name}");
+                        }
+
+                        decimal creditRequired = (decimal)total;
+                        decimal availableCredit = customer.AvailableCredit;
+
+                        if (availableCredit < creditRequired)
+                        {
+                            throw new InvalidOperationException($"Crédito insuficiente. Disponible: {availableCredit:C}, Requerido: {creditRequired:C}");
+                        }
+
                         customer.Debt = Math.Round(customer.Debt + total, 2);
                     }
 
@@ -97,6 +112,14 @@ public sealed class SaleService : ISaleService
                         customer.PuntosSaldo += earnedPoints;
                     }
                 }
+                else if (sale.IsCredit)
+                {
+                    throw new InvalidOperationException("Cliente no encontrado en la base de datos.");
+                }
+            }
+            else if (sale.IsCredit)
+            {
+                throw new InvalidOperationException("Debe asignar un cliente registrado para cobrar a crédito.");
             }
 
             await _ctx.SaveChangesAsync();
@@ -116,6 +139,54 @@ public sealed class SaleService : ISaleService
         {
             await transaction.RollbackAsync();
             throw;
+        }
+    }
+
+    public async Task<SaleResultModel> ProcessSaleAsync(SaleCreationDto dto)
+    {
+        bool isCredit = dto.CreditAmount > 0 || dto.PaymentMethod == PaymentMethod.Credito || dto.PaymentMethod == PaymentMethod.Credit;
+        var snapshots = dto.Items.Select(i => new SaleItemSnapshotDto(
+            ProductId: i.Id,
+            Name: i.Name,
+            UnitPrice: i.UnitPrice,
+            Cost: i.UnitPrice * 0.6,
+            Quantity: i.Quantity,
+            Unit: i.Unit,
+            Category: "General",
+            Discount: 0,
+            TotalPrice: i.TotalPrice
+        )).ToList();
+
+        var totalCost = snapshots.Sum(s => s.Cost * s.Quantity);
+        var profit = dto.Total - totalCost;
+
+        var saleDto = new SaleDto(
+            Id: IdGenerator.NewSaleId(),
+            Date: DateTimeOffset.UtcNow.ToString("o"),
+            Items: snapshots,
+            Total: dto.Total,
+            TotalCost: totalCost,
+            Profit: profit,
+            PaidAmount: dto.Total,
+            ChangeAmount: 0,
+            PaymentMethod: dto.PaymentMethod.ToString(),
+            CustomerId: dto.CustomerId,
+            IsCredit: isCredit,
+            IsCancelled: false,
+            CancelledAt: null,
+            EstadoFiscal: "PENDIENTE",
+            UuidSat: null,
+            SerieFolio: null
+        );
+
+        try
+        {
+            var saved = await SaveAsync(saleDto);
+            return new SaleResultModel { IsSuccess = true, SaleId = saved.Id };
+        }
+        catch (Exception ex)
+        {
+            return new SaleResultModel { IsSuccess = false, ErrorMessage = ex.Message };
         }
     }
 

@@ -54,7 +54,11 @@ public record CustomerPaymentDto(
     double Amount,
     string? PaymentMethod = "Efectivo",
     string? Reference = null
-);
+)
+{
+    public string Method => PaymentMethod ?? "Efectivo";
+    public string Notes => Reference ?? "";
+};
 
 public record FiscalClientDto(
     string Id,
@@ -95,6 +99,7 @@ public partial class CartItemDto : ObservableObject
     public string Id { get; set; } = string.Empty;
     public string Name { get; set; } = string.Empty;
     public double UnitPrice { get; set; }
+    public double Cost { get; set; }
     public string Unit { get; set; } = "Pza";
 
     [ObservableProperty]

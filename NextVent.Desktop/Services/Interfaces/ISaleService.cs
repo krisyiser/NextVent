@@ -1,3 +1,6 @@
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using NextVent.Core.Models;
 using NextVent.Data.Dtos;
 
 namespace NextVent.Services.Interfaces;
@@ -8,6 +11,7 @@ namespace NextVent.Services.Interfaces;
 public interface ISaleService
 {
     Task<SaleDto> SaveAsync(SaleDto sale);
+    Task<SaleResultModel> ProcessSaleAsync(SaleCreationDto dto);
     Task<List<SaleDto>> GetHistoryAsync(int limit = 500);
     Task CancelAsync(string saleId);
     Task UpdateFiscalStatusAsync(string saleId, string status, string? uuid, string? folio);

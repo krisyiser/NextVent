@@ -9,5 +9,7 @@ public interface IGiftcardService
     Task<List<GiftcardEntity>> GetAllAsync();
     Task<GiftcardEntity?> GetByCardNumberAsync(string cardNumber);
     Task<bool> DeductBalanceAsync(string cardNumber, double amount);
+    Task<(bool IsValid, decimal Balance, string Error)> ValidateCardAsync(string cardNumber);
+    Task<bool> RedeemBalanceAsync(string cardNumber, decimal amountToRedeem, string saleId = "");
     Task CreateCardAsync(string cardNumber, double initialBalance, string? customerId = null);
 }

@@ -59,10 +59,15 @@ public sealed class ShiftService : IShiftService
                      && string.Compare(s.Date, entity.StartTime) >= 0)
             .SumAsync(s => s.Total);
 
+        var customerAbonosCash = await _ctx.ShiftMovements
+            .AsNoTracking()
+            .Where(m => m.ShiftId == entity.Id && m.MovementType == NextVent.Core.Enums.MovementType.AbonoCliente)
+            .SumAsync(m => m.Amount);
+
         entity.EndTime = DateTimeOffset.UtcNow.ToString("o");
         entity.TotalCashSales = cashSales;
         entity.TotalCreditSales = creditSales;
-        entity.ExpectedBalance = entity.OpeningBalance + cashSales;
+        entity.ExpectedBalance = entity.OpeningBalance + cashSales + customerAbonosCash;
         entity.ActualBalance = actualBalance;
         entity.Diff = actualBalance - entity.ExpectedBalance;
         entity.IsOpen = 0;

@@ -40,6 +40,36 @@ public sealed class GiftcardService : IGiftcardService
         return true;
     }
 
+    public async Task<(bool IsValid, decimal Balance, string Error)> ValidateCardAsync(string cardNumber)
+    {
+        if (string.IsNullOrWhiteSpace(cardNumber))
+            return (false, 0m, "Ingrese un número de tarjeta válido.");
+
+        var card = await _ctx.Giftcards.FirstOrDefaultAsync(g => g.CardNumber == cardNumber && g.IsActive);
+        if (card == null)
+            return (false, 0m, "Tarjeta / Monedero no existente o inactivo.");
+
+        if (card.Balance <= 0)
+            return (false, 0m, "Monedero sin fondos disponibles ($0.00).");
+
+        return (true, (decimal)card.Balance, string.Empty);
+    }
+
+    public async Task<bool> RedeemBalanceAsync(string cardNumber, decimal amountToRedeem, string saleId = "")
+    {
+        var card = await _ctx.Giftcards.FirstOrDefaultAsync(g => g.CardNumber == cardNumber && g.IsActive)
+            ?? throw new InvalidOperationException("Monedero no válido.");
+
+        double amount = (double)amountToRedeem;
+        if (card.Balance < amount)
+            throw new InvalidOperationException("Fondos insuficientes en el monedero.");
+
+        card.Balance -= amount;
+        _ctx.Giftcards.Update(card);
+        await _ctx.SaveChangesAsync();
+        return true;
+    }
+
     public async Task CreateCardAsync(string cardNumber, double initialBalance, string? customerId = null)
     {
         var entity = new GiftcardEntity

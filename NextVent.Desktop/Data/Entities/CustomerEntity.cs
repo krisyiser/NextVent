@@ -1,50 +1,75 @@
+using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace NextVent.Data.Entities;
 
 /// <summary>
-/// Customer entity with debt tracking and loyalty points.
+/// Customer entity with debt tracking, credit limit validation, and loyalty points.
 /// Maps to legacy 'customers' SQLite table.
 /// </summary>
 [Table("customers")]
 public class CustomerEntity
 {
-[Key]
-[Column("id")]
-public string Id { get; set; } = string.Empty;
+    [Key]
+    [Column("id")]
+    public string Id { get; set; } = string.Empty;
 
-[Required]
-[Column("name")]
-public string Name { get; set; } = string.Empty;
+    [Required]
+    [Column("name")]
+    public string Name { get; set; } = string.Empty;
 
-[Column("phone")]
-public string Phone { get; set; } = string.Empty;
+    [NotMapped]
+    public string FullName => Name;
 
-[Column("customer_code")]
-public string CustomerCode { get; set; } = string.Empty;
+    [Column("phone")]
+    public string Phone { get; set; } = string.Empty;
 
-[Column("rfc")]
-public string Rfc { get; set; } = string.Empty;
+    [Column("customer_code")]
+    public string CustomerCode { get; set; } = string.Empty;
 
-[Column("email")]
-public string Email { get; set; } = string.Empty;
+    [Column("rfc")]
+    public string Rfc { get; set; } = string.Empty;
 
-[Column("address")]
-public string Address { get; set; } = string.Empty;
+    [Column("email")]
+    public string Email { get; set; } = string.Empty;
 
-[Column("credit_limit")]
-public double CreditLimit { get; set; } = 5000.0;
+    [Column("address")]
+    public string Address { get; set; } = string.Empty;
 
-[Column("debt")]
-public double Debt { get; set; }
+    [Column("credit_limit")]
+    public double CreditLimit { get; set; } = 5000.0;
 
-[Column("puntos_saldo")]
-public double PuntosSaldo { get; set; }
+    [Column("debt")]
+    public double Debt { get; set; }
 
-/// <summary>Navigation: payments made by this customer.</summary>
-public ICollection<CustomerPaymentEntity> Payments { get; set; } = [];
+    [Column("is_credit_blocked")]
+    public bool IsCreditBlocked { get; set; } = false;
 
-/// <summary>Navigation: optional fiscal data link.</summary>
-public FiscalClientEntity? FiscalData { get; set; }
+    [Column("puntos_saldo")]
+    public double PuntosSaldo { get; set; }
+
+    [NotMapped]
+    public decimal CurrentDebt
+    {
+        get => (decimal)Debt;
+        set => Debt = (double)value;
+    }
+
+    [NotMapped]
+    public decimal CreditLimitDecimal
+    {
+        get => (decimal)CreditLimit;
+        set => CreditLimit = (double)value;
+    }
+
+    [NotMapped]
+    public decimal AvailableCredit => Math.Max(0m, (decimal)CreditLimit - (decimal)Debt);
+
+    /// <summary>Navigation: payments made by this customer.</summary>
+    public ICollection<CustomerPaymentEntity> Payments { get; set; } = [];
+
+    /// <summary>Navigation: optional fiscal data link.</summary>
+    public FiscalClientEntity? FiscalData { get; set; }
 }

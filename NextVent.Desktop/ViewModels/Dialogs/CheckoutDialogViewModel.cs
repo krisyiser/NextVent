@@ -252,11 +252,41 @@ public partial class CheckoutDialogViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task ValidateGiftcardAsync()
+    {
+        if (_giftcardService == null) return;
+        if (string.IsNullOrWhiteSpace(GiftcardNumber))
+        {
+            ErrorMessage = "Ingrese el número de tarjeta / monedero.";
+            return;
+        }
+
+        var (isValid, balance, error) = await _giftcardService.ValidateCardAsync(GiftcardNumber.Trim());
+        if (!isValid)
+        {
+            ErrorMessage = error;
+            return;
+        }
+
+        double available = (double)balance;
+        double applied = Math.Min(TotalToPay, available);
+        ReceivedAmount = applied;
+        ErrorMessage = $"Monedero validado. Saldo disponible: ${available:F2} (Aplicado: ${applied:F2})";
+    }
+
+    [RelayCommand]
     private async Task ConfirmPaymentAsync()
     {
         try
         {
-            if (PaidAmount < TotalToPay && PaymentMethod != "Monedero / Tarjeta de Regalo")
+            bool isCredit = PaymentMethod == "Crédito" || PaymentMethod == "Credit" || PaymentMethod == "Fiado";
+            if (isCredit && SelectedCustomer == null)
+            {
+                ErrorMessage = "Debe asignar un cliente registrado para cobrar a crédito.";
+                return;
+            }
+
+            if (PaidAmount < TotalToPay && PaymentMethod != "Monedero / Tarjeta de Regalo" && !isCredit)
             {
                 ErrorMessage = "El monto pagado es insuficiente.";
                 return;
@@ -270,10 +300,13 @@ public partial class CheckoutDialogViewModel : ObservableObject
                     return;
                 }
 
-                var success = await _giftcardService.DeductBalanceAsync(GiftcardNumber.Trim(), TotalToPay);
-                if (!success)
+                try
                 {
-                    ErrorMessage = "Tarjeta de Regalo no encontrada o saldo insuficiente.";
+                    await _giftcardService.RedeemBalanceAsync(GiftcardNumber.Trim(), (decimal)Math.Min(TotalToPay, PaidAmount));
+                }
+                catch (Exception ex)
+                {
+                    ErrorMessage = ex.Message;
                     return;
                 }
             }
@@ -304,7 +337,7 @@ public partial class CheckoutDialogViewModel : ObservableObject
                 ChangeAmount: ChangeAmount,
                 PaymentMethod: PaymentMethod,
                 CustomerId: SelectedCustomer?.Id,
-                IsCredit: false,
+                IsCredit: isCredit,
                 IsCancelled: false,
                 CancelledAt: null,
                 EstadoFiscal: RequiresInvoice ? "TIMBRADO CFDI 4.0" : "PENDIENTE"

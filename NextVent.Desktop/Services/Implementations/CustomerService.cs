@@ -66,26 +66,65 @@ public sealed class CustomerService : ICustomerService
 
     public async Task AddPaymentAsync(CustomerPaymentDto payment)
     {
-        if (payment.Amount <= 0)
+        await RegisterCustomerPaymentAsync(payment.CustomerId, payment.Amount, payment.Method ?? "Efectivo", payment.Notes ?? "");
+    }
+
+    public async Task<bool> RegisterCustomerPaymentAsync(string customerId, double amount, string method, string notes)
+    {
+        if (amount <= 0)
+            throw new InvalidOperationException("El abono debe ser mayor a $0.00.");
+
+        await using var transaction = await _ctx.Database.BeginTransactionAsync();
+        try
         {
-            throw new ArgumentException("El monto del abono debe ser mayor a 0.");
+            var customer = await _ctx.Customers.FindAsync(customerId)
+                ?? throw new InvalidOperationException("Cliente no encontrado.");
+
+            var roundedAmount = Math.Round(amount, 2);
+
+            // 1. DEDUCT CUSTOMER DEBT
+            customer.Debt = Math.Max(0.0, Math.Round(customer.Debt - roundedAmount, 2));
+            _ctx.Customers.Update(customer);
+
+            // 2. IDENTIFY ACTIVE CASHIER SHIFT
+            var activeShift = await _ctx.Shifts.FirstOrDefaultAsync(s => s.IsOpen == 1);
+
+            // 3. CREATE PAYMENT RECORD WITH SHIFT BINDING
+            var paymentRecord = new CustomerPaymentEntity
+            {
+                Id = IdGenerator.NewPaymentId(),
+                CustomerId = customerId,
+                ShiftId = activeShift?.Id,
+                Date = DateTimeOffset.UtcNow.ToString("o"),
+                Amount = roundedAmount,
+                Method = method,
+                Notes = notes
+            };
+            _ctx.CustomerPayments.Add(paymentRecord);
+
+            // 4. INJECT PHYSICAL MONEY INTO SHIFT CASH LEDGER IF PAID IN CASH
+            if (activeShift != null && (method.Equals("Efectivo", StringComparison.OrdinalIgnoreCase) || method.Equals("Cash", StringComparison.OrdinalIgnoreCase)))
+            {
+                var cashMovement = new ShiftMovementEntity
+                {
+                    ShiftId = activeShift.Id,
+                    MovementType = NextVent.Core.Enums.MovementType.AbonoCliente,
+                    Amount = roundedAmount,
+                    Description = $"Abono a deuda - Cliente: {customer.Name}",
+                    Timestamp = DateTimeOffset.UtcNow.ToString("o")
+                };
+                _ctx.ShiftMovements.Add(cashMovement);
+            }
+
+            await _ctx.SaveChangesAsync();
+            await transaction.CommitAsync();
+            return true;
         }
-
-        var customer = await _ctx.Customers.FindAsync(payment.CustomerId);
-        if (customer is null) return;
-
-        var amount = Math.Round(payment.Amount, 2);
-
-        _ctx.CustomerPayments.Add(new CustomerPaymentEntity
+        catch
         {
-            Id = string.IsNullOrEmpty(payment.Id) ? IdGenerator.NewPaymentId() : payment.Id,
-            CustomerId = payment.CustomerId,
-            Date = string.IsNullOrEmpty(payment.Date) ? DateTimeOffset.UtcNow.ToString("o") : payment.Date,
-            Amount = amount
-        });
-
-        customer.Debt = Math.Max(0.0, Math.Round(customer.Debt - amount, 2));
-        await _ctx.SaveChangesAsync();
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
     public async Task<List<CustomerPaymentDto>> GetPaymentsAsync(string customerId)
@@ -96,7 +135,7 @@ public sealed class CustomerService : ICustomerService
             .OrderByDescending(p => p.Date)
             .ToListAsync();
 
-        return list.Select(p => new CustomerPaymentDto(p.Id, p.CustomerId, p.Date, p.Amount, "Efectivo", "")).ToList();
+        return list.Select(p => new CustomerPaymentDto(p.Id, p.CustomerId, p.Date, p.Amount, p.Method ?? "Efectivo", p.Notes ?? "")).ToList();
     }
 
     public async Task DeleteAsync(string id)
