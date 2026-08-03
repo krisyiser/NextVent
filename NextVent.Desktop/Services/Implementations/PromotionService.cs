@@ -62,4 +62,77 @@ public class PromotionService : IPromotionService
             await _ctx.SaveChangesAsync();
         }
     }
+
+    public async Task<List<CartItemDto>> EvaluateAndApplyPromotionsAsync(List<CartItemDto> cartItems)
+    {
+        if (cartItems == null || cartItems.Count == 0) return cartItems ?? [];
+
+        var nowIso = DateTime.UtcNow.ToString("s");
+        var activePromotions = await _ctx.Promotions
+            .AsNoTracking()
+            .Where(p => p.IsActive == 1 && string.Compare(p.StartDate, nowIso) <= 0 && string.Compare(p.EndDate, nowIso) >= 0)
+            .OrderByDescending(p => p.Priority)
+            .ToListAsync();
+
+        if (activePromotions.Count == 0)
+        {
+            activePromotions = await _ctx.Promotions
+                .AsNoTracking()
+                .Where(p => p.IsActive == 1)
+                .OrderByDescending(p => p.Priority)
+                .ToListAsync();
+        }
+
+        foreach (var item in cartItems)
+        {
+            if (item.OriginalUnitPrice <= 0)
+            {
+                item.OriginalUnitPrice = item.UnitPrice;
+            }
+
+            // Reset discounts before re-evaluating
+            item.AppliedDiscountAmount = 0.0;
+            item.AppliedPromotionId = null;
+            item.PromotionDescription = string.Empty;
+
+            var matchingPromo = activePromotions.FirstOrDefault(p =>
+                (p.TargetProductId == item.ProductId || p.TargetId == item.ProductId ||
+                (!string.IsNullOrEmpty(p.TargetCategory) && item.Category.Equals(p.TargetCategory, StringComparison.OrdinalIgnoreCase))) &&
+                item.Quantity >= p.MinQuantity);
+
+            if (matchingPromo == null) continue;
+
+            item.AppliedPromotionId = matchingPromo.Id;
+            item.PromotionDescription = matchingPromo.Name;
+
+            switch (matchingPromo.StrategyType)
+            {
+                case NextVent.Core.Enums.PromotionType.PercentageDiscount:
+                    item.AppliedDiscountAmount = Math.Round((item.OriginalUnitPrice * (matchingPromo.DiscountValue / 100.0)) * item.Quantity, 2);
+                    break;
+
+                case NextVent.Core.Enums.PromotionType.FixedAmountDiscount:
+                    item.AppliedDiscountAmount = Math.Round(matchingPromo.DiscountValue * item.Quantity, 2);
+                    break;
+
+                case NextVent.Core.Enums.PromotionType.WholesalePrice:
+                case NextVent.Core.Enums.PromotionType.VolumeTier:
+                    double unitSavings = Math.Max(0.0, item.OriginalUnitPrice - matchingPromo.DiscountValue);
+                    item.AppliedDiscountAmount = Math.Round(unitSavings * item.Quantity, 2);
+                    break;
+
+                case NextVent.Core.Enums.PromotionType.BuyNGetM:
+                    int stepSize = (int)(matchingPromo.MinQuantity + matchingPromo.FreeQuantity);
+                    if (stepSize > 0)
+                    {
+                        int bundleCount = (int)item.Quantity / stepSize;
+                        double totalFreeUnits = bundleCount * matchingPromo.FreeQuantity;
+                        item.AppliedDiscountAmount = Math.Round(totalFreeUnits * item.OriginalUnitPrice, 2);
+                    }
+                    break;
+            }
+        }
+
+        return cartItems;
+    }
 }

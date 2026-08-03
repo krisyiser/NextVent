@@ -1,5 +1,7 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using NextVent.Core.Enums;
 
 namespace NextVent.Data.Entities;
 
@@ -10,35 +12,59 @@ namespace NextVent.Data.Entities;
 [Table("promotions")]
 public class PromotionEntity
 {
-[Key]
-[Column("id")]
-public string Id { get; set; } = string.Empty;
+    [Key]
+    [Column("id")]
+    public string Id { get; set; } = Guid.NewGuid().ToString();
 
-[Required]
-[Column("name")]
-public string Name { get; set; } = string.Empty;
+    [Required]
+    [Column("name")]
+    public string Name { get; set; } = string.Empty;
 
-/// <summary>Rule type: "product", "category", or "multibuy".</summary>
-[Required]
-[Column("type")]
-public string Type { get; set; } = "product";
+    /// <summary>Rule type: "product", "category", or "multibuy".</summary>
+    [Required]
+    [Column("type")]
+    public string Type { get; set; } = "product";
 
-[Column("targetId")]
-public string? TargetId { get; set; }
+    [Column("strategy_type")]
+    public PromotionType StrategyType { get; set; } = PromotionType.PercentageDiscount;
 
-/// <summary>Discount mode: "percent" or "fixed".</summary>
-[Column("discountType")]
-public string? DiscountType { get; set; }
+    [Column("target_product_id")]
+    public string? TargetProductId { get; set; }
 
-[Column("discountValue")]
-public double DiscountValue { get; set; }
+    [Column("target_category")]
+    public string TargetCategory { get; set; } = string.Empty;
 
-[Column("buyQty")]
-public int BuyQty { get; set; }
+    [Column("targetId")]
+    public string? TargetId { get; set; }
 
-[Column("payQty")]
-public int PayQty { get; set; }
+    /// <summary>Discount mode: "percent" or "fixed".</summary>
+    [Column("discountType")]
+    public string? DiscountType { get; set; }
 
-[Column("isActive")]
-public int IsActive { get; set; } = 1;
+    [Column("discountValue")]
+    public double DiscountValue { get; set; }
+
+    [Column("min_quantity")]
+    public double MinQuantity { get; set; } = 1.0;
+
+    [Column("free_quantity")]
+    public double FreeQuantity { get; set; } = 0.0;
+
+    [Column("buyQty")]
+    public int BuyQty { get; set; }
+
+    [Column("payQty")]
+    public int PayQty { get; set; }
+
+    [Column("start_date")]
+    public string StartDate { get; set; } = DateTime.UtcNow.AddDays(-1).ToString("s");
+
+    [Column("end_date")]
+    public string EndDate { get; set; } = DateTime.UtcNow.AddMonths(1).ToString("s");
+
+    [Column("isActive")]
+    public int IsActive { get; set; } = 1;
+
+    [Column("priority")]
+    public int Priority { get; set; } = 0;
 }

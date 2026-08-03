@@ -98,16 +98,33 @@ public record ParkedOrderDto(string Id, DateTime CreatedAt, string CustomerName,
 public partial class CartItemDto : ObservableObject
 {
     public string Id { get; set; } = string.Empty;
+    public string ProductId => Id;
     public string Name { get; set; } = string.Empty;
     public double UnitPrice { get; set; }
+    public double OriginalUnitPrice { get; set; }
     public double Cost { get; set; }
     public string Unit { get; set; } = "Pza";
+    public string Category { get; set; } = "General";
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(TotalPrice))]
+    [NotifyPropertyChangedFor(nameof(FinalUnitPrice))]
     private double _quantity = 1.0;
 
-    public double TotalPrice => UnitPrice * Quantity;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(TotalPrice))]
+    [NotifyPropertyChangedFor(nameof(FinalUnitPrice))]
+    private double _appliedDiscountAmount = 0.0;
+
+    [ObservableProperty]
+    private string? _appliedPromotionId;
+
+    [ObservableProperty]
+    private string _promotionDescription = string.Empty;
+
+    public double FinalUnitPrice => Math.Max(0.0, OriginalUnitPrice - (AppliedDiscountAmount / Math.Max(1.0, Quantity)));
+
+    public double TotalPrice => Math.Max(0.0, (OriginalUnitPrice * Quantity) - AppliedDiscountAmount);
 
     public CartItemDto() { }
 
@@ -116,6 +133,7 @@ public partial class CartItemDto : ObservableObject
         Id = id;
         Name = name;
         UnitPrice = unitPrice;
+        OriginalUnitPrice = unitPrice;
         Quantity = quantity;
         Unit = unit;
     }
@@ -132,7 +150,10 @@ public record SaleItemSnapshotDto(
     string Unit,
     string Category,
     double Discount,
-    double TotalPrice
+    double TotalPrice,
+    double OriginalUnitPrice = 0.0,
+    double AppliedDiscountAmount = 0.0,
+    string? AppliedPromotionId = null
 )
 {
     public string Id => ProductId;

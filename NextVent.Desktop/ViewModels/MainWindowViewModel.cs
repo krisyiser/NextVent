@@ -76,7 +76,7 @@ public partial class MainWindowViewModel : ObservableObject
         var userRepository = new UserRepository(_db);
         var sessionManager = new SessionManager();
 
-        _posVm = new PosViewModel(_productService, _db, shiftNoteService, kitService, _customerService, sessionManager, userRepository);
+        _posVm = new PosViewModel(_productService, _db, shiftNoteService, kitService, _customerService, sessionManager, userRepository, _promotionService);
         _inventoryVm = new InventoryViewModel(_productService, purchaseService);
         _customersVm = new CustomersViewModel(_customerService);
         _historyVm = new HistoryViewModel(_saleService, _printerService);

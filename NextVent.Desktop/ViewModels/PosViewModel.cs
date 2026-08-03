@@ -75,6 +75,8 @@ public partial class PosViewModel : ObservableObject
     private readonly IItemKitService? _kitService;
     private readonly ISessionManager? _sessionManager;
     private readonly IUserRepository? _userRepository;
+    private readonly IPromotionService? _promotionService;
+    private readonly DispatcherTimer _debounceTimer;
 
     public ObservableCollection<ShiftNoteDto> ActiveShiftNotes { get; } = [];
     [ObservableProperty] private string _newShiftNoteText = string.Empty;
@@ -97,7 +99,8 @@ public partial class PosViewModel : ObservableObject
         IItemKitService? kitService = null,
         ICustomerService? customerService = null,
         ISessionManager? sessionManager = null,
-        IUserRepository? userRepository = null)
+        IUserRepository? userRepository = null,
+        IPromotionService? promotionService = null)
     {
         _productService = productService;
         _db = db;
@@ -106,6 +109,14 @@ public partial class PosViewModel : ObservableObject
         _customerService = customerService;
         _sessionManager = sessionManager;
         _userRepository = userRepository;
+        _promotionService = promotionService;
+
+        _debounceTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(150) };
+        _debounceTimer.Tick += async (s, e) =>
+        {
+            _debounceTimer.Stop();
+            await RecalculateCartPromotionsAsync();
+        };
 
         if (_sessionManager != null)
         {
@@ -669,8 +680,43 @@ public partial class PosViewModel : ObservableObject
 
     private void RecalculateTotal()
     {
-        Total = CartItems.Sum(i => i.TotalPrice);
-        Subtotal = Math.Round(Total / 1.16, 2);
-        Tax = Math.Round(Total - Subtotal, 2);
+        _debounceTimer.Stop();
+        _debounceTimer.Start();
+    }
+
+    private async Task RecalculateCartPromotionsAsync()
+    {
+        if (_promotionService != null && CartItems.Count > 0)
+        {
+            var evaluated = await _promotionService.EvaluateAndApplyPromotionsAsync(CartItems.ToList());
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                double sub = 0.0;
+                double disc = 0.0;
+
+                foreach (var item in evaluated)
+                {
+                    sub += item.OriginalUnitPrice * item.Quantity;
+                    disc += item.AppliedDiscountAmount;
+                }
+
+                Subtotal = Math.Round(sub, 2);
+                DiscountTotal = Math.Round(disc, 2);
+                Total = Math.Max(0.0, Math.Round(sub - disc, 2));
+                Tax = Math.Round(Total - (Total / 1.16), 2);
+            });
+        }
+        else
+        {
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                double sub = CartItems.Sum(i => (i.OriginalUnitPrice > 0 ? i.OriginalUnitPrice : i.UnitPrice) * i.Quantity);
+                double disc = CartItems.Sum(i => i.AppliedDiscountAmount);
+                Subtotal = Math.Round(sub, 2);
+                DiscountTotal = Math.Round(disc, 2);
+                Total = Math.Max(0.0, Math.Round(sub - disc, 2));
+                Tax = Math.Round(Total - (Total / 1.16), 2);
+            });
+        }
     }
 }

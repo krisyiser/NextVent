@@ -5,10 +5,11 @@ namespace NextVent.Services.Interfaces;
 /// <summary>Promotion rule CRUD and activation toggle.</summary>
 public interface IPromotionService
 {
-Task<List<PromotionDto>> GetAllAsync();
-Task<List<PromotionDto>> GetActiveAsync();
-Task SaveAsync(PromotionDto promotion);
-Task DeleteAsync(string id);
+    Task<List<PromotionDto>> GetAllAsync();
+    Task<List<PromotionDto>> GetActiveAsync();
+    Task SaveAsync(PromotionDto promotion);
+    Task DeleteAsync(string id);
+    Task<List<CartItemDto>> EvaluateAndApplyPromotionsAsync(List<CartItemDto> cartItems);
 }
 
 /// <summary>Parked/paused order CRUD.</summary>

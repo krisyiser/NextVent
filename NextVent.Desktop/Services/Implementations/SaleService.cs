@@ -197,9 +197,12 @@ public sealed class SaleService : ISaleService
             Cost: i.UnitPrice * 0.6,
             Quantity: i.Quantity,
             Unit: i.Unit,
-            Category: "General",
-            Discount: 0,
-            TotalPrice: i.TotalPrice
+            Category: i.Category ?? "General",
+            Discount: i.AppliedDiscountAmount,
+            TotalPrice: i.TotalPrice,
+            OriginalUnitPrice: i.OriginalUnitPrice > 0 ? i.OriginalUnitPrice : i.UnitPrice,
+            AppliedDiscountAmount: i.AppliedDiscountAmount,
+            AppliedPromotionId: i.AppliedPromotionId
         )).ToList();
 
         var totalCost = snapshots.Sum(s => s.Cost * s.Quantity);
