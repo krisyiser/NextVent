@@ -38,7 +38,7 @@ public sealed class CustomerAndAuthServiceTests : IDisposable
     public async Task AddPaymentAsync_ShouldReduceDebtAtomically()
     {
         // Customer initial debt = 500
-        var customer = new CustomerDto("CUST-PAY-1", "Carlos M.", "5553334444", 500.0, 10.0);
+        var customer = new CustomerDto("CUST-PAY-1", "Carlos M.", "5553334444", "carlos@carlos.com", "RFC123", 1000.0, 500.0);
         await _customerService.AddAsync(customer);
 
         // Make payment of 200
@@ -76,7 +76,7 @@ public sealed class CustomerAndAuthServiceTests : IDisposable
     public async Task AddPaymentAsync_ShouldThrowForZeroOrNegativeAmount()
     {
         var payment = new CustomerPaymentDto("PAY-INV", "CUST-PAY-1", DateTimeOffset.UtcNow.ToString("o"), 0.0);
-        await Assert.ThrowsAsync<ArgumentException>(() => _customerService.AddPaymentAsync(payment));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _customerService.AddPaymentAsync(payment));
     }
 
     [Fact]

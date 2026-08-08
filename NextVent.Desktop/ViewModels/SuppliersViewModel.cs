@@ -41,6 +41,13 @@ public partial class SuppliersViewModel : ObservableObject
     [ObservableProperty] private string _feedbackMessage = string.Empty;
     [ObservableProperty] private bool _isRegisteringPurchase = false;
 
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ConfirmPurchaseCommand))]
+    private bool _isSubmitting = false;
+
+    [ObservableProperty]
+    private string _submitButtonText = "PROCESAR ENTRADA Y REABASTECER INVENTARIO";
+
     public SuppliersViewModel(ISupplierService supplierService, IPurchaseService purchaseService, IProductService productService)
     {
         _supplierService = supplierService;
@@ -136,6 +143,7 @@ public partial class SuppliersViewModel : ObservableObject
         ));
 
         TotalPurchaseCost = DraftPurchaseItems.Sum(i => i.TotalPrice);
+        ConfirmPurchaseCommand.NotifyCanExecuteChanged();
     }
 
     [RelayCommand]
@@ -143,9 +151,15 @@ public partial class SuppliersViewModel : ObservableObject
     {
         DraftPurchaseItems.Remove(item);
         TotalPurchaseCost = DraftPurchaseItems.Sum(i => i.TotalPrice);
+        ConfirmPurchaseCommand.NotifyCanExecuteChanged();
     }
 
-    [RelayCommand]
+    private bool CanConfirmPurchase()
+    {
+        return !IsSubmitting && DraftPurchaseItems.Any();
+    }
+
+    [RelayCommand(CanExecute = nameof(CanConfirmPurchase))]
     private async Task ConfirmPurchaseAsync()
     {
         if (SelectedSupplierForPurchase == null)
@@ -162,6 +176,9 @@ public partial class SuppliersViewModel : ObservableObject
 
         try
         {
+            IsSubmitting = true;
+            SubmitButtonText = "PROCESANDO ENTRADA...";
+
             var purchaseDto = new PurchaseDto(
                 Guid.NewGuid().ToString(),
                 SelectedSupplierForPurchase.Id,
@@ -188,6 +205,12 @@ public partial class SuppliersViewModel : ObservableObject
         {
             Log.Error(ex, "Error registering purchase order");
             FeedbackMessage = "Error al procesar la entrada de mercancía";
+        }
+        finally
+        {
+            IsSubmitting = false;
+            SubmitButtonText = "PROCESAR ENTRADA Y REABASTECER INVENTARIO";
+            ConfirmPurchaseCommand.NotifyCanExecuteChanged();
         }
     }
 
@@ -230,6 +253,7 @@ public partial class SuppliersViewModel : ObservableObject
 
         TotalPurchaseCost = DraftPurchaseItems.Sum(i => i.TotalPrice);
         IsRegisteringPurchase = true;
+        ConfirmPurchaseCommand.NotifyCanExecuteChanged();
         FeedbackMessage = $"¡Orden sugerida generada con {DraftPurchaseItems.Count} productos con stock crítico!";
         await Task.CompletedTask;
     }

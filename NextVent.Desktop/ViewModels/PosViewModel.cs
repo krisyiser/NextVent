@@ -570,19 +570,41 @@ public partial class PosViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void RestoreTicket(ParkedTicketModel? ticket)
+    private async Task RestoreTicketAsync(ParkedTicketModel? ticket)
     {
         if (ticket is null) return;
         CartItems.Clear();
-        foreach (var line in ticket.Lines)
+        var outOfStockWarnings = new List<string>();
+
+        foreach (var parkedLine in ticket.Lines)
         {
-            CartItems.Add(line);
+            var currentProduct = await _productService.GetByIdAsync(parkedLine.ProductId);
+            if (currentProduct == null || currentProduct.Stock < parkedLine.Quantity)
+            {
+                outOfStockWarnings.Add($"- {parkedLine.Name} (Disp: {currentProduct?.Stock ?? 0})");
+                parkedLine.Quantity = currentProduct?.Stock ?? 0;
+            }
+
+            if (parkedLine.Quantity > 0)
+            {
+                CartItems.Add(parkedLine);
+            }
         }
-        RecalculateTotal();
+
+        if (outOfStockWarnings.Any())
+        {
+            FeedbackMessage = "Algunos productos del ticket pausado ya no tienen stock suficiente:\n" + string.Join("\n", outOfStockWarnings);
+        }
+        else
+        {
+            FeedbackMessage = $"¡Venta {ticket.TicketId} reanudada!";
+        }
+
+        await RecalculateCartPromotionsAsync();
         ParkedTickets.Remove(ticket);
         ParkedOrdersCount = ParkedTickets.Count;
+        OnPropertyChanged(nameof(CanParkCurrentTicket));
         OnPropertyChanged(nameof(HasParkedTickets));
-        FeedbackMessage = $"¡Venta {ticket.TicketId} reanudada!";
     }
 
     [RelayCommand]
@@ -680,15 +702,39 @@ public partial class PosViewModel : ObservableObject
             if (items != null)
             {
                 CartItems.Clear();
-                foreach (var item in items) CartItems.Add(item);
-                RecalculateTotal();
+                var outOfStockWarnings = new List<string>();
+
+                foreach (var parkedLine in items)
+                {
+                    var currentProduct = await _productService.GetByIdAsync(parkedLine.ProductId);
+                    if (currentProduct == null || currentProduct.Stock < parkedLine.Quantity)
+                    {
+                        outOfStockWarnings.Add($"- {parkedLine.Name} (Disp: {currentProduct?.Stock ?? 0})");
+                        parkedLine.Quantity = currentProduct?.Stock ?? 0;
+                    }
+
+                    if (parkedLine.Quantity > 0)
+                    {
+                        CartItems.Add(parkedLine);
+                    }
+                }
+
+                if (outOfStockWarnings.Any())
+                {
+                    FeedbackMessage = "Algunos productos del ticket pausado ya no tienen stock suficiente:\n" + string.Join("\n", outOfStockWarnings);
+                }
+                else
+                {
+                    FeedbackMessage = "¡Venta reanudada en el carrito!";
+                }
+
+                await RecalculateCartPromotionsAsync();
             }
 
             _db.ParkedOrders.Remove(last);
             await _db.SaveChangesAsync();
 
             await RefreshParkedCountAsync();
-            FeedbackMessage = "¡Venta reanudada en el carrito!";
         }
         catch (Exception ex)
         {

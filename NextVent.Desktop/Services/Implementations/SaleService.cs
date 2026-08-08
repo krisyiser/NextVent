@@ -324,7 +324,30 @@ public sealed class SaleService : ISaleService
             var product = await _ctx.Products.FindAsync(targetItem.ProductId);
             if (product is not null)
             {
-                product.Stock = Math.Round(product.Stock + returnQty, 3);
+                if (product.IsKit)
+                {
+                    // CASCADE RESTOCK: Restore ingredient inventory, do not touch parent SKU
+                    var kit = await _ctx.ItemKits
+                        .Include(k => k.Components)
+                        .FirstOrDefaultAsync(k => k.ParentProductId == product.Id || k.Id == product.Id)
+                        ?? throw new InvalidOperationException($"Configuración de Combo no encontrada para: {product.Name}");
+
+                    foreach (var comp in kit.Components)
+                    {
+                        var ingredient = await _ctx.Products.FindAsync(comp.ProductId);
+                        if (ingredient != null)
+                        {
+                            ingredient.Stock = Math.Round(ingredient.Stock + returnQty * comp.Quantity, 3);
+                            _ctx.Products.Update(ingredient);
+                        }
+                    }
+                }
+                else
+                {
+                    // STANDARD RESTOCK
+                    product.Stock = Math.Round(product.Stock + returnQty, 3);
+                    _ctx.Products.Update(product);
+                }
             }
 
             // 2. Adjust item quantity and sale totals

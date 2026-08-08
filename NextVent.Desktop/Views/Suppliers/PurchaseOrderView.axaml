@@ -58,7 +58,7 @@
                     <TextBlock Text="COSTO TOTAL COMPRA:" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
                     <TextBlock Grid.Column="1" Text="{Binding TotalPurchaseCost, StringFormat='${0:N2}'}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
                 </Grid>
-                <Button Command="{Binding ConfirmPurchaseCommand}" Content="PROCESAR ENTRADA Y REABASTECER INVENTARIO" Padding="16,12" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource AccentSuccessBrush}" Foreground="White" FontWeight="Bold" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" />
+                <Button Command="{Binding ConfirmPurchaseCommand}" Content="{Binding SubmitButtonText}" Padding="16,12" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource AccentSuccessBrush}" Foreground="White" FontWeight="Bold" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" />
             </StackPanel>
 
             <!-- Purchase Draft Items Table -->

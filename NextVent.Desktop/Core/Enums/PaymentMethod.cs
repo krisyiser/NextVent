@@ -11,10 +11,12 @@ public enum PaymentMethod
     Mixto = 2,
     Transferencia = 3,
     Credito = 4,
+    Monedero = 5,
 
     // Aliases for compatibility
     Cash = 0,
     Card = 1,
     Transfer = 3,
-    Credit = 4
+    Credit = 4,
+    MonederoElectronico = 5
 }

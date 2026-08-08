@@ -61,6 +61,21 @@ public partial class ReturnDialogViewModel : ObservableObject
             return;
         }
 
+        // GUARDRAIL: Prevent Cash Refunds for Wallet Payments
+        var originalPayment = _sale.PaymentMethod ?? string.Empty;
+        var selectedRefund = RefundMethod ?? string.Empty;
+
+        bool isMonedero = originalPayment.Contains("Monedero", StringComparison.OrdinalIgnoreCase) || 
+                          originalPayment.Equals("PaymentMethod.Monedero", StringComparison.OrdinalIgnoreCase);
+        bool isEfectivo = selectedRefund.Equals("Efectivo", StringComparison.OrdinalIgnoreCase) || 
+                          selectedRefund.Equals("PaymentMethod.Efectivo", StringComparison.OrdinalIgnoreCase);
+
+        if (isMonedero && isEfectivo)
+        {
+            FeedbackMessage = "Las ventas pagadas con Monedero Electrónico solo pueden reembolsarse al saldo del Monedero, no en Efectivo.";
+            return;
+        }
+
         try
         {
             var success = await _saleService.ProcessPartialReturnAsync(
