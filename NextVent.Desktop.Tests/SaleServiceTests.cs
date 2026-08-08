@@ -222,6 +222,153 @@ public sealed class SaleServiceTests : IDisposable
         Assert.Equal(10.0, restoredIng2!.Stock);
     }
 
+    [Fact]
+    public async Task SaveAsync_ShouldProrateGlobalDiscountAndCalculateVAT()
+    {
+        var prodA = new ProductDto("PROD-A", "1001", "Item A", 50.0, 100.0, 0, 0, 10, "General", "Pza", 0, null);
+        var prodB = new ProductDto("PROD-B", "1002", "Item B", 25.0, 50.0, 0, 0, 10, "General", "Pza", 0, null);
+        await _productService.AddAsync(prodA);
+        await _productService.AddAsync(prodB);
+
+        var itemA = new SaleItemSnapshotDto("PROD-A", "Item A", 100.0, 50.0, 1, "Pza", "General", 0.0, 100.0);
+        var itemB = new SaleItemSnapshotDto("PROD-B", "Item B", 50.0, 25.0, 1, "Pza", "General", 0.0, 50.0);
+
+        var saleDto = new SaleDto(
+            Id: "SALE-PRORATE-TEST",
+            Date: DateTimeOffset.UtcNow.ToString("o"),
+            Items: [itemA, itemB],
+            Total: 120.0,
+            TotalCost: 75.0,
+            Profit: 45.0,
+            PaidAmount: 120.0,
+            ChangeAmount: 0.0,
+            PaymentMethod: "Cash",
+            CustomerId: null,
+            IsCredit: false,
+            IsCancelled: false,
+            CancelledAt: null,
+            EstadoFiscal: "PENDIENTE",
+            UuidSat: null,
+            SerieFolio: null
+        );
+
+        var savedSale = await _saleService.SaveAsync(saleDto);
+        Assert.NotNull(savedSale);
+
+        var savedItems = savedSale.Items;
+        Assert.Equal(2, savedItems.Count);
+
+        var savedA = savedItems.First(i => i.ProductId == "PROD-A");
+        var savedB = savedItems.First(i => i.ProductId == "PROD-B");
+
+        Assert.Equal(20.0, savedA.ProratedGlobalDiscountAmount);
+        Assert.Equal(12.80, savedA.TaxAmount);
+        Assert.Equal(92.80, savedA.TotalPrice);
+
+        Assert.Equal(10.0, savedB.ProratedGlobalDiscountAmount);
+        Assert.Equal(6.40, savedB.TaxAmount);
+        Assert.Equal(46.40, savedB.TotalPrice);
+    }
+
+    [Fact]
+    public async Task ProcessPartialReturnAsync_ShouldEnforceAntiFraudQuantityLimit()
+    {
+        var product = new ProductDto("PROD-X", "9999", "Item X", 10.0, 20.0, 0, 0, 10, "General", "Pza", 0, null);
+        await _productService.AddAsync(product);
+
+        var item = new SaleItemSnapshotDto("PROD-X", "Item X", 20.0, 10.0, 2, "Pza", "General", 0.0, 40.0);
+        var saleDto = new SaleDto(
+            Id: "SALE-ANTI-FRAUD",
+            Date: DateTimeOffset.UtcNow.ToString("o"),
+            Items: [item],
+            Total: 40.0,
+            TotalCost: 20.0,
+            Profit: 20.0,
+            PaidAmount: 40.0,
+            ChangeAmount: 0.0,
+            PaymentMethod: "Cash",
+            CustomerId: null,
+            IsCredit: false,
+            IsCancelled: false,
+            CancelledAt: null,
+            EstadoFiscal: "PENDIENTE",
+            UuidSat: null,
+            SerieFolio: null
+        );
+
+        await _saleService.SaveAsync(saleDto);
+
+        var success = await _saleService.ProcessPartialReturnAsync("SALE-ANTI-FRAUD", "PROD-X", 1.0, "Reason");
+        Assert.True(success);
+
+        await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+        {
+            await _saleService.ProcessPartialReturnAsync("SALE-ANTI-FRAUD", "PROD-X", 2.0, "Reason");
+        });
+    }
+
+    [Fact]
+    public async Task RegisterPurchaseAsync_ShouldBlockNonPositiveCosts()
+    {
+        var purchaseService = new PurchaseService(_context);
+
+        var items = new List<PurchaseItemDto>
+        {
+            new PurchaseItemDto("ITEM-1", "PURCHASE-1", "PROD-1", "Product 1", 0.0, 10, 0.0)
+        };
+
+        var purchaseDto = new PurchaseDto(
+            Id: "PURCHASE-1",
+            SupplierId: "SUPP-1",
+            SupplierName: "Supplier 1",
+            InvoiceNumber: "INV-123",
+            Date: DateTime.Now.ToString("g"),
+            TotalCost: 0.0,
+            Notes: "Test notes",
+            Items: items
+        );
+
+        await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+        {
+            await purchaseService.RegisterPurchaseAsync(purchaseDto);
+        });
+    }
+
+    [Fact]
+    public void TestDtoSerialization()
+    {
+        var options = new System.Text.Json.JsonSerializerOptions
+        {
+            PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
+        };
+
+        var item = new SaleItemSnapshotDto(
+            ProductId: "PROD-A",
+            Name: "Item A",
+            UnitPrice: 100.0,
+            Cost: 50.0,
+            Quantity: 1.0,
+            Unit: "Pza",
+            Category: "General",
+            Discount: 0.0,
+            TotalPrice: 92.8,
+            OriginalUnitPrice: 100.0,
+            AppliedDiscountAmount: 0.0,
+            AppliedPromotionId: null,
+            ProratedGlobalDiscountAmount: 20.0,
+            TaxAmount: 12.8,
+            ReturnedQuantity: 0.0
+        );
+
+        var json = System.Text.Json.JsonSerializer.Serialize(item, options);
+        var deserialized = System.Text.Json.JsonSerializer.Deserialize<SaleItemSnapshotDto>(json, options);
+
+        Assert.Equal(20.0, deserialized.ProratedGlobalDiscountAmount);
+        Assert.Equal(12.8, deserialized.TaxAmount);
+    }
+
+
+
     public void Dispose()
     {
         _context.Dispose();

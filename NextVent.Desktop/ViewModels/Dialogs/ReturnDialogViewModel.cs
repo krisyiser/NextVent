@@ -55,9 +55,9 @@ public partial class ReturnDialogViewModel : ObservableObject
             return;
         }
 
-        if (ReturnQuantity > SelectedItem.Quantity)
+        if (ReturnQuantity > SelectedItem.AvailableForReturn)
         {
-            FeedbackMessage = $"La cantidad máxima a devolver es {SelectedItem.Quantity}";
+            FeedbackMessage = $"La cantidad máxima a devolver es {SelectedItem.AvailableForReturn}";
             return;
         }
 
@@ -83,7 +83,7 @@ public partial class ReturnDialogViewModel : ObservableObject
                 SelectedItem.ProductId,
                 ReturnQuantity,
                 ReturnReason,
-                RefundMethod
+                RefundMethod ?? "Efectivo"
             );
 
             if (success)

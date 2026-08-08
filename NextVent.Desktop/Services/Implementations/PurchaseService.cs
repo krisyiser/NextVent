@@ -57,6 +57,9 @@ public class PurchaseService : IPurchaseService
 
             foreach (var item in dto.Items)
             {
+                if (item.UnitPrice <= 0)
+                    throw new InvalidOperationException($"Error de integridad: El costo del producto {item.ProductId} no puede ser menor o igual a $0.00.");
+
                 var itemTotal = item.UnitPrice * item.Quantity;
                 totalCost += itemTotal;
 

@@ -8,6 +8,7 @@ using NextVent.Services;
 using NextVent.Services.Implementations;
 using NextVent.Services.Interfaces;
 using NextVent.Services.Audit;
+using NextVent.Services.Auth;
 using NextVent.Services.Security;
 using NextVent.ViewModels.Dialogs;
 using NextVent.Core.Models;
@@ -52,6 +53,7 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly IEscPosPrinterService _printerService;
     private readonly IGiftcardService _giftcardService;
     private readonly AppDbContext _db;
+    private readonly IShiftService _shiftService;
 
     public MainWindowViewModel()
     {
@@ -82,6 +84,9 @@ public partial class MainWindowViewModel : ObservableObject
         var securityService = new SecurityInterceptionService(userRepository);
         var attendanceService = new AttendanceService(_db);
         var performanceAnalyticsService = new PerformanceAnalyticsService(_db);
+        var authService = new AuthService(userService);
+        var shiftService = new ShiftService(_db);
+        _shiftService = shiftService;
 
         securityService.RequestSupervisorPinDialog += (title, callback) =>
         {
@@ -101,7 +106,12 @@ public partial class MainWindowViewModel : ObservableObject
         _ = _settingsVm.LoadSavedSettingsAsync();
         _suppliersVm = new SuppliersViewModel(supplierService, purchaseService, _productService);
         _expensesVm = new ExpensesViewModel(expenseService);
-        _loginVm = new LoginViewModel();
+        _loginVm = new LoginViewModel(authService);
+        _loginVm.LoginSuccessful += async () =>
+        {
+            ActiveViewModel = _posVm;
+            await ValidateShiftStatusAsync();
+        };
 
         // ── Wire Dynamic Sidebar Layout Changes ──
         ThemeService.Instance.SidebarPositionChanged += pos => Dispatcher.UIThread.Post(() => ApplySidebarLayout(pos));
@@ -264,6 +274,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         _activeViewModel = _posVm;
         _ = _posVm.LoadProductsAsync();
+        _ = ValidateShiftStatusAsync();
     }
 
     private void ApplySidebarLayout(string position)
@@ -319,7 +330,7 @@ public partial class MainWindowViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void NavigateTo(string target)
+    private async Task NavigateTo(string target)
     {
         ActiveViewModel = target.ToLower() switch
         {
@@ -340,7 +351,11 @@ public partial class MainWindowViewModel : ObservableObject
             _ => _posVm
         };
 
-        if (ActiveViewModel == _posVm) _ = _posVm.LoadProductsAsync();
+        if (ActiveViewModel == _posVm)
+        {
+            _ = _posVm.LoadProductsAsync();
+            await ValidateShiftStatusAsync();
+        }
         else if (ActiveViewModel == _inventoryVm) _ = _inventoryVm.LoadProductsAsync();
         else if (ActiveViewModel == _customersVm) _ = _customersVm.LoadCustomersAsync();
         else if (ActiveViewModel == _historyVm) _ = _historyVm.LoadSalesAsync();
@@ -349,5 +364,57 @@ public partial class MainWindowViewModel : ObservableObject
         else if (ActiveViewModel == _expensesVm) _ = _expensesVm.LoadExpensesAsync();
         else if (ActiveViewModel == _settingsVm) _ = _settingsVm.LoadUsersAsync();
         else if (ActiveViewModel == _cashierPerformanceVm) _ = _cashierPerformanceVm.LoadReportsAsync();
+    }
+
+    private async Task ValidateShiftStatusAsync()
+    {
+        var activeShift = await _shiftService.GetActiveAsync();
+        if (activeShift != null)
+        {
+            if (DateTime.TryParse(activeShift.StartTime, out var startTime) && startTime.Date < DateTime.UtcNow.Date)
+            {
+                // Orphaned Shift Recovery (Z-Cut Ciego)
+                var confirmVm = new ConfirmDialogViewModel(
+                    "Turno Suspendido Detectado",
+                    "Se detectó un turno del día anterior que no fue cerrado correctamente. Debe realizar el Corte de Caja Z antes de iniciar uno nuevo. ¿Proceder al corte ciego?",
+                    (confirmed) =>
+                    {
+                        if (confirmed)
+                        {
+                            var blindCashupVm = new CashupDialogViewModel(_db, _shiftService, isFinalZCut: true, isBlindMode: true);
+                            blindCashupVm.RequestClose += () =>
+                            {
+                                CloseDialog();
+                                _ = ValidateShiftStatusAsync();
+                            };
+                            ActiveDialogViewModel = blindCashupVm;
+                            IsDialogOverlayOpen = true;
+                        }
+                        else
+                        {
+                            CloseDialog();
+                            ActiveViewModel = _loginVm;
+                        }
+                    }
+                );
+                ActiveDialogViewModel = confirmVm;
+                IsDialogOverlayOpen = true;
+            }
+        }
+        else
+        {
+            // Open Shift Gating
+            var openShiftVm = new OpenShiftDialogViewModel(_shiftService);
+            openShiftVm.RequestClose += (success) =>
+            {
+                CloseDialog();
+                if (!success)
+                {
+                    ActiveViewModel = _loginVm;
+                }
+            };
+            ActiveDialogViewModel = openShiftVm;
+            IsDialogOverlayOpen = true;
+        }
     }
 }

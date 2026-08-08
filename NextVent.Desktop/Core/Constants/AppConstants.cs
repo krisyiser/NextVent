@@ -9,6 +9,9 @@ public static class AppConstants
     /// <summary>Application version string.</summary>
     public const string AppVersion = "3.0.0";
 
+    /// <summary>Default VAT / IVA rate (16%)</summary>
+    public const double DefaultIvaRate = 0.16;
+
     /// <summary>Application display name.</summary>
     public const string AppName = "NextVent POS";
 

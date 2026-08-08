@@ -39,7 +39,13 @@ public sealed class SaleService : ISaleService
         try
         {
             var saleId = string.IsNullOrEmpty(sale.Id) ? IdGenerator.NewSaleId() : sale.Id;
-            var itemsJson = JsonSerializer.Serialize(sale.Items, JsonOpts);
+
+            // Global discount proration & VAT (IVA) calculation
+            double snapshotsSum = sale.Items.Sum(i => (i.Quantity * (i.OriginalUnitPrice > 0 ? i.OriginalUnitPrice : i.UnitPrice)) - i.AppliedDiscountAmount);
+            double globalDiscountAmount = Math.Max(0.0, Math.Round(snapshotsSum - sale.Total, 2));
+            var processedItems = ApplyProratedGlobalDiscountAndTaxes(sale.Items, globalDiscountAmount);
+
+            var itemsJson = JsonSerializer.Serialize(processedItems, JsonOpts);
 
             var total = Math.Round(sale.Total, 2);
             var totalCost = Math.Round(sale.TotalCost, 2);
@@ -68,7 +74,7 @@ public sealed class SaleService : ISaleService
 
             // Deduct inventory in cascade (Combo/Kit support) & compute true COGS
             double totalTicketCogs = 0.0;
-            foreach (var item in sale.Items)
+            foreach (var item in processedItems)
             {
                 var product = await _ctx.Products.FirstOrDefaultAsync(p => p.Id == item.ProductId);
                 if (product is not null)
@@ -173,6 +179,7 @@ public sealed class SaleService : ISaleService
             return sale with
             {
                 Id = saleId,
+                Items = processedItems,
                 Total = total,
                 TotalCost = totalCost,
                 Profit = profit,
@@ -268,7 +275,8 @@ public sealed class SaleService : ISaleService
                 var product = await _ctx.Products.FindAsync(item.Id);
                 if (product is not null)
                 {
-                    product.Stock = Math.Round(product.Stock + item.Quantity, 3);
+                    double remaining = Math.Max(0.0, item.Quantity - item.ReturnedQuantity);
+                    product.Stock = Math.Round(product.Stock + remaining, 3);
                 }
             }
 
@@ -318,7 +326,13 @@ public sealed class SaleService : ISaleService
             var items = JsonSerializer.Deserialize<List<SaleItemSnapshotDto>>(sale.ItemsJson, JsonOpts) ?? [];
             var targetItem = items.FirstOrDefault(i => i.ProductId == productId || i.Id == productId);
 
-            if (targetItem is null || returnQty > targetItem.Quantity) return false;
+            if (targetItem is null) return false;
+
+            // ANTI-FRAUD CHECK: Prevent returning more than available quantity
+            if (returnQty > targetItem.AvailableForReturn)
+            {
+                throw new InvalidOperationException($"Fraude Detectado: Intento de devolver más unidades de las disponibles para el ítem {targetItem.ProductId}");
+            }
 
             // 1. Restock product stock in database
             var product = await _ctx.Products.FindAsync(targetItem.ProductId);
@@ -363,11 +377,8 @@ public sealed class SaleService : ISaleService
             {
                 if (item.ProductId == productId || item.Id == productId)
                 {
-                    double remainingQty = item.Quantity - returnQty;
-                    if (remainingQty > 0.001)
-                    {
-                        updatedItems.Add(item with { Quantity = remainingQty, TotalPrice = Math.Round(item.UnitPrice * remainingQty, 2) });
-                    }
+                    double newReturnedQty = item.ReturnedQuantity + returnQty;
+                    updatedItems.Add(item with { ReturnedQuantity = newReturnedQty });
                 }
                 else
                 {
@@ -375,7 +386,9 @@ public sealed class SaleService : ISaleService
                 }
             }
 
-            if (updatedItems.Count == 0)
+            // Check if all items on the ticket are fully returned
+            bool allReturned = updatedItems.All(i => i.ReturnedQuantity >= i.Quantity);
+            if (allReturned)
             {
                 sale.IsCancelled = 1;
                 sale.CancelledAt = DateTimeOffset.UtcNow.ToString("o");
@@ -424,7 +437,7 @@ public sealed class SaleService : ISaleService
         {
             await transaction.RollbackAsync();
             Serilog.Log.Error(ex, "Error processing partial return for sale {SaleId}", saleId);
-            return false;
+            throw;
         }
     }
 
@@ -522,5 +535,37 @@ public sealed class SaleService : ISaleService
             e.PaidAmount, e.ChangeAmount, e.PaymentMethod,
             e.CustomerId, e.IsCredit == 1, e.IsCancelled == 1,
             e.CancelledAt, e.EstadoFiscal, e.UuidSat, e.SerieFolio);
+    }
+
+    private List<SaleItemSnapshotDto> ApplyProratedGlobalDiscountAndTaxes(List<SaleItemSnapshotDto> items, double globalDiscountAmount)
+    {
+        double totalCartSubtotal = items.Sum(i => (i.Quantity * (i.OriginalUnitPrice > 0 ? i.OriginalUnitPrice : i.UnitPrice)) - i.AppliedDiscountAmount);
+        var result = new List<SaleItemSnapshotDto>();
+
+        foreach (var item in items)
+        {
+            double itemUnitPrice = item.OriginalUnitPrice > 0 ? item.OriginalUnitPrice : item.UnitPrice;
+            double lineSubtotal = (item.Quantity * itemUnitPrice) - item.AppliedDiscountAmount;
+            double proratedGlobalDiscount = 0.0;
+
+            if (totalCartSubtotal > 0 && globalDiscountAmount > 0)
+            {
+                double weight = lineSubtotal / totalCartSubtotal;
+                proratedGlobalDiscount = Math.Round(globalDiscountAmount * weight, 2);
+            }
+
+            // TAX CALCULATION (16% IVA) MUST OCCUR AFTER ALL DISCOUNTS
+            double finalTaxableBase = lineSubtotal - proratedGlobalDiscount;
+            double taxAmount = Math.Round(finalTaxableBase * NextVent.Core.Constants.AppConstants.DefaultIvaRate, 2);
+            double totalLineAmount = Math.Round(finalTaxableBase + taxAmount, 2);
+
+            result.Add(item with
+            {
+                ProratedGlobalDiscountAmount = proratedGlobalDiscount,
+                TaxAmount = taxAmount,
+                TotalPrice = totalLineAmount
+            });
+        }
+        return result;
     }
 }

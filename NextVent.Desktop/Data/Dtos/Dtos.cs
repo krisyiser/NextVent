@@ -2,6 +2,8 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
 
+using System.Text.Json.Serialization;
+
 namespace NextVent.Data.Dtos;
 
 public record ProductDto(
@@ -153,10 +155,14 @@ public record SaleItemSnapshotDto(
     double TotalPrice,
     double OriginalUnitPrice = 0.0,
     double AppliedDiscountAmount = 0.0,
-    string? AppliedPromotionId = null
+    string? AppliedPromotionId = null,
+    [property: JsonPropertyName("proratedGlobalDiscountAmount")] double ProratedGlobalDiscountAmount = 0.0,
+    [property: JsonPropertyName("taxAmount")] double TaxAmount = 0.0,
+    [property: JsonPropertyName("returnedQuantity")] double ReturnedQuantity = 0.0
 )
 {
     public string Id => ProductId;
+    public double AvailableForReturn => Math.Max(0.0, Quantity - ReturnedQuantity);
 }
 
 public record SaleDto(

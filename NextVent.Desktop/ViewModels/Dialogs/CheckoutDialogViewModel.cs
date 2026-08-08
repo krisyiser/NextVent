@@ -44,7 +44,13 @@ public partial class CheckoutDialogViewModel : ObservableObject
     [ObservableProperty] private double _changeAmount;
     [ObservableProperty] private string _paymentMethod = "Efectivo";
 
-    public bool IsSufficientAmount => IsFullyPaid || ReceivedAmount >= TotalToPay || PaymentMethod == "Monedero / Tarjeta de Regalo";
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(ConfirmPaymentCommand))]
+    private bool _isProcessing;
+
+    public bool IsSufficientAmount => IsFullyPaid || ReceivedAmount >= TotalToPay || PaymentMethod == "Monedero / Tarjeta de Regalo" || PaymentMethod == "Crédito" || PaymentMethod == "Credit" || PaymentMethod == "Fiado";
+
+    private bool CanConfirmPayment() => !IsProcessing && IsSufficientAmount;
     public string ChangeOrShortageText
     {
         get
@@ -114,6 +120,7 @@ public partial class CheckoutDialogViewModel : ObservableObject
         OnPropertyChanged(nameof(ChangeOrShortageText));
         OnPropertyChanged(nameof(ChangeTextColor));
         OnPropertyChanged(nameof(ChangeBgColor));
+        ConfirmPaymentCommand.NotifyCanExecuteChanged();
     }
 
     partial void OnReceivedAmountInputChanged(string value)
@@ -135,6 +142,7 @@ public partial class CheckoutDialogViewModel : ObservableObject
         OnPropertyChanged(nameof(ChangeOrShortageText));
         OnPropertyChanged(nameof(ChangeTextColor));
         OnPropertyChanged(nameof(ChangeBgColor));
+        ConfirmPaymentCommand.NotifyCanExecuteChanged();
     }
 
     [RelayCommand]
@@ -246,6 +254,7 @@ public partial class CheckoutDialogViewModel : ObservableObject
         OnPropertyChanged(nameof(ChangeOrShortageText));
         OnPropertyChanged(nameof(ChangeTextColor));
         OnPropertyChanged(nameof(ChangeBgColor));
+        ConfirmPaymentCommand.NotifyCanExecuteChanged();
     }
 
     [RelayCommand]
@@ -277,11 +286,12 @@ public partial class CheckoutDialogViewModel : ObservableObject
         ErrorMessage = $"Monedero validado. Saldo disponible: ${available:F2} (Aplicado: ${applied:F2})";
     }
 
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanConfirmPayment))]
     private async Task ConfirmPaymentAsync()
     {
         try
         {
+            IsProcessing = true;
             bool isCredit = PaymentMethod == "Crédito" || PaymentMethod == "Credit" || PaymentMethod == "Fiado";
             if (isCredit && SelectedCustomer == null)
             {
@@ -366,6 +376,10 @@ public partial class CheckoutDialogViewModel : ObservableObject
         {
             Log.Error(ex, "Error processing payment in CheckoutDialogViewModel");
             ErrorMessage = ex.Message;
+        }
+        finally
+        {
+            IsProcessing = false;
         }
     }
 

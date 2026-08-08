@@ -21,6 +21,7 @@
                 <StackPanel Spacing="12">
                     <TextBox Text="{Binding Username, Mode=TwoWay}" Watermark="Usuario" Background="{DynamicResource BgTertiaryBrush}" Padding="12" />
                     <TextBox Text="{Binding Password, Mode=TwoWay}" PasswordChar="•" Watermark="Contraseña" Background="{DynamicResource BgTertiaryBrush}" Padding="12" />
+                    <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource AccentDangerBrush}" FontSize="12" HorizontalAlignment="Center" IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
                 </StackPanel>
 
                 <Button Command="{Binding LoginCommand}" Classes="primary-action" Height="44" HorizontalAlignment="Stretch">

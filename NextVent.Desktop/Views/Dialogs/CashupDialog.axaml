@@ -51,7 +51,7 @@
                                 <TextBlock Text="{Binding TotalPhysicalCash, StringFormat='${0:N2}'}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
                             </StackPanel>
 
-                            <StackPanel Grid.Column="2" Spacing="2">
+                            <StackPanel Grid.Column="2" Spacing="2" IsVisible="{Binding !IsBlindMode}">
                                 <TextBlock Text="Diferencia Arqueo:" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
                                 <TextBlock Text="{Binding DifferenceAmount, StringFormat='${0:N2}'}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource AccentSuccessBrush}" />
                             </StackPanel>

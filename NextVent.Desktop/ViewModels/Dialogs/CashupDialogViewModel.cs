@@ -12,11 +12,15 @@ namespace NextVent.ViewModels.Dialogs;
 public partial class CashupDialogViewModel : ObservableObject
 {
     private readonly AppDbContext _db;
+    private readonly NextVent.Services.Interfaces.IShiftService? _shiftService;
 
     [ObservableProperty] private double _openCashAmount = 1000.00;
     [ObservableProperty] private double _theoreticalCash = 4250.00;
     [ObservableProperty] private double _totalPhysicalCash;
     [ObservableProperty] private double _differenceAmount;
+    [ObservableProperty] private bool _isBlindMode = false;
+    [ObservableProperty] private bool _isFinalZCut = false;
+    private NextVent.Data.Dtos.ShiftDto? _activeShift;
 
     // Denomination Counts
     [ObservableProperty] private int _count1000;
@@ -36,9 +40,14 @@ public partial class CashupDialogViewModel : ObservableObject
 
     public event Action? RequestClose;
 
-    public CashupDialogViewModel(AppDbContext db)
+    public CashupDialogViewModel(AppDbContext db, NextVent.Services.Interfaces.IShiftService? shiftService = null, bool isFinalZCut = false, bool isBlindMode = false)
     {
         _db = db;
+        _shiftService = shiftService;
+        IsFinalZCut = isFinalZCut;
+        IsBlindMode = isBlindMode;
+
+        _ = LoadActiveShiftDetailsAsync();
         RecalculatePhysicalTotal();
     }
 
@@ -105,6 +114,11 @@ public partial class CashupDialogViewModel : ObservableObject
             _db.Cashups.Add(entity);
             await _db.SaveChangesAsync();
 
+            if (_activeShift != null && IsFinalZCut && _shiftService != null)
+            {
+                await _shiftService.CloseAsync(_activeShift.Id, TotalPhysicalCash);
+            }
+
             FeedbackMessage = "¡Corte y Arqueo de Caja guardado correctamente!";
             RequestClose?.Invoke();
         }
@@ -112,6 +126,53 @@ public partial class CashupDialogViewModel : ObservableObject
         {
             Log.Error(ex, "Error saving cashup audit");
             FeedbackMessage = "Error al guardar arqueo";
+        }
+    }
+
+    private async Task LoadActiveShiftDetailsAsync()
+    {
+        if (_shiftService == null) return;
+
+        var shift = await _shiftService.GetActiveAsync();
+        if (shift != null)
+        {
+            _activeShift = shift;
+
+            await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(async () =>
+            {
+                OpenCashAmount = shift.OpeningBalance;
+
+                // Calculate theoretical cash balance in active shift
+                var cashSales = await _db.Sales
+                    .AsNoTracking()
+                    .Where(s => s.PaymentMethod == "Cash"
+                             && s.IsCancelled == 0
+                             && string.Compare(s.Date, shift.StartTime) >= 0)
+                    .SumAsync(s => s.Total);
+
+                var customerAbonosCash = await _db.ShiftMovements
+                    .AsNoTracking()
+                    .Where(m => m.ShiftId == shift.Id && m.MovementType == NextVent.Core.Enums.MovementType.AbonoCliente)
+                    .SumAsync(m => m.Amount);
+
+                var cashExpenses = await _db.ShiftMovements
+                    .AsNoTracking()
+                    .Where(m => m.ShiftId == shift.Id && m.MovementType == NextVent.Core.Enums.MovementType.GastoOperativo)
+                    .SumAsync(m => m.Amount);
+
+                var cashPurchases = await _db.ShiftMovements
+                    .AsNoTracking()
+                    .Where(m => m.ShiftId == shift.Id && m.MovementType == NextVent.Core.Enums.MovementType.CompraEfectivo)
+                    .SumAsync(m => m.Amount);
+
+                var cashReturns = await _db.ShiftMovements
+                    .AsNoTracking()
+                    .Where(m => m.ShiftId == shift.Id && m.MovementType == NextVent.Core.Enums.MovementType.DevolucionCliente)
+                    .SumAsync(m => m.Amount);
+
+                TheoreticalCash = shift.OpeningBalance + cashSales + customerAbonosCash - cashExpenses - cashPurchases - cashReturns;
+                RecalculatePhysicalTotal();
+            });
         }
     }
 }
