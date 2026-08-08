@@ -35,6 +35,13 @@ public partial class MainWindow : Window
 
         switch (e.Key)
         {
+            case Key.Escape:
+                if (vm.IsDialogOverlayOpen && vm.ActiveDialogViewModel is NextVent.ViewModels.Dialogs.OpenShiftDialogViewModel openShiftVm)
+                {
+                    openShiftVm.CancelCommand.Execute(null);
+                    e.Handled = true;
+                }
+                break;
             case Key.F2:
                 vm.NavigateToCommand.Execute("pos");
                 e.Handled = true;

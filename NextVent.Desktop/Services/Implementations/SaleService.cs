@@ -72,54 +72,12 @@ public sealed class SaleService : ISaleService
 
             _ctx.Sales.Add(entity);
 
-            // Deduct inventory in cascade (Combo/Kit support) & compute true COGS
+            // Deduct inventory recursively (Combo/Kit support) & compute true COGS
             double totalTicketCogs = 0.0;
             foreach (var item in processedItems)
             {
-                var product = await _ctx.Products.FirstOrDefaultAsync(p => p.Id == item.ProductId);
-                if (product is not null)
-                {
-                    if (product.IsKit)
-                    {
-                        // 1. HANDLE COMBO / KIT: DEDUCT INGREDIENT COMPONENTS IN CASCADE
-                        var kit = await _ctx.ItemKits
-                            .Include(k => k.Components)
-                            .FirstOrDefaultAsync(k => k.ParentProductId == product.Id || k.Id == product.Id);
-
-                        if (kit != null && kit.Components.Count > 0)
-                        {
-                            double kitUnitCogs = 0.0;
-                            foreach (var comp in kit.Components)
-                            {
-                                var ingredient = await _ctx.Products.FirstOrDefaultAsync(p => p.Id == comp.ProductId);
-                                if (ingredient == null) continue;
-
-                                double totalIngredientConsumed = item.Quantity * comp.Quantity;
-                                ingredient.Stock = Math.Max(0.0, Math.Round(ingredient.Stock - totalIngredientConsumed, 3));
-                                _ctx.Products.Update(ingredient);
-
-                                kitUnitCogs += comp.Quantity * ingredient.Cost;
-                                await CheckAndFlagLowStockAsync(ingredient);
-                            }
-                            totalTicketCogs += kitUnitCogs * item.Quantity;
-                        }
-                        else
-                        {
-                            product.Stock = Math.Max(0.0, Math.Round(product.Stock - item.Quantity, 3));
-                            _ctx.Products.Update(product);
-                            totalTicketCogs += product.Cost * item.Quantity;
-                            await CheckAndFlagLowStockAsync(product);
-                        }
-                    }
-                    else
-                    {
-                        // 2. HANDLE STANDARD PRODUCT
-                        product.Stock = Math.Max(0.0, Math.Round(product.Stock - item.Quantity, 3));
-                        _ctx.Products.Update(product);
-                        totalTicketCogs += product.Cost * item.Quantity;
-                        await CheckAndFlagLowStockAsync(product);
-                    }
-                }
+                double unitCogs = await DeductInventoryRecursiveAsync(item.ProductId, item.Quantity, new System.Collections.Generic.HashSet<string>());
+                totalTicketCogs += unitCogs * item.Quantity;
             }
 
             totalCost = Math.Round(totalTicketCogs, 2);
@@ -334,35 +292,8 @@ public sealed class SaleService : ISaleService
                 throw new InvalidOperationException($"Fraude Detectado: Intento de devolver más unidades de las disponibles para el ítem {targetItem.ProductId}");
             }
 
-            // 1. Restock product stock in database
-            var product = await _ctx.Products.FindAsync(targetItem.ProductId);
-            if (product is not null)
-            {
-                if (product.IsKit)
-                {
-                    // CASCADE RESTOCK: Restore ingredient inventory, do not touch parent SKU
-                    var kit = await _ctx.ItemKits
-                        .Include(k => k.Components)
-                        .FirstOrDefaultAsync(k => k.ParentProductId == product.Id || k.Id == product.Id)
-                        ?? throw new InvalidOperationException($"Configuración de Combo no encontrada para: {product.Name}");
-
-                    foreach (var comp in kit.Components)
-                    {
-                        var ingredient = await _ctx.Products.FindAsync(comp.ProductId);
-                        if (ingredient != null)
-                        {
-                            ingredient.Stock = Math.Round(ingredient.Stock + returnQty * comp.Quantity, 3);
-                            _ctx.Products.Update(ingredient);
-                        }
-                    }
-                }
-                else
-                {
-                    // STANDARD RESTOCK
-                    product.Stock = Math.Round(product.Stock + returnQty, 3);
-                    _ctx.Products.Update(product);
-                }
-            }
+            // 1. Restock product stock recursively in database
+            await RestockInventoryRecursiveAsync(targetItem.ProductId, returnQty, new System.Collections.Generic.HashSet<string>());
 
             // 2. Adjust item quantity and sale totals
             double refundedAmount = Math.Round(targetItem.UnitPrice * returnQty, 2);
@@ -527,6 +458,72 @@ public sealed class SaleService : ISaleService
         }
     }
 
+    private async Task<double> DeductInventoryRecursiveAsync(string productId, double quantityMultiplier, System.Collections.Generic.HashSet<string> executionStack)
+    {
+        var product = await _ctx.Products.FindAsync(productId)
+            ?? throw new InvalidOperationException($"Producto o ingrediente no encontrado: {productId}");
+
+        if (product.IsKit)
+        {
+            if (!executionStack.Add(productId))
+                throw new InvalidOperationException($"Error crítico: Referencia circular detectada en el Combo/Kit: {product.Name}");
+
+            var kit = await _ctx.ItemKits
+                .Include(k => k.Components)
+                .FirstOrDefaultAsync(k => k.ParentProductId == product.Id || k.Id == product.Id)
+                ?? throw new InvalidOperationException($"Estructura de Combo no encontrada para: {product.Name}");
+
+            double totalKitUnitCost = 0.0;
+
+            foreach (var component in kit.Components)
+            {
+                double totalRequired = quantityMultiplier * component.Quantity;
+                double compUnitCost = await DeductInventoryRecursiveAsync(component.ProductId, totalRequired, executionStack);
+                totalKitUnitCost += component.Quantity * compUnitCost;
+            }
+
+            executionStack.Remove(productId);
+            return totalKitUnitCost;
+        }
+        else
+        {
+            product.Stock = Math.Max(0.0, Math.Round(product.Stock - quantityMultiplier, 3));
+            _ctx.Products.Update(product);
+            await CheckAndFlagLowStockAsync(product);
+            return product.Cost;
+        }
+    }
+
+    private async Task RestockInventoryRecursiveAsync(string productId, double quantityMultiplier, System.Collections.Generic.HashSet<string> executionStack)
+    {
+        var product = await _ctx.Products.FindAsync(productId)
+            ?? throw new InvalidOperationException($"Producto o ingrediente no encontrado: {productId}");
+
+        if (product.IsKit)
+        {
+            if (!executionStack.Add(productId))
+                throw new InvalidOperationException($"Error crítico: Referencia circular detectada en el Combo/Kit: {product.Name}");
+
+            var kit = await _ctx.ItemKits
+                .Include(k => k.Components)
+                .FirstOrDefaultAsync(k => k.ParentProductId == product.Id || k.Id == product.Id)
+                ?? throw new InvalidOperationException($"Estructura de Combo no encontrada para: {product.Name}");
+
+            foreach (var component in kit.Components)
+            {
+                double totalRequired = quantityMultiplier * component.Quantity;
+                await RestockInventoryRecursiveAsync(component.ProductId, totalRequired, executionStack);
+            }
+
+            executionStack.Remove(productId);
+        }
+        else
+        {
+            product.Stock = Math.Round(product.Stock + quantityMultiplier, 3);
+            _ctx.Products.Update(product);
+        }
+    }
+
     private static SaleDto MapToDto(SaleEntity e)
     {
         var items = JsonSerializer.Deserialize<List<SaleItemSnapshotDto>>(e.ItemsJson, JsonOpts) ?? [];
@@ -539,31 +536,42 @@ public sealed class SaleService : ISaleService
 
     private List<SaleItemSnapshotDto> ApplyProratedGlobalDiscountAndTaxes(List<SaleItemSnapshotDto> items, double globalDiscountAmount)
     {
-        double totalCartSubtotal = items.Sum(i => (i.Quantity * (i.OriginalUnitPrice > 0 ? i.OriginalUnitPrice : i.UnitPrice)) - i.AppliedDiscountAmount);
+        decimal totalCartSubtotal = (decimal)items.Sum(i => (i.Quantity * (i.OriginalUnitPrice > 0 ? i.OriginalUnitPrice : i.UnitPrice)) - i.AppliedDiscountAmount);
+        decimal globalDiscountDec = (decimal)globalDiscountAmount;
+        decimal accumulatedProratedDiscount = 0m;
         var result = new List<SaleItemSnapshotDto>();
 
-        foreach (var item in items)
+        for (int i = 0; i < items.Count; i++)
         {
+            var item = items[i];
             double itemUnitPrice = item.OriginalUnitPrice > 0 ? item.OriginalUnitPrice : item.UnitPrice;
-            double lineSubtotal = (item.Quantity * itemUnitPrice) - item.AppliedDiscountAmount;
-            double proratedGlobalDiscount = 0.0;
+            decimal lineSubtotal = (decimal)((item.Quantity * itemUnitPrice) - item.AppliedDiscountAmount);
+            decimal proratedGlobalDiscount = 0m;
 
-            if (totalCartSubtotal > 0 && globalDiscountAmount > 0)
+            if (totalCartSubtotal > 0 && globalDiscountDec > 0)
             {
-                double weight = lineSubtotal / totalCartSubtotal;
-                proratedGlobalDiscount = Math.Round(globalDiscountAmount * weight, 2);
+                if (i == items.Count - 1)
+                {
+                    proratedGlobalDiscount = globalDiscountDec - accumulatedProratedDiscount;
+                }
+                else
+                {
+                    decimal weight = lineSubtotal / totalCartSubtotal;
+                    proratedGlobalDiscount = Math.Round(globalDiscountDec * weight, 2);
+                    accumulatedProratedDiscount += proratedGlobalDiscount;
+                }
             }
 
             // TAX CALCULATION (16% IVA) MUST OCCUR AFTER ALL DISCOUNTS
-            double finalTaxableBase = lineSubtotal - proratedGlobalDiscount;
-            double taxAmount = Math.Round(finalTaxableBase * NextVent.Core.Constants.AppConstants.DefaultIvaRate, 2);
-            double totalLineAmount = Math.Round(finalTaxableBase + taxAmount, 2);
+            decimal finalTaxableBase = lineSubtotal - proratedGlobalDiscount;
+            decimal taxAmount = Math.Round(finalTaxableBase * (decimal)NextVent.Core.Constants.AppConstants.DefaultIvaRate, 2);
+            decimal totalLineAmount = Math.Round(finalTaxableBase + taxAmount, 2);
 
             result.Add(item with
             {
-                ProratedGlobalDiscountAmount = proratedGlobalDiscount,
-                TaxAmount = taxAmount,
-                TotalPrice = totalLineAmount
+                ProratedGlobalDiscountAmount = (double)proratedGlobalDiscount,
+                TaxAmount = (double)taxAmount,
+                TotalPrice = (double)totalLineAmount
             });
         }
         return result;

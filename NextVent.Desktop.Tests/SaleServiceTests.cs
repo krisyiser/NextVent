@@ -367,6 +367,140 @@ public sealed class SaleServiceTests : IDisposable
         Assert.Equal(12.8, deserialized.TaxAmount);
     }
 
+    [Fact]
+    public async Task SaveAsync_ShouldDistributeLostPennyDiscountRemainderToLastItem()
+    {
+        var p1 = new ProductDto("P1", "1", "Item 1", 5.0, 10.0, 0, 0, 10, "General", "Pza", 0, null);
+        var p2 = new ProductDto("P2", "2", "Item 2", 5.0, 10.0, 0, 0, 10, "General", "Pza", 0, null);
+        var p3 = new ProductDto("P3", "3", "Item 3", 5.0, 10.0, 0, 0, 10, "General", "Pza", 0, null);
+        await _productService.AddAsync(p1);
+        await _productService.AddAsync(p2);
+        await _productService.AddAsync(p3);
+
+        var item1 = new SaleItemSnapshotDto("P1", "Item 1", 10.0, 5.0, 1, "Pza", "General", 0.0, 10.0);
+        var item2 = new SaleItemSnapshotDto("P2", "Item 2", 10.0, 5.0, 1, "Pza", "General", 0.0, 10.0);
+        var item3 = new SaleItemSnapshotDto("P3", "Item 3", 10.0, 5.0, 1, "Pza", "General", 0.0, 10.0);
+
+        var saleDto = new SaleDto(
+            Id: "SALE-LOST-PENNY",
+            Date: DateTimeOffset.UtcNow.ToString("o"),
+            Items: [item1, item2, item3],
+            Total: 20.0,
+            TotalCost: 15.0,
+            Profit: 5.0,
+            PaidAmount: 20.0,
+            ChangeAmount: 0.0,
+            PaymentMethod: "Cash",
+            CustomerId: null,
+            IsCredit: false,
+            IsCancelled: false,
+            CancelledAt: null,
+            EstadoFiscal: "PENDIENTE",
+            UuidSat: null,
+            SerieFolio: null
+        );
+
+        var savedSale = await _saleService.SaveAsync(saleDto);
+        var items = savedSale.Items;
+        Assert.Equal(3, items.Count);
+
+        var saved1 = items.First(i => i.ProductId == "P1");
+        var saved2 = items.First(i => i.ProductId == "P2");
+        var saved3 = items.First(i => i.ProductId == "P3");
+
+        Assert.Equal(3.33, saved1.ProratedGlobalDiscountAmount);
+        Assert.Equal(3.33, saved2.ProratedGlobalDiscountAmount);
+        Assert.Equal(3.34, saved3.ProratedGlobalDiscountAmount);
+
+        double sumDiscounts = items.Sum(i => i.ProratedGlobalDiscountAmount);
+        Assert.Equal(10.00, sumDiscounts);
+    }
+
+    [Fact]
+    public async Task ProcessSaleAsync_ShouldDeductNestedKitStockRecursively()
+    {
+        var apple = new ProductDto("APPLE", "111", "Apple", 2.0, 5.0, 0, 0, 10, "Fruits", "Pza", 0, null);
+        await _productService.AddAsync(apple);
+
+        var kitAProd = new ProductEntity { Id = "KITA", Barcode = "222", Name = "Kit A", Cost = 0.0, Price = 0.0, Stock = 0, Category = "Combo", Unit = "Pza", IsKit = true };
+        _context.Products.Add(kitAProd);
+
+        var kitA = new ItemKitEntity { Id = "KITA-DEF", ParentProductId = "KITA", KitBarcode = "222", Name = "Kit A", Price = 5.0 };
+        kitA.Components.Add(new ItemKitItemEntity { Id = "COMP-A1", ItemKitId = "KITA-DEF", ProductId = "APPLE", Quantity = 1.0 });
+        _context.ItemKits.Add(kitA);
+
+        var kitBProd = new ProductEntity { Id = "KITB", Barcode = "333", Name = "Kit B", Cost = 0.0, Price = 0.0, Stock = 0, Category = "Combo", Unit = "Pza", IsKit = true };
+        _context.Products.Add(kitBProd);
+
+        var kitB = new ItemKitEntity { Id = "KITB-DEF", ParentProductId = "KITB", KitBarcode = "333", Name = "Kit B", Price = 6.0 };
+        kitB.Components.Add(new ItemKitItemEntity { Id = "COMP-B1", ItemKitId = "KITB-DEF", ProductId = "KITA", Quantity = 1.0 });
+        _context.ItemKits.Add(kitB);
+
+        await _context.SaveChangesAsync();
+
+        var item = new SaleItemSnapshotDto("KITB", "Kit B", 6.0, 2.0, 1.0, "Pza", "Combo", 0.0, 6.0);
+        var saleDto = new SaleDto(
+            Id: "SALE-NESTED-KIT",
+            Date: DateTimeOffset.UtcNow.ToString("o"),
+            Items: [item],
+            Total: 6.0,
+            TotalCost: 2.0,
+            Profit: 4.0,
+            PaidAmount: 6.0,
+            ChangeAmount: 0.0,
+            PaymentMethod: "Cash",
+            CustomerId: null,
+            IsCredit: false,
+            IsCancelled: false,
+            CancelledAt: null,
+            EstadoFiscal: "PENDIENTE",
+            UuidSat: null,
+            SerieFolio: null
+        );
+
+        await _saleService.SaveAsync(saleDto);
+
+        var appleDb = await _context.Products.FindAsync("APPLE");
+        Assert.Equal(9.0, appleDb.Stock);
+    }
+
+    [Fact]
+    public async Task ProcessSaleAsync_ShouldThrowOnCircularKitDependency()
+    {
+        var kitAProd = new ProductEntity { Id = "KITA-CIRC", Barcode = "444", Name = "Kit A Circ", Cost = 0.0, Price = 0.0, Stock = 0, Category = "Combo", Unit = "Pza", IsKit = true };
+        _context.Products.Add(kitAProd);
+
+        var kitA = new ItemKitEntity { Id = "KITACIRC-DEF", ParentProductId = "KITA-CIRC", KitBarcode = "444", Name = "Kit A Circ", Price = 5.0 };
+        kitA.Components.Add(new ItemKitItemEntity { Id = "COMP-C1", ItemKitId = "KITACIRC-DEF", ProductId = "KITA-CIRC", Quantity = 1.0 });
+        _context.ItemKits.Add(kitA);
+        await _context.SaveChangesAsync();
+
+        var item = new SaleItemSnapshotDto("KITA-CIRC", "Kit A Circ", 5.0, 2.0, 1.0, "Pza", "Combo", 0.0, 5.0);
+        var saleDto = new SaleDto(
+            Id: "SALE-CIRC-KIT",
+            Date: DateTimeOffset.UtcNow.ToString("o"),
+            Items: [item],
+            Total: 5.0,
+            TotalCost: 2.0,
+            Profit: 3.0,
+            PaidAmount: 5.0,
+            ChangeAmount: 0.0,
+            PaymentMethod: "Cash",
+            CustomerId: null,
+            IsCredit: false,
+            IsCancelled: false,
+            CancelledAt: null,
+            EstadoFiscal: "PENDIENTE",
+            UuidSat: null,
+            SerieFolio: null
+        );
+
+        await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+        {
+            await _saleService.SaveAsync(saleDto);
+        });
+    }
+
 
 
     public void Dispose()

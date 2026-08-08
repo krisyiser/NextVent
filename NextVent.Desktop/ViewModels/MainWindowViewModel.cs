@@ -54,6 +54,7 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly IGiftcardService _giftcardService;
     private readonly AppDbContext _db;
     private readonly IShiftService _shiftService;
+    private readonly ISessionManager _sessionManager;
 
     public MainWindowViewModel()
     {
@@ -80,6 +81,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         var userRepository = new UserRepository(_db);
         var sessionManager = new SessionManager();
+        _sessionManager = sessionManager;
         var auditService = new AuditService(_db);
         var securityService = new SecurityInterceptionService(userRepository);
         var attendanceService = new AttendanceService(_db);
@@ -332,6 +334,11 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     private async Task NavigateTo(string target)
     {
+        if (ActiveViewModel == _loginVm || IsDialogOverlayOpen)
+        {
+            return;
+        }
+
         ActiveViewModel = target.ToLower() switch
         {
             "pos" => _posVm,
@@ -410,6 +417,7 @@ public partial class MainWindowViewModel : ObservableObject
                 CloseDialog();
                 if (!success)
                 {
+                    _sessionManager.SwitchCashier(null!);
                     ActiveViewModel = _loginVm;
                 }
             };
