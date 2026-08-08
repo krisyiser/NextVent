@@ -30,15 +30,15 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private ObservableObject? _activeDialogViewModel = null;
     [ObservableProperty] private bool _isDialogOverlayOpen = false;
 
-    private readonly IUserRepository _userRepository;
+    [ObservableProperty] private bool _isLocked = false;
+    [ObservableProperty] private string _unlockPin = string.Empty;
+    [ObservableProperty] private string _unlockErrorMessage = string.Empty;
 
     public ObservableObject CurrentView
     {
         get => ActiveViewModel;
         set => ActiveViewModel = value;
     }
-
-    public bool IsLocked => ActiveDialogViewModel is LockScreenDialogViewModel || ActiveViewModel == _loginVm || ActiveViewModel is FirstTimeSetupViewModel;
 
     [ObservableProperty] private string _sidebarDockPosition = "Left";
     [ObservableProperty] private double _sidebarWidth = 80;
@@ -68,6 +68,7 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly AppDbContext _db;
     private readonly IShiftService _shiftService;
     private readonly ISessionManager _sessionManager;
+    private readonly IUserRepository _userRepository;
 
     public MainWindowViewModel()
     {
@@ -95,6 +96,12 @@ public partial class MainWindowViewModel : ObservableObject
         var userRepository = new UserRepository(_db);
         var sessionManager = new SessionManager();
         _sessionManager = sessionManager;
+        _sessionManager.LockStateChanged += (locked) =>
+        {
+            IsLocked = locked;
+        };
+        IsLocked = _sessionManager.IsTerminalLocked;
+
         var auditService = new AuditService(_db);
         var securityService = new SecurityInterceptionService(userRepository);
         var attendanceService = new AttendanceService(_db);
@@ -127,9 +134,7 @@ public partial class MainWindowViewModel : ObservableObject
         {
             if (vmObj is string str && str == "LOCK_SCREEN")
             {
-                var dialog = new LockScreenDialogViewModel(userRepository, sessionManager, CloseDialog);
-                ActiveDialogViewModel = dialog;
-                IsDialogOverlayOpen = true;
+                sessionManager.LockTerminal();
                 return null;
             }
             ActiveDialogViewModel = vmObj as ObservableObject;
@@ -495,6 +500,28 @@ public partial class MainWindowViewModel : ObservableObject
             return minutes;
         }
         return 5; // default 5 minutes
+    }
+
+    [RelayCommand]
+    private async Task UnlockTerminalAsync()
+    {
+        UnlockErrorMessage = string.Empty;
+        if (string.IsNullOrWhiteSpace(UnlockPin))
+        {
+            UnlockErrorMessage = "El PIN es obligatorio.";
+            return;
+        }
+
+        var user = await _userRepository.ValidateAnyPinAsync(UnlockPin);
+        if (user != null)
+        {
+            _sessionManager.UnlockTerminal();
+            UnlockPin = string.Empty;
+        }
+        else
+        {
+            UnlockErrorMessage = "PIN incorrecto.";
+        }
     }
 
     public async Task TriggerAutoLockAsync()

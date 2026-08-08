@@ -20,6 +20,7 @@ public partial class ReturnDialogViewModel : ObservableObject
     [ObservableProperty] private string _returnReason = "Producto defectuoso";
     [ObservableProperty] private string _refundMethod = "Efectivo";
     [ObservableProperty] private string _feedbackMessage = string.Empty;
+    [ObservableProperty] private bool _isProductInGoodCondition = true;
 
     public ObservableCollection<SaleItemSnapshotDto> Items { get; } = [];
     public ObservableCollection<string> Reasons { get; } = [
@@ -83,7 +84,8 @@ public partial class ReturnDialogViewModel : ObservableObject
                 SelectedItem.ProductId,
                 ReturnQuantity,
                 ReturnReason,
-                RefundMethod ?? "Efectivo"
+                RefundMethod ?? "Efectivo",
+                IsProductInGoodCondition
             );
 
             if (success)

@@ -84,8 +84,23 @@ public sealed class ShiftService : IShiftService
         entity.TotalCreditSales = creditSales;
         entity.ExpectedBalance = entity.OpeningBalance + cashSales + customerAbonosCash - cashExpenses - cashPurchases - cashReturns;
         entity.ActualBalance = actualBalance;
-        entity.Diff = actualBalance - entity.ExpectedBalance;
+        double diff = actualBalance - entity.ExpectedBalance;
+        entity.Diff = diff;
         entity.IsOpen = 0;
+
+        if (Math.Abs(diff) > 0.01)
+        {
+            _ctx.ShiftMovements.Add(new ShiftMovementEntity
+            {
+                Id = Guid.NewGuid().ToString(),
+                ShiftId = entity.Id,
+                MovementType = diff < 0 ? NextVent.Core.Enums.MovementType.GastoOperativo : NextVent.Core.Enums.MovementType.AperturaCaja,
+                Amount = Math.Abs(diff),
+                IsOutflow = diff < 0,
+                Description = diff < 0 ? "Faltante de Caja en Corte Z" : "Sobrante de Caja en Corte Z",
+                Timestamp = DateTime.UtcNow.ToString("s")
+            });
+        }
 
         await _ctx.SaveChangesAsync();
         return MapToDto(entity);

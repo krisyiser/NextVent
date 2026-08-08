@@ -84,4 +84,29 @@ public sealed class GiftcardService : IGiftcardService
         _ctx.Giftcards.Add(entity);
         await _ctx.SaveChangesAsync();
     }
+
+    public async Task RechargeAsync(string cardId, decimal amount, NextVent.Core.Enums.PaymentMethod method, string activeShiftId)
+    {
+        var card = await _ctx.Giftcards.FindAsync(cardId);
+        if (card == null) return;
+
+        card.Balance += (double)amount;
+
+        // GUARANTEE MONEY INFLOW RECORD
+        if (method == NextVent.Core.Enums.PaymentMethod.Efectivo)
+        {
+            _ctx.ShiftMovements.Add(new ShiftMovementEntity
+            {
+                Id = Guid.NewGuid().ToString(),
+                ShiftId = activeShiftId,
+                MovementType = NextVent.Core.Enums.MovementType.AbonoCliente, // Treat as generic inflow
+                Amount = (double)amount,
+                IsOutflow = false,
+                Description = $"Recarga Monedero {card.CardNumber}",
+                Timestamp = DateTime.UtcNow.ToString("s")
+            });
+        }
+
+        await _ctx.SaveChangesAsync();
+    }
 }

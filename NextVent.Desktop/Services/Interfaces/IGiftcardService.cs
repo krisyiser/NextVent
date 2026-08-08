@@ -12,4 +12,5 @@ public interface IGiftcardService
     Task<(bool IsValid, decimal Balance, string Error)> ValidateCardAsync(string cardNumber);
     Task<bool> RedeemBalanceAsync(string cardNumber, decimal amountToRedeem, string saleId = "");
     Task CreateCardAsync(string cardNumber, double initialBalance, string? customerId = null);
+    Task RechargeAsync(string cardId, decimal amount, NextVent.Core.Enums.PaymentMethod method, string activeShiftId);
 }

@@ -131,8 +131,16 @@ public sealed class SaleService : ISaleService
                 throw new InvalidOperationException("Debe asignar un cliente registrado para cobrar a crédito.");
             }
 
-            await _ctx.SaveChangesAsync();
-            await transaction.CommitAsync();
+            try
+            {
+                await _ctx.SaveChangesAsync();
+                await transaction.CommitAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                await transaction.RollbackAsync();
+                throw new DbUpdateConcurrencyException("El inventario cambió durante la transacción. Intente cobrar de nuevo.");
+            }
 
             return sale with
             {
@@ -272,7 +280,7 @@ public sealed class SaleService : ISaleService
         await _ctx.SaveChangesAsync();
     }
 
-    public async Task<bool> ProcessPartialReturnAsync(string saleId, string productId, double returnQty, string reason, string refundMethod = "Efectivo")
+    public async Task<bool> ProcessPartialReturnAsync(string saleId, string productId, double returnQty, string reason, string refundMethod = "Efectivo", bool isProductInGoodCondition = true)
     {
         if (returnQty <= 0) return false;
         await using var transaction = await _ctx.Database.BeginTransactionAsync();
@@ -292,8 +300,30 @@ public sealed class SaleService : ISaleService
                 throw new InvalidOperationException($"Fraude Detectado: Intento de devolver más unidades de las disponibles para el ítem {targetItem.ProductId}");
             }
 
-            // 1. Restock product stock recursively in database
-            await RestockInventoryRecursiveAsync(targetItem.ProductId, returnQty, new System.Collections.Generic.HashSet<string>());
+            // 1. Restock product stock recursively in database (only if product is in good condition)
+            if (isProductInGoodCondition)
+            {
+                await RestockInventoryRecursiveAsync(targetItem.ProductId, returnQty, new System.Collections.Generic.HashSet<string>());
+            }
+            else
+            {
+                // DO NOT restock. Write to AuditLog as Merma (Shrinkage).
+                var product = await _ctx.Products.FindAsync(targetItem.ProductId);
+                if (product != null)
+                {
+                    _ctx.AuditLogs.Add(new AuditLogEntity
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        Timestamp = DateTime.UtcNow.ToString("o"),
+                        ActionType = AuditActionType.InventoryStockAdjustment,
+                        UserId = string.Empty,
+                        Reason = $"Devolución de producto dañado/mermado: {reason}",
+                        FinancialImpact = product.Cost * returnQty,
+                        EntityName = "products",
+                        EntityId = targetItem.ProductId
+                    });
+                }
+            }
 
             // 2. Adjust item quantity and sale totals
             double refundedAmount = Math.Round(targetItem.UnitPrice * returnQty, 2);

@@ -36,6 +36,7 @@ public class ProductEntity
     public int WholesaleThreshold { get; set; }
 
     [Column("stock")]
+    [ConcurrencyCheck]
     public double Stock { get; set; }
 
     [Required]

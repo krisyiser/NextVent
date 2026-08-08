@@ -501,7 +501,147 @@ public sealed class SaleServiceTests : IDisposable
         });
     }
 
+    [Fact]
+    public async Task ProcessPartialReturnAsync_ShouldNotRestockAndLogShrinkage_WhenProductIsNotInGoodCondition()
+    {
+        // 1. Setup Product
+        var product = new ProductDto("SHRINK-PROD", "777", "Damaged Item", 4.0, 10.0, 8.0, 5, 10, "Botanas", "Pza", 0, null);
+        await _productService.AddAsync(product);
 
+        // 2. Perform Sale
+        var item = new SaleItemSnapshotDto("SHRINK-PROD", "Damaged Item", 10.0, 4.0, 2, "Pza", "Botanas", 0.0, 20.0);
+        var saleDto = new SaleDto(
+            Id: "SALE-SHRINK-01",
+            Date: DateTimeOffset.UtcNow.ToString("o"),
+            Items: [item],
+            Total: 20.0,
+            TotalCost: 8.0,
+            Profit: 12.0,
+            PaidAmount: 20.0,
+            ChangeAmount: 0.0,
+            PaymentMethod: "Cash",
+            CustomerId: null,
+            IsCredit: false,
+            IsCancelled: false,
+            CancelledAt: null,
+            EstadoFiscal: "PENDIENTE",
+            UuidSat: null,
+            SerieFolio: null
+        );
+        await _saleService.SaveAsync(saleDto);
+
+        // Check stock after sale (10 - 2 = 8)
+        var prodAfterSale = await _productService.GetByIdAsync("SHRINK-PROD");
+        Assert.Equal(8.0, prodAfterSale.Stock);
+
+        // 3. Process return with isProductInGoodCondition = false
+        var result = await _saleService.ProcessPartialReturnAsync(
+            "SALE-SHRINK-01",
+            "SHRINK-PROD",
+            1.0,
+            "Rotura",
+            "Efectivo",
+            isProductInGoodCondition: false
+        );
+
+        Assert.True(result);
+
+        // 4. Verify Stock was NOT incremented (remains 8.0)
+        var prodAfterReturn = await _productService.GetByIdAsync("SHRINK-PROD");
+        Assert.Equal(8.0, prodAfterReturn.Stock);
+
+        // 5. Verify AuditLogEntity created for the shrinkage
+        var logs = await _context.AuditLogs.ToListAsync();
+        var shrinkageLog = logs.FirstOrDefault(l => l.EntityId == "SHRINK-PROD" && l.Reason.Contains("Devolución de producto dañado/mermado"));
+        Assert.NotNull(shrinkageLog);
+        Assert.Equal(4.0, shrinkageLog.FinancialImpact); // Cost = 4.0 * Quantity = 1.0 -> 4.0
+    }
+
+    [Fact]
+    public async Task CloseAsync_ShouldCreateShiftMovementForShortage_WhenActualBalanceIsLowerThanExpected()
+    {
+        var shiftService = new ShiftService(_context);
+
+        // 1. Open shift
+        var activeShift = await shiftService.OpenAsync(100.0); // opening balance = 100
+
+        // 2. Perform cash sale
+        var product = new ProductDto("CASH-CUT-PROD", "888", "Ice Cream", 5.0, 10.0, 8.0, 5, 20, "Botanas", "Pza", 0, null);
+        await _productService.AddAsync(product);
+
+        var item = new SaleItemSnapshotDto("CASH-CUT-PROD", "Ice Cream", 10.0, 5.0, 10, "Pza", "Botanas", 0.0, 100.0);
+        var saleDto = new SaleDto(
+            Id: "SALE-CASH-CUT-01",
+            Date: DateTimeOffset.UtcNow.ToString("o"),
+            Items: [item],
+            Total: 100.0,
+            TotalCost: 50.0,
+            Profit: 50.0,
+            PaidAmount: 100.0,
+            ChangeAmount: 0.0,
+            PaymentMethod: "Cash",
+            CustomerId: null,
+            IsCredit: false,
+            IsCancelled: false,
+            CancelledAt: null,
+            EstadoFiscal: "PENDIENTE",
+            UuidSat: null,
+            SerieFolio: null
+        );
+        await _saleService.SaveAsync(saleDto);
+
+        // Expected balance: opening (100) + sale (100) = 200
+        // 3. Close shift declaring only 180 (shortage of 20)
+        var closedShift = await shiftService.CloseAsync(activeShift.Id, 180.0);
+
+        Assert.Equal(200.0, closedShift.ExpectedBalance);
+        Assert.Equal(180.0, closedShift.ActualBalance);
+        Assert.Equal(-20.0, closedShift.Diff);
+
+        // 4. Verify ShiftMovement was added for the shortage
+        var movements = await _context.ShiftMovements.ToListAsync();
+        var shortageMovement = movements.FirstOrDefault(m => m.ShiftId == activeShift.Id && m.Description.Contains("Faltante de Caja"));
+        Assert.NotNull(shortageMovement);
+        Assert.Equal(20.0, shortageMovement.Amount);
+        Assert.True(shortageMovement.IsOutflow);
+    }
+
+    [Fact]
+    public async Task RechargeAsync_ShouldIncreaseGiftcardBalanceAndRecordShiftMovement()
+    {
+        var giftcardService = new GiftcardService(_context);
+
+        // 1. Create card
+        await giftcardService.CreateCardAsync("GIFT-999", 50.0, null);
+        var card = await giftcardService.GetByCardNumberAsync("GIFT-999");
+        Assert.NotNull(card);
+
+        // Add active shift to prevent foreign key failure
+        var shift = new ShiftEntity
+        {
+            Id = "SHIFT-TEST-01",
+            OpeningBalance = 100.0,
+            IsOpen = 1,
+            StartTime = DateTimeOffset.UtcNow.ToString("o")
+        };
+        _context.Shifts.Add(shift);
+        await _context.SaveChangesAsync();
+
+        // 2. Recharge card with 150.0 cash under active shift
+        await giftcardService.RechargeAsync(card.Id, 150.0m, NextVent.Core.Enums.PaymentMethod.Efectivo, "SHIFT-TEST-01");
+
+        // 3. Verify balance (50 + 150 = 200)
+        var updatedCard = await giftcardService.GetByCardNumberAsync("GIFT-999");
+        Assert.NotNull(updatedCard);
+        Assert.Equal(200.0, updatedCard.Balance);
+
+        // 4. Verify ShiftMovement created for the recharge inflow
+        var movements = await _context.ShiftMovements.ToListAsync();
+        var rechargeMovement = movements.FirstOrDefault(m => m.ShiftId == "SHIFT-TEST-01" && m.Description.Contains("Recarga Monedero"));
+        Assert.NotNull(rechargeMovement);
+        Assert.Equal(150.0, rechargeMovement.Amount);
+        Assert.False(rechargeMovement.IsOutflow);
+    }
 
     public void Dispose()
     {

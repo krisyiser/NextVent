@@ -134,13 +134,7 @@
                                         </StackPanel>
                                     </Button>
 
-                                    <!-- 9. Atajos -->
-                                    <Button Command="{Binding SelectMainTabCommand}" CommandParameter="atajos" Padding="12,10" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch">
-                                        <StackPanel Orientation="Horizontal" Spacing="10">
-                                            <mi:MaterialIcon Kind="KeyboardOutline" Width="18" Height="18" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                                            <TextBlock Text="Atajos" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
-                                        </StackPanel>
-                                    </Button>
+
 
                                     <!-- 10. Acerca de -->
                                     <Button Command="{Binding SelectMainTabCommand}" CommandParameter="acercade" Padding="12,10" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch">
@@ -165,7 +159,7 @@
                             <settings:DatosSettingsView IsVisible="{Binding IsDatosTab}" />
                             <settings:AlertasSettingsView IsVisible="{Binding IsAlertasTab}" />
                             <settings:UsuariosSettingsView IsVisible="{Binding IsUsuariosTab}" />
-                            <settings:AtajosSettingsView IsVisible="{Binding IsAtajosTab}" />
+
                             <settings:AcercaDeSettingsView IsVisible="{Binding IsAcercaDeTab}" />
                         </Grid>
                     </ScrollViewer>

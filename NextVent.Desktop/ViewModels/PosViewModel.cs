@@ -3,6 +3,8 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using NextVent.ViewModels.Dialogs;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.EntityFrameworkCore;
 using NextVent.Data;
 using NextVent.Data.Dtos;
@@ -140,6 +142,17 @@ public partial class PosViewModel : ObservableObject
         _ = LoadCustomersAsync();
         _ = RefreshParkedCountAsync();
         _ = LoadActiveShiftNotesAsync();
+
+        WeakReferenceMessenger.Default.Register<ForceLogoutMessage>(this, (r, m) =>
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                ClearCart();
+                ParkedTickets.Clear();
+                ParkedOrdersCount = 0;
+                SelectedCustomer = null;
+            });
+        });
     }
 
     private void OnCashierChanged(UserModel user)

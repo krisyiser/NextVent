@@ -15,6 +15,6 @@ public interface ISaleService
     Task<List<SaleDto>> GetHistoryAsync(int limit = 500);
     Task CancelAsync(string saleId);
     Task UpdateFiscalStatusAsync(string saleId, string status, string? uuid, string? folio);
-    Task<bool> ProcessPartialReturnAsync(string saleId, string productId, double returnQty, string reason, string refundMethod = "Efectivo");
+    Task<bool> ProcessPartialReturnAsync(string saleId, string productId, double returnQty, string reason, string refundMethod = "Efectivo", bool isProductInGoodCondition = true);
     Task<List<CashierPerformanceDto>> GetCashierPerformanceReportAsync(double defaultCommissionPct = 3.0);
 }

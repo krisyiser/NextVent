@@ -57,6 +57,10 @@
                     <ComboBox ItemsSource="{Binding Reasons}" SelectedItem="{Binding ReturnReason, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="8" />
                 </StackPanel>
 
+                <CheckBox IsChecked="{Binding IsProductInGoodCondition, Mode=TwoWay}" Margin="0,4,0,0">
+                    <TextBlock Text="Producto en buen estado (Reingresar a inventario)" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" />
+                </CheckBox>
+
                 <TextBlock Text="{Binding FeedbackMessage}" FontSize="12" Foreground="{DynamicResource AccentDangerBrush}" HorizontalAlignment="Center" />
 
                 <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right" Margin="0,8,0,0">
