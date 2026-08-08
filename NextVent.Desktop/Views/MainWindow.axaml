@@ -14,19 +14,6 @@
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaTitleBarHeightHint="-1">
 
-    <Window.KeyBindings>
-        <KeyBinding Gesture="F2" Command="{Binding NavigateToCommand}" CommandParameter="pos" />
-        <KeyBinding Gesture="{Binding ShortcutSearch}" Command="{Binding TriggerPosSearchFocusCommand}" />
-        <KeyBinding Gesture="F4" Command="{Binding NavigateToCommand}" CommandParameter="customers" />
-        <KeyBinding Gesture="F5" Command="{Binding NavigateToCommand}" CommandParameter="suppliers" />
-        <KeyBinding Gesture="F6" Command="{Binding NavigateToCommand}" CommandParameter="expenses" />
-        <KeyBinding Gesture="{Binding ShortcutPause}" Command="{Binding TriggerPosPauseCommand}" />
-        <KeyBinding Gesture="F8" Command="{Binding NavigateToCommand}" CommandParameter="promotions" />
-        <KeyBinding Gesture="F9" Command="{Binding NavigateToCommand}" CommandParameter="fiscal" />
-        <KeyBinding Gesture="F10" Command="{Binding NavigateToCommand}" CommandParameter="settings" />
-        <KeyBinding Gesture="{Binding ShortcutCharge}" Command="{Binding TriggerPosCheckoutCommand}" />
-    </Window.KeyBindings>
-
     <Window.DataTemplates>
         <!-- Module View Templates -->
         <DataTemplate DataType="vm:PosViewModel">

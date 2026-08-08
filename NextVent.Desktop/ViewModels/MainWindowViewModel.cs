@@ -4,6 +4,7 @@ using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.EntityFrameworkCore;
 using NextVent.Data;
 using NextVent.Services;
@@ -28,10 +29,6 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private ObservableObject _activeViewModel;
     [ObservableProperty] private ObservableObject? _activeDialogViewModel = null;
     [ObservableProperty] private bool _isDialogOverlayOpen = false;
-
-    [ObservableProperty] private KeyGesture _shortcutCharge = KeyGesture.Parse("F12");
-    [ObservableProperty] private KeyGesture _shortcutSearch = KeyGesture.Parse("F3");
-    [ObservableProperty] private KeyGesture _shortcutPause = KeyGesture.Parse("F7");
 
     private readonly IUserRepository _userRepository;
 
@@ -151,8 +148,6 @@ public partial class MainWindowViewModel : ObservableObject
             await ValidateShiftStatusAsync();
         };
 
-        _settingsVm.SettingsSaved += async () => await LoadDynamicShortcutsAsync();
-
         // ── Wire Dynamic Sidebar Layout Changes ──
         ThemeService.Instance.SidebarPositionChanged += pos => Dispatcher.UIThread.Post(() => ApplySidebarLayout(pos));
 
@@ -232,7 +227,7 @@ public partial class MainWindowViewModel : ObservableObject
         // ── Wire History Cashup & Return Dialog Events ──
         _historyVm.OpenCashupRequested += () =>
         {
-            var dialog = new CashupDialogViewModel(_db);
+            var dialog = new CashupDialogViewModel(_db, _shiftService, _sessionManager);
             dialog.RequestClose += CloseDialog;
             ActiveDialogViewModel = dialog;
             IsDialogOverlayOpen = true;
@@ -314,7 +309,15 @@ public partial class MainWindowViewModel : ObservableObject
 
         _activeViewModel = _loginVm;
         _ = InitializeApplicationStateAsync();
-        _ = LoadDynamicShortcutsAsync();
+
+        WeakReferenceMessenger.Default.Register<ForceLogoutMessage>(this, (r, m) =>
+        {
+            Dispatcher.UIThread.Post(() =>
+            {
+                ActiveViewModel = _loginVm;
+                CloseDialog();
+            });
+        });
     }
 
     private void ApplySidebarLayout(string position)
@@ -426,7 +429,7 @@ public partial class MainWindowViewModel : ObservableObject
                     {
                         if (confirmed)
                         {
-                            var blindCashupVm = new CashupDialogViewModel(_db, _shiftService, isFinalZCut: true, isBlindMode: true);
+                            var blindCashupVm = new CashupDialogViewModel(_db, _shiftService, _sessionManager, isFinalZCut: true, isBlindMode: true);
                             blindCashupVm.RequestClose += () =>
                             {
                                 CloseDialog();
@@ -494,39 +497,6 @@ public partial class MainWindowViewModel : ObservableObject
         return 5; // default 5 minutes
     }
 
-    private static KeyGesture TryParseGesture(string gestureStr, string fallback)
-    {
-        try
-        {
-            if (!string.IsNullOrWhiteSpace(gestureStr))
-            {
-                return KeyGesture.Parse(gestureStr);
-            }
-        }
-        catch
-        {
-            // fallback
-        }
-        return KeyGesture.Parse(fallback);
-    }
-
-    public async Task LoadDynamicShortcutsAsync()
-    {
-        var settingsService = new SettingsService(_db);
-        
-        var charge = await settingsService.GetAsync("ShortcutCharge") ?? "F12";
-        var search = await settingsService.GetAsync("ShortcutSearch") ?? "F3";
-        var pause = await settingsService.GetAsync("ShortcutPause") ?? "F7";
-
-        ShortcutCharge = TryParseGesture(charge, "F12");
-        ShortcutSearch = TryParseGesture(search, "F3");
-        ShortcutPause = TryParseGesture(pause, "F7");
-
-        OnPropertyChanged(nameof(ShortcutCharge));
-        OnPropertyChanged(nameof(ShortcutSearch));
-        OnPropertyChanged(nameof(ShortcutPause));
-    }
-
     public async Task TriggerAutoLockAsync()
     {
         if (_sessionManager.CurrentCashier != null && !IsLocked)
@@ -536,23 +506,5 @@ public partial class MainWindowViewModel : ObservableObject
             IsDialogOverlayOpen = true;
         }
         await Task.CompletedTask;
-    }
-
-    [RelayCommand]
-    private void TriggerPosSearchFocus()
-    {
-        if (ActiveViewModel == _posVm)
-        {
-            _posVm.FocusSearchCommand.Execute(null);
-        }
-    }
-
-    [RelayCommand]
-    private void TriggerPosPause()
-    {
-        if (ActiveViewModel == _posVm)
-        {
-            _posVm.ParkCurrentCartCommand.Execute(null);
-        }
     }
 }

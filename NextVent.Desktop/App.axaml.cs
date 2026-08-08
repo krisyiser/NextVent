@@ -32,7 +32,7 @@ public partial class App : Application
                     .Options;
 
                 using var context = new AppDbContext(options);
-                await context.Database.EnsureCreatedAsync();
+                await context.Database.MigrateAsync();
                 await DatabaseSeeder.SeedAsync(context);
                 Log.Information($"Database initialized and seeded successfully at {dbPath}");
             }

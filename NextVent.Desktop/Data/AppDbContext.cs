@@ -59,3 +59,13 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<AttendanceEntity>().HasKey(a => a.Id);
     }
 }
+
+public class AppDbContextFactory : Microsoft.EntityFrameworkCore.Design.IDesignTimeDbContextFactory<AppDbContext>
+{
+    public AppDbContext CreateDbContext(string[] args)
+    {
+        var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
+        optionsBuilder.UseSqlite("Data Source=app.db");
+        return new AppDbContext(optionsBuilder.Options);
+    }
+}

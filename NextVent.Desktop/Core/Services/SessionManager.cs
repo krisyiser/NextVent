@@ -12,6 +12,7 @@ public interface ISessionManager
 
     void SwitchCashier(UserModel newUser);
     void StartSession(UserModel user);
+    void ClearSession();
     void LockTerminal();
     void UnlockTerminal();
 }
@@ -44,6 +45,11 @@ public class SessionManager : ISessionManager
     public void StartSession(UserModel user)
     {
         SwitchCashier(user);
+    }
+
+    public void ClearSession()
+    {
+        SwitchCashier(null!);
     }
 
     public void LockTerminal()

@@ -1,18 +1,24 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.EntityFrameworkCore;
+using NextVent.Core.Services;
 using NextVent.Data;
 using NextVent.Data.Entities;
 using Serilog;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace NextVent.ViewModels.Dialogs;
+
+public record ForceLogoutMessage();
 
 public partial class CashupDialogViewModel : ObservableObject
 {
     private readonly AppDbContext _db;
     private readonly NextVent.Services.Interfaces.IShiftService? _shiftService;
+    private readonly ISessionManager? _sessionManager;
 
     [ObservableProperty] private double _openCashAmount = 1000.00;
     [ObservableProperty] private double _theoreticalCash = 4250.00;
@@ -40,10 +46,16 @@ public partial class CashupDialogViewModel : ObservableObject
 
     public event Action? RequestClose;
 
-    public CashupDialogViewModel(AppDbContext db, NextVent.Services.Interfaces.IShiftService? shiftService = null, bool isFinalZCut = false, bool isBlindMode = false)
+    public CashupDialogViewModel(
+        AppDbContext db,
+        NextVent.Services.Interfaces.IShiftService? shiftService = null,
+        ISessionManager? sessionManager = null,
+        bool isFinalZCut = false,
+        bool isBlindMode = false)
     {
         _db = db;
         _shiftService = shiftService;
+        _sessionManager = sessionManager;
         IsFinalZCut = isFinalZCut;
         IsBlindMode = isBlindMode;
 
@@ -117,6 +129,8 @@ public partial class CashupDialogViewModel : ObservableObject
             if (_activeShift != null && IsFinalZCut && _shiftService != null)
             {
                 await _shiftService.CloseAsync(_activeShift.Id, TotalPhysicalCash);
+                _sessionManager?.ClearSession();
+                WeakReferenceMessenger.Default.Send(new ForceLogoutMessage());
             }
 
             FeedbackMessage = "¡Corte y Arqueo de Caja guardado correctamente!";
