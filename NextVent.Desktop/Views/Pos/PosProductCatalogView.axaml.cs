@@ -25,4 +25,10 @@ public partial class PosProductCatalogView : UserControl
             });
         });
     }
+
+    protected override void OnDetachedFromVisualTree(Avalonia.VisualTreeAttachmentEventArgs e)
+    {
+        base.OnDetachedFromVisualTree(e);
+        WeakReferenceMessenger.Default.UnregisterAll(this);
+    }
 }

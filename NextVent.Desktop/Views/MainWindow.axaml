@@ -214,7 +214,7 @@
             <!-- ═══ MAIN CONTENT AREA ═══ -->
             <DockPanel LastChildFill="True">
                 <!-- Active Module Content -->
-                <ContentControl Content="{Binding ActiveViewModel}" />
+                <ContentControl Content="{Binding ActiveViewModel}" IsEnabled="{Binding !IsLocked}" />
             </DockPanel>
         </DockPanel>
 

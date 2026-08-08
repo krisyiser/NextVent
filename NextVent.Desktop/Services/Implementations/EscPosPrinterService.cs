@@ -34,6 +34,7 @@ public class EscPosPrinterService : IEscPosPrinterService, IDisposable
 
     public EscPosPrinterService()
     {
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         _printerQueue = Channel.CreateUnbounded<PrintJob>();
         _cts = new CancellationTokenSource();
         _ = ProcessPrintQueueAsync(_cts.Token);
@@ -45,6 +46,7 @@ public class EscPosPrinterService : IEscPosPrinterService, IDisposable
         {
             using var ms = new MemoryStream();
             ms.Write(EscInit, 0, EscInit.Length);
+            ms.Write(new byte[] { 0x1B, 0x74, 0x13 }, 0, 3); // Select Code Page 19 (CP858)
 
             // Header
             ms.Write(AlignCenter, 0, AlignCenter.Length);
@@ -136,6 +138,7 @@ public class EscPosPrinterService : IEscPosPrinterService, IDisposable
         {
             using var ms = new MemoryStream();
             ms.Write(EscInit, 0, EscInit.Length);
+            ms.Write(new byte[] { 0x1B, 0x74, 0x13 }, 0, 3); // Select Code Page 19 (CP858)
 
             // Header
             ms.Write(AlignCenter, 0, AlignCenter.Length);
@@ -187,6 +190,7 @@ public class EscPosPrinterService : IEscPosPrinterService, IDisposable
         {
             using var ms = new MemoryStream();
             ms.Write(EscInit, 0, EscInit.Length);
+            ms.Write(new byte[] { 0x1B, 0x74, 0x13 }, 0, 3); // Select Code Page 19 (CP858)
             ms.Write(AlignCenter, 0, AlignCenter.Length);
             ms.Write(DoubleSizeOn, 0, DoubleSizeOn.Length);
             ms.Write(BoldOn, 0, BoldOn.Length);
@@ -288,7 +292,8 @@ public class EscPosPrinterService : IEscPosPrinterService, IDisposable
 
     private static void WriteString(Stream s, string text)
     {
-        byte[] bytes = Encoding.ASCII.GetBytes(text);
+        var encoding = Encoding.GetEncoding(858);
+        byte[] bytes = encoding.GetBytes(text);
         s.Write(bytes, 0, bytes.Length);
     }
 

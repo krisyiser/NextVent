@@ -58,6 +58,15 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<ShiftNoteEntity>().HasKey(sn => sn.Id);
         modelBuilder.Entity<AttendanceEntity>().HasKey(a => a.Id);
     }
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        base.OnConfiguring(optionsBuilder);
+        if (!optionsBuilder.IsConfigured)
+        {
+            var dbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app.db");
+            optionsBuilder.UseSqlite($"Data Source={dbPath};Cache=Shared;Mode=ReadWriteCreate;Journal Mode=WAL;");
+        }
+    }
 }
 
 public class AppDbContextFactory : Microsoft.EntityFrameworkCore.Design.IDesignTimeDbContextFactory<AppDbContext>
@@ -65,7 +74,7 @@ public class AppDbContextFactory : Microsoft.EntityFrameworkCore.Design.IDesignT
     public AppDbContext CreateDbContext(string[] args)
     {
         var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-        optionsBuilder.UseSqlite("Data Source=app.db");
+        optionsBuilder.UseSqlite("Data Source=app.db;Cache=Shared;Mode=ReadWriteCreate;Journal Mode=WAL;");
         return new AppDbContext(optionsBuilder.Options);
     }
 }

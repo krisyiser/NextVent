@@ -9,7 +9,8 @@ namespace NextVent.ViewModels;
 
 public partial class ClientDisplayViewModel : ObservableObject,
     IRecipient<CartStateSnapshotMessage>,
-    IRecipient<CustomerDisplayIdleStateMessage>
+    IRecipient<CustomerDisplayIdleStateMessage>,
+    System.IDisposable
 {
     public ObservableCollection<CartItemDto> CustomerCartItems { get; } = [];
 
@@ -55,5 +56,10 @@ public partial class ClientDisplayViewModel : ObservableObject,
         {
             IsIdleMode = message.IsIdle;
         });
+    }
+
+    public void Dispose()
+    {
+        WeakReferenceMessenger.Default.UnregisterAll(this);
     }
 }

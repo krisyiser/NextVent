@@ -28,7 +28,7 @@ public partial class App : Application
             {
                 var dbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app.db");
                 var options = new DbContextOptionsBuilder<AppDbContext>()
-                    .UseSqlite($"Data Source={dbPath}")
+                    .UseSqlite($"Data Source={dbPath};Cache=Shared;Mode=ReadWriteCreate;Journal Mode=WAL;")
                     .Options;
 
                 using var context = new AppDbContext(options);

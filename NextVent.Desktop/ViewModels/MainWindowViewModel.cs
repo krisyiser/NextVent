@@ -74,7 +74,7 @@ public partial class MainWindowViewModel : ObservableObject
     {
         var dbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app.db");
         var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseSqlite($"Data Source={dbPath}")
+            .UseSqlite($"Data Source={dbPath};Cache=Shared;Mode=ReadWriteCreate;Journal Mode=WAL;")
             .Options;
 
         _db = new AppDbContext(options);
@@ -149,6 +149,7 @@ public partial class MainWindowViewModel : ObservableObject
         _loginVm.LoginSuccessful += async () =>
         {
             ActiveViewModel = _posVm;
+            _posVm.RegisterMessages();
             _ = _posVm.LoadProductsAsync();
             await ValidateShiftStatusAsync();
         };

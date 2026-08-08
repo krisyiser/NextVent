@@ -643,6 +643,30 @@ public sealed class SaleServiceTests : IDisposable
         Assert.False(rechargeMovement.IsOutflow);
     }
 
+    [Fact]
+    public void EscPosPrinterService_ShouldEncodeSpanishCharactersToCp858Bytes()
+    {
+        // 1. Register encoding provider
+        System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+
+        // 2. Fetch CP858 encoding
+        var printerEncoding = System.Text.Encoding.GetEncoding(858);
+        Assert.NotNull(printerEncoding);
+
+        // 3. Test conversion of "ñáéíóú"
+        var text = "ñáéíóú";
+        var bytes = printerEncoding.GetBytes(text);
+
+        Assert.Equal(6, bytes.Length);
+        // Under CP858: ñ is 0xA4, á is 0xA0, é is 0x82, í is 0xA1, ó is 0xA2, ú is 0xA3
+        Assert.Equal(0xA4, bytes[0]);
+        Assert.Equal(0xA0, bytes[1]);
+        Assert.Equal(0x82, bytes[2]);
+        Assert.Equal(0xA1, bytes[3]);
+        Assert.Equal(0xA2, bytes[4]);
+        Assert.Equal(0xA3, bytes[5]);
+    }
+
     public void Dispose()
     {
         _context.Dispose();

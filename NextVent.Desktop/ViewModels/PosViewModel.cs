@@ -36,7 +36,7 @@ public partial class ParkedTicketModel : ObservableObject
     public List<CartItemDto> Lines { get; init; } = new();
 }
 
-public partial class PosViewModel : ObservableObject
+public partial class PosViewModel : ObservableObject, System.IDisposable
 {
     private readonly IProductService _productService;
     private readonly AppDbContext? _db;
@@ -143,15 +143,29 @@ public partial class PosViewModel : ObservableObject
         _ = RefreshParkedCountAsync();
         _ = LoadActiveShiftNotesAsync();
 
+        RegisterMessages();
+    }
+
+    public void RegisterMessages()
+    {
+        WeakReferenceMessenger.Default.UnregisterAll(this);
+
         WeakReferenceMessenger.Default.Register<ForceLogoutMessage>(this, (r, m) =>
         {
-            Dispatcher.UIThread.Post(() =>
-            {
-                ClearCart();
-                ParkedTickets.Clear();
-                ParkedOrdersCount = 0;
-                SelectedCustomer = null;
-            });
+            HandleForceLogout();
+        });
+    }
+
+    private void HandleForceLogout()
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            ClearCart();
+            ParkedTickets.Clear();
+            ParkedOrdersCount = 0;
+            SelectedCustomer = null;
+
+            WeakReferenceMessenger.Default.UnregisterAll(this);
         });
     }
 
@@ -889,5 +903,10 @@ public partial class PosViewModel : ObservableObject
                 WeakReferenceMessenger.Default.Send(new NextVent.Core.Messages.CustomerDisplayIdleStateMessage(IsIdle: CartItems.Count == 0));
             });
         }
+    }
+
+    public void Dispose()
+    {
+        WeakReferenceMessenger.Default.UnregisterAll(this);
     }
 }
