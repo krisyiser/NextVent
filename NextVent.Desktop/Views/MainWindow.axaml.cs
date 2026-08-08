@@ -1,32 +1,75 @@
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
+using Avalonia.Threading;
 using NextVent.ViewModels;
+using System;
 
 namespace NextVent.Views;
 
 /// <summary>
-/// MainWindow code-behind. Handles global function key shortcuts (F2-F10) for zero-mouse operation and fullscreen toggling.
+/// MainWindow code-behind. Handles global function key shortcuts (F2-F10) for zero-mouse operation,
+/// fullscreen toggling, and global idle timeout auto-lock.
 /// </summary>
 public partial class MainWindow : Window
 {
+    private DispatcherTimer _idleTimer;
+    private int _idleTimeoutMinutes = 5;
+
     public MainWindow()
     {
         InitializeComponent();
         KeyDown += OnGlobalKeyDown;
         DataContextChanged += OnDataContextChanged;
+
+        _idleTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromMinutes(_idleTimeoutMinutes)
+        };
+        _idleTimer.Tick += OnIdleTimeout;
+        _idleTimer.Start();
+
+        // Global Event Listeners for Inactivity auto-lock
+        AddHandler(PointerMovedEvent, OnUserActivity, RoutingStrategies.Tunnel);
+        AddHandler(KeyDownEvent, OnUserActivity, RoutingStrategies.Tunnel);
+        AddHandler(PointerPressedEvent, OnUserActivity, RoutingStrategies.Tunnel);
     }
 
-    private void OnDataContextChanged(object? sender, System.EventArgs e)
+    private async void OnDataContextChanged(object? sender, System.EventArgs e)
     {
         if (DataContext is MainWindowViewModel vm)
         {
             vm.ToggleFullscreenRequested += ToggleFullscreen;
+
+            // Load idle timeout dynamically from VM settings
+            int minutes = await vm.GetIdleTimeoutMinutesAsync();
+            _idleTimeoutMinutes = minutes;
+            _idleTimer.Interval = TimeSpan.FromMinutes(_idleTimeoutMinutes);
+            _idleTimer.Stop();
+            _idleTimer.Start();
         }
     }
 
     private void ToggleFullscreen()
     {
         WindowState = WindowState == WindowState.FullScreen ? WindowState.Normal : WindowState.FullScreen;
+    }
+
+    private void OnUserActivity(object? sender, RoutedEventArgs e)
+    {
+        // Reset timer on any mouse/keyboard activity
+        _idleTimer.Stop();
+        _idleTimer.Start();
+    }
+
+    private async void OnIdleTimeout(object? sender, EventArgs e)
+    {
+        _idleTimer.Stop();
+        
+        if (DataContext is MainWindowViewModel vm && !vm.IsLocked)
+        {
+            await vm.TriggerAutoLockAsync();
+        }
     }
 
     private void OnGlobalKeyDown(object? sender, KeyEventArgs e)

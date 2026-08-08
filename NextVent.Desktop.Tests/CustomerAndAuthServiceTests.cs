@@ -5,6 +5,8 @@ using NextVent.Data;
 using NextVent.Data.Dtos;
 using NextVent.Services.Auth;
 using NextVent.Services.Implementations;
+using System;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace NextVent.Desktop.Tests;
@@ -59,7 +61,8 @@ public sealed class CustomerAndAuthServiceTests : IDisposable
     public async Task AuthService_Login_ShouldAuthenticateValidUserWithBCrypt()
     {
         var passwordHash = CryptoHelper.HashSecret("securePass123");
-        await _userService.SaveAsync("USR-001", "AdminUser", "ADMIN", passwordHash, null);
+        var guidId = "00000000-0000-0000-0000-000000000001";
+        await _userService.SaveAsync(guidId, "AdminUser", "ADMIN", passwordHash, null);
 
         // Valid Login
         var success = await _authService.LoginAsync("AdminUser", "securePass123");
@@ -83,13 +86,14 @@ public sealed class CustomerAndAuthServiceTests : IDisposable
     public async Task AuthService_Login_ShouldFailForInactiveUser()
     {
         var passwordHash = CryptoHelper.HashSecret("pass123");
-        await _userService.SaveAsync("USR-INACTIVE", "DisabledUser", "CAJERO", passwordHash, null);
+        var guidId = "00000000-0000-0000-0000-000000000002";
+        await _userService.SaveAsync(guidId, "DisabledUser", "CAJERO", passwordHash, null);
 
         // Deactivate user in DB
-        var userEntity = await _context.Users.FindAsync("USR-INACTIVE");
+        var userEntity = await _context.Users.FindAsync(Guid.Parse(guidId));
         if (userEntity != null)
         {
-            userEntity.Estatus = 0;
+            userEntity.IsActive = false;
             await _context.SaveChangesAsync();
         }
 
@@ -101,12 +105,13 @@ public sealed class CustomerAndAuthServiceTests : IDisposable
     public async Task AuthService_VerifyManagerPin_ShouldReturnTrueForValidPin()
     {
         var pinHash = CryptoHelper.HashSecret("9999");
-        await _userService.SaveAsync("USR-MGR", "Manager", "GERENTE", null, pinHash);
+        var guidId = "00000000-0000-0000-0000-000000000003";
+        await _userService.SaveAsync(guidId, "Manager", "GERENTE", null, pinHash);
 
-        var valid = await _authService.VerifyManagerPinAsync("USR-MGR", "9999");
+        var valid = await _authService.VerifyManagerPinAsync(guidId, "9999");
         Assert.True(valid);
 
-        var invalid = await _authService.VerifyManagerPinAsync("USR-MGR", "0000");
+        var invalid = await _authService.VerifyManagerPinAsync(guidId, "0000");
         Assert.False(invalid);
     }
 

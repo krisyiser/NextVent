@@ -22,25 +22,25 @@ public class AttendanceService : IAttendanceService
 
     public async Task<bool> HasActiveClockInAsync(string userId)
     {
-        if (string.IsNullOrWhiteSpace(userId)) return false;
+        if (string.IsNullOrWhiteSpace(userId) || !Guid.TryParse(userId, out var guid)) return false;
 
         return await _dbContext.Attendances
-            .AnyAsync(a => a.UserId == userId && a.CheckOutTime == null && a.Status == AttendanceStatus.Active);
+            .AnyAsync(a => a.UserId == guid && a.CheckOutTime == null && a.Status == AttendanceStatus.Active);
     }
 
     public async Task<AttendanceEntity?> GetActiveAttendanceAsync(string userId)
     {
-        if (string.IsNullOrWhiteSpace(userId)) return null;
+        if (string.IsNullOrWhiteSpace(userId) || !Guid.TryParse(userId, out var guid)) return null;
 
         return await _dbContext.Attendances
-            .FirstOrDefaultAsync(a => a.UserId == userId && a.CheckOutTime == null && a.Status == AttendanceStatus.Active);
+            .FirstOrDefaultAsync(a => a.UserId == guid && a.CheckOutTime == null && a.Status == AttendanceStatus.Active);
     }
 
     public async Task<AttendanceResultModel> ClockInAsync(string userId, string notes = "")
     {
-        if (string.IsNullOrWhiteSpace(userId))
+        if (string.IsNullOrWhiteSpace(userId) || !Guid.TryParse(userId, out var guid))
         {
-            return new AttendanceResultModel { IsSuccess = false, ErrorMessage = "ID de usuario inválido." };
+            return new AttendanceResultModel { IsSuccess = false, ErrorMessage = "ID de usuario inválido o formato incorrecto." };
         }
 
         bool alreadyClockedIn = await HasActiveClockInAsync(userId);
@@ -52,7 +52,7 @@ public class AttendanceService : IAttendanceService
         var entry = new AttendanceEntity
         {
             Id = Guid.NewGuid().ToString(),
-            UserId = userId,
+            UserId = guid,
             CheckInTime = DateTime.UtcNow,
             Status = AttendanceStatus.Active,
             TerminalName = Environment.MachineName,
@@ -67,7 +67,7 @@ public class AttendanceService : IAttendanceService
 
     public async Task<AttendanceResultModel> ClockOutAsync(string userId)
     {
-        if (string.IsNullOrWhiteSpace(userId))
+        if (string.IsNullOrWhiteSpace(userId) || !Guid.TryParse(userId, out var guid))
         {
             return new AttendanceResultModel { IsSuccess = false, ErrorMessage = "ID de usuario inválido." };
         }
@@ -86,7 +86,7 @@ public class AttendanceService : IAttendanceService
         }
 
         var activeAttendance = await _dbContext.Attendances
-            .FirstOrDefaultAsync(a => a.UserId == userId && a.CheckOutTime == null);
+            .FirstOrDefaultAsync(a => a.UserId == guid && a.CheckOutTime == null);
 
         if (activeAttendance == null)
         {

@@ -294,6 +294,12 @@ public partial class SettingsViewModel : ObservableObject
 
     [ObservableProperty] private string _feedbackMessage = string.Empty;
 
+    [ObservableProperty] private string _shortcutCharge = "F12";
+    [ObservableProperty] private string _shortcutSearch = "F3";
+    [ObservableProperty] private string _shortcutPause = "F7";
+
+    public event Func<Task>? SettingsSaved;
+
     public SettingsViewModel(IUserService userService, ISettingsService settingsService) : this()
     {
         _userService = userService;
@@ -338,7 +344,9 @@ public partial class SettingsViewModel : ObservableObject
             if (dict.TryGetValue("TamanoPreciosPosPx", out var fontPrice) && double.TryParse(fontPrice, out var fpVal)) TamanoPreciosPosPx = fpVal;
             if (dict.TryGetValue("AnchoCarritoPx", out var cartW) && double.TryParse(cartW, out var cwVal)) AnchoCarritoPx = cwVal;
             if (dict.TryGetValue("RadioBordesPx", out var radius) && double.TryParse(radius, out var rVal)) RadioBordesPx = rVal;
-            if (dict.TryGetValue("DuracionTransicionMs", out var trans) && double.TryParse(trans, out var tVal)) DuracionTransicionMs = tVal;
+            if (dict.TryGetValue("ShortcutCharge", out var sc)) ShortcutCharge = sc;
+            if (dict.TryGetValue("ShortcutSearch", out var ss)) ShortcutSearch = ss;
+            if (dict.TryGetValue("ShortcutPause", out var spKey)) ShortcutPause = spKey;
         }
         catch (Exception ex)
         {
@@ -535,9 +543,18 @@ public partial class SettingsViewModel : ObservableObject
             await _settingsService.SetAsync("EmpresaRazonSocial", EmpresaRazonSocial);
             await _settingsService.SetAsync("EmpresaGiroComercial", EmpresaGiroComercial);
             await _settingsService.SetAsync("EmpresaRfc", EmpresaRfc);
+
+            await _settingsService.SetAsync("ShortcutCharge", ShortcutCharge);
+            await _settingsService.SetAsync("ShortcutSearch", ShortcutSearch);
+            await _settingsService.SetAsync("ShortcutPause", ShortcutPause);
         }
 
-        FeedbackMessage = "¡Toda la configuración visual y paletas de colores guardada y sincronizada!";
+        if (SettingsSaved != null)
+        {
+            await SettingsSaved.Invoke();
+        }
+
+        FeedbackMessage = "¡Toda la configuración visual, paletas de colores y atajos guardada y sincronizada!";
     }
 
     [RelayCommand] private void Close() { }

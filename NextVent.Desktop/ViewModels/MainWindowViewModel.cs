@@ -1,4 +1,6 @@
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -26,6 +28,20 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private ObservableObject _activeViewModel;
     [ObservableProperty] private ObservableObject? _activeDialogViewModel = null;
     [ObservableProperty] private bool _isDialogOverlayOpen = false;
+
+    [ObservableProperty] private KeyGesture _shortcutCharge = KeyGesture.Parse("F12");
+    [ObservableProperty] private KeyGesture _shortcutSearch = KeyGesture.Parse("F3");
+    [ObservableProperty] private KeyGesture _shortcutPause = KeyGesture.Parse("F7");
+
+    private readonly IUserRepository _userRepository;
+
+    public ObservableObject CurrentView
+    {
+        get => ActiveViewModel;
+        set => ActiveViewModel = value;
+    }
+
+    public bool IsLocked => ActiveDialogViewModel is LockScreenDialogViewModel || ActiveViewModel == _loginVm || ActiveViewModel is FirstTimeSetupViewModel;
 
     [ObservableProperty] private string _sidebarDockPosition = "Left";
     [ObservableProperty] private double _sidebarWidth = 80;
@@ -108,12 +124,34 @@ public partial class MainWindowViewModel : ObservableObject
         _ = _settingsVm.LoadSavedSettingsAsync();
         _suppliersVm = new SuppliersViewModel(supplierService, purchaseService, _productService);
         _expensesVm = new ExpensesViewModel(expenseService);
-        _loginVm = new LoginViewModel(authService);
+        _userRepository = userRepository;
+
+        var dialogService = new DialogService(async (vmObj) =>
+        {
+            if (vmObj is string str && str == "LOCK_SCREEN")
+            {
+                var dialog = new LockScreenDialogViewModel(userRepository, sessionManager, CloseDialog);
+                ActiveDialogViewModel = dialog;
+                IsDialogOverlayOpen = true;
+                return null;
+            }
+            ActiveDialogViewModel = vmObj as ObservableObject;
+            IsDialogOverlayOpen = true;
+            return null;
+        }, () =>
+        {
+            CloseDialog();
+        });
+
+        _loginVm = new LoginViewModel(authService, sessionManager, dialogService);
         _loginVm.LoginSuccessful += async () =>
         {
             ActiveViewModel = _posVm;
+            _ = _posVm.LoadProductsAsync();
             await ValidateShiftStatusAsync();
         };
+
+        _settingsVm.SettingsSaved += async () => await LoadDynamicShortcutsAsync();
 
         // ── Wire Dynamic Sidebar Layout Changes ──
         ThemeService.Instance.SidebarPositionChanged += pos => Dispatcher.UIThread.Post(() => ApplySidebarLayout(pos));
@@ -274,9 +312,9 @@ public partial class MainWindowViewModel : ObservableObject
             IsDialogOverlayOpen = true;
         };
 
-        _activeViewModel = _posVm;
-        _ = _posVm.LoadProductsAsync();
-        _ = ValidateShiftStatusAsync();
+        _activeViewModel = _loginVm;
+        _ = InitializeApplicationStateAsync();
+        _ = LoadDynamicShortcutsAsync();
     }
 
     private void ApplySidebarLayout(string position)
@@ -423,6 +461,98 @@ public partial class MainWindowViewModel : ObservableObject
             };
             ActiveDialogViewModel = openShiftVm;
             IsDialogOverlayOpen = true;
+        }
+    }
+
+    public async Task InitializeApplicationStateAsync()
+    {
+        bool hasUsers = await _userRepository.HasAnyUsersAsync();
+
+        if (!hasUsers)
+        {
+            // Route to First-Time Setup (OOBE)
+            ActiveViewModel = new FirstTimeSetupViewModel(_userRepository, new DialogService(async (vm) => { return null; }, () => {}), () =>
+            {
+                ActiveViewModel = _loginVm;
+            });
+        }
+        else
+        {
+            // Route to standard Login
+            ActiveViewModel = _loginVm;
+        }
+    }
+
+    public async Task<int> GetIdleTimeoutMinutesAsync()
+    {
+        var settingsService = new SettingsService(_db);
+        var val = await settingsService.GetAsync("IdleTimeoutMinutes");
+        if (int.TryParse(val, out var minutes) && minutes > 0)
+        {
+            return minutes;
+        }
+        return 5; // default 5 minutes
+    }
+
+    private static KeyGesture TryParseGesture(string gestureStr, string fallback)
+    {
+        try
+        {
+            if (!string.IsNullOrWhiteSpace(gestureStr))
+            {
+                return KeyGesture.Parse(gestureStr);
+            }
+        }
+        catch
+        {
+            // fallback
+        }
+        return KeyGesture.Parse(fallback);
+    }
+
+    public async Task LoadDynamicShortcutsAsync()
+    {
+        var settingsService = new SettingsService(_db);
+        
+        var charge = await settingsService.GetAsync("ShortcutCharge") ?? "F12";
+        var search = await settingsService.GetAsync("ShortcutSearch") ?? "F3";
+        var pause = await settingsService.GetAsync("ShortcutPause") ?? "F7";
+
+        ShortcutCharge = TryParseGesture(charge, "F12");
+        ShortcutSearch = TryParseGesture(search, "F3");
+        ShortcutPause = TryParseGesture(pause, "F7");
+
+        OnPropertyChanged(nameof(ShortcutCharge));
+        OnPropertyChanged(nameof(ShortcutSearch));
+        OnPropertyChanged(nameof(ShortcutPause));
+    }
+
+    public async Task TriggerAutoLockAsync()
+    {
+        if (_sessionManager.CurrentCashier != null && !IsLocked)
+        {
+            var dialog = new LockScreenDialogViewModel(_userRepository, _sessionManager, CloseDialog);
+            ActiveDialogViewModel = dialog;
+            IsDialogOverlayOpen = true;
+        }
+        await Task.CompletedTask;
+    }
+
+    [RelayCommand]
+    private void TriggerPosSearchFocus()
+    {
+        if (ActiveViewModel == _posVm)
+        {
+            _posVm.FocusSearchCommand.Execute(null);
+        }
+    }
+
+    [RelayCommand]
+    private void TriggerPosPause()
+    {
+        if (ActiveViewModel == _posVm)
+        {
+            _posVm.ParkCurrentCartCommand.Execute(null);
         }
     }
 }

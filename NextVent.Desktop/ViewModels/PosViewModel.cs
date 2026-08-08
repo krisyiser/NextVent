@@ -265,7 +265,7 @@ public partial class PosViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void FocusSearch() => FocusSearchRequested?.Invoke();
+    private void FocusSearch() => WeakReferenceMessenger.Default.Send(new NextVent.Views.Pos.FocusSearchMessage());
 
     [RelayCommand]
     private void OpenCustomerSelect() => OpenCustomerSelectRequested?.Invoke();

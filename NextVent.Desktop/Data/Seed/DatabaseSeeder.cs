@@ -62,33 +62,8 @@ public static class DatabaseSeeder
         }
         await context.SaveChangesAsync();
 
-        // 2. Seed Admin and Cajero Users if empty
-        if (!await context.Users.AnyAsync())
-        {
-            var adminPasswordHash = CryptoHelper.HashSecret("admin123");
-            var adminPinHash = CryptoHelper.HashSecret("1234");
-            var cajeroPasswordHash = CryptoHelper.HashSecret("cajero123");
-
-            context.Users.AddRange(
-                new UserEntity
-                {
-                    Id = "USR-ADMIN-001",
-                    Nombre = "Administrador",
-                    Rol = "ADMIN",
-                    PasswordHash = adminPasswordHash,
-                    PinChecadorHash = adminPinHash,
-                    Estatus = 1
-                },
-                new UserEntity
-                {
-                    Id = "USR-CAJERO-001",
-                    Nombre = "Cajero Principal",
-                    Rol = "CAJERO",
-                    PasswordHash = cajeroPasswordHash,
-                    Estatus = 1
-                }
-            );
-        }
+        // 2. User seeding is now delegated to OOBE FirstTimeSetupView if empty
+        // context.Users.AddRange(...) removed to allow OOBE setup.
 
         // 3. Seed Sample Customers if empty
         if (!await context.Customers.AnyAsync())

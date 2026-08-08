@@ -11,6 +11,7 @@ public interface ISessionManager
     event Action<bool>? LockStateChanged;
 
     void SwitchCashier(UserModel newUser);
+    void StartSession(UserModel user);
     void LockTerminal();
     void UnlockTerminal();
 }
@@ -38,6 +39,11 @@ public class SessionManager : ISessionManager
     {
         CurrentCashier = newUser;
         CashierChanged?.Invoke(newUser);
+    }
+
+    public void StartSession(UserModel user)
+    {
+        SwitchCashier(user);
     }
 
     public void LockTerminal()

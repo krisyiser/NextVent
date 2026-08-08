@@ -9,10 +9,8 @@
     <UserControl.KeyBindings>
         <KeyBinding Gesture="F1" Command="{Binding SwitchCashierCommand}" />
         <KeyBinding Gesture="Win+L" Command="{Binding LockTerminalCommand}" />
-        <KeyBinding Gesture="F7" Command="{Binding ParkCurrentCartCommand}" />
         <KeyBinding Gesture="F10" Command="{Binding PayCashCommand}" />
         <KeyBinding Gesture="F11" Command="{Binding PayCardCommand}" />
-        <KeyBinding Gesture="F12" Command="{Binding OpenCheckoutDialogCommand}" />
     </UserControl.KeyBindings>
 
     <Grid RowDefinitions="Auto,*" Margin="16">

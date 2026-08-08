@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using NextVent.Data;
 using NextVent.Data.Dtos;
 using NextVent.Data.Entities;
+using NextVent.Core.Enums;
 using NextVent.Services.Interfaces;
 
 namespace NextVent.Services.Implementations;
@@ -32,37 +33,42 @@ public class UserService : IUserService
 
     public async Task<UserDto?> GetByNameAsync(string name)
     {
-        var entity = await _context.Users.FirstOrDefaultAsync(u => u.Nombre.ToLower() == name.ToLower());
+        var entity = await _context.Users.FirstOrDefaultAsync(u => u.FullName.ToLower() == name.ToLower() || u.Username.ToLower() == name.ToLower());
         return entity == null ? null : MapToDto(entity);
     }
 
     public async Task<List<UserDto>> GetManagersAsync()
     {
-        var entities = await _context.Users.Where(u => u.Rol == "ADMIN").AsNoTracking().ToListAsync();
+        var entities = await _context.Users.Where(u => u.Role == UserRole.Admin || u.Role == UserRole.Gerente).AsNoTracking().ToListAsync();
         return entities.Select(MapToDto).ToList();
     }
 
     public async Task SaveAsync(string id, string nombre, string rol, string? passwordHash, string? pinHash)
     {
-        var entity = await _context.Users.FindAsync(id);
+        Guid guidId = Guid.TryParse(id, out var parsed) ? parsed : Guid.NewGuid();
+        var entity = await _context.Users.FindAsync(guidId);
+        
+        var enumRole = Enum.TryParse<UserRole>(rol, true, out var parsedRole) ? parsedRole : UserRole.Cajero;
+
         if (entity == null)
         {
             entity = new UserEntity
             {
-                Id = string.IsNullOrEmpty(id) ? Guid.NewGuid().ToString() : id,
-                Nombre = nombre,
-                Rol = rol,
-                PasswordHash = passwordHash,
-                PinChecadorHash = string.IsNullOrEmpty(pinHash) ? "1234" : pinHash,
-                Estatus = 1
+                Id = guidId,
+                FullName = nombre,
+                Username = nombre.ToLower().Replace(" ", ""),
+                Role = enumRole,
+                PasswordHash = passwordHash ?? string.Empty,
+                PinCode = string.IsNullOrEmpty(pinHash) ? "1234" : pinHash,
+                IsActive = true
             };
             _context.Users.Add(entity);
         }
         else
         {
-            entity.Nombre = nombre;
-            entity.Rol = rol;
-            if (!string.IsNullOrEmpty(pinHash)) entity.PinChecadorHash = pinHash;
+            entity.FullName = nombre;
+            entity.Role = enumRole;
+            if (!string.IsNullOrEmpty(pinHash)) entity.PinCode = pinHash;
             if (!string.IsNullOrEmpty(passwordHash)) entity.PasswordHash = passwordHash;
         }
         await _context.SaveChangesAsync();
@@ -70,26 +76,46 @@ public class UserService : IUserService
 
     public async Task DeleteAsync(string id)
     {
-        var entity = await _context.Users.FindAsync(id);
-        if (entity != null)
+        if (Guid.TryParse(id, out var guidId))
         {
-            _context.Users.Remove(entity);
-            await _context.SaveChangesAsync();
+            var entity = await _context.Users.FindAsync(guidId);
+            if (entity != null)
+            {
+                _context.Users.Remove(entity);
+                await _context.SaveChangesAsync();
+            }
         }
     }
 
     public async Task<string?> GetPasswordHashAsync(string userId)
     {
-        var entity = await _context.Users.FindAsync(userId);
-        return entity?.PasswordHash;
+        if (Guid.TryParse(userId, out var guidId))
+        {
+            var entity = await _context.Users.FindAsync(guidId);
+            return entity?.PasswordHash;
+        }
+        return null;
     }
 
     public async Task<string?> GetPinHashAsync(string userId)
     {
-        var entity = await _context.Users.FindAsync(userId);
-        return entity?.PinChecadorHash;
+        if (Guid.TryParse(userId, out var guidId))
+        {
+            var entity = await _context.Users.FindAsync(guidId);
+            return entity?.PinCode;
+        }
+        return null;
     }
 
-    private static UserDto MapToDto(UserEntity e) =>
-        new(e.Id, e.Nombre.ToLower().Replace(" ", ""), e.Nombre, e.Rol, e.Estatus == 1);
+    public async Task<string?> GetPasswordHintAsync(string username)
+    {
+        var entity = await _context.Users.FirstOrDefaultAsync(u => u.Username.ToLower() == username.ToLower() || u.FullName.ToLower() == username.ToLower());
+        return entity?.PasswordHint;
+    }
+
+    private static UserDto MapToDto(UserEntity e)
+    {
+        var roleStr = e.Role.ToString().ToUpper();
+        return new UserDto(e.Id.ToString(), e.Username, e.FullName, roleStr, e.IsActive);
+    }
 }

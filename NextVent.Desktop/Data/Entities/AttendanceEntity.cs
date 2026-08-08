@@ -14,7 +14,7 @@ public partial class AttendanceEntity
 
     [Required]
     [Column("usuario_id")]
-    public string UserId { get; set; } = string.Empty;
+    public Guid UserId { get; set; }
 
     [Column("check_in_time")]
     public DateTime CheckInTime { get; set; } = DateTime.UtcNow;

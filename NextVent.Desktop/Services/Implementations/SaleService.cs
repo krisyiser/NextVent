@@ -399,7 +399,7 @@ public sealed class SaleService : ISaleService
                     double commission = totalRev * (defaultCommissionPct / 100.0);
 
                     report.Add(new CashierPerformanceDto(
-                        user.Nombre,
+                        user.FullName,
                         count,
                         Math.Round(totalRev, 2),
                         Math.Round(avgTicket, 2),

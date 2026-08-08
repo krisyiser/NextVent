@@ -31,6 +31,7 @@ Task SaveAsync(string id, string nombre, string rol, string? passwordHash, strin
 Task DeleteAsync(string id);
 Task<string?> GetPasswordHashAsync(string userId);
 Task<string?> GetPinHashAsync(string userId);
+Task<string?> GetPasswordHintAsync(string username);
 }
 
 /// <summary>Key-value settings persistence.</summary>

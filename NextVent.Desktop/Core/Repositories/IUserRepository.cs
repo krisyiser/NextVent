@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using NextVent.Core.Models;
+using NextVent.Data.Entities;
 
 namespace NextVent.Core.Repositories;
 
@@ -10,4 +11,7 @@ public interface IUserRepository
     Task<UserModel?> ValidatePinAsync(string username, string pin4Digits);
     Task<UserModel?> ValidateAnyPinAsync(string pin4Digits);
     Task<bool> ValidateAdminPinAsync(string pin4Digits);
+    Task<bool> HasAnyUsersAsync();
+    Task CreateUserAsync(UserEntity user);
+    Task<UserEntity?> GetByUsernameAsync(string username);
 }

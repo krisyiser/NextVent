@@ -62,9 +62,9 @@ public class PerformanceAnalyticsService : IPerformanceAnalyticsService
 
                 resultList.Add(new CashierProductivityReportModel
                 {
-                    UserId = user.Id,
-                    FullName = user.Nombre,
-                    Role = user.Rol,
+                    UserId = user.Id.ToString(),
+                    FullName = user.FullName,
+                    Role = user.Role.ToString().ToUpper(),
                     TotalHoursWorked = Math.Round(totalHoursWorked, 2),
                     TotalTicketsProcessed = totalTickets,
                     GrossSales = totalSalesAmount,
