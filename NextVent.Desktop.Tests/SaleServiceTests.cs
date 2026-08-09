@@ -678,9 +678,11 @@ public sealed class SaleServiceTests : IDisposable
             Directory.CreateDirectory(appFolder);
         }
         var dbPath = Path.Combine(appFolder, "nextvent.db");
+        bool createdDummy = false;
         if (!File.Exists(dbPath))
         {
             await File.WriteAllTextAsync(dbPath, "SQLite format 3\0 dummy db data");
+            createdDummy = true;
         }
 
         var backupService = new NextVent.Services.Implementations.BackupService();
@@ -699,6 +701,11 @@ public sealed class SaleServiceTests : IDisposable
         foreach (var file in files)
         {
             File.Delete(file);
+        }
+
+        if (createdDummy && File.Exists(dbPath))
+        {
+            File.Delete(dbPath);
         }
     }
 

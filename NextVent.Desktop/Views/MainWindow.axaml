@@ -93,6 +93,9 @@
         <DataTemplate DataType="vmDialogs:ConfirmDialogViewModel">
             <vDialogs:ConfirmDialog />
         </DataTemplate>
+        <DataTemplate DataType="vmDialogs:OpenShiftDialogViewModel">
+            <vDialogs:OpenShiftDialog />
+        </DataTemplate>
     </Window.DataTemplates>
 
     <Panel>
