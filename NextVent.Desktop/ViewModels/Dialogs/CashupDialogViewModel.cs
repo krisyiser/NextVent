@@ -19,6 +19,8 @@ public partial class CashupDialogViewModel : ObservableObject
     private readonly AppDbContext _db;
     private readonly NextVent.Services.Interfaces.IShiftService? _shiftService;
     private readonly ISessionManager? _sessionManager;
+    private readonly NextVent.Services.Interfaces.IEscPosPrinterService? _printerService;
+    private readonly NextVent.Services.Interfaces.IBackupService? _backupService;
 
     [ObservableProperty] private double _openCashAmount = 1000.00;
     [ObservableProperty] private double _theoreticalCash = 4250.00;
@@ -50,12 +52,16 @@ public partial class CashupDialogViewModel : ObservableObject
         AppDbContext db,
         NextVent.Services.Interfaces.IShiftService? shiftService = null,
         ISessionManager? sessionManager = null,
+        NextVent.Services.Interfaces.IEscPosPrinterService? printerService = null,
+        NextVent.Services.Interfaces.IBackupService? backupService = null,
         bool isFinalZCut = false,
         bool isBlindMode = false)
     {
         _db = db;
         _shiftService = shiftService;
         _sessionManager = sessionManager;
+        _printerService = printerService;
+        _backupService = backupService;
         IsFinalZCut = isFinalZCut;
         IsBlindMode = isBlindMode;
 
@@ -97,6 +103,15 @@ public partial class CashupDialogViewModel : ObservableObject
     private void Cancel() => RequestClose?.Invoke();
 
     [RelayCommand]
+    private async Task OnViewLoadedAsync()
+    {
+        if (_printerService != null)
+        {
+            await _printerService.OpenCashDrawerAsync();
+        }
+    }
+
+    [RelayCommand]
     private async Task SaveCashupAsync()
     {
         try
@@ -129,6 +144,13 @@ public partial class CashupDialogViewModel : ObservableObject
             if (_activeShift != null && IsFinalZCut && _shiftService != null)
             {
                 await _shiftService.CloseAsync(_activeShift.Id, TotalPhysicalCash);
+
+                if (_backupService != null)
+                {
+                    string refId = _activeShift.Id.Length >= 8 ? _activeShift.Id.Substring(0, 8) : _activeShift.Id;
+                    await _backupService.CreateZCutBackupAsync(refId);
+                }
+
                 _sessionManager?.ClearSession();
                 WeakReferenceMessenger.Default.Send(new ForceLogoutMessage());
             }

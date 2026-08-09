@@ -667,6 +667,44 @@ public sealed class SaleServiceTests : IDisposable
         Assert.Equal(0xA3, bytes[5]);
     }
 
+    [Fact]
+    public async Task BackupService_ShouldCreateBackupSuccessfully()
+    {
+        // 1. Create a dummy app.db file if it doesn't exist
+        var dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app.db");
+        if (!File.Exists(dbPath))
+        {
+            await File.WriteAllTextAsync(dbPath, "SQLite format 3\0 dummy db data");
+        }
+
+        var backupService = new NextVent.Services.Implementations.BackupService();
+        var result = await backupService.CreateZCutBackupAsync("SHIFT-TEST");
+
+        Assert.True(result);
+
+        // 2. Verify that the backup file exists in the Backups folder
+        var backupDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Backups");
+        Assert.True(Directory.Exists(backupDir));
+
+        var files = Directory.GetFiles(backupDir, "backup_ZCut_SHIFT-TEST_*.db");
+        Assert.NotEmpty(files);
+
+        // Clean up
+        foreach (var file in files)
+        {
+            File.Delete(file);
+        }
+    }
+
+    [Fact]
+    public async Task EscPosPrinterService_ShouldSupportGracefulDisposeAsync()
+    {
+        var printerService = new NextVent.Services.Implementations.EscPosPrinterService();
+        
+        // Simply dispose and check no exceptions are thrown
+        await printerService.DisposeAsync();
+    }
+
     public void Dispose()
     {
         _context.Dispose();

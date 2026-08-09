@@ -69,6 +69,7 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly IShiftService _shiftService;
     private readonly ISessionManager _sessionManager;
     private readonly IUserRepository _userRepository;
+    private readonly NextVent.Services.Interfaces.IBackupService _backupService;
 
     public MainWindowViewModel()
     {
@@ -80,6 +81,7 @@ public partial class MainWindowViewModel : ObservableObject
         _db = new AppDbContext(options);
 
         _printerService = new EscPosPrinterService();
+        _backupService = new NextVent.Services.Implementations.BackupService();
         _productService = new ProductService(_db);
         _customerService = new CustomerService(_db, _printerService);
         _saleService = new SaleService(_db);
@@ -233,7 +235,7 @@ public partial class MainWindowViewModel : ObservableObject
         // ── Wire History Cashup & Return Dialog Events ──
         _historyVm.OpenCashupRequested += () =>
         {
-            var dialog = new CashupDialogViewModel(_db, _shiftService, _sessionManager);
+            var dialog = new CashupDialogViewModel(_db, _shiftService, _sessionManager, _printerService, _backupService);
             dialog.RequestClose += CloseDialog;
             ActiveDialogViewModel = dialog;
             IsDialogOverlayOpen = true;
@@ -435,7 +437,7 @@ public partial class MainWindowViewModel : ObservableObject
                     {
                         if (confirmed)
                         {
-                            var blindCashupVm = new CashupDialogViewModel(_db, _shiftService, _sessionManager, isFinalZCut: true, isBlindMode: true);
+                            var blindCashupVm = new CashupDialogViewModel(_db, _shiftService, _sessionManager, _printerService, _backupService, isFinalZCut: true, isBlindMode: true);
                             blindCashupVm.RequestClose += () =>
                             {
                                 CloseDialog();

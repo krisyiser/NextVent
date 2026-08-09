@@ -12,7 +12,7 @@ using Serilog;
 
 namespace NextVent.Services.Implementations;
 
-public class EscPosPrinterService : IEscPosPrinterService, IDisposable
+public class EscPosPrinterService : IEscPosPrinterService, IDisposable, IAsyncDisposable
 {
     private static readonly byte[] EscInit = [0x1B, 0x40];
     private static readonly byte[] AlignLeft = [0x1B, 0x61, 0x00];
@@ -31,13 +31,14 @@ public class EscPosPrinterService : IEscPosPrinterService, IDisposable
 
     private readonly Channel<PrintJob> _printerQueue;
     private readonly CancellationTokenSource _cts;
+    private readonly Task _processingTask;
 
     public EscPosPrinterService()
     {
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
         _printerQueue = Channel.CreateUnbounded<PrintJob>();
         _cts = new CancellationTokenSource();
-        _ = ProcessPrintQueueAsync(_cts.Token);
+        _processingTask = ProcessPrintQueueAsync(_cts.Token);
     }
 
     public Task<bool> PrintTicketAsync(SaleDto sale, string printerPortOrName = "COM1")
@@ -308,6 +309,41 @@ public class EscPosPrinterService : IEscPosPrinterService, IDisposable
         catch
         {
             // Ignored on dispose
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        // 1. Stop accepting new print jobs
+        _printerQueue.Writer.Complete();
+
+        try
+        {
+            // 2. Wait for the queue to empty naturally (with a 3-second grace period)
+            using var gracePeriodCts = new CancellationTokenSource(TimeSpan.FromSeconds(3));
+            await _printerQueue.Reader.Completion.WaitAsync(gracePeriodCts.Token);
+        }
+        catch (Exception ex)
+        {
+            Log.Warning("Printer queue graceful shutdown timed out or failed: {Message}", ex.Message);
+        }
+        finally
+        {
+            // 3. Forcefully kill the background task
+            _cts.Cancel();
+            try
+            {
+                await _processingTask;
+            }
+            catch (OperationCanceledException)
+            {
+                // Expected cancellation
+            }
+            catch (Exception ex)
+            {
+                Log.Warning("Error waiting for printer worker task shutdown: {Message}", ex.Message);
+            }
+            _cts.Dispose();
         }
     }
 }
