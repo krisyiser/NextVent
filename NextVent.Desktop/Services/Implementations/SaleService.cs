@@ -222,6 +222,20 @@ public sealed class SaleService : ISaleService
         return entities.Select(MapToDto).ToList();
     }
 
+    public async Task<List<SaleDto>> GetSalesByDateRangeAsync(DateTime start, DateTime end)
+    {
+        string startStr = start.ToString("o");
+        string endStr = end.ToString("o");
+
+        var entities = await _ctx.Sales
+            .AsNoTracking()
+            .Where(s => string.Compare(s.Date, startStr) >= 0 && string.Compare(s.Date, endStr) <= 0)
+            .OrderByDescending(s => s.Date)
+            .ToListAsync();
+
+        return entities.Select(MapToDto).ToList();
+    }
+
     /// <summary>
     /// Atomic cancellation: restore stock + reduce debt + mark cancelled.
     /// </summary>

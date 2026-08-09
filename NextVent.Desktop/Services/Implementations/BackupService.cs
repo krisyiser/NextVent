@@ -7,8 +7,15 @@ namespace NextVent.Services.Implementations;
 
 public class BackupService : IBackupService
 {
-    private readonly string _dbFilePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app.db");
-    private readonly string _backupDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Backups");
+    private readonly string _dbFilePath;
+    private readonly string _backupDirectory;
+
+    public BackupService()
+    {
+        string appDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        _dbFilePath = Path.Combine(appDataFolder, "NextVent", "Database", "nextvent.db");
+        _backupDirectory = Path.Combine(appDataFolder, "NextVent", "Backups");
+    }
 
     public async Task<bool> CreateZCutBackupAsync(string shiftReference)
     {

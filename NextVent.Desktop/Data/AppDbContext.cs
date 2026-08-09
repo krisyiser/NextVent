@@ -63,7 +63,13 @@ public class AppDbContext : DbContext
         base.OnConfiguring(optionsBuilder);
         if (!optionsBuilder.IsConfigured)
         {
-            var dbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app.db");
+            string appDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            string appFolder = System.IO.Path.Combine(appDataFolder, "NextVent", "Database");
+            if (!System.IO.Directory.Exists(appFolder))
+            {
+                System.IO.Directory.CreateDirectory(appFolder);
+            }
+            string dbPath = System.IO.Path.Combine(appFolder, "nextvent.db");
             optionsBuilder.UseSqlite($"Data Source={dbPath};Cache=Shared;Mode=ReadWriteCreate;Journal Mode=WAL;");
         }
     }
@@ -74,7 +80,14 @@ public class AppDbContextFactory : Microsoft.EntityFrameworkCore.Design.IDesignT
     public AppDbContext CreateDbContext(string[] args)
     {
         var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-        optionsBuilder.UseSqlite("Data Source=app.db;Cache=Shared;Mode=ReadWriteCreate;Journal Mode=WAL;");
+        string appDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        string appFolder = System.IO.Path.Combine(appDataFolder, "NextVent", "Database");
+        if (!System.IO.Directory.Exists(appFolder))
+        {
+            System.IO.Directory.CreateDirectory(appFolder);
+        }
+        string dbPath = System.IO.Path.Combine(appFolder, "nextvent.db");
+        optionsBuilder.UseSqlite($"Data Source={dbPath};Cache=Shared;Mode=ReadWriteCreate;Journal Mode=WAL;");
         return new AppDbContext(optionsBuilder.Options);
     }
 }

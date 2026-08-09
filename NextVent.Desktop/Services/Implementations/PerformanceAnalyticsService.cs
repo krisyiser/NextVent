@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using NextVent.Core.Models;
 using NextVent.Data;
 using NextVent.Services.Interfaces;
+using NextVent.Core.Helpers;
 using Serilog;
 
 namespace NextVent.Services.Implementations;
@@ -37,8 +38,8 @@ public class PerformanceAnalyticsService : IPerformanceAnalyticsService
                 double totalHoursWorked = attendances.Sum(a => a.TotalWorkedHours);
 
                 // 2. COMPUTE GROSS SALES & TRANSACTION COUNT
-                var startIso = startDate.ToString("s");
-                var endIso = endDate.ToString("s");
+                var startIso = startDate.ToBusinessUtcTime().ToString("o");
+                var endIso = endDate.ToBusinessUtcTime().ToString("o");
 
                 var userSales = await _dbContext.Sales.AsNoTracking()
                     .Where(s => string.Compare(s.Date, startIso) >= 0 && string.Compare(s.Date, endIso) <= 0)

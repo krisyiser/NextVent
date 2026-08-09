@@ -6,6 +6,7 @@ using NextVent.Core.Services;
 using NextVent.Data;
 using NextVent.Data.Entities;
 using Serilog;
+using NextVent.Core.Helpers;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -135,7 +136,7 @@ public partial class CashupDialogViewModel : ObservableObject
                 TheoreticalCash = TheoreticalCash,
                 Difference = DifferenceAmount,
                 Notes = Notes,
-                Timestamp = DateTime.Now.ToString("g")
+                Timestamp = DateTime.UtcNow.ToBusinessLocalTime().ToString("g")
             };
 
             _db.Cashups.Add(entity);

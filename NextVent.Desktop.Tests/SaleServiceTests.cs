@@ -670,8 +670,14 @@ public sealed class SaleServiceTests : IDisposable
     [Fact]
     public async Task BackupService_ShouldCreateBackupSuccessfully()
     {
-        // 1. Create a dummy app.db file if it doesn't exist
-        var dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app.db");
+        // 1. Create a dummy database file in LocalAppData
+        string appDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        string appFolder = Path.Combine(appDataFolder, "NextVent", "Database");
+        if (!Directory.Exists(appFolder))
+        {
+            Directory.CreateDirectory(appFolder);
+        }
+        var dbPath = Path.Combine(appFolder, "nextvent.db");
         if (!File.Exists(dbPath))
         {
             await File.WriteAllTextAsync(dbPath, "SQLite format 3\0 dummy db data");
@@ -683,7 +689,7 @@ public sealed class SaleServiceTests : IDisposable
         Assert.True(result);
 
         // 2. Verify that the backup file exists in the Backups folder
-        var backupDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Backups");
+        var backupDir = Path.Combine(appDataFolder, "NextVent", "Backups");
         Assert.True(Directory.Exists(backupDir));
 
         var files = Directory.GetFiles(backupDir, "backup_ZCut_SHIFT-TEST_*.db");
@@ -703,6 +709,53 @@ public sealed class SaleServiceTests : IDisposable
         
         // Simply dispose and check no exceptions are thrown
         await printerService.DisposeAsync();
+    }
+
+    [Fact]
+    public void DateTimeExtensions_ShouldConvertBetweenUtcAndMexicoCityTimezone()
+    {
+        // 2026-08-10 05:30:00 UTC = 2026-08-09 23:30:00 America/Mexico_City
+        var utcDate = new DateTime(2026, 8, 10, 5, 30, 0, DateTimeKind.Utc);
+        var localDate = NextVent.Core.Helpers.DateTimeExtensions.ToBusinessLocalTime(utcDate);
+
+        Assert.Equal(2026, localDate.Year);
+        Assert.Equal(8, localDate.Month);
+        Assert.Equal(9, localDate.Day);
+        Assert.Equal(23, localDate.Hour);
+        Assert.Equal(30, localDate.Minute);
+
+        var utcBack = NextVent.Core.Helpers.DateTimeExtensions.ToBusinessUtcTime(localDate);
+        Assert.Equal(utcDate, utcBack);
+    }
+
+    [Fact]
+    public async Task PosViewModel_ShouldAutoSaveAndRehydrateCartItems()
+    {
+        var posVm = new NextVent.ViewModels.PosViewModel(_productService);
+        await Task.Delay(200);
+
+        var item = new CartItemDto("PROD-TEST", "Refresco", 15.0, 2.0, "Pza");
+
+        await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(async () =>
+        {
+            posVm.CartItems.Add(item);
+            await Task.Delay(200);
+
+            string appDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            string draftCartPath = Path.Combine(appDataFolder, "NextVent", "DraftCart.json");
+            Assert.True(File.Exists(draftCartPath));
+
+            var posVm2 = new NextVent.ViewModels.PosViewModel(_productService);
+            await Task.Delay(200);
+
+            Assert.Single(posVm2.CartItems);
+            Assert.Equal("PROD-TEST", posVm2.CartItems[0].Id);
+            Assert.Equal(2.0, posVm2.CartItems[0].Quantity);
+
+            posVm2.CartItems.Clear();
+            await Task.Delay(200);
+            Assert.False(File.Exists(draftCartPath));
+        });
     }
 
     public void Dispose()

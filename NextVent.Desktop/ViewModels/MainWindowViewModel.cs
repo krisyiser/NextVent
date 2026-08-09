@@ -73,7 +73,13 @@ public partial class MainWindowViewModel : ObservableObject
 
     public MainWindowViewModel()
     {
-        var dbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "app.db");
+        string appDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        string appFolder = System.IO.Path.Combine(appDataFolder, "NextVent", "Database");
+        if (!System.IO.Directory.Exists(appFolder))
+        {
+            System.IO.Directory.CreateDirectory(appFolder);
+        }
+        string dbPath = System.IO.Path.Combine(appFolder, "nextvent.db");
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseSqlite($"Data Source={dbPath};Cache=Shared;Mode=ReadWriteCreate;Journal Mode=WAL;")
             .Options;

@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using NextVent.Data.Dtos;
 using NextVent.Services.Interfaces;
+using NextVent.Core.Helpers;
 using Serilog;
 using System;
 using System.Collections.Generic;
@@ -27,6 +28,9 @@ public partial class HistoryViewModel : ObservableObject
     [ObservableProperty] private string _peakHourLabel = "Ninguna";
     [ObservableProperty] private double _peakHourRevenue = 0.0;
     [ObservableProperty] private double _totalDayRevenue = 0.0;
+    [ObservableProperty] private DateTimeOffset? _startDate = DateTimeOffset.Now.Date;
+    [ObservableProperty] private DateTimeOffset? _endDate = DateTimeOffset.Now.Date.AddDays(1).AddTicks(-1);
+    [ObservableProperty] private bool _isLoading = false;
 
     public event Action? OpenCashupRequested;
     public event Action<SaleDto>? OpenReturnRequested;
@@ -39,22 +43,40 @@ public partial class HistoryViewModel : ObservableObject
         _ = LoadCashierPerformanceAsync();
     }
 
-    public async Task LoadSalesAsync()
+    public Task LoadSalesAsync() => FetchSalesHistoryAsync();
+
+    [RelayCommand]
+    private async Task FetchSalesHistoryAsync()
     {
+        IsLoading = true;
         try
         {
-            var items = await _saleService.GetHistoryAsync(500);
+            DateTime start = StartDate?.DateTime ?? DateTime.Today;
+            DateTime end = EndDate?.DateTime ?? DateTime.Today.AddDays(1).AddTicks(-1);
+
+            DateTime utcStart = start.ToBusinessUtcTime();
+            DateTime utcEnd = end.ToBusinessUtcTime();
+
+            var salesList = await _saleService.GetSalesByDateRangeAsync(utcStart, utcEnd);
+
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 Sales.Clear();
-                foreach (var item in items.OrderByDescending(s => s.Date)) Sales.Add(item);
+                foreach (var sale in salesList.Take(500))
+                {
+                    Sales.Add(sale);
+                }
 
-                CalculateHourlyReport(items);
+                CalculateHourlyReport(Sales.ToList());
             });
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Error loading sales history");
+            Log.Error(ex, "Error fetching date-filtered sales history");
+        }
+        finally
+        {
+            IsLoading = false;
         }
     }
 
@@ -85,7 +107,11 @@ public partial class HistoryViewModel : ObservableObject
         var groups = validSales
             .GroupBy(s =>
             {
-                if (DateTime.TryParse(s.Date, out var dt)) return dt.Hour;
+                if (DateTime.TryParse(s.Date, out var dt))
+                {
+                    var utcDt = DateTime.SpecifyKind(dt, DateTimeKind.Utc);
+                    return utcDt.ToBusinessLocalTime().Hour;
+                }
                 return 0;
             })
             .OrderBy(g => g.Key)

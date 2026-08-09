@@ -10,6 +10,28 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <!-- DEPLOYMENT PROFILE FOR WINDOWS X64 -->
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <OutputType>WinExe</OutputType>
+    
+    <!-- Self Contained Single File Execution -->
+    <PublishSingleFile>true</PublishSingleFile>
+    <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    
+    <!-- Optimization & Trimming -->
+    <PublishTrimmed>true</PublishTrimmed>
+    <TrimMode>partial</TrimMode>
+    <PublishReadyToRun>false</PublishReadyToRun>
+    
+    <!-- Include Native Libraries (Crucial for SQLite & Cryptography) -->
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    
+    <!-- Hide Console Window on Windows -->
+    <PublishWin32Manifest>app.manifest</PublishWin32Manifest>
+  </PropertyGroup>
+
   <!-- ═══ AVALONIA UI ═══ -->
   <ItemGroup>
     <PackageReference Include="Avalonia" Version="11.2.5" />

@@ -19,7 +19,7 @@
                                 <Grid ColumnDefinitions="140,160,*,120,Auto">
                                     <StackPanel Grid.Column="0" Spacing="2">
                                         <TextBlock Text="{Binding Id, StringFormat='Folio: {0}'}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" TextTrimming="CharacterEllipsis" />
-                                        <TextBlock Text="{Binding Date}" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" />
+                                        <TextBlock Text="{Binding LocalDateDisplay}" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" />
                                     </StackPanel>
 
                                     <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center" Margin="8,0">

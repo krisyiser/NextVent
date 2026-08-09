@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Collections.Generic;
 
+using NextVent.Core.Helpers;
 using System.Text.Json.Serialization;
 
 namespace NextVent.Data.Dtos;
@@ -182,7 +183,21 @@ public record SaleDto(
     string EstadoFiscal = "PENDIENTE",
     string? UuidSat = null,
     string? SerieFolio = null
-);
+)
+{
+    public string LocalDateDisplay
+    {
+        get
+        {
+            if (DateTime.TryParse(Date, out var dt))
+            {
+                var utcDt = DateTime.SpecifyKind(dt, DateTimeKind.Utc);
+                return utcDt.ToBusinessLocalTime().ToString("g");
+            }
+            return Date;
+        }
+    }
+}
 
 public record SupplierDto(
     string Id,

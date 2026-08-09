@@ -17,6 +17,8 @@ using NextVent.Core.Services;
 using Serilog;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Text.Json;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.Json;
@@ -41,6 +43,7 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
     private readonly IProductService _productService;
     private readonly AppDbContext? _db;
     private readonly ICustomerService? _customerService;
+    private readonly string _draftCartPath;
 
     public ObservableCollection<ProductDto> Products { get; } = [];
     public ObservableCollection<ProductDto> FilteredProducts { get; } = [];
@@ -142,6 +145,17 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
         _ = LoadCustomersAsync();
         _ = RefreshParkedCountAsync();
         _ = LoadActiveShiftNotesAsync();
+
+        string appDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        string nextVentFolder = Path.Combine(appDataFolder, "NextVent");
+        if (!Directory.Exists(nextVentFolder))
+        {
+            Directory.CreateDirectory(nextVentFolder);
+        }
+        _draftCartPath = Path.Combine(nextVentFolder, "DraftCart.json");
+
+        CartItems.CollectionChanged += (s, e) => _ = SaveDraftCartAsync();
+        _ = RehydrateDraftCartAsync();
 
         RegisterMessages();
     }
@@ -908,5 +922,49 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
     public void Dispose()
     {
         WeakReferenceMessenger.Default.UnregisterAll(this);
+    }
+
+    private async Task SaveDraftCartAsync()
+    {
+        try
+        {
+            if (CartItems.Count == 0)
+            {
+                if (File.Exists(_draftCartPath)) File.Delete(_draftCartPath);
+                return;
+            }
+
+            var json = JsonSerializer.Serialize(CartItems.ToList());
+            await File.WriteAllTextAsync(_draftCartPath, json);
+        }
+        catch { /* Fire-and-forget, suppress IO locks */ }
+    }
+
+    private async Task RehydrateDraftCartAsync()
+    {
+        if (File.Exists(_draftCartPath))
+        {
+            try
+            {
+                var json = await File.ReadAllTextAsync(_draftCartPath);
+                var recoveredItems = JsonSerializer.Deserialize<List<CartItemDto>>(json);
+
+                if (recoveredItems != null)
+                {
+                    await Dispatcher.UIThread.InvokeAsync(async () =>
+                    {
+                        foreach (var item in recoveredItems)
+                        {
+                            CartItems.Add(item);
+                        }
+                        await RecalculateCartPromotionsAsync();
+                    });
+                }
+            }
+            catch
+            {
+                try { File.Delete(_draftCartPath); } catch {}
+            }
+        }
     }
 }
