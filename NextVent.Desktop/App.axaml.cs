@@ -79,11 +79,12 @@ public partial class App : Application
                 }
                 string dbPath = System.IO.Path.Combine(appFolder, "nextvent.db");
                 var options = new DbContextOptionsBuilder<AppDbContext>()
-                    .UseSqlite($"Data Source={dbPath};Cache=Shared;Mode=ReadWriteCreate;Journal Mode=WAL;")
+                    .UseSqlite($"Data Source={dbPath};Cache=Shared;Mode=ReadWriteCreate;")
                     .Options;
 
                 using var context = new AppDbContext(options);
                 await context.Database.MigrateAsync();
+                await context.Database.ExecuteSqlRawAsync("PRAGMA journal_mode=WAL;");
                 await DatabaseSeeder.SeedAsync(context);
                 Log.Information($"Database initialized and seeded successfully at {dbPath}");
             }

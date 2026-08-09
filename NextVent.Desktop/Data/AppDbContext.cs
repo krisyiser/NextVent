@@ -70,7 +70,7 @@ public class AppDbContext : DbContext
                 System.IO.Directory.CreateDirectory(appFolder);
             }
             string dbPath = System.IO.Path.Combine(appFolder, "nextvent.db");
-            optionsBuilder.UseSqlite($"Data Source={dbPath};Cache=Shared;Mode=ReadWriteCreate;Journal Mode=WAL;");
+            optionsBuilder.UseSqlite($"Data Source={dbPath};Cache=Shared;Mode=ReadWriteCreate;");
         }
     }
 }
@@ -87,7 +87,7 @@ public class AppDbContextFactory : Microsoft.EntityFrameworkCore.Design.IDesignT
             System.IO.Directory.CreateDirectory(appFolder);
         }
         string dbPath = System.IO.Path.Combine(appFolder, "nextvent.db");
-        optionsBuilder.UseSqlite($"Data Source={dbPath};Cache=Shared;Mode=ReadWriteCreate;Journal Mode=WAL;");
+        optionsBuilder.UseSqlite($"Data Source={dbPath};Cache=Shared;Mode=ReadWriteCreate;");
         return new AppDbContext(optionsBuilder.Options);
     }
 }

@@ -81,7 +81,7 @@ public partial class MainWindowViewModel : ObservableObject
         }
         string dbPath = System.IO.Path.Combine(appFolder, "nextvent.db");
         var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseSqlite($"Data Source={dbPath};Cache=Shared;Mode=ReadWriteCreate;Journal Mode=WAL;")
+            .UseSqlite($"Data Source={dbPath};Cache=Shared;Mode=ReadWriteCreate;")
             .Options;
 
         _db = new AppDbContext(options);
