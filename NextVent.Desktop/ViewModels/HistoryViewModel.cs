@@ -28,8 +28,8 @@ public partial class HistoryViewModel : ObservableObject
     [ObservableProperty] private string _peakHourLabel = "Ninguna";
     [ObservableProperty] private double _peakHourRevenue = 0.0;
     [ObservableProperty] private double _totalDayRevenue = 0.0;
-    [ObservableProperty] private DateTimeOffset? _startDate = DateTimeOffset.Now.Date;
-    [ObservableProperty] private DateTimeOffset? _endDate = DateTimeOffset.Now.Date.AddDays(1).AddTicks(-1);
+    [ObservableProperty] private DateTimeOffset? _startDate = DateTimeOffset.Now;
+    [ObservableProperty] private DateTimeOffset? _endDate = DateTimeOffset.Now;
     [ObservableProperty] private bool _isLoading = false;
 
     public event Action? OpenCashupRequested;

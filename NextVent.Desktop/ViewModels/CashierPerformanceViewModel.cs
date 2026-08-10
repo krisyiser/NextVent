@@ -16,8 +16,8 @@ public partial class CashierPerformanceViewModel : ObservableObject
 
     public ObservableCollection<CashierProductivityReportModel> CashierProductivityReports { get; } = [];
 
-    [ObservableProperty] private DateTimeOffset _startDate = DateTimeOffset.Now.AddDays(-7);
-    [ObservableProperty] private DateTimeOffset _endDate = DateTimeOffset.Now;
+    [ObservableProperty] private DateTimeOffset? _startDate = DateTimeOffset.Now.AddDays(-7);
+    [ObservableProperty] private DateTimeOffset? _endDate = DateTimeOffset.Now;
     [ObservableProperty] private bool _isLoading = false;
     [ObservableProperty] private string _feedbackMessage = string.Empty;
 
@@ -39,7 +39,9 @@ public partial class CashierPerformanceViewModel : ObservableObject
                 await _attendanceService.AutoCloseForgottenAttendancesAsync();
             }
 
-            var reports = await _performanceService.CalculateTrueCashierProductivityAsync(StartDate.DateTime, EndDate.DateTime);
+            var start = StartDate?.DateTime ?? DateTime.Today.AddDays(-7);
+            var end = EndDate?.DateTime ?? DateTime.Today;
+            var reports = await _performanceService.CalculateTrueCashierProductivityAsync(start, end);
             CashierProductivityReports.Clear();
             foreach (var r in reports)
             {
