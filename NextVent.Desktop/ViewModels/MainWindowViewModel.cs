@@ -218,6 +218,11 @@ public partial class MainWindowViewModel : ObservableObject
             dialog.RequestClose += CloseDialog;
             ActiveDialogViewModel = dialog;
             IsDialogOverlayOpen = true;
+
+            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+            {
+                dialog.PaymentMethod = _posVm.InitialPaymentMode;
+            }, Avalonia.Threading.DispatcherPriority.Loaded);
         };
 
         _posVm.OpenCreateItemKitRequested += () =>
