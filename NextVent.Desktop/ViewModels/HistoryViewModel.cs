@@ -194,10 +194,19 @@ public partial class HistoryViewModel : ObservableObject
     [RelayCommand]
     private void OpenReturnDialog(SaleDto sale)
     {
-        if (sale != null && !sale.IsCancelled)
+        if (sale == null || sale.IsCancelled) return;
+
+        OpenSupervisorPinRequested?.Invoke($"Autorizar Devolución Folio: {sale.Id.Substring(0, Math.Min(8, sale.Id.Length))}", (authorized) =>
         {
-            OpenReturnRequested?.Invoke(sale);
-        }
+            if (authorized)
+            {
+                OpenReturnRequested?.Invoke(sale);
+            }
+            else
+            {
+                FeedbackMessage = "Autorización denegada. PIN de administrador incorrecto.";
+            }
+        });
     }
 
     [RelayCommand]
