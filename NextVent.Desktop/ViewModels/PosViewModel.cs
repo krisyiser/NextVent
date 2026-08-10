@@ -775,7 +775,9 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
 
             if (_db != null)
             {
-                var json = JsonSerializer.Serialize(CartItems);
+                var json = JsonSerializer.Serialize(
+                    CartItems.ToList(),
+                    NextVent.Desktop.Core.Helpers.NextVentJsonContext.Default.ListCartItemDto);
                 _db.ParkedOrders.Add(new ParkedOrderEntity
                 {
                     Id = Guid.NewGuid().ToString(),
@@ -812,7 +814,9 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
                 return;
             }
 
-            var items = JsonSerializer.Deserialize<List<CartItemDto>>(last.ItemsJson);
+            var items = JsonSerializer.Deserialize(
+                last.ItemsJson,
+                NextVent.Desktop.Core.Helpers.NextVentJsonContext.Default.ListCartItemDto);
             if (items != null)
             {
                 CartItems.Clear();

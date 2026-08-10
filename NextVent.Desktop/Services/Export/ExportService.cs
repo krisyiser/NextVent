@@ -15,11 +15,7 @@ public sealed class ExportService
     /// </summary>
     public async Task ExportJsonAsync<T>(IEnumerable<T> data, string filePath)
     {
-        var json = JsonSerializer.Serialize(data, new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            PropertyNamingPolicy = JsonNamingPolicy.CamelCase
-        });
+        var json = JsonSerializer.Serialize(data, typeof(IEnumerable<T>), NextVent.Desktop.Core.Helpers.NextVentJsonContext.Default);
         await File.WriteAllTextAsync(filePath, json, Encoding.UTF8);
         Log.Information("Exported JSON: {Path} ({Count} records)", filePath, data.Count());
     }

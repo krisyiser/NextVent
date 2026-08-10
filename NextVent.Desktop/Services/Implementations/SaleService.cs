@@ -45,7 +45,9 @@ public sealed class SaleService : ISaleService
             double globalDiscountAmount = Math.Max(0.0, Math.Round(snapshotsSum - sale.Total, 2));
             var processedItems = ApplyProratedGlobalDiscountAndTaxes(sale.Items, globalDiscountAmount);
 
-            var itemsJson = JsonSerializer.Serialize(processedItems, JsonOpts);
+            var itemsJson = JsonSerializer.Serialize(
+                processedItems,
+                NextVent.Desktop.Core.Helpers.NextVentJsonContext.Default.ListSaleItemSnapshotDto);
 
             var total = Math.Round(sale.Total, 2);
             var totalCost = Math.Round(sale.TotalCost, 2);
@@ -247,7 +249,9 @@ public sealed class SaleService : ISaleService
             var sale = await _ctx.Sales.FindAsync(saleId);
             if (sale is null || sale.IsCancelled == 1) return;
 
-            var items = JsonSerializer.Deserialize<List<SaleItemSnapshotDto>>(sale.ItemsJson, JsonOpts) ?? [];
+            var items = JsonSerializer.Deserialize(
+                sale.ItemsJson,
+                NextVent.Desktop.Core.Helpers.NextVentJsonContext.Default.ListSaleItemSnapshotDto) ?? [];
 
             // Restore stock
             foreach (var item in items)
@@ -303,7 +307,9 @@ public sealed class SaleService : ISaleService
             var sale = await _ctx.Sales.FindAsync(saleId);
             if (sale is null || sale.IsCancelled == 1) return false;
 
-            var items = JsonSerializer.Deserialize<List<SaleItemSnapshotDto>>(sale.ItemsJson, JsonOpts) ?? [];
+            var items = JsonSerializer.Deserialize(
+                sale.ItemsJson,
+                NextVent.Desktop.Core.Helpers.NextVentJsonContext.Default.ListSaleItemSnapshotDto) ?? [];
             var targetItem = items.FirstOrDefault(i => i.ProductId == productId || i.Id == productId);
 
             if (targetItem is null) return false;
@@ -369,7 +375,9 @@ public sealed class SaleService : ISaleService
                 sale.CancelledAt = DateTimeOffset.UtcNow.ToString("o");
             }
 
-            sale.ItemsJson = JsonSerializer.Serialize(updatedItems, JsonOpts);
+            sale.ItemsJson = JsonSerializer.Serialize(
+                updatedItems,
+                NextVent.Desktop.Core.Helpers.NextVentJsonContext.Default.ListSaleItemSnapshotDto);
 
             // Record Return Audit Entity
             var returnEntity = new ReturnEntity
@@ -570,7 +578,9 @@ public sealed class SaleService : ISaleService
 
     private static SaleDto MapToDto(SaleEntity e)
     {
-        var items = JsonSerializer.Deserialize<List<SaleItemSnapshotDto>>(e.ItemsJson, JsonOpts) ?? [];
+        var items = JsonSerializer.Deserialize(
+            e.ItemsJson,
+            NextVent.Desktop.Core.Helpers.NextVentJsonContext.Default.ListSaleItemSnapshotDto) ?? [];
         return new SaleDto(
             e.Id, e.Date, items, e.Total, e.TotalCost, e.Profit,
             e.PaidAmount, e.ChangeAmount, e.PaymentMethod,
