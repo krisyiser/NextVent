@@ -48,21 +48,23 @@ public partial class HistoryViewModel : ObservableObject
     [RelayCommand]
     private async Task FetchSalesHistoryAsync()
     {
+        if (!StartDate.HasValue || !EndDate.HasValue) return;
+
         IsLoading = true;
         try
         {
-            DateTime start = StartDate?.DateTime ?? DateTime.Today;
-            DateTime end = EndDate?.DateTime ?? DateTime.Today.AddDays(1).AddTicks(-1);
+            DateTime queryStart = StartDate.Value.DateTime.Date;
+            DateTime queryEnd = EndDate.Value.DateTime.Date.AddDays(1).AddTicks(-1);
 
-            DateTime utcStart = start.ToBusinessUtcTime();
-            DateTime utcEnd = end.ToBusinessUtcTime();
+            DateTime utcStart = queryStart.ToBusinessUtcTime();
+            DateTime utcEnd = queryEnd.ToBusinessUtcTime();
 
             var salesList = await _saleService.GetSalesByDateRangeAsync(utcStart, utcEnd);
 
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 Sales.Clear();
-                foreach (var sale in salesList.Take(500))
+                foreach (var sale in salesList.OrderByDescending(s => s.Date).Take(500))
                 {
                     Sales.Add(sale);
                 }
