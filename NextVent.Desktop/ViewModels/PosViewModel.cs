@@ -99,6 +99,12 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
     public event Action? OpenSwitchUserPinRequested;
     public event Action? OpenLockScreenRequested;
     public event Action<string, Action<bool>>? OpenSupervisorPinRequested;
+    public event Action<string, string>? ShowAlertRequested;
+
+    private void ShowAlert(string title, string message)
+    {
+        ShowAlertRequested?.Invoke(title, message);
+    }
 
     public PosViewModel(
         IProductService productService,
@@ -341,26 +347,29 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
         double quantityMultiplier = 1.0;
         string productQuery = input;
 
-        // Check for FAST SCAN syntax N*CODE (e.g., '6*750123456' or '0.750*carne')
-        var match = Regex.Match(input, @"^([0-9]+(?:\.[0-9]+)?)\*(.+)$");
-        if (match.Success)
+        // ADVANCED PARSER (e.g. "6*750123456" -> Qty: 6, Query: "750123456")
+        var parts = input.Split('*', 2);
+        if (parts.Length == 2 && double.TryParse(parts[0], out double parsedQty))
         {
-            if (double.TryParse(match.Groups[1].Value, out double q))
-            {
-                quantityMultiplier = q;
-                productQuery = match.Groups[2].Value.Trim();
-            }
+            quantityMultiplier = parsedQty;
+            productQuery = parts[1].Trim();
         }
 
         var p = Products.FirstOrDefault(x =>
             (x.Barcode != null && x.Barcode.Equals(productQuery, StringComparison.OrdinalIgnoreCase)) ||
             x.Name.Equals(productQuery, StringComparison.OrdinalIgnoreCase));
 
+        if (p == null)
+        {
+            // Fallback: search by partial name
+            p = Products.FirstOrDefault(x => x.Name.Contains(productQuery, StringComparison.OrdinalIgnoreCase));
+        }
+
         if (p != null)
         {
             AddToCartWithQuantity(p, quantityMultiplier);
             SearchQuery = string.Empty;
-            FeedbackMessage = $"¡Agregado {quantityMultiplier:N2}x {p.Name} al ticket!";
+            FeedbackMessage = $"¡Agregado {quantityMultiplier:N3}x {p.Name} al ticket!";
         }
         else
         {
@@ -462,15 +471,70 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
     {
         if (product == null) return;
         var existing = CartItems.FirstOrDefault(i => i.Id == product.Id);
+        
+        double currentPrice = GetPriceForCurrentCustomer(product);
+        
         if (existing != null)
         {
-            existing.Quantity += qty;
+            double projectedQty = existing.Quantity + qty;
+            existing.Quantity = Math.Max(0.0, Math.Min(projectedQty, product.Stock)); // HARD CAP
+            
+            existing.UnitPrice = currentPrice;
+            existing.OriginalUnitPrice = currentPrice;
+
+            if (projectedQty > product.Stock)
+            {
+                ShowAlert("Stock Insuficiente", $"Solo hay {product.Stock} unidades disponibles de {product.Name}.");
+            }
         }
         else
         {
-            CartItems.Add(new CartItemDto(product.Id, product.Name, product.SalePrice, qty, product.Unit));
+            double safeQty = Math.Max(0.0, Math.Min(qty, product.Stock)); // HARD CAP
+            var cartItem = new CartItemDto(product.Id, product.Name, currentPrice, safeQty, product.Unit)
+            {
+                Category = product.Category ?? "General",
+                Cost = product.Cost
+            };
+            CartItems.Add(cartItem);
+
+            if (qty > product.Stock)
+            {
+                ShowAlert("Stock Insuficiente", $"Solo se agregaron {safeQty} unidades de {product.Name}.");
+            }
         }
         RecalculateTotal();
+    }
+
+    partial void OnSelectedCustomerChanged(CustomerDto? value)
+    {
+        RecalculateCartPricesForCustomer();
+    }
+
+    private void RecalculateCartPricesForCustomer()
+    {
+        if (CartItems.Count == 0) return;
+
+        foreach (var item in CartItems)
+        {
+            var productDef = Products.FirstOrDefault(p => p.Id == item.Id);
+            if (productDef != null)
+            {
+                double basePrice = GetPriceForCurrentCustomer(productDef);
+                item.UnitPrice = basePrice;
+                item.OriginalUnitPrice = basePrice;
+            }
+        }
+        
+        _ = RecalculateCartPromotionsAsync();
+    }
+
+    private double GetPriceForCurrentCustomer(ProductDto product)
+    {
+        if (SelectedCustomer != null && SelectedCustomer.IsWholesale)
+        {
+            return product.WholesalePrice > 0 ? product.WholesalePrice : product.Price;
+        }
+        return product.Price;
     }
 
     [RelayCommand]

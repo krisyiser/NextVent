@@ -41,20 +41,59 @@ public partial class CheckoutDialogViewModel : ObservableObject
     [ObservableProperty] private double _receivedAmount;
     [ObservableProperty] private string _receivedAmountInput = "0";
     [ObservableProperty] private double _paidAmount;
-    [ObservableProperty] private double _changeAmount;
+    [ObservableProperty] private decimal _changeAmount;
     [ObservableProperty] private string _paymentMethod = "Efectivo";
+
+    [ObservableProperty] private decimal _cashAmount;
+    [ObservableProperty] private decimal _cardAmount;
+    [ObservableProperty] private decimal _walletAmount;
+    [ObservableProperty] private decimal _totalBill;
+
+    public bool IsMixedPayment => PaymentMethod == "Mixto";
+    public bool IsNotMixedPayment => PaymentMethod != "Mixto";
+    public decimal TotalMixedReceived => CashAmount + CardAmount + WalletAmount;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ConfirmPaymentCommand))]
     private bool _isProcessing;
 
-    public bool IsSufficientAmount => IsFullyPaid || ReceivedAmount >= TotalToPay || PaymentMethod == "Monedero / Tarjeta de Regalo" || PaymentMethod == "Crédito" || PaymentMethod == "Credit" || PaymentMethod == "Fiado";
+    public bool IsSufficientAmount
+    {
+        get
+        {
+            if (PaymentMethod == "Mixto")
+            {
+                return (CashAmount + CardAmount + WalletAmount) >= TotalBill && string.IsNullOrEmpty(ErrorMessage);
+            }
+            return IsFullyPaid || ReceivedAmount >= TotalToPay || PaymentMethod == "Monedero / Tarjeta de Regalo" || PaymentMethod == "Crédito" || PaymentMethod == "Credit" || PaymentMethod == "Fiado";
+        }
+    }
 
-    private bool CanConfirmPayment() => !IsProcessing && IsSufficientAmount;
+    private bool CanConfirmPayment()
+    {
+        if (IsProcessing) return false;
+        
+        if (PaymentMethod == "Mixto")
+        {
+            return (CashAmount + CardAmount + WalletAmount) >= TotalBill && string.IsNullOrEmpty(ErrorMessage);
+        }
+        
+        return IsSufficientAmount;
+    }
+
     public string ChangeOrShortageText
     {
         get
         {
+            if (PaymentMethod == "Mixto")
+            {
+                decimal totalMixed = CashAmount + CardAmount + WalletAmount;
+                if (totalMixed < TotalBill)
+                {
+                    return $"Faltante: ${(TotalBill - totalMixed):N2}";
+                }
+                return $"Cambio: ${ChangeAmount:N2}";
+            }
             if (string.IsNullOrWhiteSpace(ReceivedAmountInput) || !double.TryParse(ReceivedAmountInput, out _))
             {
                 return "Monto Inválido";
@@ -129,13 +168,13 @@ public partial class CheckoutDialogViewModel : ObservableObject
         {
             ReceivedAmount = parsed;
             PaidAmount = parsed;
-            ChangeAmount = Math.Max(0.0, parsed - TotalToPay);
+            ChangeAmount = (decimal)Math.Max(0.0, parsed - TotalToPay);
         }
         else
         {
             ReceivedAmount = 0.0;
             PaidAmount = 0.0;
-            ChangeAmount = 0.0;
+            ChangeAmount = 0m;
         }
 
         OnPropertyChanged(nameof(IsSufficientAmount));
@@ -180,7 +219,7 @@ public partial class CheckoutDialogViewModel : ObservableObject
     [ObservableProperty] private double _pointsEarnedThisSale = 0.0;
 
     public ObservableCollection<string> PaymentMethods { get; } = [
-        "Efectivo", "Tarjeta Débito/Crédito", "Transferencia SPEI", "Puntos de Fidelidad", "Monedero / Tarjeta de Regalo", "CoDi / QR"
+        "Efectivo", "Tarjeta Débito/Crédito", "Transferencia SPEI", "Mixto", "Puntos de Fidelidad", "Monedero / Tarjeta de Regalo", "CoDi / QR"
     ];
 
     public ObservableCollection<string> UsoCfdiOptions { get; } = [
@@ -208,6 +247,7 @@ public partial class CheckoutDialogViewModel : ObservableObject
         _onSuccessCallback = onSuccessCallback;
 
         TotalToPay = total;
+        TotalBill = (decimal)total;
         ReceivedAmount = 0.0;
         PaidAmount = 0.0;
         ReceivedAmountInput = "0";
@@ -249,7 +289,7 @@ public partial class CheckoutDialogViewModel : ObservableObject
     partial void OnReceivedAmountChanged(double value)
     {
         PaidAmount = value;
-        ChangeAmount = Math.Max(0.0, value - TotalToPay);
+        ChangeAmount = (decimal)Math.Max(0.0, value - TotalToPay);
         OnPropertyChanged(nameof(IsSufficientAmount));
         OnPropertyChanged(nameof(ChangeOrShortageText));
         OnPropertyChanged(nameof(ChangeTextColor));
@@ -299,7 +339,17 @@ public partial class CheckoutDialogViewModel : ObservableObject
                 return;
             }
 
-            if (PaidAmount < TotalToPay && PaymentMethod != "Monedero / Tarjeta de Regalo" && !isCredit)
+            double finalPaid = PaymentMethod == "Mixto" ? (double)(CashAmount + CardAmount + WalletAmount) : PaidAmount;
+
+            if (PaymentMethod == "Mixto")
+            {
+                if (finalPaid < (double)TotalBill)
+                {
+                    ErrorMessage = "El monto pagado es insuficiente.";
+                    return;
+                }
+            }
+            else if (PaidAmount < TotalToPay && PaymentMethod != "Monedero / Tarjeta de Regalo" && !isCredit)
             {
                 ErrorMessage = "El monto pagado es insuficiente.";
                 return;
@@ -349,8 +399,8 @@ public partial class CheckoutDialogViewModel : ObservableObject
                 Total: TotalToPay,
                 TotalCost: totalCost,
                 Profit: profit,
-                PaidAmount: PaidAmount,
-                ChangeAmount: ChangeAmount,
+                PaidAmount: finalPaid,
+                ChangeAmount: (double)ChangeAmount,
                 PaymentMethod: PaymentMethod,
                 CustomerId: SelectedCustomer?.Id,
                 IsCredit: isCredit,
@@ -426,5 +476,59 @@ public partial class CheckoutDialogViewModel : ObservableObject
         }
 
         return true;
+    }
+
+    partial void OnCashAmountChanged(decimal value) => ValidateMixedPaymentMath();
+    partial void OnCardAmountChanged(decimal value) => ValidateMixedPaymentMath();
+    partial void OnWalletAmountChanged(decimal value) => ValidateMixedPaymentMath();
+
+    private void ValidateMixedPaymentMath()
+    {
+        OnPropertyChanged(nameof(TotalMixedReceived));
+        OnPropertyChanged(nameof(IsSufficientAmount));
+        OnPropertyChanged(nameof(ChangeOrShortageText));
+
+        // 1. STRICT DIGITAL LIMIT: Card + Wallet cannot exceed the Total Bill
+        decimal digitalPayments = CardAmount + WalletAmount;
+        if (digitalPayments > TotalBill)
+        {
+            ErrorMessage = "El cobro en Tarjeta y Monedero no puede superar el Total del Ticket.";
+            ChangeAmount = 0m;
+            OnPropertyChanged(nameof(ChangeTextColor));
+            OnPropertyChanged(nameof(ChangeBgColor));
+            ConfirmPaymentCommand.NotifyCanExecuteChanged();
+            return;
+        }
+        else
+        {
+            ErrorMessage = string.Empty;
+        }
+
+        // 2. EXACT CHANGE: Change is only produced by Cash overpaying the remaining balance
+        decimal remainingBalanceToPayByCash = TotalBill - digitalPayments;
+        
+        if (CashAmount >= remainingBalanceToPayByCash)
+        {
+            ChangeAmount = CashAmount - remainingBalanceToPayByCash;
+        }
+        else
+        {
+            ChangeAmount = 0m; // Not enough money yet
+        }
+        
+        OnPropertyChanged(nameof(ChangeTextColor));
+        OnPropertyChanged(nameof(ChangeBgColor));
+        ConfirmPaymentCommand.NotifyCanExecuteChanged();
+    }
+
+    partial void OnPaymentMethodChanged(string value)
+    {
+        OnPropertyChanged(nameof(IsMixedPayment));
+        OnPropertyChanged(nameof(IsNotMixedPayment));
+        OnPropertyChanged(nameof(IsSufficientAmount));
+        OnPropertyChanged(nameof(ChangeOrShortageText));
+        OnPropertyChanged(nameof(ChangeTextColor));
+        OnPropertyChanged(nameof(ChangeBgColor));
+        ConfirmPaymentCommand.NotifyCanExecuteChanged();
     }
 }

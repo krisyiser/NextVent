@@ -191,6 +191,13 @@ public partial class MainWindowViewModel : ObservableObject
             IsDialogOverlayOpen = true;
         };
 
+        _posVm.ShowAlertRequested += (title, message) =>
+        {
+            var dialog = new ConfirmDialogViewModel(title, message, _ => CloseDialog());
+            ActiveDialogViewModel = dialog;
+            IsDialogOverlayOpen = true;
+        };
+
         // ── Wire POS Dialog & Fullscreen / Logout Events ──
         _posVm.OpenCheckoutRequested += () =>
         {

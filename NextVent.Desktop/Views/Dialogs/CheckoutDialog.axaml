@@ -66,23 +66,62 @@
                         </WrapPanel>
                     </StackPanel>
 
-                    <!-- Inputs: Monto Recibido & Cambio -->
-                    <Grid ColumnDefinitions="*,*">
-                        <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,6,0">
-                            <TextBlock Text="Monto Recibido ($):" FontSize="12" FontWeight="SemiBold" Foreground="#334155"/>
-                            <TextBox Text="{Binding ReceivedAmountInput, Mode=TwoWay}" FontSize="20" FontWeight="Bold" 
-                                     FontFamily="Consolas, monospace" HorizontalContentAlignment="Right" Padding="8"/>
-                        </StackPanel>
+                    <StackPanel Spacing="10">
+                        <!-- Standard Received Amount Input (Visible if NOT Mixed) -->
+                        <Grid ColumnDefinitions="*,*" IsVisible="{Binding IsNotMixedPayment}">
+                            <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,6,0">
+                                <TextBlock Text="Monto Recibido ($):" FontSize="12" FontWeight="SemiBold" Foreground="#334155"/>
+                                <TextBox Text="{Binding ReceivedAmountInput, Mode=TwoWay}" FontSize="20" FontWeight="Bold" 
+                                         FontFamily="Consolas, monospace" HorizontalContentAlignment="Right" Padding="8"/>
+                            </StackPanel>
 
-                        <StackPanel Grid.Column="1" Spacing="4" Margin="6,0,0,0">
-                            <TextBlock Text="Estado de Cambio:" FontSize="12" FontWeight="SemiBold" Foreground="#334155"/>
-                            <Border Background="{Binding ChangeBgColor}" CornerRadius="4" Padding="10,6" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
-                                <TextBlock Text="{Binding ChangeOrShortageText}" 
-                                           Foreground="{Binding ChangeTextColor}" 
-                                           FontSize="18" FontWeight="ExtraBold" FontFamily="Consolas, monospace" HorizontalAlignment="Right"/>
-                            </Border>
+                            <StackPanel Grid.Column="1" Spacing="4" Margin="6,0,0,0">
+                                <TextBlock Text="Estado de Cambio:" FontSize="12" FontWeight="SemiBold" Foreground="#334155"/>
+                                <Border Background="{Binding ChangeBgColor}" CornerRadius="4" Padding="10,6" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                    <TextBlock Text="{Binding ChangeOrShortageText}" 
+                                               Foreground="{Binding ChangeTextColor}" 
+                                               FontSize="18" FontWeight="ExtraBold" FontFamily="Consolas, monospace" HorizontalAlignment="Right"/>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Mixed Payment Inputs Grid (Visible if Mixed) -->
+                        <StackPanel Spacing="8" IsVisible="{Binding IsMixedPayment}">
+                            <TextBlock Text="Desglose de Pago Mixto:" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}"/>
+                            <Grid ColumnDefinitions="*,*,*">
+                                <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,4,0">
+                                    <TextBlock Text="Efectivo ($):" FontSize="11" FontWeight="SemiBold" Foreground="#334155"/>
+                                    <TextBox Text="{Binding CashAmount, Mode=TwoWay}" FontSize="14" FontWeight="Bold" 
+                                             FontFamily="Consolas, monospace" HorizontalContentAlignment="Right" Padding="6"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Spacing="4" Margin="4,0,4,0">
+                                    <TextBlock Text="Tarjeta ($):" FontSize="11" FontWeight="SemiBold" Foreground="#334155"/>
+                                    <TextBox Text="{Binding CardAmount, Mode=TwoWay}" FontSize="14" FontWeight="Bold" 
+                                             FontFamily="Consolas, monospace" HorizontalContentAlignment="Right" Padding="6"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Spacing="4" Margin="4,0,0,0">
+                                    <TextBlock Text="Monedero ($):" FontSize="11" FontWeight="SemiBold" Foreground="#334155"/>
+                                    <TextBox Text="{Binding WalletAmount, Mode=TwoWay}" FontSize="14" FontWeight="Bold" 
+                                             FontFamily="Consolas, monospace" HorizontalContentAlignment="Right" Padding="6"/>
+                                </StackPanel>
+                            </Grid>
+                            
+                            <Grid ColumnDefinitions="*,*">
+                                <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,6,0">
+                                    <TextBlock Text="Total Recibido (Mixto):" FontSize="11" FontWeight="SemiBold" Foreground="#334155"/>
+                                    <TextBlock Text="{Binding TotalMixedReceived, StringFormat='${0:N2}'}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" FontFamily="Consolas, monospace"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Spacing="4" Margin="6,0,0,0">
+                                    <TextBlock Text="Cambio (Mixto):" FontSize="11" FontWeight="SemiBold" Foreground="#334155"/>
+                                    <Border Background="{Binding ChangeBgColor}" CornerRadius="4" Padding="8,4" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                        <TextBlock Text="{Binding ChangeAmount, StringFormat='Cambio: ${0:N2}'}" 
+                                                   Foreground="{Binding ChangeTextColor}" 
+                                                   FontSize="16" FontWeight="ExtraBold" FontFamily="Consolas, monospace" HorizontalAlignment="Right"/>
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
                         </StackPanel>
-                    </Grid>
+                    </StackPanel>
 
                     <!-- Customer Selector & Loyalty Points Card -->
                     <StackPanel Spacing="4">

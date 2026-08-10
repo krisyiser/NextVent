@@ -16,23 +16,23 @@
                 <Button Background="{DynamicResource AccentPrimaryBrush}" Foreground="White" CornerRadius="20" Padding="12,5" Cursor="Hand">
                     <Button.Flyout>
                         <MenuFlyout Placement="BottomEdgeAlignedLeft">
-                            <MenuItem Header="Cambiar de Usuario (F1)" Command="{Binding SwitchCashierCommand}">
+                            <MenuItem Header="Cambiar de Usuario" Command="{Binding SwitchCashierCommand}">
                                 <MenuItem.Icon>
                                     <mi:MaterialIcon Kind="AccountSwitch" Width="16" Height="16"/>
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem Header="Bloquear Terminal (Win+L)" Command="{Binding LockTerminalCommand}">
+                            <MenuItem Header="Bloquear Terminal" Command="{Binding LockTerminalCommand}">
                                 <MenuItem.Icon>
                                     <mi:MaterialIcon Kind="LockOutline" Width="16" Height="16"/>
                                 </MenuItem.Icon>
                             </MenuItem>
                             <Separator/>
-                            <MenuItem Header="Corte Parcial de Caja (Arqueo X)" Command="{Binding GenerateXReportCommand}">
+                            <MenuItem Header="Corte Parcial de Caja" Command="{Binding GenerateXReportCommand}">
                                 <MenuItem.Icon>
                                     <mi:MaterialIcon Kind="FileChartOutline" Width="16" Height="16"/>
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem Header="Corte Final de Turno (Arqueo Z)" Command="{Binding GenerateZReportCommand}" Foreground="#EF4444">
+                            <MenuItem Header="Corte Final de Turno" Command="{Binding GenerateZReportCommand}" Foreground="#EF4444">
                                 <MenuItem.Icon>
                                     <mi:MaterialIcon Kind="CashRegister" Width="16" Height="16" Foreground="#EF4444"/>
                                 </MenuItem.Icon>
@@ -77,10 +77,10 @@
                 <Button Command="{Binding ParkCurrentCartCommand}" 
                         Background="#EFF6FF" Foreground="#2563EB" BorderBrush="#2563EB" BorderThickness="1"
                         CornerRadius="6" Padding="10,6" Cursor="Hand"
-                        ToolTip.Tip="Pausar y guardar el ticket actual en la lista en espera (F7)">
+                        ToolTip.Tip="Pausar y guardar el ticket actual en la lista en espera">
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <mi:MaterialIcon Kind="PauseCircle" Width="16" Height="16" Foreground="#2563EB"/>
-                        <TextBlock Text="Pausar (F7)" FontSize="11" FontWeight="Bold" Foreground="#2563EB" VerticalAlignment="Center"/>
+                        <TextBlock Text="Pausar" FontSize="11" FontWeight="Bold" Foreground="#2563EB" VerticalAlignment="Center"/>
                     </StackPanel>
                 </Button>
 

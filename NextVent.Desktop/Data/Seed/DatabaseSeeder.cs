@@ -15,7 +15,7 @@ public static class DatabaseSeeder
         // 1. Seed/Upsert 25 Varied Test Products unconditionally
         var seedList = new[]
         {
-            new ProductEntity { Id = "PROD-SEED-001", Barcode = "7501234567890", Name = "Coca-Cola 600ml", Cost = 12.5, Price = 18.0, Stock = 45, Category = "Bebidas", Unit = "Pza", CreatedAt = now },
+            new ProductEntity { Id = "PROD-SEED-001", Barcode = "7501234567890", Name = "Coca-Cola 600ml", Cost = 12.5, Price = 20.0, WholesalePrice = 18.0, Stock = 45, Category = "Bebidas", Unit = "Pza", CreatedAt = now },
             new ProductEntity { Id = "PROD-SEED-002", Barcode = "7509876543210", Name = "Leche Lala Entera 1L", Cost = 22.0, Price = 28.0, Stock = 12, Category = "Lácteos", Unit = "Pza", ExpiresSoon = 1, CreatedAt = now },
             new ProductEntity { Id = "PROD-SEED-003", Barcode = "7501000000003", Name = "Pan Bimbo Blanco Rendidor", Cost = 34.0, Price = 45.0, Stock = 18, Category = "Panadería", Unit = "Pza", CreatedAt = now },
             new ProductEntity { Id = "PROD-SEED-004", Barcode = "7502000000004", Name = "Paracetamol 500mg (20 Tab)", Cost = 18.0, Price = 35.0, Stock = 68, Category = "Farmacia", Unit = "Caja", CreatedAt = now },
@@ -39,7 +39,8 @@ public static class DatabaseSeeder
             new ProductEntity { Id = "PROD-SEED-022", Barcode = "7509000000022", Name = "Cerveza Corona Extra 355ml", Cost = 16.0, Price = 24.0, Stock = 72, Category = "Bebidas", Unit = "Pza", CreatedAt = now },
             new ProductEntity { Id = "PROD-SEED-023", Barcode = "7509000000023", Name = "Crema Lala Ácida 450g", Cost = 21.5, Price = 31.0, Stock = 16, Category = "Lácteos", Unit = "Pza", CreatedAt = now },
             new ProductEntity { Id = "PROD-SEED-024", Barcode = "7509000000024", Name = "Peñafiel Naranjada 2L", Cost = 18.0, Price = 27.0, Stock = 20, Category = "Bebidas", Unit = "Pza", CreatedAt = now },
-            new ProductEntity { Id = "PROD-SEED-025", Barcode = "7509000000025", Name = "Electrolit Suero Fresa 625ml", Cost = 24.0, Price = 36.0, Stock = 33, Category = "Farmacia", Unit = "Pza", CreatedAt = now }
+            new ProductEntity { Id = "PROD-SEED-025", Barcode = "7509000000025", Name = "Electrolit Suero Fresa 625ml", Cost = 24.0, Price = 36.0, Stock = 33, Category = "Farmacia", Unit = "Pza", CreatedAt = now },
+            new ProductEntity { Id = "PROD-SEED-026", Barcode = "7509000000026", Name = "Jamón Cocido (Kilo)", Cost = 120.0, Price = 180.0, Stock = 15, Category = "Carnicería", Unit = "Kg", CreatedAt = now }
         };
 
         foreach (var p in seedList)
@@ -54,6 +55,8 @@ public static class DatabaseSeeder
                 existing.Name = p.Name;
                 existing.Barcode = p.Barcode;
                 existing.Price = p.Price;
+                existing.WholesalePrice = p.WholesalePrice;
+                existing.WholesaleThreshold = p.WholesaleThreshold;
                 existing.Cost = p.Cost;
                 existing.Stock = p.Stock;
                 existing.Category = p.Category;
@@ -84,6 +87,14 @@ public static class DatabaseSeeder
                     Phone = "5551234567",
                     Debt = 150.00,
                     PuntosSaldo = 45
+                },
+                new CustomerEntity
+                {
+                    Id = "CUST-SEED-003",
+                    Name = "Distribuidora del Norte (Mayorista)",
+                    Phone = "5559876543",
+                    Debt = 0,
+                    PuntosSaldo = 0
                 }
             );
         }

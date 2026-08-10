@@ -49,6 +49,7 @@ public record CustomerDto(
     public string Phone => Telefono;
     public double CreditLimit => LimiteCredito;
     public double Debt => Deuda;
+    public bool IsWholesale => Name.Contains("Mayorista", StringComparison.OrdinalIgnoreCase);
 }
 
 public record CustomerPaymentDto(
