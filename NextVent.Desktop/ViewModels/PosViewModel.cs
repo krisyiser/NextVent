@@ -62,6 +62,10 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
     [ObservableProperty] private double _tax;
     [ObservableProperty] private double _total;
     [ObservableProperty] private string _feedbackMessage = string.Empty;
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(FeedbackColor))]
+    private bool _feedbackIsError;
+    public string FeedbackColor => FeedbackIsError ? "#EF4444" : "#10B981";
     [ObservableProperty] private int _parkedOrdersCount = 0;
     [ObservableProperty] private double _cartWidthPx = 380;
     [ObservableProperty] private string _initialPaymentMode = "Efectivo";
@@ -318,25 +322,13 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
     private void OpenCustomerSelect() => OpenCustomerSelectRequested?.Invoke();
 
     [RelayCommand]
-    private void PayCash()
-    {
-        InitialPaymentMode = "Efectivo";
-        OpenCheckoutDialog();
-    }
+    private void PayCash() => _ = CheckoutAsync("Efectivo");
 
     [RelayCommand]
-    private void PayCard()
-    {
-        InitialPaymentMode = "Tarjeta Débito/Crédito";
-        OpenCheckoutDialog();
-    }
+    private void PayCard() => _ = CheckoutAsync("TarjetaDebito");
 
     [RelayCommand]
-    private void PayMixed()
-    {
-        InitialPaymentMode = "Mixto";
-        OpenCheckoutDialog();
-    }
+    private void PayMixed() => _ = CheckoutAsync("Mixto");
 
     [RelayCommand]
     private void ProcessScanOrSearchSubmit()
@@ -369,6 +361,7 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
         {
             AddToCartWithQuantity(p, quantityMultiplier);
             SearchQuery = string.Empty;
+            FeedbackIsError = false;
             FeedbackMessage = $"¡Agregado {quantityMultiplier:N3}x {p.Name} al ticket!";
         }
         else
@@ -749,6 +742,7 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
     {
         if (CartItems.Count == 0)
         {
+            FeedbackIsError = true;
             FeedbackMessage = "El carrito está vacío para pausar";
             return;
         }
@@ -766,8 +760,6 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
             ParkedTickets.Add(parked);
             ParkedOrdersCount = ParkedTickets.Count;
             OnPropertyChanged(nameof(HasParkedTickets));
-            CartItems.Clear();
-            RecalculateTotal();
 
             if (_db != null)
             {
@@ -781,11 +773,16 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
                 await _db.SaveChangesAsync();
             }
 
+            CartItems.Clear();
+            RecalculateTotal();
+
+            FeedbackIsError = false;
             FeedbackMessage = "¡Venta pausada exitosamente!";
         }
         catch (Exception ex)
         {
             Log.Error(ex, "Error parking current cart");
+            FeedbackIsError = true;
             FeedbackMessage = "Error al pausar la venta";
         }
     }
@@ -826,10 +823,12 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
 
                 if (outOfStockWarnings.Any())
                 {
+                    FeedbackIsError = true;
                     FeedbackMessage = "Algunos productos del ticket pausado ya no tienen stock suficiente:\n" + string.Join("\n", outOfStockWarnings);
                 }
                 else
                 {
+                    FeedbackIsError = false;
                     FeedbackMessage = "¡Venta reanudada en el carrito!";
                 }
 
@@ -844,6 +843,7 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
         catch (Exception ex)
         {
             Log.Error(ex, "Error resuming parked cart");
+            FeedbackIsError = true;
             FeedbackMessage = "Error al reanudar venta";
         }
     }
@@ -855,9 +855,23 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
     {
         if (_attendanceService != null && _sessionManager?.CurrentCashier != null)
         {
+            // 1. Prioritize Shift Status over pure attendance
+            if (_db != null)
+            {
+                var hasActiveShift = await _db.Shifts
+                    .AsNoTracking()
+                    .AnyAsync(s => s.IsOpen == 1);
+                if (hasActiveShift)
+                {
+                    return true;
+                }
+            }
+
+            // 2. Fallback to attendance check (if strict rules apply)
             bool clockedIn = await _attendanceService.HasActiveClockInAsync(_sessionManager.CurrentCashier.Id.ToString());
             if (!clockedIn)
             {
+                FeedbackIsError = true;
                 FeedbackMessage = "Acceso Denegado: Debes registrar tu entrada en el control de asistencia antes de abrir la caja.";
                 return false;
             }
@@ -866,39 +880,25 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
     }
 
     [RelayCommand]
-    private async Task OpenCashCheckoutAsync()
+    private async Task CheckoutAsync(string? paymentMethodParam)
     {
         if (CartItems.Count == 0) return;
         if (!await VerifyAttendanceGuardAsync()) return;
-        InitialPaymentMode = "Efectivo";
+
+        InitialPaymentMode = paymentMethodParam switch
+        {
+            "TarjetaDebito" => "Tarjeta Débito/Crédito",
+            "Mixto" => "Mixto",
+            _ => "Efectivo"
+        };
+
         OpenCheckoutRequested?.Invoke();
     }
 
     [RelayCommand]
-    private async Task OpenCardCheckoutAsync()
+    private void OpenCheckoutDialog()
     {
-        if (CartItems.Count == 0) return;
-        if (!await VerifyAttendanceGuardAsync()) return;
-        InitialPaymentMode = "Tarjeta Débito/Crédito";
-        OpenCheckoutRequested?.Invoke();
-    }
-
-    [RelayCommand]
-    private async Task OpenMixedCheckoutAsync()
-    {
-        if (CartItems.Count == 0) return;
-        if (!await VerifyAttendanceGuardAsync()) return;
-        InitialPaymentMode = "Mixto";
-        OpenCheckoutRequested?.Invoke();
-    }
-
-    [RelayCommand]
-    private async Task OpenDefaultCheckoutAsync()
-    {
-        if (CartItems.Count == 0) return;
-        if (!await VerifyAttendanceGuardAsync()) return;
-        InitialPaymentMode = "Efectivo";
-        OpenCheckoutRequested?.Invoke();
+        _ = CheckoutAsync("Efectivo");
     }
 
     [RelayCommand(CanExecute = nameof(CanParkCurrentTicket))]
@@ -908,12 +908,6 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
         OnPropertyChanged(nameof(CanParkCurrentTicket));
         OnPropertyChanged(nameof(HasParkedOrders));
         OnPropertyChanged(nameof(HasParkedTickets));
-    }
-
-    [RelayCommand]
-    private void OpenCheckoutDialog()
-    {
-        _ = OpenDefaultCheckoutAsync();
     }
 
     [RelayCommand] private void ToggleFullscreen() => ToggleFullscreenRequested?.Invoke();

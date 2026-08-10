@@ -64,14 +64,14 @@
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="CornerRadius" Value="6" />
         <Setter Property="Background" Value="#FFFFFF" />
-        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="Foreground" Value="#1E293B" />
         <Setter Property="MinHeight" Value="38" />
         <Setter Property="Padding" Value="10,8" />
     </Style>
 
     <Style Selector="ComboBoxItem">
         <Setter Property="Background" Value="#FFFFFF"/>
-        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+        <Setter Property="Foreground" Value="#1E293B"/>
         <Setter Property="Padding" Value="12,10"/>
     </Style>
 

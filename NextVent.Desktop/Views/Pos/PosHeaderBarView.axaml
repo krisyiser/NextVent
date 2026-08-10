@@ -69,7 +69,7 @@
                 </StackPanel>
             </StackPanel>
 
-            <TextBlock Grid.Column="1" Text="{Binding FeedbackMessage}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentSuccessBrush}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="8,0" />
+            <TextBlock Grid.Column="1" Text="{Binding FeedbackMessage}" FontSize="11" FontWeight="Bold" Foreground="{Binding FeedbackColor}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="8,0" />
 
             <!-- Top Action Buttons (Right) -->
             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
