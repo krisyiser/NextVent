@@ -78,6 +78,12 @@ public class ProductEntity
     public string? CreatedAt { get; set; }
 
     [NotMapped]
+    public bool IsOutOfStock => Stock <= 0.0;
+
+    [NotMapped]
+    public bool IsAvailable => Stock > 0.0;
+
+    [NotMapped]
     public decimal CostPrice
     {
         get => (decimal)Cost;

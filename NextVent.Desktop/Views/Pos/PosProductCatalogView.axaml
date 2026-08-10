@@ -75,31 +75,52 @@
                     <DataTemplate x:DataType="dto:ProductDto">
                         <Button Command="{Binding $parent[UserControl].((vm:PosViewModel)DataContext).AddToCartCommand}"
                                 CommandParameter="{Binding}"
+                                IsEnabled="{Binding IsAvailable}"
                                 Width="165" Height="190" Margin="6" Padding="0" CornerRadius="8" Cursor="Hand"
                                 Background="{DynamicResource BgSecondaryBrush}"
                                 BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                                 HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch">
-                            <Grid RowDefinitions="Auto, *, Auto, Auto" Margin="10">
-                                <!-- Top Header: Category/Icon & Stock Badge -->
-                                <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
-                                    <mi:MaterialIcon Kind="PackageVariant" Width="18" Height="18" Foreground="#94A3B8"/>
-                                    <Border Grid.Column="1" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="4" Padding="4,2">
-                                        <TextBlock Text="{Binding Stock, StringFormat='Stk: {0:N0}'}" FontSize="10" Foreground="#475569" FontWeight="SemiBold"/>
-                                    </Border>
+                            <Grid>
+                                <Grid RowDefinitions="Auto, *, Auto, Auto" Margin="10">
+                                    <!-- Top Header: Category/Icon & Stock Badge -->
+                                    <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
+                                        <mi:MaterialIcon Kind="PackageVariant" Width="18" Height="18" Foreground="#94A3B8"/>
+                                        <Border Grid.Column="1" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="4" Padding="4,2">
+                                            <TextBlock Text="{Binding Stock, StringFormat='Stk: {0:N0}'}" FontSize="10" Foreground="#475569" FontWeight="SemiBold"/>
+                                        </Border>
+                                    </Grid>
+
+                                    <!-- Product Title -->
+                                    <TextBlock Grid.Row="1" Text="{Binding Name}" TextWrapping="Wrap" MaxLines="2" 
+                                               FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,6,0,0"/>
+
+                                    <!-- SKU Code -->
+                                    <TextBlock Grid.Row="2" Text="{Binding Barcode, FallbackValue='SKU: N/A'}" FontSize="10" Foreground="#64748B" 
+                                               FontFamily="Consolas, monospace" Margin="0,2,0,4"/>
+
+                                    <!-- Monospaced Price Tag -->
+                                    <TextBlock Grid.Row="3" Text="{Binding SalePrice, StringFormat='${0:N2}'}" 
+                                               FontSize="18" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" 
+                                               FontFamily="Consolas, JetBrains Mono, monospace"/>
                                 </Grid>
 
-                                <!-- Product Title -->
-                                <TextBlock Grid.Row="1" Text="{Binding Name}" TextWrapping="Wrap" MaxLines="2" 
-                                           FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,6,0,0"/>
-
-                                <!-- SKU Code -->
-                                <TextBlock Grid.Row="2" Text="{Binding Barcode, FallbackValue='SKU: N/A'}" FontSize="10" Foreground="#64748B" 
-                                           FontFamily="Consolas, monospace" Margin="0,2,0,4"/>
-
-                                <!-- Monospaced Price Tag -->
-                                <TextBlock Grid.Row="3" Text="{Binding SalePrice, StringFormat='${0:N2}'}" 
-                                           FontSize="18" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" 
-                                           FontFamily="Consolas, JetBrains Mono, monospace"/>
+                                <!-- OUT OF STOCK OVERLAY -->
+                                <Border IsVisible="{Binding IsOutOfStock}" 
+                                        Background="#CC1E293B" 
+                                        CornerRadius="8" 
+                                        HorizontalAlignment="Stretch" 
+                                        VerticalAlignment="Stretch">
+                                    <Border Background="#EF4444" 
+                                            HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center" 
+                                            Padding="10,5" 
+                                            CornerRadius="4">
+                                        <TextBlock Text="AGOTADO" 
+                                                   Foreground="White" 
+                                                   FontWeight="Bold" 
+                                                   FontSize="12"/>
+                                    </Border>
+                                </Border>
                             </Grid>
                         </Button>
                     </DataTemplate>

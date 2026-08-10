@@ -52,6 +52,7 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
     public ObservableCollection<CategoryChipDto> CategoryChips { get; } = [];
     public ObservableCollection<CustomerDto> Customers { get; } = [];
     public ObservableCollection<ParkedTicketModel> ParkedTickets { get; } = new();
+    private readonly Dictionary<string, double> _originalStockCache = new();
 
     public bool HasParkedTickets => ParkedTickets.Count > 0;
 
@@ -274,7 +275,12 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 Products.Clear();
-                foreach (var p in list) Products.Add(p);
+                _originalStockCache.Clear();
+                foreach (var p in list)
+                {
+                    _originalStockCache[p.Id] = p.Stock;
+                    Products.Add(p);
+                }
                 BuildCategoryChips();
                 FilterProducts();
             });
@@ -282,6 +288,27 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
         catch (Exception ex)
         {
             Log.Error(ex, "Error loading products in PosViewModel");
+        }
+    }
+
+    private void RefreshCatalogItemState(string productId)
+    {
+        var index = Products.IndexOf(Products.FirstOrDefault(p => p.Id == productId));
+        if (index >= 0 && _originalStockCache.TryGetValue(productId, out double dbStock))
+        {
+            var oldItem = Products[index];
+            var cartItem = CartItems.FirstOrDefault(i => i.Id == productId);
+            double cartQty = cartItem?.Quantity ?? 0.0;
+            double newStock = Math.Max(0.0, dbStock - cartQty);
+
+            var newItem = oldItem with { Stock = newStock };
+            Products[index] = newItem;
+
+            var filteredIndex = FilteredProducts.IndexOf(FilteredProducts.FirstOrDefault(p => p.Id == productId));
+            if (filteredIndex >= 0)
+            {
+                FilteredProducts[filteredIndex] = newItem;
+            }
         }
     }
 
@@ -547,6 +574,30 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
                 ShowAlert("Stock Insuficiente", $"Solo se agregaron {safeQty} unidades de {product.Name}.");
             }
         }
+
+        // Calculate and trigger warnings and update card state in real-time
+        var finalItem = CartItems.FirstOrDefault(i => i.Id == product.Id);
+        if (finalItem != null)
+        {
+            double remainingStock = product.Stock - finalItem.Quantity;
+            if (remainingStock <= product.MinStock && remainingStock > 0)
+            {
+                FeedbackIsError = true;
+                FeedbackMessage = $"⚠️ ALERTA: Quedan {remainingStock:N2} piezas de {product.Name} (Stock Mínimo).";
+            }
+            else if (remainingStock <= 0)
+            {
+                FeedbackIsError = true;
+                FeedbackMessage = $"⚠️ {product.Name} se ha AGOTADO con esta venta.";
+            }
+            else
+            {
+                FeedbackIsError = false;
+                FeedbackMessage = $"Agregado: {product.Name}";
+            }
+        }
+
+        RefreshCatalogItemState(product.Id);
         RecalculateTotal();
     }
 
@@ -594,8 +645,26 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
                 ShowAlert("Stock Insuficiente", $"Solo hay {product.Stock:N2} unidades disponibles de {product.Name}. No se pueden agregar más.");
                 return;
             }
+
+            double remainingStock = product.Stock - (item.Quantity + 1);
+            if (remainingStock <= product.MinStock && remainingStock > 0)
+            {
+                FeedbackIsError = true;
+                FeedbackMessage = $"⚠️ ALERTA: Quedan {remainingStock:N2} piezas de {product.Name} (Stock Mínimo).";
+            }
+            else if (remainingStock <= 0)
+            {
+                FeedbackIsError = true;
+                FeedbackMessage = $"⚠️ {product.Name} se ha AGOTADO con esta venta.";
+            }
+            else
+            {
+                FeedbackIsError = false;
+                FeedbackMessage = $"Agregado: {product.Name}";
+            }
         }
         item.Quantity += 1;
+        RefreshCatalogItemState(item.Id);
         RecalculateTotal();
     }
 
@@ -611,6 +680,32 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
         {
             CartItems.Remove(item);
         }
+
+        var product = Products.FirstOrDefault(p => p.Id == item.Id);
+        if (product != null)
+        {
+            var cartItem = CartItems.FirstOrDefault(i => i.Id == item.Id);
+            double currentCartQty = cartItem?.Quantity ?? 0.0;
+            double remainingStock = product.Stock - currentCartQty;
+
+            if (remainingStock <= product.MinStock && remainingStock > 0)
+            {
+                FeedbackIsError = true;
+                FeedbackMessage = $"⚠️ ALERTA: Quedan {remainingStock:N2} piezas de {product.Name} (Stock Mínimo).";
+            }
+            else if (remainingStock <= 0)
+            {
+                FeedbackIsError = true;
+                FeedbackMessage = $"⚠️ {product.Name} se ha AGOTADO con esta venta.";
+            }
+            else
+            {
+                FeedbackIsError = false;
+                FeedbackMessage = $"Descontado: {product.Name}";
+            }
+        }
+
+        RefreshCatalogItemState(item.Id);
         RecalculateTotal();
     }
 
@@ -640,7 +735,11 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
         }
 
         CartItems.Remove(item);
+        RefreshCatalogItemState(item.Id);
         RecalculateTotal();
+
+        FeedbackIsError = false;
+        FeedbackMessage = $"Removido del carrito: {item.Name}";
     }
 
     private void RemoveFromCart(CartItemDto item) => _ = RemoveFromCartAsync(item);
@@ -670,9 +769,16 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
             await _auditService.LogAsync(auditEntry);
         }
 
+        var itemsToRefresh = CartItems.ToList();
         CartItems.Clear();
         RecalculateTotal();
+        FeedbackIsError = false;
         FeedbackMessage = "Carrito limpiado";
+
+        foreach (var item in itemsToRefresh)
+        {
+            RefreshCatalogItemState(item.Id);
+        }
     }
 
     public void ClearCart() => _ = ClearCartAsync();

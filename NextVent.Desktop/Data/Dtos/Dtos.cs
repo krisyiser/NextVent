@@ -30,6 +30,8 @@ public record ProductDto(
 {
     public double CostPrice => Cost;
     public double SalePrice => Price;
+    public bool IsOutOfStock => Stock <= 0.0;
+    public bool IsAvailable => Stock > 0.0;
 }
 
 public record CustomerDto(
