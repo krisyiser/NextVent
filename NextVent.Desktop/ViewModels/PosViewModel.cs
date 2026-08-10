@@ -1004,16 +1004,22 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
     {
         try
         {
-            if (CartItems.Count == 0)
+            if (CartItems == null || CartItems.Count == 0)
             {
                 if (File.Exists(_draftCartPath)) File.Delete(_draftCartPath);
                 return;
             }
 
-            var json = JsonSerializer.Serialize(CartItems.ToList());
+            var json = JsonSerializer.Serialize(
+                CartItems.ToList(),
+                NextVent.Desktop.Core.Helpers.NextVentJsonContext.Default.ListCartItemDto);
             await File.WriteAllTextAsync(_draftCartPath, json);
         }
-        catch { /* Fire-and-forget, suppress IO locks */ }
+        catch
+        {
+            // SILENT FAIL: Do NOT let auto-save crashes interrupt the cashier workflow.
+            // The UI must remain clean and unblocked.
+        }
     }
 
     private async Task RehydrateDraftCartAsync()
@@ -1023,9 +1029,11 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
             try
             {
                 var json = await File.ReadAllTextAsync(_draftCartPath);
-                var recoveredItems = JsonSerializer.Deserialize<List<CartItemDto>>(json);
+                var recoveredItems = JsonSerializer.Deserialize(
+                    json,
+                    NextVent.Desktop.Core.Helpers.NextVentJsonContext.Default.ListCartItemDto);
 
-                if (recoveredItems != null)
+                if (recoveredItems != null && recoveredItems.Count > 0)
                 {
                     await Dispatcher.UIThread.InvokeAsync(async () =>
                     {
