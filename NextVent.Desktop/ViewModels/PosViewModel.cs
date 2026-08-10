@@ -304,11 +304,7 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
             var newItem = oldItem with { Stock = newStock };
             Products[index] = newItem;
 
-            var filteredIndex = FilteredProducts.IndexOf(FilteredProducts.FirstOrDefault(p => p.Id == productId));
-            if (filteredIndex >= 0)
-            {
-                FilteredProducts[filteredIndex] = newItem;
-            }
+            FilterProducts();
         }
     }
 
@@ -341,7 +337,8 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
             (SelectedCategory == "⭐ Top Ventas" || SelectedCategory == "Todos" || p.Category == SelectedCategory) &&
             (string.IsNullOrWhiteSpace(query) ||
              p.Name.ToLower().Contains(query) ||
-             (p.Barcode != null && p.Barcode.ToLower().Contains(query)))
+             (p.Barcode != null && p.Barcode.ToLower().Contains(query))) &&
+            p.Stock > 0.0
         );
 
         foreach (var m in matches)
