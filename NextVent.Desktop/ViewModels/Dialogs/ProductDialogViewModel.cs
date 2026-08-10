@@ -21,10 +21,12 @@ public partial class ProductDialogViewModel : ObservableObject
     private string _name = string.Empty;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ProfitMargin))]
     private double _costPrice;
 
     [ObservableProperty]
-    private double _salePrice;
+    [NotifyPropertyChangedFor(nameof(ProfitMargin))]
+    private double _retailPrice;
 
     [ObservableProperty]
     private int _stock;
@@ -60,6 +62,21 @@ public partial class ProductDialogViewModel : ObservableObject
     [ObservableProperty]
     private string _title = "Nuevo Producto";
 
+    [ObservableProperty]
+    private double _minStock = 5.0;
+
+    public string ProfitMargin
+    {
+        get
+        {
+            if (RetailPrice <= 0 || CostPrice < 0) return "Margen: 0.00%";
+            if (CostPrice == 0) return "Margen: 100.00%";
+            
+            double margin = ((RetailPrice - CostPrice) / RetailPrice) * 100.0;
+            return $"Margen: {margin:F2}%";
+        }
+    }
+
     private string? _editingProductId = null;
     private double _originalStockSnapshot = 0.0;
     private double _originalMinStockSnapshot = 5.0;
@@ -83,7 +100,7 @@ public partial class ProductDialogViewModel : ObservableObject
         Barcode = product.Barcode ?? string.Empty;
         Name = product.Name;
         CostPrice = product.Cost;
-        SalePrice = product.Price;
+        RetailPrice = product.Price;
         Stock = (int)product.Stock;
         Category = product.Category;
         SerialNumber = product.LocationRack; // Wait, let's keep attributes / serial number empty or set them if present.
@@ -92,6 +109,7 @@ public partial class ProductDialogViewModel : ObservableObject
         LocationRack = product.LocationRack;
         ClaveSat = product.ClaveSat;
         UnidadSat = product.UnidadSat;
+        MinStock = product.MinStock;
 
         _originalStockSnapshot = product.Stock;
         _originalMinStockSnapshot = product.MinStock;
@@ -121,14 +139,14 @@ public partial class ProductDialogViewModel : ObservableObject
             }
 
             var dto = new ProductDto(
-                _editingProductId ?? Guid.NewGuid().ToString(), Barcode, Name, CostPrice, SalePrice,
+                _editingProductId ?? Guid.NewGuid().ToString(), Barcode, Name, CostPrice, RetailPrice,
                 Stock: Stock, Category: Category,
                 PointsRewarded: PointsRewarded,
                 ReorderQuantity: ReorderQuantity,
                 LocationRack: LocationRack,
                 ClaveSat: ClaveSat,
                 UnidadSat: UnidadSat,
-                MinStock: _editingProductId != null ? _originalMinStockSnapshot : 5.0
+                MinStock: MinStock
             );
 
             if (_editingProductId != null)

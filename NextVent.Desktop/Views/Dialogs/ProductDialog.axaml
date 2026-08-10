@@ -25,90 +25,104 @@
             </StackPanel>
 
             <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <StackPanel Spacing="14">
-                    <Grid ColumnDefinitions="*,Auto">
-                        <StackPanel Spacing="4" Margin="0,0,8,0">
-                            <TextBlock Text="Código de Barras / SKU *" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                            <TextBox Text="{Binding Barcode, Mode=TwoWay}" Watermark="Ej. 7501000000001" Background="{DynamicResource BgTertiaryBrush}" Padding="10" />
+                <StackPanel Spacing="16">
+                    
+                    <!-- 1. DATOS GENERALES -->
+                    <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="14" Background="{DynamicResource BgTertiaryBrush}">
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="Datos Generales" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" Margin="0,0,0,6"/>
+                            
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Nombre del Producto *" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                <TextBox Text="{Binding Name, Mode=TwoWay}" Watermark="Ej. Leche Entera 1 Litro" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                            </StackPanel>
+
+                            <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,0">
+                                <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,8,0">
+                                    <TextBlock Text="Código de Barras / SKU *" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    <TextBox Text="{Binding Barcode, Mode=TwoWay}" Watermark="Ej. 7501000000001" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                                </StackPanel>
+                                <Button Grid.Column="1" Command="{Binding GenerateBarcodeCommand}" Content="Generar SKU" VerticalAlignment="Bottom" Padding="12,8"
+                                        Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                            </Grid>
+
+                            <StackPanel Spacing="4" Margin="0,4,0,0">
+                                <TextBlock Text="Categoría" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                <TextBox Text="{Binding Category, Mode=TwoWay}" Watermark="Ej. Abarrotes / Bebidas" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                            </StackPanel>
                         </StackPanel>
+                    </Border>
 
-                        <Button Grid.Column="1" Command="{Binding GenerateBarcodeCommand}" Content="Generar SKU" VerticalAlignment="Bottom" Padding="12,10"
-                                Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                    </Grid>
+                    <!-- 2. PRECIOS Y FINANZAS -->
+                    <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="14" Background="{DynamicResource BgTertiaryBrush}">
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="Precios y Finanzas" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" Margin="0,0,0,6"/>
+                            
+                            <Grid ColumnDefinitions="*,*">
+                                <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,6,0">
+                                    <TextBlock Text="Costo ($) *" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    <TextBox Text="{Binding CostPrice, Mode=TwoWay}" Watermark="0.00" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                                </StackPanel>
 
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="Nombre del Producto *" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                        <TextBox Text="{Binding Name, Mode=TwoWay}" Watermark="Ej. Leche Entera 1 Litro" Background="{DynamicResource BgTertiaryBrush}" Padding="10" />
-                    </StackPanel>
+                                <StackPanel Grid.Column="1" Spacing="4" Margin="6,0,0,0">
+                                    <TextBlock Text="Precio Venta ($) *" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    <TextBox Text="{Binding RetailPrice, Mode=TwoWay}" Watermark="0.00" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                                </StackPanel>
+                            </Grid>
 
-                    <Grid ColumnDefinitions="*,*,*">
-                        <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,4,0">
-                            <TextBlock Text="Precio Costo ($)" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                            <TextBox Text="{Binding CostPrice, Mode=TwoWay}" Watermark="0.00" Background="{DynamicResource BgTertiaryBrush}" Padding="10" />
+                            <!-- REACTIVE MARGIN BADGE -->
+                            <TextBlock Text="{Binding ProfitMargin}" Foreground="{DynamicResource AccentSuccessBrush}" FontSize="12" FontWeight="SemiBold" Margin="0,4,0,0" HorizontalAlignment="Right"/>
                         </StackPanel>
+                    </Border>
 
-                        <StackPanel Grid.Column="1" Spacing="4" Margin="2,0,2,0">
-                            <TextBlock Text="Precio Venta ($) *" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                            <TextBox Text="{Binding SalePrice, Mode=TwoWay}" Watermark="0.00" Background="{DynamicResource BgTertiaryBrush}" Padding="10" />
+                    <!-- 3. CONTROL DE INVENTARIO Y SAT -->
+                    <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="14" Background="{DynamicResource BgTertiaryBrush}">
+                        <StackPanel Spacing="10">
+                            <TextBlock Text="Control de Inventario y SAT" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" Margin="0,0,0,6"/>
+                            
+                            <Grid ColumnDefinitions="*,*">
+                                <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,6,0">
+                                    <TextBlock Text="Stock Actual *" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    <TextBox Text="{Binding Stock, Mode=TwoWay}" Watermark="0" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" Spacing="4" Margin="6,0,0,0">
+                                    <TextBlock Text="Stock Mínimo (Alerta) *" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    <TextBox Text="{Binding MinStock, Mode=TwoWay}" Watermark="5" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid ColumnDefinitions="*,*,*" Margin="0,4,0,0">
+                                <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,4,0">
+                                    <TextBlock Text="⭐ Puntos Regalo" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    <TextBox Text="{Binding PointsRewarded, Mode=TwoWay}" Watermark="1.0" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" Spacing="4" Margin="2,0,2,0">
+                                    <TextBlock Text="📦 Cant. Reorden" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource AccentWarningBrush}" />
+                                    <TextBox Text="{Binding ReorderQuantity, Mode=TwoWay}" Watermark="10.0" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="2" Spacing="4" Margin="4,0,0,0">
+                                    <TextBlock Text="📍 Pasillo / Rack" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    <TextBox Text="{Binding LocationRack, Mode=TwoWay}" Watermark="Pasillo 1 - A" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid ColumnDefinitions="*,*" Margin="0,4,0,0">
+                                <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,6,0">
+                                    <TextBlock Text="📄 Clave Prod SAT" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    <TextBox Text="{Binding ClaveSat, Mode=TwoWay}" Watermark="50202306" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" Spacing="4" Margin="6,0,0,0">
+                                    <TextBlock Text="📄 Clave Unidad SAT" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    <TextBox Text="{Binding UnidadSat, Mode=TwoWay}" Watermark="H87" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                                </StackPanel>
+                            </Grid>
                         </StackPanel>
-
-                        <StackPanel Grid.Column="2" Spacing="4" Margin="4,0,0,0">
-                            <TextBlock Text="Stock Inicial *" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                            <TextBox Text="{Binding Stock, Mode=TwoWay}" Watermark="0" Background="{DynamicResource BgTertiaryBrush}" Padding="10" />
-                        </StackPanel>
-                    </Grid>
-
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="Categoría" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                        <TextBox Text="{Binding Category, Mode=TwoWay}" Watermark="Ej. Abarrotes / Bebidas / Electrónica" Background="{DynamicResource BgTertiaryBrush}" Padding="10" />
-                    </StackPanel>
-
-                    <!-- Sprint K: Atributos y Números de Serie / IMEIs -->
-                    <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,4" />
-
-                    <Grid ColumnDefinitions="*,*">
-                        <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,6,0">
-                            <TextBlock Text="Número de Serie / IMEI" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                            <TextBox Text="{Binding SerialNumber, Mode=TwoWay}" Watermark="Ej. SN-89123871298" Background="{DynamicResource BgTertiaryBrush}" Padding="8" />
-                        </StackPanel>
-
-                        <StackPanel Grid.Column="1" Spacing="4" Margin="6,0,0,0">
-                            <TextBlock Text="Atributos (Talla, Color, Garantía)" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                            <TextBox Text="{Binding AttributesText, Mode=TwoWay}" Watermark="Ej. Talla: M, Color: Negro" Background="{DynamicResource BgTertiaryBrush}" Padding="8" />
-                        </StackPanel>
-                    </Grid>
-
-                    <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,4" />
-
-                    <!-- Loyalty, Reordering & SAT Integration Fields -->
-                    <Grid ColumnDefinitions="*,*,*">
-                        <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,4,0">
-                            <TextBlock Text="⭐ Puntos de Regalo" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                            <TextBox Text="{Binding PointsRewarded, Mode=TwoWay}" Watermark="1.0" Background="{DynamicResource BgTertiaryBrush}" Padding="8" />
-                        </StackPanel>
-
-                        <StackPanel Grid.Column="1" Spacing="4" Margin="2,0,2,0">
-                            <TextBlock Text="📦 Cant. Reabastecer" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentWarningBrush}" />
-                            <TextBox Text="{Binding ReorderQuantity, Mode=TwoWay}" Watermark="10.0" Background="{DynamicResource BgTertiaryBrush}" Padding="8" />
-                        </StackPanel>
-
-                        <StackPanel Grid.Column="2" Spacing="4" Margin="4,0,0,0">
-                            <TextBlock Text="📍 Pasillo / Anaquel" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                            <TextBox Text="{Binding LocationRack, Mode=TwoWay}" Watermark="Pasillo 1 - A" Background="{DynamicResource BgTertiaryBrush}" Padding="8" />
-                        </StackPanel>
-                    </Grid>
-
-                    <Grid ColumnDefinitions="*,*">
-                        <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,6,0">
-                            <TextBlock Text="📄 Clave Prod/Serv SAT" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                            <TextBox Text="{Binding ClaveSat, Mode=TwoWay}" Watermark="50202306" Background="{DynamicResource BgTertiaryBrush}" Padding="8" />
-                        </StackPanel>
-
-                        <StackPanel Grid.Column="1" Spacing="4" Margin="6,0,0,0">
-                            <TextBlock Text="📄 Clave Unidad SAT" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                            <TextBox Text="{Binding UnidadSat, Mode=TwoWay}" Watermark="H87" Background="{DynamicResource BgTertiaryBrush}" Padding="8" />
-                        </StackPanel>
-                    </Grid>
+                    </Border>
+                    
                 </StackPanel>
             </ScrollViewer>
         </DockPanel>
