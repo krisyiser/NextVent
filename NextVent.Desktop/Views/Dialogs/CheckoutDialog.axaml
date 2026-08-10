@@ -129,7 +129,7 @@
                         <ComboBox ItemsSource="{Binding Customers}" SelectedItem="{Binding SelectedCustomer, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="8">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate x:DataType="dto:CustomerDto">
-                                    <TextBlock Text="{Binding Name, StringFormat='{}{0} (Tarjeta: {1})'}" />
+                                    <TextBlock Text="{Binding Name, StringFormat='{}{0} (Tarjeta: {1})'}" Foreground="#1E293B" />
                                 </DataTemplate>
                             </ComboBox.ItemTemplate>
                         </ComboBox>
@@ -149,7 +149,13 @@
                     <!-- Payment Method Selector -->
                     <StackPanel Spacing="4">
                         <TextBlock Text="Método de Pago" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                        <ComboBox ItemsSource="{Binding PaymentMethods}" SelectedItem="{Binding PaymentMethod, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="8" />
+                        <ComboBox ItemsSource="{Binding PaymentMethods}" SelectedItem="{Binding PaymentMethod, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="8">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <TextBlock Text="{Binding}" Foreground="#1E293B" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
                     </StackPanel>
 
                     <!-- Giftcard input if giftcard payment chosen -->
@@ -201,7 +207,13 @@
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Spacing="4" Margin="4,0,0,0">
                                     <TextBlock Text="Uso de CFDI" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                                    <ComboBox ItemsSource="{Binding UsoCfdiOptions}" SelectedItem="{Binding FiscalUsoCfdi, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="6" />
+                                    <ComboBox ItemsSource="{Binding UsoCfdiOptions}" SelectedItem="{Binding FiscalUsoCfdi, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="6">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate x:DataType="x:String">
+                                                <TextBlock Text="{Binding}" Foreground="#1E293B" />
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
                                 </StackPanel>
                             </Grid>
 

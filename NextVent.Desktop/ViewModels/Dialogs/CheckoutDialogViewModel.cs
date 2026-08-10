@@ -482,8 +482,11 @@ public partial class CheckoutDialogViewModel : ObservableObject
     partial void OnCardAmountChanged(decimal value) => ValidateMixedPaymentMath();
     partial void OnWalletAmountChanged(decimal value) => ValidateMixedPaymentMath();
 
+    public decimal TotalReceived => CashAmount + CardAmount + WalletAmount;
+
     private void ValidateMixedPaymentMath()
     {
+        OnPropertyChanged(nameof(TotalReceived));
         OnPropertyChanged(nameof(TotalMixedReceived));
         OnPropertyChanged(nameof(IsSufficientAmount));
         OnPropertyChanged(nameof(ChangeOrShortageText));
@@ -523,8 +526,17 @@ public partial class CheckoutDialogViewModel : ObservableObject
 
     partial void OnPaymentMethodChanged(string value)
     {
+        // 1. WIPE GHOST STATE
+        CashAmount = 0m;
+        CardAmount = 0m;
+        WalletAmount = 0m;
+        ChangeAmount = 0m;
+        ErrorMessage = string.Empty;
+
+        // 2. TRIGGER UI UPDATES
         OnPropertyChanged(nameof(IsMixedPayment));
         OnPropertyChanged(nameof(IsNotMixedPayment));
+        OnPropertyChanged(nameof(TotalReceived));
         OnPropertyChanged(nameof(IsSufficientAmount));
         OnPropertyChanged(nameof(ChangeOrShortageText));
         OnPropertyChanged(nameof(ChangeTextColor));

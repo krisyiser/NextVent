@@ -66,6 +66,18 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
     [NotifyPropertyChangedFor(nameof(FeedbackColor))]
     private bool _feedbackIsError;
     public string FeedbackColor => FeedbackIsError ? "#EF4444" : "#10B981";
+
+    public bool NotificationIsError
+    {
+        get => FeedbackIsError;
+        set => FeedbackIsError = value;
+    }
+
+    public string NotificationMessage
+    {
+        get => FeedbackMessage;
+        set => FeedbackMessage = value;
+    }
     [ObservableProperty] private int _parkedOrdersCount = 0;
     [ObservableProperty] private double _cartWidthPx = 380;
     [ObservableProperty] private string _initialPaymentMode = "Efectivo";
@@ -777,7 +789,7 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
             RecalculateTotal();
 
             FeedbackIsError = false;
-            FeedbackMessage = "¡Venta pausada exitosamente!";
+            FeedbackMessage = "Venta en espera guardada correctamente.";
         }
         catch (Exception ex)
         {
@@ -882,7 +894,13 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
     [RelayCommand]
     private async Task CheckoutAsync(string? paymentMethodParam)
     {
-        if (CartItems.Count == 0) return;
+        if (CartItems == null || CartItems.Count == 0)
+        {
+            FeedbackIsError = true;
+            FeedbackMessage = "El carrito está vacío. Agregue productos antes de cobrar.";
+            return;
+        }
+
         if (!await VerifyAttendanceGuardAsync()) return;
 
         InitialPaymentMode = paymentMethodParam switch
