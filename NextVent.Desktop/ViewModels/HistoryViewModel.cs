@@ -28,8 +28,8 @@ public partial class HistoryViewModel : ObservableObject
     [ObservableProperty] private string _peakHourLabel = "Ninguna";
     [ObservableProperty] private double _peakHourRevenue = 0.0;
     [ObservableProperty] private double _totalDayRevenue = 0.0;
-    [ObservableProperty] private DateTimeOffset? _startDate = DateTimeOffset.Now;
-    [ObservableProperty] private DateTimeOffset? _endDate = DateTimeOffset.Now;
+    [ObservableProperty] private DateTime? _startDate = DateTime.Today;
+    [ObservableProperty] private DateTime? _endDate = DateTime.Today;
     [ObservableProperty] private bool _isLoading = false;
 
     public event Action? OpenCashupRequested;
@@ -53,8 +53,8 @@ public partial class HistoryViewModel : ObservableObject
         IsLoading = true;
         try
         {
-            DateTime queryStart = StartDate.Value.DateTime.Date;
-            DateTime queryEnd = EndDate.Value.DateTime.Date.AddDays(1).AddTicks(-1);
+            DateTime queryStart = StartDate.Value.Date;
+            DateTime queryEnd = EndDate.Value.Date.AddDays(1).AddTicks(-1);
 
             DateTime utcStart = queryStart.ToBusinessUtcTime();
             DateTime utcEnd = queryEnd.ToBusinessUtcTime();
