@@ -26,7 +26,7 @@
                 <TextBlock Text="{Binding FeedbackMessage}" Foreground="{DynamicResource AccentSuccessBrush}" FontSize="12" FontWeight="Bold" HorizontalAlignment="Center" />
 
                 <Grid ColumnDefinitions="*,*">
-                    <Button Grid.Column="0" Command="{Binding CancelCommand}" Content="Cancelar (Esc)" Margin="0,0,6,0" Padding="12"
+                    <Button Grid.Column="0" Command="{Binding CancelCommand}" Content="Cancelar" Margin="0,0,6,0" Padding="12"
                             Background="{DynamicResource BgPrimaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                             Foreground="{DynamicResource TextPrimaryBrush}" CornerRadius="6" HorizontalContentAlignment="Center" />
 

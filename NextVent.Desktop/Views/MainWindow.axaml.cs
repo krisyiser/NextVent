@@ -19,7 +19,6 @@ public partial class MainWindow : Window
     public MainWindow()
     {
         InitializeComponent();
-        KeyDown += OnGlobalKeyDown;
         DataContextChanged += OnDataContextChanged;
 
         _idleTimer = new DispatcherTimer

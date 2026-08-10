@@ -27,7 +27,7 @@
                 <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource AccentDangerBrush}" FontSize="12" FontWeight="Bold" TextWrapping="Wrap" HorizontalAlignment="Center" />
 
                 <Grid ColumnDefinitions="*,*">
-                    <Button Grid.Column="0" Command="{Binding CancelCommand}" Content="Cancelar (Esc)" Margin="0,0,6,0" Padding="12"
+                    <Button Grid.Column="0" Command="{Binding CancelCommand}" Content="Cancelar" Margin="0,0,6,0" Padding="12"
                             Background="{DynamicResource BgPrimaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                             Foreground="{DynamicResource TextPrimaryBrush}" CornerRadius="6" HorizontalContentAlignment="Center" />
 
@@ -35,7 +35,7 @@
                             Background="#10B981" Foreground="White" FontWeight="Bold" CornerRadius="6" HorizontalContentAlignment="Center">
                         <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
                             <mi:MaterialIcon Kind="CheckBold" Width="20" Height="20"/>
-                            <TextBlock Text="CONFIRMAR COBRO (Enter)" FontWeight="Bold" VerticalAlignment="Center"/>
+                            <TextBlock Text="CONFIRMAR COBRO" FontWeight="Bold" VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                 </Grid>
@@ -57,12 +57,12 @@
                     <StackPanel Spacing="6">
                         <TextBlock Text="Billetes / Montos Rápidos:" FontSize="12" FontWeight="SemiBold" Foreground="#475569"/>
                         <WrapPanel Orientation="Horizontal">
-                            <Button Content="+$20 (F1)" Command="{Binding AddCashDenominationCommand}" CommandParameter="20" Margin="0,0,6,6" Padding="8,5" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4"/>
-                            <Button Content="+$50 (F2)" Command="{Binding AddCashDenominationCommand}" CommandParameter="50" Margin="0,0,6,6" Padding="8,5" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4"/>
-                            <Button Content="+$100 (F3)" Command="{Binding AddCashDenominationCommand}" CommandParameter="100" Margin="0,0,6,6" Padding="8,5" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4"/>
-                            <Button Content="+$200 (F4)" Command="{Binding AddCashDenominationCommand}" CommandParameter="200" Margin="0,0,6,6" Padding="8,5" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4"/>
-                            <Button Content="+$500 (F5)" Command="{Binding AddCashDenominationCommand}" CommandParameter="500" Margin="0,0,6,6" Padding="8,5" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4"/>
-                            <Button Content="Exacto (F6)" Command="{Binding SetExactCashCommand}" Margin="0,0,6,6" Padding="8,5" Background="{DynamicResource AccentPrimaryBrush}" Foreground="White" FontWeight="Bold" CornerRadius="4"/>
+                            <Button Content="+$20" Command="{Binding AddCashDenominationCommand}" CommandParameter="20" Margin="0,0,6,6" Padding="8,5" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4"/>
+                            <Button Content="+$50" Command="{Binding AddCashDenominationCommand}" CommandParameter="50" Margin="0,0,6,6" Padding="8,5" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4"/>
+                            <Button Content="+$100" Command="{Binding AddCashDenominationCommand}" CommandParameter="100" Margin="0,0,6,6" Padding="8,5" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4"/>
+                            <Button Content="+$200" Command="{Binding AddCashDenominationCommand}" CommandParameter="200" Margin="0,0,6,6" Padding="8,5" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4"/>
+                            <Button Content="+$500" Command="{Binding AddCashDenominationCommand}" CommandParameter="500" Margin="0,0,6,6" Padding="8,5" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4"/>
+                            <Button Content="Exacto" Command="{Binding SetExactCashCommand}" Margin="0,0,6,6" Padding="8,5" Background="{DynamicResource AccentPrimaryBrush}" Foreground="White" FontWeight="Bold" CornerRadius="4"/>
                         </WrapPanel>
                     </StackPanel>
 

@@ -75,7 +75,7 @@
                 </StackPanel>
 
                 <!-- Footer Cancel Button -->
-                <Button Content="Cancelar (Esc)" Command="{Binding CloseModalCommand}" 
+                <Button Content="Cancelar" Command="{Binding CloseModalCommand}" 
                         HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Height="40" Margin="0,8,0,0"/>
             </StackPanel>
         </Border>
