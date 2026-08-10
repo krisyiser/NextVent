@@ -113,7 +113,12 @@ public partial class CartItemDto : ObservableObject
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(TotalPrice))]
     [NotifyPropertyChangedFor(nameof(FinalUnitPrice))]
+    [NotifyPropertyChangedFor(nameof(IsFractional))]
+    [NotifyPropertyChangedFor(nameof(IsNotFractional))]
     private double _quantity = 1.0;
+
+    public bool IsFractional => Quantity % 1.0 != 0.0;
+    public bool IsNotFractional => !IsFractional;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(TotalPrice))]

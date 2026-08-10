@@ -42,9 +42,9 @@
 
                                     <!-- Touch Stepper Quantity Controls -->
                                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center" Margin="8,0">
-                                        <Button Content="-" Command="{Binding $parent[UserControl].((vm:PosViewModel)DataContext).DecreaseQuantityCommand}" CommandParameter="{Binding}" Width="24" Height="24" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
-                                        <TextBlock Text="{Binding Quantity, StringFormat='{}{0:N0}'}" Width="30" TextAlignment="Center" FontWeight="Bold" VerticalAlignment="Center" FontFamily="Consolas, monospace"/>
-                                        <Button Content="+" Command="{Binding $parent[UserControl].((vm:PosViewModel)DataContext).IncreaseQuantityCommand}" CommandParameter="{Binding}" Width="24" Height="24" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                                        <Button Content="-" Command="{Binding $parent[UserControl].((vm:PosViewModel)DataContext).DecreaseQuantityCommand}" CommandParameter="{Binding}" IsEnabled="{Binding IsNotFractional}" Width="24" Height="24" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                                        <TextBlock Text="{Binding Quantity, StringFormat='{}{0:0.###}'}" Width="45" TextAlignment="Center" FontWeight="Bold" VerticalAlignment="Center" FontFamily="Consolas, monospace"/>
+                                        <Button Content="+" Command="{Binding $parent[UserControl].((vm:PosViewModel)DataContext).IncreaseQuantityCommand}" CommandParameter="{Binding}" IsEnabled="{Binding IsNotFractional}" Width="24" Height="24" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
                                     </StackPanel>
 
                                     <!-- Total Price -->

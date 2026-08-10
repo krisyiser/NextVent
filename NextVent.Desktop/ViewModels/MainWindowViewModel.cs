@@ -70,6 +70,7 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly ISessionManager _sessionManager;
     private readonly IUserRepository _userRepository;
     private readonly NextVent.Services.Interfaces.IBackupService _backupService;
+    private readonly IAttendanceService _attendanceService;
 
     public MainWindowViewModel()
     {
@@ -113,6 +114,7 @@ public partial class MainWindowViewModel : ObservableObject
         var auditService = new AuditService(_db);
         var securityService = new SecurityInterceptionService(userRepository);
         var attendanceService = new AttendanceService(_db);
+        _attendanceService = attendanceService;
         var performanceAnalyticsService = new PerformanceAnalyticsService(_db);
         var authService = new AuthService(userService);
         var shiftService = new ShiftService(_db);
@@ -248,7 +250,7 @@ public partial class MainWindowViewModel : ObservableObject
         // ── Wire History Cashup & Return Dialog Events ──
         _historyVm.OpenCashupRequested += () =>
         {
-            var dialog = new CashupDialogViewModel(_db, _shiftService, _sessionManager, _printerService, _backupService);
+            var dialog = new CashupDialogViewModel(_db, _shiftService, _sessionManager, _printerService, _backupService, attendanceService: _attendanceService);
             dialog.RequestClose += CloseDialog;
             ActiveDialogViewModel = dialog;
             IsDialogOverlayOpen = true;
@@ -450,7 +452,7 @@ public partial class MainWindowViewModel : ObservableObject
                     {
                         if (confirmed)
                         {
-                            var blindCashupVm = new CashupDialogViewModel(_db, _shiftService, _sessionManager, _printerService, _backupService, isFinalZCut: true, isBlindMode: true);
+                            var blindCashupVm = new CashupDialogViewModel(_db, _shiftService, _sessionManager, _printerService, _backupService, isFinalZCut: true, isBlindMode: true, attendanceService: _attendanceService);
                             blindCashupVm.RequestClose += () =>
                             {
                                 CloseDialog();
@@ -473,7 +475,7 @@ public partial class MainWindowViewModel : ObservableObject
         else
         {
             // Open Shift Gating
-            var openShiftVm = new OpenShiftDialogViewModel(_shiftService);
+            var openShiftVm = new OpenShiftDialogViewModel(_shiftService, _attendanceService, _sessionManager);
             openShiftVm.RequestClose += (success) =>
             {
                 CloseDialog();

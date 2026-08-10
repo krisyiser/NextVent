@@ -22,6 +22,7 @@ public partial class CashupDialogViewModel : ObservableObject
     private readonly ISessionManager? _sessionManager;
     private readonly NextVent.Services.Interfaces.IEscPosPrinterService? _printerService;
     private readonly NextVent.Services.Interfaces.IBackupService? _backupService;
+    private readonly NextVent.Services.Interfaces.IAttendanceService? _attendanceService;
 
     [ObservableProperty] private double _openCashAmount = 1000.00;
     [ObservableProperty] private double _theoreticalCash = 4250.00;
@@ -56,13 +57,15 @@ public partial class CashupDialogViewModel : ObservableObject
         NextVent.Services.Interfaces.IEscPosPrinterService? printerService = null,
         NextVent.Services.Interfaces.IBackupService? backupService = null,
         bool isFinalZCut = false,
-        bool isBlindMode = false)
+        bool isBlindMode = false,
+        NextVent.Services.Interfaces.IAttendanceService? attendanceService = null)
     {
         _db = db;
         _shiftService = shiftService;
         _sessionManager = sessionManager;
         _printerService = printerService;
         _backupService = backupService;
+        _attendanceService = attendanceService;
         IsFinalZCut = isFinalZCut;
         IsBlindMode = isBlindMode;
 
@@ -150,6 +153,11 @@ public partial class CashupDialogViewModel : ObservableObject
                 {
                     string refId = _activeShift.Id.Length >= 8 ? _activeShift.Id.Substring(0, 8) : _activeShift.Id;
                     await _backupService.CreateZCutBackupAsync(refId);
+                }
+
+                if (_sessionManager?.CurrentCashier != null && _attendanceService != null)
+                {
+                    await _attendanceService.ClockOutAsync(_sessionManager.CurrentCashier.Id.ToString());
                 }
 
                 _sessionManager?.ClearSession();
