@@ -162,6 +162,7 @@ public partial class MainWindowViewModel : ObservableObject
             _posVm.RegisterMessages();
             _ = _posVm.LoadProductsAsync();
             await ValidateShiftStatusAsync();
+            WeakReferenceMessenger.Default.Send(new NextVent.Core.Messages.FocusSearchMessage());
         };
 
         // ── Wire Dynamic Sidebar Layout Changes ──
@@ -170,14 +171,22 @@ public partial class MainWindowViewModel : ObservableObject
         // ── Wire Session & Header Commands ──
         _posVm.OpenSwitchUserPinRequested += () =>
         {
-            var dialog = new SwitchUserPinDialogViewModel(userRepository, sessionManager, CloseDialog);
+            var dialog = new SwitchUserPinDialogViewModel(userRepository, sessionManager, () =>
+            {
+                CloseDialog();
+                WeakReferenceMessenger.Default.Send(new NextVent.Core.Messages.FocusSearchMessage());
+            });
             ActiveDialogViewModel = dialog;
             IsDialogOverlayOpen = true;
         };
 
         _posVm.OpenLockScreenRequested += () =>
         {
-            var dialog = new LockScreenDialogViewModel(userRepository, sessionManager, CloseDialog);
+            var dialog = new LockScreenDialogViewModel(userRepository, sessionManager, () =>
+            {
+                CloseDialog();
+                WeakReferenceMessenger.Default.Send(new NextVent.Core.Messages.FocusSearchMessage());
+            });
             ActiveDialogViewModel = dialog;
             IsDialogOverlayOpen = true;
         };
@@ -188,6 +197,7 @@ public partial class MainWindowViewModel : ObservableObject
             {
                 CloseDialog();
                 callback?.Invoke(authorized);
+                WeakReferenceMessenger.Default.Send(new NextVent.Core.Messages.FocusSearchMessage());
             });
             ActiveDialogViewModel = dialog;
             IsDialogOverlayOpen = true;
@@ -195,7 +205,11 @@ public partial class MainWindowViewModel : ObservableObject
 
         _posVm.ShowAlertRequested += (title, message) =>
         {
-            var dialog = new ConfirmDialogViewModel(title, message, _ => CloseDialog());
+            var dialog = new ConfirmDialogViewModel(title, message, _ =>
+            {
+                CloseDialog();
+                WeakReferenceMessenger.Default.Send(new NextVent.Core.Messages.FocusSearchMessage());
+            });
             ActiveDialogViewModel = dialog;
             IsDialogOverlayOpen = true;
         };
@@ -215,7 +229,11 @@ public partial class MainWindowViewModel : ObservableObject
                 },
                 _giftcardService);
 
-            dialog.RequestClose += CloseDialog;
+            dialog.RequestClose += () =>
+            {
+                CloseDialog();
+                WeakReferenceMessenger.Default.Send(new NextVent.Core.Messages.FocusSearchMessage());
+            };
             ActiveDialogViewModel = dialog;
             IsDialogOverlayOpen = true;
 
@@ -232,6 +250,7 @@ public partial class MainWindowViewModel : ObservableObject
             {
                 CloseDialog();
                 _ = _posVm.LoadProductsAsync();
+                WeakReferenceMessenger.Default.Send(new NextVent.Core.Messages.FocusSearchMessage());
             };
             ActiveDialogViewModel = dialog;
             IsDialogOverlayOpen = true;
@@ -244,6 +263,7 @@ public partial class MainWindowViewModel : ObservableObject
             {
                 CloseDialog();
                 _ = _posVm.LoadActiveShiftNotesAsync();
+                WeakReferenceMessenger.Default.Send(new NextVent.Core.Messages.FocusSearchMessage());
             };
             ActiveDialogViewModel = dialog;
             IsDialogOverlayOpen = true;
@@ -442,6 +462,7 @@ public partial class MainWindowViewModel : ObservableObject
         {
             _ = _posVm.LoadProductsAsync();
             await ValidateShiftStatusAsync();
+            WeakReferenceMessenger.Default.Send(new NextVent.Core.Messages.FocusSearchMessage());
         }
         else if (ActiveViewModel == _inventoryVm) _ = _inventoryVm.LoadProductsAsync();
         else if (ActiveViewModel == _customersVm) _ = _customersVm.LoadCustomersAsync();

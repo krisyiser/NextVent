@@ -20,7 +20,7 @@
                     <mi:MaterialIcon Grid.Column="0" Kind="BarcodeScan" Width="18" Height="18"
                                      Foreground="{DynamicResource AccentPrimaryBrush}"
                                      VerticalAlignment="Center" Margin="0,0,8,0" />
-                    <TextBox Grid.Column="1" x:Name="SearchBox" Text="{Binding SearchQuery, Mode=TwoWay}"
+                    <TextBox Grid.Column="1" x:Name="SearchTextBox" Text="{Binding SearchQuery, Mode=TwoWay}"
                              Watermark="Escanear o buscar (Ej. '6*750123456' para 6 piezas o '0.750*carne')..."
                              Background="Transparent" BorderThickness="0"
                              Foreground="{DynamicResource TextPrimaryBrush}"

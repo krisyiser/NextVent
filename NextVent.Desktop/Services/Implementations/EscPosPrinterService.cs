@@ -10,6 +10,8 @@ using NextVent.Core.Models;
 using NextVent.Services.Interfaces;
 using Serilog;
 
+using NextVent.Desktop.Core.Helpers;
+
 namespace NextVent.Services.Implementations;
 
 public class EscPosPrinterService : IEscPosPrinterService, IDisposable, IAsyncDisposable
@@ -249,7 +251,7 @@ public class EscPosPrinterService : IEscPosPrinterService, IDisposable, IAsyncDi
     {
         await Task.Run(() =>
         {
-            if (string.IsNullOrEmpty(portOrName)) portOrName = "COM1";
+            if (string.IsNullOrEmpty(portOrName)) portOrName = "ImpresoraTickets";
 
             if (portOrName.StartsWith("COM", StringComparison.OrdinalIgnoreCase))
             {
@@ -270,7 +272,21 @@ public class EscPosPrinterService : IEscPosPrinterService, IDisposable, IAsyncDi
                 }
                 catch (Exception ex)
                 {
-                    Log.Warning("COM Serial Port {Port} not reachable directly, fallback simulation log: {Message}", portOrName, ex.Message);
+                    Log.Warning("COM Serial Port {Port} not reachable directly, fallback spooler simulation: {Message}", portOrName, ex.Message);
+                    // Fallback to spooler printing using standard ImpresoraTickets printer name
+                    RawPrinterHelper.SendBytesToPrinter("ImpresoraTickets", bytes);
+                }
+            }
+            else
+            {
+                bool success = RawPrinterHelper.SendBytesToPrinter(portOrName, bytes);
+                if (!success)
+                {
+                    Log.Warning("Failed to send print job to Winspool printer {PrinterName}", portOrName);
+                    if (portOrName != "ImpresoraTickets")
+                    {
+                        RawPrinterHelper.SendBytesToPrinter("ImpresoraTickets", bytes);
+                    }
                 }
             }
         }, token);

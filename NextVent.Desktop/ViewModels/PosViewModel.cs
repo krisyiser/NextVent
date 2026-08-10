@@ -3,6 +3,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using NextVent.Core.Messages;
 using NextVent.ViewModels.Dialogs;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.EntityFrameworkCore;
@@ -328,7 +329,7 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
     }
 
     [RelayCommand]
-    private void FocusSearch() => WeakReferenceMessenger.Default.Send(new NextVent.Views.Pos.FocusSearchMessage());
+    private void FocusSearch() => WeakReferenceMessenger.Default.Send(new FocusSearchMessage());
 
     [RelayCommand]
     private void OpenCustomerSelect() => OpenCustomerSelectRequested?.Invoke();
@@ -345,40 +346,47 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
     [RelayCommand]
     private void ProcessScanOrSearchSubmit()
     {
-        if (string.IsNullOrWhiteSpace(SearchQuery)) return;
-
-        var input = SearchQuery.Trim();
-        double quantityMultiplier = 1.0;
-        string productQuery = input;
-
-        // ADVANCED PARSER (e.g. "6*750123456" -> Qty: 6, Query: "750123456")
-        var parts = input.Split('*', 2);
-        if (parts.Length == 2 && double.TryParse(parts[0], out double parsedQty))
+        try
         {
-            quantityMultiplier = parsedQty;
-            productQuery = parts[1].Trim();
+            if (string.IsNullOrWhiteSpace(SearchQuery)) return;
+
+            var input = SearchQuery.Trim();
+            double quantityMultiplier = 1.0;
+            string productQuery = input;
+
+            // ADVANCED PARSER (e.g. "6*750123456" -> Qty: 6, Query: "750123456")
+            var parts = input.Split('*', 2);
+            if (parts.Length == 2 && double.TryParse(parts[0], out double parsedQty))
+            {
+                quantityMultiplier = parsedQty;
+                productQuery = parts[1].Trim();
+            }
+
+            var p = Products.FirstOrDefault(x =>
+                (x.Barcode != null && x.Barcode.Equals(productQuery, StringComparison.OrdinalIgnoreCase)) ||
+                x.Name.Equals(productQuery, StringComparison.OrdinalIgnoreCase));
+
+            if (p == null)
+            {
+                // Fallback: search by partial name
+                p = Products.FirstOrDefault(x => x.Name.Contains(productQuery, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (p != null)
+            {
+                AddToCartWithQuantity(p, quantityMultiplier);
+                SearchQuery = string.Empty;
+                FeedbackIsError = false;
+                FeedbackMessage = $"¡Agregado {quantityMultiplier:N3}x {p.Name} al ticket!";
+            }
+            else
+            {
+                _ = TryAddKitBarcodeAsync(productQuery, quantityMultiplier);
+            }
         }
-
-        var p = Products.FirstOrDefault(x =>
-            (x.Barcode != null && x.Barcode.Equals(productQuery, StringComparison.OrdinalIgnoreCase)) ||
-            x.Name.Equals(productQuery, StringComparison.OrdinalIgnoreCase));
-
-        if (p == null)
+        finally
         {
-            // Fallback: search by partial name
-            p = Products.FirstOrDefault(x => x.Name.Contains(productQuery, StringComparison.OrdinalIgnoreCase));
-        }
-
-        if (p != null)
-        {
-            AddToCartWithQuantity(p, quantityMultiplier);
-            SearchQuery = string.Empty;
-            FeedbackIsError = false;
-            FeedbackMessage = $"¡Agregado {quantityMultiplier:N3}x {p.Name} al ticket!";
-        }
-        else
-        {
-            _ = TryAddKitBarcodeAsync(productQuery, quantityMultiplier);
+            WeakReferenceMessenger.Default.Send(new FocusSearchMessage());
         }
     }
 

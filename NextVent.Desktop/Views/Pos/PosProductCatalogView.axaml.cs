@@ -2,9 +2,9 @@ using Avalonia.Controls;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Messaging;
 
-namespace NextVent.Views.Pos;
+using NextVent.Core.Messages;
 
-public record FocusSearchMessage();
+namespace NextVent.Views.Pos;
 
 public partial class PosProductCatalogView : UserControl
 {
@@ -16,7 +16,7 @@ public partial class PosProductCatalogView : UserControl
         {
             Dispatcher.UIThread.Post(() =>
             {
-                var searchBox = this.FindControl<TextBox>("SearchBox");
+                var searchBox = this.FindControl<TextBox>("SearchTextBox");
                 if (searchBox != null)
                 {
                     searchBox.Focus();

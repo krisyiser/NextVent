@@ -12,3 +12,5 @@ public record CartStateSnapshotMessage(
 );
 
 public record CustomerDisplayIdleStateMessage(bool IsIdle);
+
+public record FocusSearchMessage();

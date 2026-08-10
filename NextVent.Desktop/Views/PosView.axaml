@@ -14,7 +14,7 @@
 
         <!-- ═══ 2. MAIN POS WORKSPACE WITH DYNAMIC CART POSITION (LEFT / RIGHT) ═══ -->
         <Grid Grid.Row="1" ColumnDefinitions="*,Auto">
-            <pos:PosProductCatalogView Grid.Column="{Binding ProductsGridColumn}" Margin="{Binding ProductsMargin}" />
+            <pos:PosProductCatalogView x:Name="ProductCatalog" Grid.Column="{Binding ProductsGridColumn}" Margin="{Binding ProductsMargin}" />
             <pos:PosCartTicketView Grid.Column="{Binding CartGridColumn}" />
         </Grid>
 
