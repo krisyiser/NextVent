@@ -9,11 +9,13 @@ public static class DateTimeExtensions
 
     public static DateTime ToBusinessLocalTime(this DateTime utcDate)
     {
-        return TimeZoneInfo.ConvertTimeFromUtc(utcDate, LocalBusinessTimeZone);
+        var utc = DateTime.SpecifyKind(utcDate, DateTimeKind.Utc);
+        return TimeZoneInfo.ConvertTimeFromUtc(utc, LocalBusinessTimeZone);
     }
 
     public static DateTime ToBusinessUtcTime(this DateTime localDate)
     {
-        return TimeZoneInfo.ConvertTimeToUtc(localDate, LocalBusinessTimeZone);
+        var unspecified = DateTime.SpecifyKind(localDate, DateTimeKind.Unspecified);
+        return TimeZoneInfo.ConvertTimeToUtc(unspecified, LocalBusinessTimeZone);
     }
 }
