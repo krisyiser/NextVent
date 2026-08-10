@@ -306,10 +306,24 @@ public partial class MainWindowViewModel : ObservableObject
             IsDialogOverlayOpen = true;
         };
 
-        // ── Wire Inventory Add Product Dialog Event ──
+        // ── Wire Inventory Add & Edit Product Dialog Events ──
         _inventoryVm.OpenAddProductRequested += () =>
         {
-            var dialog = new ProductDialogViewModel(_productService);
+            var dialog = new ProductDialogViewModel(_productService, _sessionManager, auditService);
+            dialog.RequestClose += () =>
+            {
+                CloseDialog();
+                _ = _inventoryVm.LoadProductsAsync();
+                _ = _posVm.LoadProductsAsync();
+            };
+            ActiveDialogViewModel = dialog;
+            IsDialogOverlayOpen = true;
+        };
+
+        _inventoryVm.OpenEditProductRequested += (product) =>
+        {
+            var dialog = new ProductDialogViewModel(_productService, _sessionManager, auditService);
+            dialog.LoadProductForEdit(product);
             dialog.RequestClose += () =>
             {
                 CloseDialog();

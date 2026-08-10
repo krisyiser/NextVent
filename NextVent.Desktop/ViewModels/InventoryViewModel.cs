@@ -7,7 +7,10 @@ using Serilog;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Platform.Storage;
 
 namespace NextVent.ViewModels;
 
@@ -22,8 +25,10 @@ public partial class InventoryViewModel : ObservableObject
     [ObservableProperty] private bool _showOnlyLowStock = false;
 
     private readonly IPurchaseService? _purchaseService;
+    private CancellationTokenSource? _searchCts;
 
     public event Action? OpenAddProductRequested;
+    public event Action<ProductDto>? OpenEditProductRequested;
 
     public InventoryViewModel(IProductService productService, IPurchaseService? purchaseService = null)
     {
@@ -50,8 +55,38 @@ public partial class InventoryViewModel : ObservableObject
         }
     }
 
-    partial void OnSearchQueryChanged(string value) => ApplyFilter();
+    partial void OnSearchQueryChanged(string value)
+    {
+        _searchCts?.Cancel();
+        _searchCts = new CancellationTokenSource();
+        _ = ExecuteDebouncedSearchAsync(value, _searchCts.Token);
+    }
+
+    private async Task ExecuteDebouncedSearchAsync(string query, CancellationToken token)
+    {
+        try
+        {
+            await Task.Delay(300, token);
+            if (!token.IsCancellationRequested)
+            {
+                await Dispatcher.UIThread.InvokeAsync(() => ApplyFilter());
+            }
+        }
+        catch (TaskCanceledException) { }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error in debounced search");
+        }
+    }
+
     partial void OnShowOnlyLowStockChanged(bool value) => ApplyFilter();
+
+    [RelayCommand]
+    private void EditProduct(ProductDto product)
+    {
+        if (product == null) return;
+        OpenEditProductRequested?.Invoke(product);
+    }
 
     [RelayCommand]
     private void ToggleLowStockFilter()
@@ -67,7 +102,7 @@ public partial class InventoryViewModel : ObservableObject
         var matches = Products.AsEnumerable();
         if (ShowOnlyLowStock)
         {
-            matches = matches.Where(p => p.Stock <= 5.0); // Stock Mínimo threshold
+            matches = matches.Where(p => p.Stock <= (p.MinStock > 0 ? p.MinStock : 5.0)); // Stock Mínimo threshold
         }
         if (!string.IsNullOrEmpty(q))
         {
@@ -83,18 +118,49 @@ public partial class InventoryViewModel : ObservableObject
     [RelayCommand]
     private async Task ImportCsvCatalogAsync()
     {
-        try
+        if (Avalonia.Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            string sampleCsv = "Barcode;Name;CostPrice;SalePrice;Stock;Category;Unit\n750105530001;Aceite Vegetal 1L;32.50;45.00;30;Abarrotes;pza";
+            var storageProvider = desktop.MainWindow?.StorageProvider;
+            if (storageProvider != null)
+            {
+                var options = new FilePickerOpenOptions
+                {
+                    Title = "Seleccionar CSV de Inventario",
+                    AllowMultiple = false,
+                    FileTypeFilter = new[]
+                    {
+                        new FilePickerFileType("Archivos CSV (*.csv)")
+                        {
+                            Patterns = new[] { "*.csv" }
+                        }
+                    }
+                };
 
-            int count = await _productService.ImportFromCsvTextAsync(sampleCsv);
-            await LoadProductsAsync();
-            FeedbackMessage = "¡Se importaron e integraron productos del archivo CSV exitosamente!";
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Error importing CSV catalog");
-            FeedbackMessage = "Error al importar catálogo CSV";
+                try
+                {
+                    var files = await storageProvider.OpenFilePickerAsync(options);
+                    if (files != null && files.Count > 0)
+                    {
+                        var filePath = files[0].Path.LocalPath;
+                        if (System.IO.File.Exists(filePath))
+                        {
+                            var text = await System.IO.File.ReadAllTextAsync(filePath);
+                            int count = await _productService.ImportFromCsvTextAsync(text);
+                            await LoadProductsAsync();
+                            FeedbackMessage = $"¡Se importaron e integraron {count} productos del archivo CSV exitosamente!";
+                        }
+                        else
+                        {
+                            FeedbackMessage = "El archivo seleccionado no existe.";
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Error importing CSV catalog");
+                    FeedbackMessage = $"Error al importar catálogo CSV: {ex.Message}";
+                }
+            }
         }
     }
 

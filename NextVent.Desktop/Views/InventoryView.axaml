@@ -74,7 +74,7 @@
 
         <!-- Products DataGrid -->
         <Border Grid.Row="2" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="1">
-            <DataGrid ItemsSource="{Binding FilteredProducts}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal">
+            <DataGrid ItemsSource="{Binding FilteredProducts}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" DoubleTapped="OnDataGridDoubleTapped">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Código / SKU" Binding="{Binding Barcode}" Width="1.5*" />
                     <DataGridTextColumn Header="Descripción" Binding="{Binding Name}" Width="3*" />

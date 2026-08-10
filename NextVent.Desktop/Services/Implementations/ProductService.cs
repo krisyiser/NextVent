@@ -149,11 +149,18 @@ public sealed class ProductService : IProductService
         using var reader = new StringReader(csvContent);
         string? line;
         bool isHeader = true;
+        
+        var csvParser = new System.Text.RegularExpressions.Regex("[,;](?=(?:[^\"]*\"[^\"]*\")*(?![^\"]*\"))");
 
         while ((line = await reader.ReadLineAsync()) != null)
         {
             if (string.IsNullOrWhiteSpace(line)) continue;
-            var parts = line.Split([';', ',']);
+            var parts = csvParser.Split(line);
+            for (int i = 0; i < parts.Length; i++)
+            {
+                parts[i] = parts[i].Trim().TrimStart('"').TrimEnd('"');
+            }
+
             if (isHeader)
             {
                 isHeader = false;
@@ -161,13 +168,13 @@ public sealed class ProductService : IProductService
             }
 
             if (parts.Length < 4) continue;
-            string barcode = parts[0].Trim();
-            string name = parts[1].Trim();
-            _ = double.TryParse(parts[2].Trim(), out double cost);
-            _ = double.TryParse(parts[3].Trim(), out double price);
-            double stock = parts.Length > 4 && double.TryParse(parts[4].Trim(), out double s) ? s : 10.0;
-            string category = parts.Length > 5 ? parts[5].Trim() : "General";
-            string unit = parts.Length > 6 ? parts[6].Trim() : "pza";
+            string barcode = parts[0];
+            string name = parts[1];
+            _ = double.TryParse(parts[2], out double cost);
+            _ = double.TryParse(parts[3], out double price);
+            double stock = parts.Length > 4 && double.TryParse(parts[4], out double s) ? s : 10.0;
+            string category = parts.Length > 5 ? parts[5] : "General";
+            string unit = parts.Length > 6 ? parts[6] : "pza";
 
             items.Add(new ProductDto(Guid.NewGuid().ToString(), barcode, name, cost, price, Stock: stock, Category: category, Unit: unit));
         }
