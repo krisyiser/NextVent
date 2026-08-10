@@ -447,8 +447,11 @@ public partial class MainWindowViewModel : ObservableObject
         var activeShift = await _shiftService.GetActiveAsync();
         if (activeShift != null)
         {
-            if (DateTime.TryParse(activeShift.StartTime, out var startTime) && startTime.Date < DateTime.UtcNow.Date)
+            if (DateTime.TryParse(activeShift.StartTime, out var startTime))
             {
+                var localStartTime = startTime.ToLocalTime();
+                if (localStartTime.Date < DateTime.Today)
+                {
                 // Orphaned Shift Recovery (Z-Cut Ciego)
                 var confirmVm = new ConfirmDialogViewModel(
                     "Turno Suspendido Detectado",
@@ -476,6 +479,7 @@ public partial class MainWindowViewModel : ObservableObject
                 ActiveDialogViewModel = confirmVm;
                 IsDialogOverlayOpen = true;
             }
+        }
         }
         else
         {
