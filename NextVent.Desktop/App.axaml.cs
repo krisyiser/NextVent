@@ -87,6 +87,22 @@ public partial class App : Application
                 await context.Database.ExecuteSqlRawAsync("PRAGMA journal_mode=WAL;");
                 await DatabaseSeeder.SeedAsync(context);
                 Log.Information($"Database initialized and seeded successfully at {dbPath}");
+
+                // Migrate any legacy non-ISO-8601 sale dates in the database
+                var legacySales = await context.Sales.Where(s => !s.Date.Contains("T")).ToListAsync();
+                if (legacySales.Count > 0)
+                {
+                    foreach (var sale in legacySales)
+                    {
+                        if (DateTime.TryParse(sale.Date, out var parsedDate))
+                        {
+                            var localDt = DateTime.SpecifyKind(parsedDate, DateTimeKind.Local);
+                            sale.Date = new DateTimeOffset(localDt).UtcDateTime.ToString("o");
+                        }
+                    }
+                    await context.SaveChangesAsync();
+                    Log.Information($"Successfully migrated {legacySales.Count} legacy local-formatted sale dates to ISO-8601.");
+                }
             }
             catch (Exception ex)
             {

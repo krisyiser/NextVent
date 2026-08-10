@@ -394,7 +394,7 @@ public partial class CheckoutDialogViewModel : ObservableObject
 
             var saleDto = new SaleDto(
                 Id: Guid.NewGuid().ToString(),
-                Date: DateTime.Now.ToString("g"),
+                Date: DateTimeOffset.UtcNow.ToString("o"),
                 Items: snapshots,
                 Total: TotalToPay,
                 TotalCost: totalCost,
