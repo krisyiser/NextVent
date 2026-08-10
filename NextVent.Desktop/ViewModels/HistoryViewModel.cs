@@ -34,6 +34,7 @@ public partial class HistoryViewModel : ObservableObject
 
     public event Action? OpenCashupRequested;
     public event Action<SaleDto>? OpenReturnRequested;
+    public event Action<string, Action<bool>>? OpenSupervisorPinRequested;
 
     public HistoryViewModel(ISaleService saleService, IEscPosPrinterService printerService)
     {
@@ -166,17 +167,28 @@ public partial class HistoryViewModel : ObservableObject
     private async Task CancelSaleAsync(SaleDto sale)
     {
         if (sale == null || sale.IsCancelled) return;
-        try
+
+        OpenSupervisorPinRequested?.Invoke($"Cancelar Venta Folio: {sale.Id.Substring(0, Math.Min(8, sale.Id.Length))}", async (authorized) =>
         {
-            await _saleService.CancelAsync(sale.Id);
-            FeedbackMessage = "Venta cancelada e inventario restablecido";
-            await LoadSalesAsync();
-            await LoadCashierPerformanceAsync();
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Error cancelling sale");
-        }
+            if (!authorized)
+            {
+                FeedbackMessage = "Autorización denegada. PIN de administrador incorrecto.";
+                return;
+            }
+
+            try
+            {
+                await _saleService.CancelAsync(sale.Id);
+                FeedbackMessage = "Venta cancelada e inventario restablecido";
+                await LoadSalesAsync();
+                await LoadCashierPerformanceAsync();
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error cancelling sale");
+                FeedbackMessage = "Error al cancelar la venta";
+            }
+        });
     }
 
     [RelayCommand]

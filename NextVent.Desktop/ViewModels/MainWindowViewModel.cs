@@ -275,6 +275,17 @@ public partial class MainWindowViewModel : ObservableObject
             IsDialogOverlayOpen = true;
         };
 
+        _historyVm.OpenSupervisorPinRequested += (title, callback) =>
+        {
+            var dialog = new SupervisorPinDialogViewModel(userRepository, title, (authorized, user) =>
+            {
+                CloseDialog();
+                callback?.Invoke(authorized);
+            });
+            ActiveDialogViewModel = dialog;
+            IsDialogOverlayOpen = true;
+        };
+
         // ── Wire Inventory Add Product Dialog Event ──
         _inventoryVm.OpenAddProductRequested += () =>
         {

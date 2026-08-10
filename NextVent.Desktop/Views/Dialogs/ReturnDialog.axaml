@@ -15,7 +15,7 @@
                 <Grid ColumnDefinitions="*,Auto">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <mi:MaterialIcon Kind="KeyboardReturn" Width="22" Height="22" Foreground="{DynamicResource AccentDangerBrush}" />
-                        <TextBlock Text="Devolución Parcial de Producto" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        <TextBlock Text="Devolución de Producto" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
                     </StackPanel>
                     <Button Grid.Column="1" Command="{Binding CancelCommand}" Width="28" Height="28" Padding="0" Background="Transparent" BorderThickness="0">
                         <mi:MaterialIcon Kind="Close" Width="18" Height="18" Foreground="{DynamicResource TextSecondaryBrush}" />
@@ -34,7 +34,15 @@
                     <ComboBox ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="8">
                         <ComboBox.ItemTemplate>
                             <DataTemplate x:DataType="dto:SaleItemSnapshotDto">
-                                <TextBlock Text="{Binding Name, StringFormat='{}{0} (Comprado: {1:N2} pza @ ${2:N2})'}" />
+                                <TextBlock Foreground="#1E293B">
+                                    <TextBlock.Text>
+                                        <MultiBinding StringFormat="{}{0} (Comprado: {1:N1} pza @ ${2:N2})">
+                                            <Binding Path="Name"/>
+                                            <Binding Path="Quantity"/>
+                                            <Binding Path="UnitPrice"/>
+                                        </MultiBinding>
+                                    </TextBlock.Text>
+                                </TextBlock>
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>

@@ -203,6 +203,30 @@ public record SaleDto(
             return Date;
         }
     }
+
+    public string PaymentStatusDisplay
+    {
+        get
+        {
+            if (IsCancelled) return "CANCELADO";
+            if (Items != null && System.Linq.Enumerable.Any(Items, i => i.ReturnedQuantity > 0))
+            {
+                bool allReturned = System.Linq.Enumerable.All(Items, i => i.ReturnedQuantity >= i.Quantity);
+                return allReturned ? "DEVUELTO TOTAL" : "DEVOLUCIÓN PARCIAL";
+            }
+            return IsCredit ? "CRÉDITO (PENDIENTE)" : "COBRADO";
+        }
+    }
+
+    public string PaymentStatusColor
+    {
+        get
+        {
+            if (IsCancelled) return "#EF4444"; // Red
+            if (Items != null && System.Linq.Enumerable.Any(Items, i => i.ReturnedQuantity > 0)) return "#F59E0B"; // Amber
+            return IsCredit ? "#3B82F6" : "#10B981"; // Blue / Green
+        }
+    }
 }
 
 public record SupplierDto(
