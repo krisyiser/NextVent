@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 
 using NextVent.Core.Helpers;
+using NextVent.Core.Enums;
 using System.Text.Json.Serialization;
 
 namespace NextVent.Data.Dtos;
@@ -190,7 +191,8 @@ public record SaleDto(
     string? CancelledAt,
     string EstadoFiscal = "PENDIENTE",
     string? UuidSat = null,
-    string? SerieFolio = null
+    string? SerieFolio = null,
+    SaleStatus Status = SaleStatus.Completed
 )
 {
     public string LocalDateDisplay

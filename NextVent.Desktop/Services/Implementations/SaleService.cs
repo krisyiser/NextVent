@@ -28,6 +28,50 @@ public sealed class SaleService : ISaleService
     /// Atomic sale save: INSERT sale + UPDATE stock + UPDATE debt (if credit) + UPDATE co-occurrences.
     /// Uses EF Core transaction to guarantee all-or-nothing.
     /// </summary>
+    private async Task<string> GenerateNextSaleFolioAsync()
+    {
+        string datePrefix = DateTime.Now.ToString("ddMMyy");
+        var lastSale = await _ctx.Sales
+            .Where(s => s.Id.StartsWith(datePrefix))
+            .OrderByDescending(s => s.Id)
+            .FirstOrDefaultAsync();
+
+        if (lastSale == null || string.IsNullOrEmpty(lastSale.Id))
+        {
+            return $"{datePrefix}-0001";
+        }
+
+        var parts = lastSale.Id.Split('-');
+        if (parts.Length == 2 && int.TryParse(parts[1], out int lastSequence))
+        {
+            return $"{datePrefix}-{(lastSequence + 1):D4}";
+        }
+
+        return $"{datePrefix}-0001";
+    }
+
+    private async Task<string> GenerateNextReturnFolioAsync()
+    {
+        string datePrefix = $"DEV-{DateTime.Now.ToString("ddMMyy")}";
+        var lastReturn = await _ctx.Returns
+            .Where(r => r.Id.StartsWith(datePrefix))
+            .OrderByDescending(r => r.Id)
+            .FirstOrDefaultAsync();
+
+        if (lastReturn == null || string.IsNullOrEmpty(lastReturn.Id))
+        {
+            return $"{datePrefix}-0001";
+        }
+
+        var parts = lastReturn.Id.Split('-');
+        if (parts.Length == 3 && int.TryParse(parts[2], out int lastSequence))
+        {
+            return $"{datePrefix}-{(lastSequence + 1):D4}";
+        }
+
+        return $"{datePrefix}-0001";
+    }
+
     public async Task<SaleDto> SaveAsync(SaleDto sale)
     {
         if (sale.Items is null || sale.Items.Count == 0)
@@ -38,7 +82,11 @@ public sealed class SaleService : ISaleService
         await using var transaction = await _ctx.Database.BeginTransactionAsync();
         try
         {
-            var saleId = string.IsNullOrEmpty(sale.Id) ? IdGenerator.NewSaleId() : sale.Id;
+            var saleId = sale.Id;
+            if (string.IsNullOrEmpty(saleId) || !saleId.Contains("-") || saleId.Length != 11)
+            {
+                saleId = await GenerateNextSaleFolioAsync();
+            }
 
             // Global discount proration & VAT (IVA) calculation
             double snapshotsSum = sale.Items.Sum(i => (i.Quantity * (i.OriginalUnitPrice > 0 ? i.OriginalUnitPrice : i.UnitPrice)) - i.AppliedDiscountAmount);
@@ -69,7 +117,9 @@ public sealed class SaleService : ISaleService
                 CustomerId = sale.CustomerId,
                 IsCredit = sale.IsCredit ? 1 : 0,
                 IsCancelled = 0,
-                EstadoFiscal = sale.EstadoFiscal
+                EstadoFiscal = sale.EstadoFiscal,
+                SerieFolio = saleId,
+                Status = SaleStatus.Completed
             };
 
             _ctx.Sales.Add(entity);
@@ -152,7 +202,9 @@ public sealed class SaleService : ISaleService
                 TotalCost = totalCost,
                 Profit = profit,
                 PaidAmount = paidAmount,
-                ChangeAmount = changeAmount
+                ChangeAmount = changeAmount,
+                SerieFolio = saleId,
+                Status = SaleStatus.Completed
             };
         }
         catch
@@ -243,11 +295,17 @@ public sealed class SaleService : ISaleService
     /// </summary>
     public async Task CancelAsync(string saleId)
     {
+        await CancelSaleAsync(saleId, "Cancelación Administrativa");
+    }
+
+    public async Task<bool> CancelSaleAsync(string saleId, string reason)
+    {
         await using var transaction = await _ctx.Database.BeginTransactionAsync();
         try
         {
             var sale = await _ctx.Sales.FindAsync(saleId);
-            if (sale is null || sale.IsCancelled == 1) return;
+            if (sale is null || sale.IsCancelled == 1 || sale.Status == SaleStatus.Canceled) 
+                return false;
 
             var items = JsonSerializer.Deserialize(
                 sale.ItemsJson,
@@ -276,9 +334,13 @@ public sealed class SaleService : ISaleService
 
             sale.IsCancelled = 1;
             sale.CancelledAt = DateTimeOffset.UtcNow.ToString("o");
+            sale.Status = SaleStatus.Canceled;
+            sale.CancellationReason = reason;
+            sale.CancellationDate = DateTimeOffset.UtcNow.ToString("o");
 
             await _ctx.SaveChangesAsync();
             await transaction.CommitAsync();
+            return true;
         }
         catch
         {
@@ -373,6 +435,11 @@ public sealed class SaleService : ISaleService
             {
                 sale.IsCancelled = 1;
                 sale.CancelledAt = DateTimeOffset.UtcNow.ToString("o");
+                sale.Status = SaleStatus.Refunded;
+            }
+            else
+            {
+                sale.Status = SaleStatus.Refunded;
             }
 
             sale.ItemsJson = JsonSerializer.Serialize(
@@ -382,7 +449,7 @@ public sealed class SaleService : ISaleService
             // Record Return Audit Entity
             var returnEntity = new ReturnEntity
             {
-                Id = Guid.NewGuid().ToString(),
+                Id = await GenerateNextReturnFolioAsync(),
                 OriginalSaleId = sale.Id,
                 CashierUserId = null,
                 TotalRefunded = refundedAmount,
@@ -585,7 +652,8 @@ public sealed class SaleService : ISaleService
             e.Id, e.Date, items, e.Total, e.TotalCost, e.Profit,
             e.PaidAmount, e.ChangeAmount, e.PaymentMethod,
             e.CustomerId, e.IsCredit == 1, e.IsCancelled == 1,
-            e.CancelledAt, e.EstadoFiscal, e.UuidSat, e.SerieFolio);
+            e.CancelledAt, e.EstadoFiscal, e.UuidSat, e.SerieFolio,
+            Status: e.Status);
     }
 
     private List<SaleItemSnapshotDto> ApplyProratedGlobalDiscountAndTaxes(List<SaleItemSnapshotDto> items, double globalDiscountAmount)

@@ -85,6 +85,24 @@ public partial class App : Application
                 using var context = new AppDbContext(options);
                 await context.Database.MigrateAsync();
                 await context.Database.ExecuteSqlRawAsync("PRAGMA journal_mode=WAL;");
+                
+                // Dynamically ensure status and cancellation columns exist in SQLite table
+                try
+                {
+                    await context.Database.ExecuteSqlRawAsync("ALTER TABLE sales ADD COLUMN status INTEGER NOT NULL DEFAULT 0;");
+                }
+                catch { }
+                try
+                {
+                    await context.Database.ExecuteSqlRawAsync("ALTER TABLE sales ADD COLUMN cancellation_reason TEXT NULL;");
+                }
+                catch { }
+                try
+                {
+                    await context.Database.ExecuteSqlRawAsync("ALTER TABLE sales ADD COLUMN cancellation_date TEXT NULL;");
+                }
+                catch { }
+
                 await DatabaseSeeder.SeedAsync(context);
                 Log.Information($"Database initialized and seeded successfully at {dbPath}");
 

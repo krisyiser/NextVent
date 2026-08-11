@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using NextVent.Core.Enums;
 
 namespace NextVent.Data.Entities;
 
@@ -62,4 +63,13 @@ public class SaleEntity
 
     [Column("serie_folio")]
     public string? SerieFolio { get; set; }
+
+    [Column("status")]
+    public SaleStatus Status { get; set; } = SaleStatus.Completed;
+
+    [Column("cancellation_reason")]
+    public string? CancellationReason { get; set; }
+
+    [Column("cancellation_date")]
+    public string? CancellationDate { get; set; }
 }
