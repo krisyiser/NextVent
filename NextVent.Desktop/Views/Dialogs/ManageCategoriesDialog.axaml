@@ -5,12 +5,12 @@
              x:Class="NextVent.Views.Dialogs.ManageCategoriesDialog"
              x:DataType="vm:ManageCategoriesDialogViewModel">
 
-    <Border Width="450" Height="450" Padding="20" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8">
+    <Border Width="480" Height="450" Padding="20" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8">
         <Grid RowDefinitions="Auto,*,Auto">
             <!-- Header -->
             <StackPanel Grid.Row="0" Spacing="4" Margin="0,0,0,16">
                 <TextBlock Text="Administrar Categorías" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
-                <TextBlock Text="Cree nuevas categorías para la clasificación y filtrado de productos." FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
+                <TextBlock Text="Cree, edite o elimine categorías. Al eliminar, los productos pasarán a 'General'." FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
             </StackPanel>
 
             <!-- List & Input -->
@@ -19,11 +19,24 @@
                 <Border Grid.Row="0" Margin="0,0,0,12" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="6">
                     <ListBox ItemsSource="{Binding Categories}" Background="Transparent" BorderThickness="0" MaxHeight="220">
                         <ListBox.ItemTemplate>
-                            <DataTemplate x:DataType="x:String">
-                                <StackPanel Orientation="Horizontal" Spacing="8" Height="28">
-                                    <mi:MaterialIcon Kind="FolderOutline" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
-                                    <TextBlock Text="{Binding}" VerticalAlignment="Center" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}" />
-                                </StackPanel>
+                            <DataTemplate x:DataType="vm:CategoryItemViewModel">
+                                <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto" Height="32">
+                                    <mi:MaterialIcon Grid.Column="0" Kind="FolderOutline" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                    
+                                    <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold"/>
+                                    
+                                    <TextBlock Grid.Column="2" Text="{Binding ProductCountText}" VerticalAlignment="Center" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="8,0" />
+                                    
+                                    <!-- Edit button -->
+                                    <Button Grid.Column="3" Command="{Binding ((vm:ManageCategoriesDialogViewModel)DataContext).StartEditCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Padding="4" Background="Transparent" BorderThickness="0" ToolTip.Tip="Editar nombre" IsVisible="{Binding IsNotGeneral}">
+                                        <mi:MaterialIcon Kind="Pencil" Width="14" Height="14" Foreground="{DynamicResource AccentWarningBrush}"/>
+                                    </Button>
+                                    
+                                    <!-- Delete button -->
+                                    <Button Grid.Column="4" Command="{Binding ((vm:ManageCategoriesDialogViewModel)DataContext).DeleteCategoryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Padding="4" Background="Transparent" BorderThickness="0" ToolTip.Tip="Eliminar categoría" IsVisible="{Binding IsNotGeneral}" Margin="6,0,0,0">
+                                        <mi:MaterialIcon Kind="TrashCan" Width="14" Height="14" Foreground="{DynamicResource AccentDangerBrush}"/>
+                                    </Button>
+                                </Grid>
                             </DataTemplate>
                         </ListBox.ItemTemplate>
                     </ListBox>
@@ -31,10 +44,13 @@
 
                 <!-- Input area for new category -->
                 <StackPanel Grid.Row="1" Spacing="8">
-                    <TextBlock Text="Nueva Categoría" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                    <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Text="{Binding InputHeader}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <Grid ColumnDefinitions="*,Auto,Auto">
                         <TextBox Grid.Column="0" Text="{Binding NewCategoryName, Mode=TwoWay}" Watermark="Ej. Lácteos" Background="{DynamicResource BgTertiaryBrush}" Padding="10,8" Margin="0,0,8,0" />
-                        <Button Grid.Column="1" Command="{Binding AddCategoryCommand}" Classes="primary-action" Content="Agregar" VerticalAlignment="Center" />
+                        
+                        <Button Grid.Column="1" Command="{Binding SaveCategoryCommand}" Classes="primary-action" Content="{Binding SaveButtonText}" VerticalAlignment="Center" />
+                        
+                        <Button Grid.Column="2" Command="{Binding CancelEditCommand}" Content="Cancelar" Margin="6,0,0,0" IsVisible="{Binding IsEditing}" VerticalAlignment="Center" />
                     </Grid>
                     <!-- Error message banner -->
                     <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource AccentDangerBrush}" FontSize="11" TextWrapping="Wrap" Height="16" />

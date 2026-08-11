@@ -353,6 +353,11 @@ public partial class MainWindowViewModel : ObservableObject
         _inventoryVm.OpenManageCategoriesRequested += () =>
         {
             var dialog = new NextVent.ViewModels.Dialogs.ManageCategoriesDialogViewModel(_db);
+            dialog.CategoriesUpdated += () =>
+            {
+                _ = _inventoryVm.LoadProductsAsync();
+                _ = _posVm.LoadProductsAsync();
+            };
             dialog.RequestClose += () => CloseDialog();
             ActiveDialogViewModel = dialog;
             IsDialogOverlayOpen = true;
