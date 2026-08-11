@@ -24,12 +24,24 @@ public partial class ExpensesViewModel : ObservableObject
     [ObservableProperty] private string _expenseDescription = string.Empty;
     [ObservableProperty] private string _paymentMethod = "Efectivo";
 
-    // Financial Metrics
+    // Financial Metrics (Double representation kept for compatibility)
     [ObservableProperty] private double _totalRevenue;
     [ObservableProperty] private double _totalCostOfGoods;
     [ObservableProperty] private double _grossProfit;
     [ObservableProperty] private double _totalExpenses;
     [ObservableProperty] private double _netProfit;
+
+    // Cash-Flow Metrics (Decimal representation)
+    [ObservableProperty] private decimal _ingresos;
+    [ObservableProperty] private decimal _egresos;
+    [ObservableProperty] private decimal _totalEnCaja;
+    [ObservableProperty] private decimal _reinversion;
+    
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(UtilidadNetaColor))]
+    private decimal _utilidadNeta;
+
+    public string UtilidadNetaColor => UtilidadNeta >= 0 ? "#059669" : "#EF4444";
 
     [ObservableProperty] private string _feedbackMessage = string.Empty;
 
@@ -56,6 +68,12 @@ public partial class ExpensesViewModel : ObservableObject
                 GrossProfit = summary.GrossProfit;
                 TotalExpenses = summary.TotalExpenses;
                 NetProfit = summary.NetProfit;
+
+                Ingresos = (decimal)summary.TotalRevenue;
+                Egresos = (decimal)summary.TotalExpenses;
+                TotalEnCaja = Ingresos - Egresos;
+                Reinversion = (decimal)summary.TotalCostOfGoodsSold;
+                UtilidadNeta = TotalEnCaja - Reinversion;
             });
         }
         catch (Exception ex)
