@@ -89,6 +89,26 @@
                     <DataGridTextColumn Header="Precio Costo Ponderado ($)" Binding="{Binding CostPrice, StringFormat='${0:N2}'}" Width="1.8*" />
                     <DataGridTextColumn Header="Precio Venta ($)" Binding="{Binding SalePrice, StringFormat='${0:N2}'}" Width="1.5*" />
                     <DataGridTextColumn Header="Stock Actual" Binding="{Binding Stock, StringFormat='{}{0:N2}'}" Width="1.2*" />
+                    <DataGridTextColumn Header="Stock Mínimo" Binding="{Binding MinStock, StringFormat='{}{0:N2}'}" Width="1.2*" />
+                    <DataGridTextColumn Header="Puntos" Binding="{Binding PointsRewarded, StringFormat='{}{0:N2}'}" Width="1.0*" />
+
+                    <!-- Action Column -->
+                    <DataGridTemplateColumn Header="Acciones" Width="1.5*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="dto:ProductDto">
+                                <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                    <!-- Edit button -->
+                                    <Button Command="{Binding ((vm:InventoryViewModel)DataContext).EditProductCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Padding="6,4" Background="Transparent" BorderThickness="0" ToolTip.Tip="Editar Producto">
+                                        <mi:MaterialIcon Kind="Pencil" Width="14" Height="14" Foreground="{DynamicResource AccentWarningBrush}"/>
+                                    </Button>
+                                    <!-- Delete button -->
+                                    <Button Command="{Binding ((vm:InventoryViewModel)DataContext).DeleteProductCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" CommandParameter="{Binding}" Padding="6,4" Background="Transparent" BorderThickness="0" ToolTip.Tip="Eliminar Producto">
+                                        <mi:MaterialIcon Kind="TrashCan" Width="14" Height="14" Foreground="{DynamicResource AccentDangerBrush}"/>
+                                    </Button>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                 </DataGrid.Columns>
             </DataGrid>
         </Border>

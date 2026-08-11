@@ -127,6 +127,23 @@ public partial class InventoryViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private async Task DeleteProductAsync(ProductDto product)
+    {
+        if (product == null) return;
+        try
+        {
+            await _productService.DeleteAsync(product.Id);
+            await LoadProductsAsync();
+            FeedbackMessage = $"Producto '{product.Name}' eliminado exitosamente.";
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error deleting product");
+            FeedbackMessage = $"Error al eliminar producto: {ex.Message}";
+        }
+    }
+
+    [RelayCommand]
     private void ToggleLowStockFilter()
     {
         if (ShowOnlyLowStock)
