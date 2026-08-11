@@ -78,6 +78,30 @@ public partial class App : Application
                     System.IO.Directory.CreateDirectory(appFolder);
                 }
                 string dbPath = System.IO.Path.Combine(appFolder, "nextvent.db");
+
+                // Safely ensure status and cancellation columns exist in SQLite table before EF Core model validation
+                using (var rawConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={dbPath}"))
+                {
+                    await rawConn.OpenAsync();
+                    string[] alterQueries = new[]
+                    {
+                        "ALTER TABLE sales ADD COLUMN status INTEGER NOT NULL DEFAULT 0;",
+                        "ALTER TABLE sales ADD COLUMN cancellation_reason TEXT NULL;",
+                        "ALTER TABLE sales ADD COLUMN cancellation_date TEXT NULL;"
+                    };
+                    foreach (var q in alterQueries)
+                    {
+                        try
+                        {
+                            using var cmd = rawConn.CreateCommand();
+                            cmd.CommandText = q;
+                            await cmd.ExecuteNonQueryAsync();
+                        }
+                        catch { }
+                    }
+                    await rawConn.CloseAsync();
+                }
+
                 var options = new DbContextOptionsBuilder<AppDbContext>()
                     .UseSqlite($"Data Source={dbPath};Cache=Shared;Mode=ReadWriteCreate;")
                     .Options;
@@ -85,24 +109,6 @@ public partial class App : Application
                 using var context = new AppDbContext(options);
                 await context.Database.MigrateAsync();
                 await context.Database.ExecuteSqlRawAsync("PRAGMA journal_mode=WAL;");
-                
-                // Dynamically ensure status and cancellation columns exist in SQLite table
-                try
-                {
-                    await context.Database.ExecuteSqlRawAsync("ALTER TABLE sales ADD COLUMN status INTEGER NOT NULL DEFAULT 0;");
-                }
-                catch { }
-                try
-                {
-                    await context.Database.ExecuteSqlRawAsync("ALTER TABLE sales ADD COLUMN cancellation_reason TEXT NULL;");
-                }
-                catch { }
-                try
-                {
-                    await context.Database.ExecuteSqlRawAsync("ALTER TABLE sales ADD COLUMN cancellation_date TEXT NULL;");
-                }
-                catch { }
-
                 await DatabaseSeeder.SeedAsync(context);
                 Log.Information($"Database initialized and seeded successfully at {dbPath}");
 
