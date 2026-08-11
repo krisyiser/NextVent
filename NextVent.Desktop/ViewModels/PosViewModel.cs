@@ -398,14 +398,19 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
 
             if (p != null)
             {
+                if (!_originalStockCache.TryGetValue(p.Id, out double dbStock))
+                {
+                    dbStock = p.Stock;
+                }
+
                 var existingItem = CartItems.FirstOrDefault(i => i.Id == p.Id);
                 double currentCartQty = existingItem?.Quantity ?? 0.0;
                 double projectedQty = currentCartQty + quantityMultiplier;
 
-                if (projectedQty > p.Stock)
+                if (projectedQty > dbStock)
                 {
-                    ShowAlert("Stock Excedido", $"Intentas agregar {projectedQty:N2} pero solo hay {p.Stock:N2} disponibles de {p.Name}. Se ajustará al máximo permitido.");
-                    quantityMultiplier = p.Stock - currentCartQty;
+                    ShowAlert("Stock Excedido", $"Intentas agregar {projectedQty:N2} pero solo hay {dbStock:N2} disponibles de {p.Name}. Se ajustará al máximo permitido.");
+                    quantityMultiplier = dbStock - currentCartQty;
                 }
 
                 if (quantityMultiplier <= 0)
@@ -416,10 +421,27 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
                     return;
                 }
 
+                double remainingStock = dbStock - (currentCartQty + quantityMultiplier);
+
                 AddToCartWithQuantity(p, quantityMultiplier);
                 SearchQuery = string.Empty;
-                FeedbackIsError = false;
-                FeedbackMessage = $"¡Agregado {quantityMultiplier:N3}x {p.Name} al ticket!";
+
+                if (remainingStock <= p.MinStock && remainingStock > 0)
+                {
+                    FeedbackIsError = true;
+                    FeedbackMessage = $"⚠️ ALERTA: Quedan {remainingStock:N2} piezas de {p.Name} (Stock Mínimo).";
+                }
+                else if (remainingStock <= 0)
+                {
+                    FeedbackIsError = true;
+                    FeedbackMessage = $"⚠️ {p.Name} se ha AGOTADO con esta venta.";
+                    RefreshCatalogItemState(p.Id);
+                }
+                else
+                {
+                    FeedbackIsError = false;
+                    FeedbackMessage = $"Agregado: {p.Name}";
+                }
             }
             else
             {
@@ -448,15 +470,20 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
                 var prod = Products.FirstOrDefault(p => p.Id == item.ProductId);
                 if (prod != null)
                 {
+                    if (!_originalStockCache.TryGetValue(prod.Id, out double dbStock))
+                    {
+                        dbStock = prod.Stock;
+                    }
+
                     var existingItem = CartItems.FirstOrDefault(i => i.Id == prod.Id);
                     double currentCartQty = existingItem?.Quantity ?? 0.0;
                     double requestedQty = item.Quantity * multiplier;
                     double projectedQty = currentCartQty + requestedQty;
 
-                    if (projectedQty > prod.Stock)
+                    if (projectedQty > dbStock)
                     {
-                        ShowAlert("Stock Excedido en Combo", $"El combo '{kit.Name}' requiere {projectedQty:N2} de {prod.Name} pero solo hay {prod.Stock:N2} disponibles. Se ajustará al máximo permitido.");
-                        requestedQty = prod.Stock - currentCartQty;
+                        ShowAlert("Stock Excedido en Combo", $"El combo '{kit.Name}' requiere {projectedQty:N2} de {prod.Name} pero solo hay {dbStock:N2} disponibles. Se ajustará al máximo permitido.");
+                        requestedQty = dbStock - currentCartQty;
                     }
 
                     if (requestedQty > 0)
@@ -543,22 +570,27 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
         
         double currentPrice = GetPriceForCurrentCustomer(product);
         
+        if (!_originalStockCache.TryGetValue(product.Id, out double dbStock))
+        {
+            dbStock = product.Stock;
+        }
+
         if (existing != null)
         {
             double projectedQty = existing.Quantity + qty;
-            existing.Quantity = Math.Max(0.0, Math.Min(projectedQty, product.Stock)); // HARD CAP
+            existing.Quantity = Math.Max(0.0, Math.Min(projectedQty, dbStock)); // HARD CAP
             
             existing.UnitPrice = currentPrice;
             existing.OriginalUnitPrice = currentPrice;
 
-            if (projectedQty > product.Stock)
+            if (projectedQty > dbStock)
             {
-                ShowAlert("Stock Insuficiente", $"Solo hay {product.Stock} unidades disponibles de {product.Name}.");
+                ShowAlert("Stock Insuficiente", $"Solo hay {dbStock} unidades disponibles de {product.Name}.");
             }
         }
         else
         {
-            double safeQty = Math.Max(0.0, Math.Min(qty, product.Stock)); // HARD CAP
+            double safeQty = Math.Max(0.0, Math.Min(qty, dbStock)); // HARD CAP
             var cartItem = new CartItemDto(product.Id, product.Name, currentPrice, safeQty, product.Unit)
             {
                 Category = product.Category ?? "General",
@@ -566,7 +598,7 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
             };
             CartItems.Add(cartItem);
 
-            if (qty > product.Stock)
+            if (qty > dbStock)
             {
                 ShowAlert("Stock Insuficiente", $"Solo se agregaron {safeQty} unidades de {product.Name}.");
             }
@@ -576,7 +608,7 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
         var finalItem = CartItems.FirstOrDefault(i => i.Id == product.Id);
         if (finalItem != null)
         {
-            double remainingStock = product.Stock - finalItem.Quantity;
+            double remainingStock = dbStock - finalItem.Quantity;
             if (remainingStock <= product.MinStock && remainingStock > 0)
             {
                 FeedbackIsError = true;
@@ -635,15 +667,15 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
     {
         if (item == null) return;
         var product = Products.FirstOrDefault(p => p.Id == item.Id);
-        if (product != null)
+        if (product != null && _originalStockCache.TryGetValue(item.Id, out double dbStock))
         {
-            if (item.Quantity + 1 > product.Stock)
+            if (item.Quantity + 1 > dbStock)
             {
-                ShowAlert("Stock Insuficiente", $"Solo hay {product.Stock:N2} unidades disponibles de {product.Name}. No se pueden agregar más.");
+                ShowAlert("Stock Insuficiente", $"Solo hay {dbStock:N2} unidades disponibles de {product.Name}. No se pueden agregar más.");
                 return;
             }
 
-            double remainingStock = product.Stock - (item.Quantity + 1);
+            double remainingStock = dbStock - (item.Quantity + 1);
             if (remainingStock <= product.MinStock && remainingStock > 0)
             {
                 FeedbackIsError = true;
