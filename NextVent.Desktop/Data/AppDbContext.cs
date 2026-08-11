@@ -30,12 +30,14 @@ public class AppDbContext : DbContext
     public DbSet<ReturnEntity> Returns => Set<ReturnEntity>();
     public DbSet<AuditLogEntity> AuditLogs => Set<AuditLogEntity>();
     public DbSet<AttendanceEntity> Attendances => Set<AttendanceEntity>();
+    public DbSet<CategoryEntity> Categories => Set<CategoryEntity>();
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<CategoryEntity>().HasKey(c => c.Id);
         modelBuilder.Entity<ProductEntity>().HasKey(p => p.Id);
         modelBuilder.Entity<CustomerEntity>().HasKey(c => c.Id);
         modelBuilder.Entity<PromotionEntity>().HasKey(p => p.Id);

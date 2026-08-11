@@ -1,0 +1,50 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NextVent.ViewModels.Dialogs"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             x:Class="NextVent.Views.Dialogs.ManageCategoriesDialog"
+             x:DataType="vm:ManageCategoriesDialogViewModel">
+
+    <Border Width="450" Height="450" Padding="20" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8">
+        <Grid RowDefinitions="Auto,*,Auto">
+            <!-- Header -->
+            <StackPanel Grid.Row="0" Spacing="4" Margin="0,0,0,16">
+                <TextBlock Text="Administrar Categorías" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                <TextBlock Text="Cree nuevas categorías para la clasificación y filtrado de productos." FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
+            </StackPanel>
+
+            <!-- List & Input -->
+            <Grid Grid.Row="1" RowDefinitions="*,Auto">
+                <!-- List of existing categories -->
+                <Border Grid.Row="0" Margin="0,0,0,12" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="6">
+                    <ListBox ItemsSource="{Binding Categories}" Background="Transparent" BorderThickness="0" MaxHeight="220">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate x:DataType="x:String">
+                                <StackPanel Orientation="Horizontal" Spacing="8" Height="28">
+                                    <mi:MaterialIcon Kind="FolderOutline" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding}" VerticalAlignment="Center" FontSize="13" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Border>
+
+                <!-- Input area for new category -->
+                <StackPanel Grid.Row="1" Spacing="8">
+                    <TextBlock Text="Nueva Categoría" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBox Grid.Column="0" Text="{Binding NewCategoryName, Mode=TwoWay}" Watermark="Ej. Lácteos" Background="{DynamicResource BgTertiaryBrush}" Padding="10,8" Margin="0,0,8,0" />
+                        <Button Grid.Column="1" Command="{Binding AddCategoryCommand}" Classes="primary-action" Content="Agregar" VerticalAlignment="Center" />
+                    </Grid>
+                    <!-- Error message banner -->
+                    <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource AccentDangerBrush}" FontSize="11" TextWrapping="Wrap" Height="16" />
+                </StackPanel>
+            </Grid>
+
+            <!-- Footer close action -->
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10" Margin="0,16,0,0">
+                <Button Content="Cerrar" Command="{Binding CloseCommand}" HotKey="Escape" VerticalAlignment="Center" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>

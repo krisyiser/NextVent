@@ -1,6 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using NextVent.Data.Dtos;
+using NextVent.Data;
+using Microsoft.EntityFrameworkCore;
 using NextVent.Services.Interfaces;
 using NextVent.Core.Services;
 using NextVent.Data.Entities;
@@ -83,14 +85,46 @@ public partial class ProductDialogViewModel : ObservableObject
 
     private readonly ISessionManager? _sessionManager;
     private readonly IAuditService? _auditService;
+    private readonly AppDbContext _db;
+
+    public System.Collections.ObjectModel.ObservableCollection<string> Categories { get; } = [];
 
     public event Action? RequestClose;
 
-    public ProductDialogViewModel(IProductService productService, ISessionManager? sessionManager = null, IAuditService? auditService = null)
+    public ProductDialogViewModel(IProductService productService, AppDbContext db, ISessionManager? sessionManager = null, IAuditService? auditService = null)
     {
         _productService = productService;
+        _db = db;
         _sessionManager = sessionManager;
         _auditService = auditService;
+        _ = LoadCategoriesAsync();
+    }
+
+    public async Task LoadCategoriesAsync()
+    {
+        try
+        {
+            var list = await _db.Categories
+                .AsNoTracking()
+                .OrderBy(c => c.Name)
+                .Select(c => c.Name)
+                .ToListAsync();
+
+            Categories.Clear();
+            foreach (var item in list)
+            {
+                Categories.Add(item);
+            }
+
+            if (!string.IsNullOrEmpty(Category) && !Categories.Contains(Category))
+            {
+                Categories.Add(Category);
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error loading categories in dialog");
+        }
     }
 
     public void LoadProductForEdit(ProductDto product)
@@ -103,6 +137,10 @@ public partial class ProductDialogViewModel : ObservableObject
         RetailPrice = product.Price;
         Stock = (int)product.Stock;
         Category = product.Category;
+        if (!string.IsNullOrEmpty(Category) && !Categories.Contains(Category))
+        {
+            Categories.Add(Category);
+        }
         SerialNumber = product.LocationRack; // Wait, let's keep attributes / serial number empty or set them if present.
         PointsRewarded = product.PointsRewarded;
         ReorderQuantity = product.ReorderQuantity;

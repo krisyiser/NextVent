@@ -310,7 +310,7 @@ public partial class MainWindowViewModel : ObservableObject
         // ── Wire Inventory Add & Edit Product Dialog Events ──
         _inventoryVm.OpenAddProductRequested += () =>
         {
-            var dialog = new ProductDialogViewModel(_productService, _sessionManager, auditService);
+            var dialog = new ProductDialogViewModel(_productService, _db, _sessionManager, auditService);
             dialog.RequestClose += () =>
             {
                 CloseDialog();
@@ -323,7 +323,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         _inventoryVm.OpenEditProductRequested += (product) =>
         {
-            var dialog = new ProductDialogViewModel(_productService, _sessionManager, auditService);
+            var dialog = new ProductDialogViewModel(_productService, _db, _sessionManager, auditService);
             dialog.LoadProductForEdit(product);
             dialog.RequestClose += () =>
             {
@@ -345,6 +345,14 @@ public partial class MainWindowViewModel : ObservableObject
                 _inventoryVm.ShowOnlyLowStock = true;
                 _ = _inventoryVm.LoadProductsAsync();
             };
+            dialog.RequestClose += () => CloseDialog();
+            ActiveDialogViewModel = dialog;
+            IsDialogOverlayOpen = true;
+        };
+
+        _inventoryVm.OpenManageCategoriesRequested += () =>
+        {
+            var dialog = new NextVent.ViewModels.Dialogs.ManageCategoriesDialogViewModel(_db);
             dialog.RequestClose += () => CloseDialog();
             ActiveDialogViewModel = dialog;
             IsDialogOverlayOpen = true;

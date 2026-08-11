@@ -96,6 +96,9 @@
         <DataTemplate DataType="vmDialogs:ConfigureMinStockDialogViewModel">
             <vDialogs:ConfigureMinStockDialog />
         </DataTemplate>
+        <DataTemplate DataType="vmDialogs:ManageCategoriesDialogViewModel">
+            <vDialogs:ManageCategoriesDialog />
+        </DataTemplate>
         <DataTemplate DataType="vmDialogs:OpenShiftDialogViewModel">
             <vDialogs:OpenShiftDialog />
         </DataTemplate>

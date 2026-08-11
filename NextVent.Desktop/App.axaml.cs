@@ -99,6 +99,38 @@ public partial class App : Application
                         }
                         catch { }
                     }
+
+                    // Create and seed categories table if missing
+                    try
+                    {
+                        using (var cmd = rawConn.CreateCommand())
+                        {
+                            cmd.CommandText = "CREATE TABLE IF NOT EXISTS categories (id TEXT PRIMARY KEY, name TEXT NOT NULL UNIQUE);";
+                            await cmd.ExecuteNonQueryAsync();
+                        }
+
+                        using (var countCmd = rawConn.CreateCommand())
+                        {
+                            countCmd.CommandText = "SELECT COUNT(*) FROM categories;";
+                            var count = Convert.ToInt32(await countCmd.ExecuteScalarAsync());
+                            if (count == 0)
+                            {
+                                string[] defaultCats = new[] { "General", "Abarrotes", "Bebidas", "Farmacia", "Hogar" };
+                                foreach (var cat in defaultCats)
+                                {
+                                    using (var insertCmd = rawConn.CreateCommand())
+                                    {
+                                        insertCmd.CommandText = "INSERT OR IGNORE INTO categories (id, name) VALUES (@id, @name);";
+                                        insertCmd.Parameters.AddWithValue("@id", Guid.NewGuid().ToString());
+                                        insertCmd.Parameters.AddWithValue("@name", cat);
+                                        await insertCmd.ExecuteNonQueryAsync();
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch { }
+
                     await rawConn.CloseAsync();
                 }
 

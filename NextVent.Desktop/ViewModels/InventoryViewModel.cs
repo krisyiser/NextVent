@@ -30,6 +30,7 @@ public partial class InventoryViewModel : ObservableObject
     public event Action? OpenAddProductRequested;
     public event Action<ProductDto>? OpenEditProductRequested;
     public event Action? OpenConfigureLowStockRequested;
+    public event Action? OpenManageCategoriesRequested;
 
     private static readonly string SettingsPath = System.IO.Path.Combine(
         Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
@@ -137,6 +138,9 @@ public partial class InventoryViewModel : ObservableObject
             OpenConfigureLowStockRequested?.Invoke();
         }
     }
+
+    [RelayCommand]
+    private void OpenManageCategoriesDialog() => OpenManageCategoriesRequested?.Invoke();
 
     private void ApplyFilter()
     {
