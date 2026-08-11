@@ -148,9 +148,6 @@
                     <mi:MaterialIcon Kind="NotebookOutline" Width="16" Height="16" Foreground="{DynamicResource TextPrimaryBrush}" />
                 </Button>
 
-                <Button Command="{Binding OpenCreateItemKitDialogCommand}" Padding="8,6" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" ToolTip.Tip="Crear Combos y Paquetes">
-                    <mi:MaterialIcon Kind="PackageVariantPlus" Width="16" Height="16" Foreground="{DynamicResource TextPrimaryBrush}" />
-                </Button>
 
                 <Button Command="{Binding ToggleFullscreenCommand}" Padding="8,6" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" ToolTip.Tip="Pantalla Completa">
                     <mi:MaterialIcon Kind="Fullscreen" Width="16" Height="16" Foreground="{DynamicResource TextPrimaryBrush}" />

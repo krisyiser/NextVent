@@ -110,7 +110,6 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
     public event Action? OpenCheckoutRequested;
     public event Action? ToggleFullscreenRequested;
     public event Action? LogoutRequested;
-    public event Action? OpenCreateItemKitRequested;
     public event Action? OpenShiftNotesRequested;
     public event Action? FocusSearchRequested;
     public event Action? OpenCustomerSelectRequested;
@@ -553,9 +552,6 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
             Log.Error(ex, "Error resolving shift note");
         }
     }
-
-    [RelayCommand]
-    private void OpenCreateItemKitDialog() => OpenCreateItemKitRequested?.Invoke();
 
     [RelayCommand]
     private void OpenShiftNotesDialog() => OpenShiftNotesRequested?.Invoke();

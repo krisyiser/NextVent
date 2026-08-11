@@ -16,6 +16,7 @@ public partial class PromotionsViewModel : ObservableObject
     public ObservableCollection<PromotionDto> Promotions { get; } = [];
 
     public event Action? OpenAddPromotionRequested;
+    public event Action? OpenCreateItemKitRequested;
 
     public PromotionsViewModel(IPromotionService promotionService)
     {
@@ -42,4 +43,7 @@ public partial class PromotionsViewModel : ObservableObject
 
     [RelayCommand]
     private void OpenAddPromotionDialog() => OpenAddPromotionRequested?.Invoke();
+
+    [RelayCommand]
+    private void OpenCreateItemKitDialog() => OpenCreateItemKitRequested?.Invoke();
 }

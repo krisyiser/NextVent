@@ -243,13 +243,14 @@ public partial class MainWindowViewModel : ObservableObject
             }, Avalonia.Threading.DispatcherPriority.Loaded);
         };
 
-        _posVm.OpenCreateItemKitRequested += () =>
+        _promotionsVm.OpenCreateItemKitRequested += () =>
         {
             var dialog = new ItemKitDialogViewModel(kitService, _productService);
             dialog.RequestClose += () =>
             {
                 CloseDialog();
                 _ = _posVm.LoadProductsAsync();
+                _ = _promotionsVm.LoadPromotionsAsync();
                 WeakReferenceMessenger.Default.Send(new NextVent.Core.Messages.FocusSearchMessage());
             };
             ActiveDialogViewModel = dialog;
