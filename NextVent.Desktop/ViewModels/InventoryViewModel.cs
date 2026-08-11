@@ -29,6 +29,43 @@ public partial class InventoryViewModel : ObservableObject
 
     public event Action? OpenAddProductRequested;
     public event Action<ProductDto>? OpenEditProductRequested;
+    public event Action? OpenConfigureLowStockRequested;
+
+    private static readonly string SettingsPath = System.IO.Path.Combine(
+        Environment.GetFolderPath(Environment.SpecialFolder.UserProfile),
+        ".gemini", "antigravity-ide", "pos_settings.json"
+    );
+
+    public static double LoadDefaultMinStock()
+    {
+        try
+        {
+            if (System.IO.File.Exists(SettingsPath))
+            {
+                var text = System.IO.File.ReadAllText(SettingsPath);
+                if (double.TryParse(text.Trim(), out double val))
+                {
+                    return val;
+                }
+            }
+        }
+        catch { }
+        return 5.0;
+    }
+
+    public static void SaveDefaultMinStock(double val)
+    {
+        try
+        {
+            var dir = System.IO.Path.GetDirectoryName(SettingsPath);
+            if (dir != null && !System.IO.Directory.Exists(dir))
+            {
+                System.IO.Directory.CreateDirectory(dir);
+            }
+            System.IO.File.WriteAllText(SettingsPath, val.ToString());
+        }
+        catch { }
+    }
 
     public InventoryViewModel(IProductService productService, IPurchaseService? purchaseService = null)
     {
@@ -91,7 +128,14 @@ public partial class InventoryViewModel : ObservableObject
     [RelayCommand]
     private void ToggleLowStockFilter()
     {
-        ShowOnlyLowStock = !ShowOnlyLowStock;
+        if (ShowOnlyLowStock)
+        {
+            ShowOnlyLowStock = false;
+        }
+        else
+        {
+            OpenConfigureLowStockRequested?.Invoke();
+        }
     }
 
     private void ApplyFilter()
@@ -102,7 +146,8 @@ public partial class InventoryViewModel : ObservableObject
         var matches = Products.AsEnumerable();
         if (ShowOnlyLowStock)
         {
-            matches = matches.Where(p => p.Stock <= (p.MinStock > 0 ? p.MinStock : 5.0)); // Stock Mínimo threshold
+            double defaultMin = LoadDefaultMinStock();
+            matches = matches.Where(p => p.Stock <= (p.MinStock > 0.0 ? p.MinStock : defaultMin)); // Stock Mínimo threshold
         }
         if (!string.IsNullOrEmpty(q))
         {

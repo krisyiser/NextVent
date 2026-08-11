@@ -426,7 +426,10 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
                 AddToCartWithQuantity(p, quantityMultiplier);
                 SearchQuery = string.Empty;
 
-                if (remainingStock <= p.MinStock && remainingStock > 0)
+                double defaultMin = NextVent.ViewModels.InventoryViewModel.LoadDefaultMinStock();
+                double minThreshold = p.MinStock > 0.0 ? p.MinStock : defaultMin;
+
+                if (remainingStock <= minThreshold && remainingStock > 0)
                 {
                     FeedbackIsError = true;
                     FeedbackMessage = $"⚠️ ALERTA: Quedan {remainingStock:N2} piezas de {p.Name} (Stock Mínimo).";
@@ -609,7 +612,10 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
         if (finalItem != null)
         {
             double remainingStock = dbStock - finalItem.Quantity;
-            if (remainingStock <= product.MinStock && remainingStock > 0)
+            double defaultMin = NextVent.ViewModels.InventoryViewModel.LoadDefaultMinStock();
+            double minThreshold = product.MinStock > 0.0 ? product.MinStock : defaultMin;
+
+            if (remainingStock <= minThreshold && remainingStock > 0)
             {
                 FeedbackIsError = true;
                 FeedbackMessage = $"⚠️ ALERTA: Quedan {remainingStock:N2} piezas de {product.Name} (Stock Mínimo).";
@@ -676,7 +682,10 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
             }
 
             double remainingStock = dbStock - (item.Quantity + 1);
-            if (remainingStock <= product.MinStock && remainingStock > 0)
+            double defaultMin = NextVent.ViewModels.InventoryViewModel.LoadDefaultMinStock();
+            double minThreshold = product.MinStock > 0.0 ? product.MinStock : defaultMin;
+
+            if (remainingStock <= minThreshold && remainingStock > 0)
             {
                 FeedbackIsError = true;
                 FeedbackMessage = $"⚠️ ALERTA: Quedan {remainingStock:N2} piezas de {product.Name} (Stock Mínimo).";
@@ -716,8 +725,10 @@ public partial class PosViewModel : ObservableObject, System.IDisposable
             var cartItem = CartItems.FirstOrDefault(i => i.Id == item.Id);
             double currentCartQty = cartItem?.Quantity ?? 0.0;
             double remainingStock = product.Stock - currentCartQty;
+            double defaultMin = NextVent.ViewModels.InventoryViewModel.LoadDefaultMinStock();
+            double minThreshold = product.MinStock > 0.0 ? product.MinStock : defaultMin;
 
-            if (remainingStock <= product.MinStock && remainingStock > 0)
+            if (remainingStock <= minThreshold && remainingStock > 0)
             {
                 FeedbackIsError = true;
                 FeedbackMessage = $"⚠️ ALERTA: Quedan {remainingStock:N2} piezas de {product.Name} (Stock Mínimo).";

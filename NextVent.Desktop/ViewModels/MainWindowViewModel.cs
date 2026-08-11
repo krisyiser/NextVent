@@ -334,6 +334,21 @@ public partial class MainWindowViewModel : ObservableObject
             IsDialogOverlayOpen = true;
         };
 
+        _inventoryVm.OpenConfigureLowStockRequested += () =>
+        {
+            double currentVal = NextVent.ViewModels.InventoryViewModel.LoadDefaultMinStock();
+            var dialog = new NextVent.ViewModels.Dialogs.ConfigureMinStockDialogViewModel(currentVal);
+            dialog.Saved += (newVal) =>
+            {
+                NextVent.ViewModels.InventoryViewModel.SaveDefaultMinStock(newVal);
+                _inventoryVm.ShowOnlyLowStock = true;
+                _ = _inventoryVm.LoadProductsAsync();
+            };
+            dialog.RequestClose += () => CloseDialog();
+            ActiveDialogViewModel = dialog;
+            IsDialogOverlayOpen = true;
+        };
+
         // ── Wire Customers Add Customer, Payment & Statement Dialog Events ──
         _customersVm.OpenAddCustomerRequested += () =>
         {
