@@ -28,6 +28,12 @@ public partial class UserEntity
     [Column("password_hash")]
     public string PasswordHash { get; set; } = string.Empty;
 
+    [Column("password_salt")]
+    public byte[]? PasswordSalt { get; set; }
+
+    [Column("password_hash_bytes")]
+    public byte[]? PasswordHashBytes { get; set; }
+
     [Column("password_hint")]
     public string PasswordHint { get; set; } = string.Empty; // Pista de contraseña
 

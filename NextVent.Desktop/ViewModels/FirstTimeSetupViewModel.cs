@@ -68,6 +68,15 @@ public partial class FirstTimeSetupViewModel : ValidatableViewModelBase
             };
 
             await _userRepository.CreateUserAsync(adminUser);
+            
+            // Enviar telemetría al finalizar el Setup
+            var registrationService = new NextVent.Services.Implementations.DeviceRegistrationService();
+            await registrationService.RegisterNodeAsync(new NextVent.Services.Implementations.BusinessProfile 
+            { 
+                BusinessName = "NextVent User", // Could ask user for business name later
+                Email = "admin@nextvent.com" 
+            });
+
             _navigateToLogin();
         }
         catch (Exception ex)

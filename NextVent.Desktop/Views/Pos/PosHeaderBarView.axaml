@@ -3,7 +3,7 @@
              xmlns:vm="using:NextVent.ViewModels"
              xmlns:mi="using:Material.Icons.Avalonia"
              x:Class="NextVent.Views.Pos.PosHeaderBarView"
-             x:DataType="vm:PosViewModel">
+             x:DataType="vm:PosHeaderViewModel">
 
     <!-- ═══ HEADER STATUS BAR CONTAINER (ZERO EMOJIS - PURE VECTOR MATERIAL ICONS) ═══ -->
     <Border Padding="12,8"
@@ -114,13 +114,13 @@
                                                         </StackPanel>
 
                                                         <Button Grid.Column="1" Content="Reanudar" 
-                                                                Command="{Binding $parent[ItemsControl].((vm:PosViewModel)DataContext).RestoreTicketCommand}" 
+                                                                Command="{Binding $parent[ItemsControl].((vm:PosHeaderViewModel)DataContext).RestoreTicketCommand}" 
                                                                 CommandParameter="{Binding}" 
                                                                 Background="{DynamicResource AccentBrandSubtleBrush}" Foreground="{DynamicResource AccentPrimaryBrush}" BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="1" 
                                                                 CornerRadius="4" Padding="10,6" Margin="8,0,4,0"/>
 
                                                         <Button Grid.Column="2" 
-                                                                Command="{Binding $parent[ItemsControl].((vm:PosViewModel)DataContext).DiscardParkedTicketCommand}" 
+                                                                Command="{Binding $parent[ItemsControl].((vm:PosHeaderViewModel)DataContext).DiscardParkedTicketCommand}" 
                                                                 CommandParameter="{Binding}" 
                                                                 Background="Transparent" BorderThickness="0" Padding="6">
                                                             <mi:MaterialIcon Kind="TrashCanOutline" Width="18" Height="18" Foreground="#EF4444"/>

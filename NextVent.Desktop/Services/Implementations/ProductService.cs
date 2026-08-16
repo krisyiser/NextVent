@@ -251,6 +251,22 @@ public sealed class ProductService : IProductService
         }
     }
 
+    [Dapper.DapperAot]
+    public async Task<IEnumerable<ProductDto>> GetCatalogForPosAsync()
+    {
+        string appDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        string dbPath = Path.Combine(appDataFolder, "NextVent", "Database", "nextvent.db");
+        string securePassword = NextVent.Services.Security.SecurityManager.GetMasterKey();
+        string secureConnectionString = $"Data Source={dbPath};Password={securePassword};";
+
+        using var connection = new Microsoft.Data.Sqlite.SqliteConnection(secureConnectionString);
+        await connection.OpenAsync();
+        
+        // Consulta SQL cruda y estricta, mapeada a un DTO por el compilador AOT
+        const string sql = "SELECT Id, Barcode, Name, Cost, Price, WholesalePrice, WholesaleThreshold, Stock, Category, Unit, ExpiresSoon, CreatedAt, PointsRewarded, ReorderQuantity, LocationRack, ClaveSat, UnidadSat, MinStock FROM products WHERE Stock > 0";
+        return await Dapper.SqlMapper.QueryAsync<ProductDto>(connection, sql);
+    }
+
     private static ProductDto MapToDto(ProductEntity e) => new(
         e.Id, e.Barcode, e.Name, e.Cost, e.Price,
         e.WholesalePrice, e.WholesaleThreshold,

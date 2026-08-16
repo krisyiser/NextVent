@@ -249,47 +249,49 @@ public class EscPosPrinterService : IEscPosPrinterService, IDisposable, IAsyncDi
 
     private async Task SendRawBytesToHardwareAsync(string portOrName, byte[] bytes, CancellationToken token)
     {
-        await Task.Run(() =>
+        try
         {
-            if (string.IsNullOrEmpty(portOrName)) portOrName = "ImpresoraTickets";
-
-            if (portOrName.StartsWith("COM", StringComparison.OrdinalIgnoreCase))
+            await Task.Run(() =>
             {
-                try
-                {
-                    using var serial = new SerialPort(portOrName, 9600, Parity.None, 8, StopBits.One);
-                    token.ThrowIfCancellationRequested();
-                    serial.Open();
+                if (string.IsNullOrEmpty(portOrName)) portOrName = "ImpresoraTickets";
 
-                    token.ThrowIfCancellationRequested();
-                    serial.Write(bytes, 0, bytes.Length);
-
-                    serial.Close();
-                }
-                catch (OperationCanceledException)
+                if (portOrName.StartsWith("COM", StringComparison.OrdinalIgnoreCase))
                 {
-                    throw;
-                }
-                catch (Exception ex)
-                {
-                    Log.Warning("COM Serial Port {Port} not reachable directly, fallback spooler simulation: {Message}", portOrName, ex.Message);
-                    // Fallback to spooler printing using standard ImpresoraTickets printer name
-                    RawPrinterHelper.SendBytesToPrinter("ImpresoraTickets", bytes);
-                }
-            }
-            else
-            {
-                bool success = RawPrinterHelper.SendBytesToPrinter(portOrName, bytes);
-                if (!success)
-                {
-                    Log.Warning("Failed to send print job to Winspool printer {PrinterName}", portOrName);
-                    if (portOrName != "ImpresoraTickets")
+                    try
                     {
+                        using var serial = new SerialPort(portOrName, 9600, Parity.None, 8, StopBits.One);
+                        serial.Open();
+                        serial.Write(bytes, 0, bytes.Length);
+                        serial.Close();
+                    }
+                    catch (Exception ex)
+                    {
+                        Log.Warning("COM Serial Port {Port} not reachable directly, fallback spooler simulation: {Message}", portOrName, ex.Message);
                         RawPrinterHelper.SendBytesToPrinter("ImpresoraTickets", bytes);
                     }
                 }
-            }
-        }, token);
+                else
+                {
+                    bool success = RawPrinterHelper.SendBytesToPrinter(portOrName, bytes);
+                    if (!success)
+                    {
+                        Log.Warning("Failed to send print job to Winspool printer {PrinterName}", portOrName);
+                        if (portOrName != "ImpresoraTickets")
+                        {
+                            RawPrinterHelper.SendBytesToPrinter("ImpresoraTickets", bytes);
+                        }
+                    }
+                }
+            }, token).WaitAsync(TimeSpan.FromSeconds(3), token);
+        }
+        catch (TimeoutException)
+        {
+            Log.Warning("Hardware Timeout: P/Invoke to winspool.drv hung for more than 3 seconds. Aborting await.");
+        }
+        catch (OperationCanceledException)
+        {
+            Log.Warning("Hardware Canceled: Printer task was canceled.");
+        }
     }
 
     private static void WriteEscPosQrCode(Stream s, string qrData)

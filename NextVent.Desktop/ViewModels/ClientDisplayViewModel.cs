@@ -5,61 +5,39 @@ using NextVent.Core.Messages;
 using NextVent.Data.Dtos;
 using System.Collections.ObjectModel;
 
+using NextVent.Core.State;
+
 namespace NextVent.ViewModels;
 
-public partial class ClientDisplayViewModel : ObservableObject,
-    IRecipient<CartStateSnapshotMessage>,
-    IRecipient<CustomerDisplayIdleStateMessage>,
-    System.IDisposable
+public partial class ClientDisplayViewModel : ObservableObject, System.IDisposable
 {
-    public ObservableCollection<CartItemDto> CustomerCartItems { get; } = [];
+    private readonly CartStateStore _cartState;
 
-    [ObservableProperty] private double _grandTotal;
+    public System.Collections.ObjectModel.ObservableCollection<CartItemDto> CustomerCartItems => _cartState.Items;
+
+    public double GrandTotal => _cartState.Total;
+
     [ObservableProperty] private double _totalSaved;
     [ObservableProperty] private bool _isIdleMode = true;
     [ObservableProperty] private string _highlightBannerText = string.Empty;
     [ObservableProperty] private string _lastAddedProductName = string.Empty;
 
-    public ClientDisplayViewModel()
-    {
-        WeakReferenceMessenger.Default.RegisterAll(this);
-    }
+    public ClientDisplayViewModel() { _cartState = new CartStateStore(); } // For designer
 
-    public void Receive(CartStateSnapshotMessage message)
+    public ClientDisplayViewModel(CartStateStore cartState)
     {
-        Dispatcher.UIThread.Post(() =>
+        _cartState = cartState;
+        _cartState.PropertyChanged += (s, e) =>
         {
-            CustomerCartItems.Clear();
-            foreach (var item in message.Items)
+            if (e.PropertyName == nameof(CartStateStore.Total))
             {
-                CustomerCartItems.Add(item);
+                OnPropertyChanged(nameof(GrandTotal));
+                // Add logic for savings and banner later if necessary
             }
-
-            GrandTotal = message.GrandTotal;
-            TotalSaved = message.TotalDiscount;
-            LastAddedProductName = message.LastAddedProductName;
-
-            if (TotalSaved > 0.01)
-            {
-                HighlightBannerText = $"¡AHORRASTE ${TotalSaved:N2} EN ESTA COMPRA!";
-            }
-            else
-            {
-                HighlightBannerText = string.Empty;
-            }
-        });
-    }
-
-    public void Receive(CustomerDisplayIdleStateMessage message)
-    {
-        Dispatcher.UIThread.Post(() =>
-        {
-            IsIdleMode = message.IsIdle;
-        });
+        };
     }
 
     public void Dispose()
     {
-        WeakReferenceMessenger.Default.UnregisterAll(this);
     }
 }

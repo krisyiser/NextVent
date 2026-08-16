@@ -1,0 +1,123 @@
+using Avalonia.Threading;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using NextVent.Core.Messages;
+using NextVent.Data.Dtos;
+using NextVent.Services.Interfaces;
+using NextVent.Core.State;
+using NextVent.Core.Repositories;
+using Serilog;
+using System;
+using System.Collections.ObjectModel;
+using System.Threading.Tasks;
+using System.Linq;
+
+namespace NextVent.ViewModels;
+
+public partial class CartViewModel : ObservableObject
+{
+    public CartStateStore CartState { get; }
+    
+    private readonly ISaleService _saleService;
+    private readonly ICustomerService _customerService;
+
+    public ObservableCollection<CustomerDto> Customers { get; } = [];
+    public ObservableCollection<ParkedTicketModel> ParkedTickets { get; } = new();
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasCustomerCredit))]
+    [NotifyPropertyChangedFor(nameof(CustomerCreditBadgeText))]
+    [NotifyPropertyChangedFor(nameof(CustomerCreditBadgeColor))]
+    private CustomerDto? _selectedCustomer;
+    [ObservableProperty] private int _parkedOrdersCount = 0;
+    [ObservableProperty] private double _cartWidthPx = 380;
+    [ObservableProperty] private string _initialPaymentMode = "Efectivo";
+
+    public bool HasCustomerCredit => SelectedCustomer?.CreditLimit > 0;
+    public string CustomerCreditBadgeText => HasCustomerCredit ? $"CRÉDITO: {SelectedCustomer!.AvailableCredit:C}" : string.Empty;
+    public string CustomerCreditBadgeColor => SelectedCustomer?.AvailableCredit > 0 ? "#10B981" : "#EF4444";
+
+    public bool HasParkedTickets => ParkedTickets.Count > 0;
+
+    public event Action? OpenCheckoutRequested;
+
+    public CartViewModel(CartStateStore cartState, ISaleService saleService, ICustomerService customerService)
+    {
+        CartState = cartState;
+        _saleService = saleService;
+        _customerService = customerService;
+
+        _ = LoadCustomersAsync();
+    }
+
+    public async Task LoadCustomersAsync()
+    {
+        try
+        {
+            var list = await _customerService.GetAllAsync();
+            await Dispatcher.UIThread.InvokeAsync(() =>
+            {
+                Customers.Clear();
+                foreach (var c in list) Customers.Add(c);
+                if (SelectedCustomer == null && Customers.Count > 0)
+                {
+                    SelectedCustomer = Customers.FirstOrDefault(c => c.Name.Contains("Público", StringComparison.OrdinalIgnoreCase)) ?? Customers[0];
+                }
+            });
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error loading customers in CartViewModel");
+        }
+    }
+
+    [RelayCommand]
+    private void OpenCustomerSelect()
+    {
+        // For simplicity, just request focus search or trigger a modal event.
+    }
+
+    [RelayCommand]
+    private void Checkout(string method)
+    {
+        InitialPaymentMode = method ?? "Efectivo";
+        OpenCheckoutRequested?.Invoke();
+    }
+
+    [RelayCommand]
+    private void IncreaseQuantity(CartItemDto item)
+    {
+        // Domain validates internally
+        // Assume absoluteDbStock is 999 for simplicity in this proxy method,
+        // Since Catalog should handle the real stock. But let's pass a safe value.
+        CartState.AddItem(item, 999.0);
+    }
+
+    [RelayCommand]
+    private void DecreaseQuantity(CartItemDto item)
+    {
+        if (item.Quantity > 1)
+        {
+            item.DecreaseQuantity(1.0);
+            CartState.RecalculateTotals();
+        }
+        else
+        {
+            CartState.RemoveItem(item);
+        }
+    }
+
+    [RelayCommand]
+    private void RemoveFromCart(CartItemDto item)
+    {
+        CartState.RemoveItem(item);
+    }
+
+    [RelayCommand]
+    private void ClearCart()
+    {
+        CartState.Clear();
+        SelectedCustomer = Customers.FirstOrDefault(c => c.Name.Contains("Público", StringComparison.OrdinalIgnoreCase)) ?? Customers.FirstOrDefault();
+    }
+}

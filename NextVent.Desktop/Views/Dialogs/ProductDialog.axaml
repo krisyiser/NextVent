@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:NextVent.ViewModels.Dialogs"
+             xmlns:mi="using:Material.Icons.Avalonia"
              x:Class="NextVent.Views.Dialogs.ProductDialog"
              x:DataType="vm:ProductDialogViewModel">
 
@@ -26,6 +27,17 @@
 
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Spacing="16">
+                    
+                    <!-- AUTOFILL BANNER -->
+                    <Border IsVisible="{Binding ShowAutoFillBanner}" 
+                            Background="#E0F2FE" BorderBrush="#3B82F6" BorderThickness="1" 
+                            CornerRadius="6" Padding="10">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <mi:MaterialIcon Kind="CloudDownload" Width="20" Height="20" Foreground="#0284C7"/>
+                            <TextBlock Text="¡Información precargada desde el catálogo global! Revisa el precio y guarda." 
+                                       Foreground="#0369A1" FontWeight="Medium" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Border>
                     
                     <!-- 1. DATOS GENERALES -->
                     <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="14" Background="{DynamicResource BgTertiaryBrush}">

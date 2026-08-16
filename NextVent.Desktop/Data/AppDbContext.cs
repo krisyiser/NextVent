@@ -1,7 +1,17 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NextVent.Data.Entities;
+using System;
 
 namespace NextVent.Data;
+
+public class SqliteDecimalConverter : ValueConverter<decimal, long>
+{
+    public SqliteDecimalConverter() : base(
+        v => Convert.ToInt64(Math.Round(v, 2, MidpointRounding.ToEven) * 100m),
+        v => Convert.ToDecimal(v) / 100m)
+    { }
+}
 
 public class AppDbContext : DbContext
 {
@@ -28,9 +38,10 @@ public class AppDbContext : DbContext
     public DbSet<ShiftMovementEntity> ShiftMovements => Set<ShiftMovementEntity>();
     public DbSet<SystemAlertEntity> SystemAlerts => Set<SystemAlertEntity>();
     public DbSet<ReturnEntity> Returns => Set<ReturnEntity>();
-    public DbSet<AuditLogEntity> AuditLogs => Set<AuditLogEntity>();
     public DbSet<AttendanceEntity> Attendances => Set<AttendanceEntity>();
     public DbSet<CategoryEntity> Categories => Set<CategoryEntity>();
+    public DbSet<FolioSequenceEntity> FolioSequences => Set<FolioSequenceEntity>();
+    public DbSet<CoOccurrenceEntity> CoOccurrences => Set<CoOccurrenceEntity>();
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
@@ -59,7 +70,20 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<ProductAttributeEntity>().HasKey(pa => pa.Id);
         modelBuilder.Entity<ShiftNoteEntity>().HasKey(sn => sn.Id);
         modelBuilder.Entity<AttendanceEntity>().HasKey(a => a.Id);
+        modelBuilder.Entity<FolioSequenceEntity>().HasKey(f => f.DatePrefix);
+        modelBuilder.Entity<CoOccurrenceEntity>().HasKey(c => new { c.ProductoA, c.ProductoB });
     }
+
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        if (Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite")
+        {
+            configurationBuilder
+                .Properties<decimal>()
+                .HaveConversion<SqliteDecimalConverter>();
+        }
+    }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);
@@ -72,7 +96,8 @@ public class AppDbContext : DbContext
                 System.IO.Directory.CreateDirectory(appFolder);
             }
             string dbPath = System.IO.Path.Combine(appFolder, "nextvent.db");
-            optionsBuilder.UseSqlite($"Data Source={dbPath};Cache=Shared;Mode=ReadWriteCreate;");
+            string securePassword = NextVent.Services.Security.SecurityManager.GetMasterKey();
+            optionsBuilder.UseSqlite($"Data Source={dbPath};Password={securePassword};Cache=Shared;Mode=ReadWriteCreate;");
         }
     }
 }
@@ -89,7 +114,8 @@ public class AppDbContextFactory : Microsoft.EntityFrameworkCore.Design.IDesignT
             System.IO.Directory.CreateDirectory(appFolder);
         }
         string dbPath = System.IO.Path.Combine(appFolder, "nextvent.db");
-        optionsBuilder.UseSqlite($"Data Source={dbPath};Cache=Shared;Mode=ReadWriteCreate;");
+        string securePassword = NextVent.Services.Security.SecurityManager.GetMasterKey();
+        optionsBuilder.UseSqlite($"Data Source={dbPath};Password={securePassword};Cache=Shared;Mode=ReadWriteCreate;");
         return new AppDbContext(optionsBuilder.Options);
     }
 }

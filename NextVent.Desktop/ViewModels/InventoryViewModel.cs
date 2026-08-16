@@ -23,11 +23,17 @@ public partial class InventoryViewModel : ObservableObject
     [ObservableProperty] private string _searchQuery = string.Empty;
     [ObservableProperty] private string _feedbackMessage = string.Empty;
     [ObservableProperty] private bool _showOnlyLowStock = false;
+    [ObservableProperty] private bool _isIntelligencePanelVisible = false;
 
     private readonly IPurchaseService? _purchaseService;
+    private readonly IPredictiveIntelligenceService? _predictiveService;
+    private readonly IExternalCatalogService _externalCatalogService;
     private CancellationTokenSource? _searchCts;
+    
+    public ObservableCollection<PredictiveAlertDto> UrgentRestockAlerts { get; } = [];
 
     public event Action? OpenAddProductRequested;
+    public event Action<NextVent.ViewModels.Dialogs.ProductDialogParameters>? OpenProductDialogWithParamsRequested;
     public event Action<ProductDto>? OpenEditProductRequested;
     public event Action? OpenConfigureLowStockRequested;
     public event Action? OpenManageCategoriesRequested;
@@ -68,10 +74,14 @@ public partial class InventoryViewModel : ObservableObject
         catch { }
     }
 
-    public InventoryViewModel(IProductService productService, IPurchaseService? purchaseService = null)
+    [ObservableProperty] private bool _isLoading = false;
+
+    public InventoryViewModel(IProductService productService, IExternalCatalogService externalCatalogService, IPurchaseService? purchaseService = null, IPredictiveIntelligenceService? predictiveService = null)
     {
         _productService = productService;
+        _externalCatalogService = externalCatalogService;
         _purchaseService = purchaseService;
+        _predictiveService = predictiveService;
         _ = LoadProductsAsync();
     }
 
@@ -80,11 +90,18 @@ public partial class InventoryViewModel : ObservableObject
         try
         {
             var items = await _productService.GetAllAsync();
+            
+            var alerts = _predictiveService != null ? await _predictiveService.GetUrgentRestockAlertsAsync() : new();
+
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 Products.Clear();
                 foreach (var item in items) Products.Add(item);
                 ApplyFilter();
+                
+                UrgentRestockAlerts.Clear();
+                foreach (var alert in alerts.Take(3)) UrgentRestockAlerts.Add(alert);
+                IsIntelligencePanelVisible = UrgentRestockAlerts.Count > 0;
             });
         }
         catch (Exception ex)
@@ -227,6 +244,46 @@ public partial class InventoryViewModel : ObservableObject
                     FeedbackMessage = $"Error al importar catálogo CSV: {ex.Message}";
                 }
             }
+        }
+    }
+
+    [RelayCommand]
+    private async Task ScanBarcodeAsync(string barcode)
+    {
+        IsLoading = true;
+
+        var localProduct = await _productService.GetByBarcodeAsync(barcode);
+
+        if (localProduct != null)
+        {
+            // El producto existe, procesar normalmente (abrir edición)
+            OpenEditProductRequested?.Invoke(localProduct);
+            IsLoading = false;
+            return;
+        }
+
+        // El producto NO existe. Consultar la nube silenciosamente.
+        var externalProduct = await _externalCatalogService.FetchProductByBarcodeAsync(barcode);
+        IsLoading = false;
+
+        if (externalProduct != null)
+        {
+            // Se encontró en internet. Pre-llenar el formulario.
+            OpenProductDialogWithParamsRequested?.Invoke(new NextVent.ViewModels.Dialogs.ProductDialogParameters 
+            { 
+                IsEditMode = false,
+                PreFilledData = externalProduct,
+                ShowAutoFillBanner = true
+            });
+        }
+        else
+        {
+            // No hay internet o no existe en la API. Abrir vacío tradicional.
+            OpenProductDialogWithParamsRequested?.Invoke(new NextVent.ViewModels.Dialogs.ProductDialogParameters 
+            { 
+                IsEditMode = false,
+                PreFilledBarcode = barcode
+            });
         }
     }
 

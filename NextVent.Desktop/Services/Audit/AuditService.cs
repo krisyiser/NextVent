@@ -16,11 +16,11 @@ namespace NextVent.Services.Audit;
 /// </summary>
 public class AuditService : IAuditService
 {
-    private readonly AppDbContext _context;
+    private readonly IDbContextFactory<AuditDbContext> _contextFactory;
 
-    public AuditService(AppDbContext context)
+    public AuditService(IDbContextFactory<AuditDbContext> contextFactory)
     {
-        _context = context;
+        _contextFactory = contextFactory;
     }
 
     public async Task LogAsync(AuditLogEntity log)
@@ -31,8 +31,10 @@ public class AuditService : IAuditService
             if (string.IsNullOrEmpty(log.Timestamp)) log.Timestamp = DateTime.UtcNow.ToString("s");
             if (string.IsNullOrEmpty(log.TerminalName)) log.TerminalName = Environment.MachineName;
 
-            _context.AuditLogs.Add(log);
-            await _context.SaveChangesAsync();
+            using var context = await _contextFactory.CreateDbContextAsync();
+            context.AuditLogs.Add(log);
+            
+            await DbResilienceHelper.ExecuteWithRetryAsync(async () => await context.SaveChangesAsync());
 
             Log.Information("AuditLog [{ActionType}] [{RiskLevel}] Entity: {EntityName}/{EntityId}, User: {UserId}, Impact: {Impact:C}",
                 log.ActionType, log.RiskLevel, log.EntityName, log.EntityId, log.UserId, log.FinancialImpact);
@@ -59,7 +61,8 @@ public class AuditService : IAuditService
 
     public async Task<List<AuditLogEntity>> GetRecentLogsAsync(int limit = 100)
     {
-        return await _context.AuditLogs
+        using var context = await _contextFactory.CreateDbContextAsync();
+        return await context.AuditLogs
             .AsNoTracking()
             .OrderByDescending(a => a.Timestamp)
             .Take(limit)

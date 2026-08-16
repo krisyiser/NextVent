@@ -24,32 +24,42 @@ internal static class Program
 
         try
         {
-            var logDir = Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                "NextVent", "logs");
-            Directory.CreateDirectory(logDir);
+            var dsn = Environment.GetEnvironmentVariable("NEXTVENT_SENTRY_DSN");
+            
+            using (SentrySdk.Init(o =>
+            {
+                o.Dsn = !string.IsNullOrWhiteSpace(dsn) ? dsn : "https://example@sentry.io/example";
+                o.TracesSampleRate = 1.0;
+                o.AutoSessionTracking = true;
+            }))
+            {
+                var logDir = Path.Combine(
+                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "NextVent", "logs");
+                Directory.CreateDirectory(logDir);
 
-            Log.Logger = new LoggerConfiguration()
-                .MinimumLevel.Information()
-                .WriteTo.File(
-                    Path.Combine(logDir, "nextvent_.log"),
-                    rollingInterval: RollingInterval.Day,
-                    retainedFileCountLimit: 30,
-                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
-                .CreateLogger();
+                Log.Logger = new LoggerConfiguration()
+                    .MinimumLevel.Information()
+                    .WriteTo.File(
+                        Path.Combine(logDir, "nextvent_.log"),
+                        rollingInterval: RollingInterval.Day,
+                        retainedFileCountLimit: 30,
+                        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
+                    .CreateLogger();
 
-            try
-            {
-                BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
-            }
-            catch (Exception ex)
-            {
-                Log.Fatal(ex, "NextVent POS crashed fatally");
-                throw;
-            }
-            finally
-            {
-                Log.CloseAndFlush();
+                try
+                {
+                    BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+                }
+                catch (Exception ex)
+                {
+                    Log.Fatal(ex, "NextVent POS crashed fatally");
+                    throw;
+                }
+                finally
+                {
+                    Log.CloseAndFlush();
+                }
             }
         }
         finally

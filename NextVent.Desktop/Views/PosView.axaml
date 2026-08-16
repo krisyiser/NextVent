@@ -10,12 +10,29 @@
     <Grid RowDefinitions="Auto,*" Margin="16">
 
         <!-- ═══ 1. TOP FUNCTION BANNER BAR ═══ -->
-        <pos:PosHeaderBarView Grid.Row="0" Margin="0,0,0,16" />
+        <pos:PosHeaderBarView Grid.Row="0" Margin="0,0,0,16" DataContext="{Binding Header}" />
+
+        <!-- ═══ CROSS-SELLING SUGGESTION BANNER ═══ -->
+        <Border Grid.Row="0" VerticalAlignment="Bottom" Margin="0,0,0,-16" 
+                Background="#FEF3C7" BorderBrush="#F59E0B" BorderThickness="1" CornerRadius="8" Padding="12,8"
+                IsVisible="{Binding IsSuggestionVisible}"
+                ZIndex="10" BoxShadow="0 4 10 0 #40000000">
+            <Border.Transitions>
+                <Transitions>
+                    <DoubleTransition Property="Opacity" Duration="0:0:0.3"/>
+                </Transitions>
+            </Border.Transitions>
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="{Binding SmartSuggestionText}" VerticalAlignment="Center" FontSize="14" FontWeight="Bold" Foreground="#92400E" />
+                <Button Grid.Column="1" Content="Añadir Sugerencia" Command="{Binding AddSuggestionToCartCommand}" 
+                        Background="#F59E0B" Foreground="White" FontWeight="Bold" CornerRadius="4" Padding="12,6" Margin="16,0,0,0"/>
+            </Grid>
+        </Border>
 
         <!-- ═══ 2. MAIN POS WORKSPACE WITH DYNAMIC CART POSITION (LEFT / RIGHT) ═══ -->
         <Grid Grid.Row="1" ColumnDefinitions="*,Auto">
-            <pos:PosProductCatalogView x:Name="ProductCatalog" Grid.Column="{Binding ProductsGridColumn}" Margin="{Binding ProductsMargin}" />
-            <pos:PosCartTicketView Grid.Column="{Binding CartGridColumn}" />
+            <pos:PosProductCatalogView x:Name="ProductCatalog" Grid.Column="{Binding $parent[UserControl].((vm:PosViewModel)DataContext).ProductsGridColumn}" Margin="{Binding $parent[UserControl].((vm:PosViewModel)DataContext).ProductsMargin}" DataContext="{Binding Catalog}" />
+            <pos:PosCartTicketView Grid.Column="{Binding $parent[UserControl].((vm:PosViewModel)DataContext).CartGridColumn}" DataContext="{Binding Cart}" />
         </Grid>
 
     </Grid>

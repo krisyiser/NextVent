@@ -8,8 +8,5 @@ public partial class ClientDisplayWindow : Window
     public ClientDisplayWindow()
     {
         InitializeComponent();
-        var vm = new ClientDisplayViewModel();
-        DataContext = vm;
-        Closed += (s, e) => vm.Dispose();
     }
 }

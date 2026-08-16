@@ -28,6 +28,8 @@ public partial class CashupDialogViewModel : ObservableObject
     [ObservableProperty] private double _theoreticalCash = 4250.00;
     [ObservableProperty] private double _totalPhysicalCash;
     [ObservableProperty] private double _differenceAmount;
+    [ObservableProperty] private double _grossProfit;
+    [ObservableProperty] private double _netProfit;
     [ObservableProperty] private bool _isBlindMode = false;
     [ObservableProperty] private bool _isFinalZCut = false;
     private NextVent.Data.Dtos.ShiftDto? _activeShift;
@@ -187,22 +189,22 @@ public partial class CashupDialogViewModel : ObservableObject
             {
                 OpenCashAmount = shift.OpeningBalance;
 
-                // Calculate theoretical cash balance in active shift
+                // Calculate theoretical cash balance in active shift (Cash only)
                 var cashSales = await _db.Sales
                     .AsNoTracking()
-                    .Where(s => s.PaymentMethod == "Cash"
-                             && s.IsCancelled == 0
+                    .Where(s => (s.PaymentMethod == "Cash" || s.PaymentMethod == "Efectivo")
+                             && s.Status == NextVent.Core.Enums.SaleStatus.Completed
                              && string.Compare(s.Date, shift.StartTime) >= 0)
                     .SumAsync(s => s.Total);
 
                 var customerAbonosCash = await _db.ShiftMovements
                     .AsNoTracking()
-                    .Where(m => m.ShiftId == shift.Id && m.MovementType == NextVent.Core.Enums.MovementType.AbonoCliente)
+                    .Where(m => m.ShiftId == shift.Id && m.MovementType == NextVent.Core.Enums.MovementType.AbonoCliente && m.Description.Contains("Efectivo"))
                     .SumAsync(m => m.Amount);
 
                 var cashExpenses = await _db.ShiftMovements
                     .AsNoTracking()
-                    .Where(m => m.ShiftId == shift.Id && m.MovementType == NextVent.Core.Enums.MovementType.GastoOperativo)
+                    .Where(m => m.ShiftId == shift.Id && m.MovementType == NextVent.Core.Enums.MovementType.GastoOperativo && m.Description.Contains("Efectivo"))
                     .SumAsync(m => m.Amount);
 
                 var cashPurchases = await _db.ShiftMovements
@@ -212,10 +214,32 @@ public partial class CashupDialogViewModel : ObservableObject
 
                 var cashReturns = await _db.ShiftMovements
                     .AsNoTracking()
-                    .Where(m => m.ShiftId == shift.Id && m.MovementType == NextVent.Core.Enums.MovementType.DevolucionCliente)
+                    .Where(m => m.ShiftId == shift.Id && m.MovementType == NextVent.Core.Enums.MovementType.DevolucionCliente && m.Description.Contains("Efectivo"))
                     .SumAsync(m => m.Amount);
 
                 TheoreticalCash = shift.OpeningBalance + cashSales + customerAbonosCash - cashExpenses - cashPurchases - cashReturns;
+                
+                // Calculate Profit (All sales and expenses, regardless of payment method)
+                var allSalesTotal = await _db.Sales
+                    .AsNoTracking()
+                    .Where(s => s.Status == NextVent.Core.Enums.SaleStatus.Completed
+                             && string.Compare(s.Date, shift.StartTime) >= 0)
+                    .SumAsync(s => s.Total);
+                    
+                var allSalesCogs = await _db.Sales
+                    .AsNoTracking()
+                    .Where(s => s.Status == NextVent.Core.Enums.SaleStatus.Completed
+                             && string.Compare(s.Date, shift.StartTime) >= 0)
+                    .SumAsync(s => s.TotalCost);
+
+                var allExpensesTotal = await _db.ShiftMovements
+                    .AsNoTracking()
+                    .Where(m => m.ShiftId == shift.Id && m.MovementType == NextVent.Core.Enums.MovementType.GastoOperativo)
+                    .SumAsync(m => m.Amount);
+
+                GrossProfit = allSalesTotal;
+                NetProfit = GrossProfit - allExpensesTotal - allSalesCogs;
+                
                 RecalculatePhysicalTotal();
             });
         }

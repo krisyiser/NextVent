@@ -20,5 +20,6 @@ public interface IProductService
     Task BulkSaveAsync(IEnumerable<ProductDto> products);
     Task<int> ImportFromCsvTextAsync(string csvContent);
     Task<List<ProductDto>> SearchFtsAsync(string query);
+    Task<IEnumerable<ProductDto>> GetCatalogForPosAsync();
     Task<bool> AdjustStockManuallyAsync(string productId, double newPhysicalStock, string reason, string userId, NextVent.Services.Security.ISecurityInterceptionService? securityService = null, IAuditService? auditService = null);
 }

@@ -64,6 +64,7 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly IProductService _productService;
     private readonly IPromotionService _promotionService;
     private readonly IEscPosPrinterService _printerService;
+    private readonly IPrintDispatcherService _printDispatcherService;
     private readonly IGiftcardService _giftcardService;
     private readonly AppDbContext _db;
     private readonly IShiftService _shiftService;
@@ -71,27 +72,51 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly IUserRepository _userRepository;
     private readonly NextVent.Services.Interfaces.IBackupService _backupService;
     private readonly IAttendanceService _attendanceService;
+    private readonly SatBillingQueueService _satBillingQueue;
+    private readonly IUserService _authService;
+    private readonly IAuditService _auditService;
+    private readonly DeviceRegistrationService _deviceRegistrationService;
 
     public MainWindowViewModel()
     {
         string appDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        string appFolder = System.IO.Path.Combine(appDataFolder, "NextVent", "Database");
-        if (!System.IO.Directory.Exists(appFolder))
-        {
-            System.IO.Directory.CreateDirectory(appFolder);
-        }
-        string dbPath = System.IO.Path.Combine(appFolder, "nextvent.db");
+        string appFolder = Path.Combine(appDataFolder, "NextVent", "Database");
+        if (!Directory.Exists(appFolder)) Directory.CreateDirectory(appFolder);
+        string dbPath = Path.Combine(appFolder, "nextvent.db");
+
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseSqlite($"Data Source={dbPath};Cache=Shared;Mode=ReadWriteCreate;")
+            .AddInterceptors(new NextVent.Data.Interceptors.SlowQueryInterceptor())
             .Options;
 
         _db = new AppDbContext(options);
+        var _dbContextFactory = new NextVent.Data.AppDbContextFactoryImpl<AppDbContext>(options);
+
+        var auditOptions = new DbContextOptionsBuilder<AuditDbContext>()
+            .UseSqlite($"Data Source={Path.Combine(appFolder, "audit_logs.db")};")
+            .Options;
+        var _auditContextFactory = new NextVent.Data.AppDbContextFactoryImpl<AuditDbContext>(auditOptions);
+
+        var _auditArchivingWorker = new NextVent.Services.Implementations.AuditArchivingWorker(_auditContextFactory);
+        _ = _auditArchivingWorker.StartAsync(System.Threading.CancellationToken.None);
+
+        var _coOccurrenceQueue = new NextVent.Services.Implementations.CoOccurrenceQueue();
+        var _coOccurrenceWorker = new NextVent.Services.Implementations.CoOccurrenceWorker(_coOccurrenceQueue, _dbContextFactory);
+        _ = _coOccurrenceWorker.StartAsync(System.Threading.CancellationToken.None);
+
+        var _alertWorker = new NextVent.Services.Implementations.AlertBackgroundWorker(_dbContextFactory);
+        _ = _alertWorker.StartAsync(System.Threading.CancellationToken.None);
 
         _printerService = new EscPosPrinterService();
         _backupService = new NextVent.Services.Implementations.BackupService();
+        _satBillingQueue = new SatBillingQueueService();
+        _ = _satBillingQueue.StartAsync(System.Threading.CancellationToken.None);
+
         _productService = new ProductService(_db);
         _customerService = new CustomerService(_db, _printerService);
-        _saleService = new SaleService(_db);
+        _authService = new UserService(_db);
+        _auditService = new NextVent.Services.Audit.AuditService(_auditContextFactory);
+        _saleService = new SaleService(_dbContextFactory, _coOccurrenceQueue, _auditService);
         _promotionService = new PromotionService(_db);
         _giftcardService = new GiftcardService(_db);
         var supplierService = new SupplierService(_db);
@@ -99,19 +124,25 @@ public partial class MainWindowViewModel : ObservableObject
         var expenseService = new ExpenseService(_db, _printerService);
         var userService = new UserService(_db);
         var settingsService = new SettingsService(_db);
+        var terminalService = new MercadoPagoTerminalService(new System.Net.Http.HttpClient(), settingsService);
         var shiftNoteService = new ShiftNoteService(_db);
         var kitService = new ItemKitService(_db);
+        var predictiveService = new PredictiveIntelligenceService(_dbContextFactory);
+
+        var certificateGenerator = new CertificateGeneratorService();
+        _printDispatcherService = new PrintDispatcherService(_printerService, certificateGenerator, _dbContextFactory, settingsService);
 
         var userRepository = new UserRepository(_db);
         var sessionManager = new SessionManager();
         _sessionManager = sessionManager;
+        
+        _deviceRegistrationService = new DeviceRegistrationService(settingsService, _sessionManager);
         _sessionManager.LockStateChanged += (locked) =>
         {
             IsLocked = locked;
         };
         IsLocked = _sessionManager.IsTerminalLocked;
 
-        var auditService = new AuditService(_db);
         var securityService = new SecurityInterceptionService(userRepository);
         var attendanceService = new AttendanceService(_db);
         _attendanceService = attendanceService;
@@ -127,8 +158,10 @@ public partial class MainWindowViewModel : ObservableObject
             IsDialogOverlayOpen = true;
         };
 
-        _posVm = new PosViewModel(_productService, _db, shiftNoteService, kitService, _customerService, sessionManager, userRepository, _promotionService, auditService, attendanceService);
-        _inventoryVm = new InventoryViewModel(_productService, purchaseService);
+        var externalCatalogService = new ExternalCatalogService(new System.Net.Http.HttpClient());
+
+        _posVm = new PosViewModel(_productService, _db, shiftNoteService, kitService, _customerService, sessionManager, userRepository, _promotionService, _auditService, attendanceService, predictiveService, externalCatalogService);
+        _inventoryVm = new InventoryViewModel(_productService, externalCatalogService, purchaseService, predictiveService);
         _customersVm = new CustomersViewModel(_customerService);
         _historyVm = new HistoryViewModel(_saleService, _printerService);
         _promotionsVm = new PromotionsViewModel(_promotionService);
@@ -139,6 +172,9 @@ public partial class MainWindowViewModel : ObservableObject
         _suppliersVm = new SuppliersViewModel(supplierService, purchaseService, _productService);
         _expensesVm = new ExpensesViewModel(expenseService);
         _userRepository = userRepository;
+
+        _satBillingQueue = new SatBillingQueueService();
+        _ = _satBillingQueue.StartAsync(System.Threading.CancellationToken.None);
 
         var dialogService = new DialogService(async (vmObj) =>
         {
@@ -160,6 +196,10 @@ public partial class MainWindowViewModel : ObservableObject
         {
             ActiveViewModel = _posVm;
             _posVm.RegisterMessages();
+            
+            // Ping Telemetry on Login
+            _ = _deviceRegistrationService.PingServerAsync(new BusinessProfile());
+
             _ = _posVm.LoadProductsAsync();
             await ValidateShiftStatusAsync();
             WeakReferenceMessenger.Default.Send(new NextVent.Core.Messages.FocusSearchMessage());
@@ -203,13 +243,21 @@ public partial class MainWindowViewModel : ObservableObject
             IsDialogOverlayOpen = true;
         };
 
-        _posVm.ShowAlertRequested += (title, message) =>
+        // Temporary fix: ShowAlertRequested might not be wired in PosViewModel
+        // If we really need it, we should bubble it from Catalog/Cart/Header
+        // But let's skip for now or wire it to Cart / Catalog if added.
+
+        _posVm.Catalog.OpenProductDialogWithParamsRequested += (parameters) =>
         {
-            var dialog = new ConfirmDialogViewModel(title, message, _ =>
+            var dialog = new ProductDialogViewModel(_productService, _db, _sessionManager, _auditService);
+            dialog.LoadFromParameters(parameters);
+            dialog.RequestClose += () =>
             {
                 CloseDialog();
+                _ = _inventoryVm.LoadProductsAsync();
+                _ = _posVm.LoadProductsAsync();
                 WeakReferenceMessenger.Default.Send(new NextVent.Core.Messages.FocusSearchMessage());
-            });
+            };
             ActiveDialogViewModel = dialog;
             IsDialogOverlayOpen = true;
         };
@@ -218,16 +266,18 @@ public partial class MainWindowViewModel : ObservableObject
         _posVm.OpenCheckoutRequested += () =>
         {
             var dialog = new CheckoutDialogViewModel(
-                _saleService, _customerService, _printerService,
-                _posVm.CartItems.ToList(), _posVm.Total,
+                _saleService, _customerService, _printDispatcherService, terminalService,
+                _posVm.Cart.CartState.Items.ToList(), _posVm.Cart.CartState.Total,
                 async () =>
                 {
-                    _posVm.ClearCart();
+                    _posVm.Cart.ClearCartCommand.Execute(null);
                     await _posVm.LoadProductsAsync();
+                    await _posVm.Cart.LoadCustomersAsync();
                     await _historyVm.LoadSalesAsync();
                     await _historyVm.LoadCashierPerformanceAsync();
                 },
-                _giftcardService);
+                _giftcardService,
+                preselectedCustomer: _posVm.Cart.SelectedCustomer);
 
             dialog.RequestClose += () =>
             {
@@ -239,7 +289,7 @@ public partial class MainWindowViewModel : ObservableObject
 
             Avalonia.Threading.Dispatcher.UIThread.Post(() =>
             {
-                dialog.PaymentMethod = _posVm.InitialPaymentMode;
+                dialog.PaymentMethod = _posVm.Cart.InitialPaymentMode;
             }, Avalonia.Threading.DispatcherPriority.Loaded);
         };
 
@@ -263,7 +313,7 @@ public partial class MainWindowViewModel : ObservableObject
             dialog.RequestClose += () =>
             {
                 CloseDialog();
-                _ = _posVm.LoadActiveShiftNotesAsync();
+                _ = _posVm.Header.LoadActiveShiftNotesAsync();
                 WeakReferenceMessenger.Default.Send(new NextVent.Core.Messages.FocusSearchMessage());
             };
             ActiveDialogViewModel = dialog;
@@ -271,7 +321,12 @@ public partial class MainWindowViewModel : ObservableObject
         };
 
         _posVm.ToggleFullscreenRequested += () => ToggleFullscreenRequested?.Invoke();
-        _posVm.LogoutRequested += () => ActiveViewModel = _loginVm;
+        _posVm.LogoutRequested += () => 
+        {
+            ActiveViewModel = _loginVm;
+            // Ping Telemetry on Logout
+            _ = _deviceRegistrationService.PingServerAsync(new BusinessProfile());
+        };
 
         // ── Wire History Cashup & Return Dialog Events ──
         _historyVm.OpenCashupRequested += () =>
@@ -310,7 +365,21 @@ public partial class MainWindowViewModel : ObservableObject
         // ── Wire Inventory Add & Edit Product Dialog Events ──
         _inventoryVm.OpenAddProductRequested += () =>
         {
-            var dialog = new ProductDialogViewModel(_productService, _db, _sessionManager, auditService);
+            var dialog = new ProductDialogViewModel(_productService, _db, _sessionManager, _auditService);
+            dialog.RequestClose += () =>
+            {
+                CloseDialog();
+                _ = _inventoryVm.LoadProductsAsync();
+                _ = _posVm.LoadProductsAsync();
+            };
+            ActiveDialogViewModel = dialog;
+            IsDialogOverlayOpen = true;
+        };
+
+        _inventoryVm.OpenProductDialogWithParamsRequested += (parameters) =>
+        {
+            var dialog = new ProductDialogViewModel(_productService, _db, _sessionManager, _auditService);
+            dialog.LoadFromParameters(parameters);
             dialog.RequestClose += () =>
             {
                 CloseDialog();
@@ -323,7 +392,7 @@ public partial class MainWindowViewModel : ObservableObject
 
         _inventoryVm.OpenEditProductRequested += (product) =>
         {
-            var dialog = new ProductDialogViewModel(_productService, _db, _sessionManager, auditService);
+            var dialog = new ProductDialogViewModel(_productService, _db, _sessionManager, _auditService);
             dialog.LoadProductForEdit(product);
             dialog.RequestClose += () =>
             {
@@ -464,7 +533,7 @@ public partial class MainWindowViewModel : ObservableObject
     {
         if (ActiveViewModel == _posVm)
         {
-            _posVm.OpenCheckoutDialogCommand.Execute(null);
+            _posVm.Cart.CheckoutCommand.Execute("Efectivo");
         }
     }
 
@@ -576,6 +645,14 @@ public partial class MainWindowViewModel : ObservableObject
 
     public async Task InitializeApplicationStateAsync()
     {
+        var licenseService = new NextVent.Services.Security.LicenseEnforcementService();
+        if (licenseService.IsSystemLocked())
+        {
+            // KILL SWITCH ACTIVADO
+            ActiveViewModel = new LicenseLockedViewModel();
+            return;
+        }
+
         bool hasUsers = await _userRepository.HasAnyUsersAsync();
 
         if (!hasUsers)

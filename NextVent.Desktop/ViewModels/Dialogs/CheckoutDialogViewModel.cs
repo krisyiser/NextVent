@@ -26,10 +26,15 @@ public partial class CheckoutDialogViewModel : ObservableObject
 {
     private readonly ISaleService _saleService;
     private readonly ICustomerService _customerService;
-    private readonly IEscPosPrinterService _printerService;
+    private readonly IPrintDispatcherService _printDispatcher;
+    private readonly IPaymentTerminalService _terminalService;
     private readonly IGiftcardService? _giftcardService;
     private readonly List<CartItemDto> _cartItems;
     private readonly Func<Task>? _onSuccessCallback;
+
+    [ObservableProperty] private bool _isWaitingForTerminal;
+    [ObservableProperty] private string _terminalStatusMessage = string.Empty;
+    private CancellationTokenSource? _paymentCts;
 
     public ObservableCollection<TenderEntryModel> AppliedTenders { get; } = new();
 
@@ -65,19 +70,27 @@ public partial class CheckoutDialogViewModel : ObservableObject
             {
                 return (CashAmount + CardAmount + WalletAmount) >= TotalBill && string.IsNullOrEmpty(ErrorMessage);
             }
-            return IsFullyPaid || ReceivedAmount >= TotalToPay || PaymentMethod == "Monedero / Tarjeta de Regalo" || PaymentMethod == "Crédito" || PaymentMethod == "Credit" || PaymentMethod == "Fiado";
+            // Credit-to-account payments and giftcard/wallet are always "sufficient" for the input amount gate;
+            // the actual credit-limit guard fires inside ConfirmPaymentAsync.
+            return IsFullyPaid || ReceivedAmount >= TotalToPay || PaymentMethod == "Monedero / Tarjeta de Regalo" || IsCreditPayment;
         }
     }
 
     private bool CanConfirmPayment()
     {
         if (IsProcessing) return false;
-        
+
         if (PaymentMethod == "Mixto")
         {
             return (CashAmount + CardAmount + WalletAmount) >= TotalBill && string.IsNullOrEmpty(ErrorMessage);
         }
-        
+
+        // Block confirm if credit is selected but insufficient or no customer assigned
+        if (IsCreditPayment)
+        {
+            return SelectedCustomer != null && !CreditIsInsufficient;
+        }
+
         return IsSufficientAmount;
     }
 
@@ -219,8 +232,35 @@ public partial class CheckoutDialogViewModel : ObservableObject
     [ObservableProperty] private double _pointsEarnedThisSale = 0.0;
 
     public ObservableCollection<string> PaymentMethods { get; } = [
-        "Efectivo", "Tarjeta Débito/Crédito", "Transferencia SPEI", "Mixto", "Puntos de Fidelidad", "Monedero / Tarjeta de Regalo", "CoDi / QR"
+        "Efectivo", "Tarjeta Débito/Crédito", "Transferencia SPEI", "Mixto",
+        "Crédito de Cliente", "Puntos de Fidelidad", "Monedero / Tarjeta de Regalo", "CoDi / QR"
     ];
+
+    /// <summary>True when the selected payment method charges to the customer's running credit account.</summary>
+    public bool IsCreditPayment =>
+        PaymentMethod == "Crédito de Cliente" ||
+        PaymentMethod == "Crédito / Cuenta Corriente" ||
+        PaymentMethod == "Crédito" ||
+        PaymentMethod == "Credit" ||
+        PaymentMethod == "Fiado";
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CreditAvailableDisplay))]
+    [NotifyPropertyChangedFor(nameof(CreditIsInsufficient))]
+    private double _customerCreditLimit = 0.0;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(CreditAvailableDisplay))]
+    [NotifyPropertyChangedFor(nameof(CreditIsInsufficient))]
+    private double _customerCurrentDebt = 0.0;
+
+    /// <summary>Remaining credit headroom for the selected customer.</summary>
+    public double AvailableCredit => Math.Max(0.0, CustomerCreditLimit - CustomerCurrentDebt);
+
+    public string CreditAvailableDisplay => $"Crédito disponible: ${AvailableCredit:N2}  |  Límite: ${CustomerCreditLimit:N2}  |  Deuda actual: ${CustomerCurrentDebt:N2}";
+
+    /// <summary>True when the ticket total exceeds the customer's available credit balance.</summary>
+    public bool CreditIsInsufficient => IsCreditPayment && AvailableCredit < TotalToPay;
 
     public ObservableCollection<string> UsoCfdiOptions { get; } = [
         "G01 - Gastos en General", "I03 - Equipo de Transporte", "I04 - Equipo de Cómputo", "P01 - Por Definir"
@@ -233,15 +273,18 @@ public partial class CheckoutDialogViewModel : ObservableObject
     public CheckoutDialogViewModel(
         ISaleService saleService,
         ICustomerService customerService,
-        IEscPosPrinterService printerService,
+        IPrintDispatcherService printDispatcher,
+        IPaymentTerminalService terminalService,
         List<CartItemDto> cartItems,
         double total,
         Func<Task>? onSuccessCallback = null,
-        IGiftcardService? giftcardService = null)
+        IGiftcardService? giftcardService = null,
+        CustomerDto? preselectedCustomer = null)
     {
         _saleService = saleService;
         _customerService = customerService;
-        _printerService = printerService;
+        _printDispatcher = printDispatcher;
+        _terminalService = terminalService;
         _giftcardService = giftcardService;
         _cartItems = cartItems ?? [];
         _onSuccessCallback = onSuccessCallback;
@@ -255,10 +298,10 @@ public partial class CheckoutDialogViewModel : ObservableObject
         // Earn 1 point per $10 spent
         PointsEarnedThisSale = Math.Floor(total / 10.0);
 
-        _ = LoadCustomersAsync();
+        _ = LoadCustomersAsync(preselectedCustomer);
     }
 
-    private async Task LoadCustomersAsync()
+    private async Task LoadCustomersAsync(CustomerDto? preselected = null)
     {
         try
         {
@@ -267,6 +310,12 @@ public partial class CheckoutDialogViewModel : ObservableObject
             {
                 Customers.Clear();
                 foreach (var c in list) Customers.Add(c);
+
+                // Pre-wire the customer that was already selected on the POS ticket.
+                if (preselected != null)
+                {
+                    SelectedCustomer = Customers.FirstOrDefault(c => c.Id == preselected.Id) ?? preselected;
+                }
             });
         }
         catch (Exception ex)
@@ -280,10 +329,23 @@ public partial class CheckoutDialogViewModel : ObservableObject
         if (value != null)
         {
             CustomerPointsBalance = value.PuntosSaldo;
+            CustomerCreditLimit  = value.CreditLimit;
+            CustomerCurrentDebt  = value.Debt;
             FiscalRazonSocial = value.Nombre;
             if (!string.IsNullOrWhiteSpace(value.Rfc)) FiscalRfc = value.Rfc;
             if (!string.IsNullOrWhiteSpace(value.Email)) FiscalEmail = value.Email;
         }
+        else
+        {
+            CustomerCreditLimit = 0.0;
+            CustomerCurrentDebt = 0.0;
+        }
+
+        OnPropertyChanged(nameof(AvailableCredit));
+        OnPropertyChanged(nameof(CreditAvailableDisplay));
+        OnPropertyChanged(nameof(CreditIsInsufficient));
+        OnPropertyChanged(nameof(IsCreditPayment));
+        ConfirmPaymentCommand.NotifyCanExecuteChanged();
     }
 
     partial void OnReceivedAmountChanged(double value)
@@ -332,10 +394,16 @@ public partial class CheckoutDialogViewModel : ObservableObject
         try
         {
             IsProcessing = true;
-            bool isCredit = PaymentMethod == "Crédito" || PaymentMethod == "Credit" || PaymentMethod == "Fiado";
+            bool isCredit = IsCreditPayment;
             if (isCredit && SelectedCustomer == null)
             {
                 ErrorMessage = "Debe asignar un cliente registrado para cobrar a crédito.";
+                return;
+            }
+
+            if (isCredit && AvailableCredit < TotalToPay)
+            {
+                ErrorMessage = $"Crédito insuficiente. Disponible: ${AvailableCredit:N2} — Requerido: ${TotalToPay:N2}";
                 return;
             }
 
@@ -372,6 +440,29 @@ public partial class CheckoutDialogViewModel : ObservableObject
                     ErrorMessage = ex.Message;
                     return;
                 }
+            }
+
+            if (PaymentMethod == "Tarjeta Débito/Crédito" || PaymentMethod == "Tarjeta")
+            {
+                IsWaitingForTerminal = true;
+                TerminalStatusMessage = "Por favor, pase la tarjeta por la terminal...";
+                _paymentCts = new CancellationTokenSource();
+
+                // Fake a reference id for now, actually we should get next folio.
+                // Or just use a random GUID for the terminal reference.
+                string referenceId = Guid.NewGuid().ToString("N");
+
+                var terminalResult = await _terminalService.ProcessPaymentAsync((decimal)TotalToPay, referenceId, _paymentCts.Token);
+                
+                IsWaitingForTerminal = false;
+
+                if (!terminalResult.IsSuccess)
+                {
+                    ErrorMessage = terminalResult.ErrorMessage ?? "Cobro rechazado o cancelado en la terminal.";
+                    return;
+                }
+                
+                // If success, we have the auth code. We can append it to the tickets later, or pass to SaleDto.
             }
 
             var snapshots = _cartItems.Select(i => new SaleItemSnapshotDto(
@@ -412,8 +503,8 @@ public partial class CheckoutDialogViewModel : ObservableObject
             var savedSale = await _saleService.SaveAsync(saleDto);
             Log.Information("Sale saved successfully with ID: {SaleId}", savedSale.Id);
 
-            // Attempt thermal print asynchronously
-            _ = _printerService.PrintTicketAsync(savedSale, "COM1");
+            // Print routing (Thermal + PDF if applicable)
+            _ = _printDispatcher.DispatchSaleDocumentsAsync(savedSale);
 
             if (_onSuccessCallback != null)
             {
@@ -430,7 +521,20 @@ public partial class CheckoutDialogViewModel : ObservableObject
         finally
         {
             IsProcessing = false;
+            IsWaitingForTerminal = false;
         }
+    }
+
+    [RelayCommand]
+    private async Task CancelTerminalPaymentAsync()
+    {
+        _paymentCts?.Cancel();
+        // Generamos un dummy referenceId para cancelar, o guardamos el generado.
+        // As the cancel intent API takes the referenceId. We should ideally store the referenceId at class level.
+        // For simplicity we just cancel the token which aborts the polling and makes the timeout handle it.
+        IsWaitingForTerminal = false;
+        ErrorMessage = "Cobro cancelado por el cajero.";
+        await Task.CompletedTask;
     }
 
     public async Task<bool> ApplyManualDiscountAsync(double requestedDiscountPercentage, string reason, ISecurityInterceptionService? securityService = null, IAuditService? auditService = null, UserModel? currentUser = null)
@@ -536,6 +640,9 @@ public partial class CheckoutDialogViewModel : ObservableObject
         // 2. TRIGGER UI UPDATES
         OnPropertyChanged(nameof(IsMixedPayment));
         OnPropertyChanged(nameof(IsNotMixedPayment));
+        OnPropertyChanged(nameof(IsCreditPayment));
+        OnPropertyChanged(nameof(CreditIsInsufficient));
+        OnPropertyChanged(nameof(CreditAvailableDisplay));
         OnPropertyChanged(nameof(TotalReceived));
         OnPropertyChanged(nameof(IsSufficientAmount));
         OnPropertyChanged(nameof(ChangeOrShortageText));

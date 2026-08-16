@@ -4,7 +4,7 @@
              xmlns:dto="using:NextVent.Data.Dtos"
              xmlns:mi="using:Material.Icons.Avalonia"
              x:Class="NextVent.Views.Pos.PosProductCatalogView"
-             x:DataType="vm:PosViewModel">
+             x:DataType="vm:CatalogViewModel">
 
     <!-- Product Catalog Grid & Categories -->
     <Grid RowDefinitions="Auto,Auto,*">
@@ -48,7 +48,7 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="vm:CategoryChipDto">
-                        <Button Command="{Binding $parent[UserControl].((vm:PosViewModel)DataContext).SelectCategoryChipCommand}"
+                        <Button Command="{Binding $parent[UserControl].((vm:CatalogViewModel)DataContext).SelectCategoryChipCommand}"
                                 CommandParameter="{Binding}"
                                 Padding="12,6" CornerRadius="{DynamicResource AppCornerRadius}" Cursor="Hand"
                                 Background="{DynamicResource BgSecondaryBrush}"
@@ -73,7 +73,7 @@
 
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="dto:ProductDto">
-                        <Button Command="{Binding $parent[UserControl].((vm:PosViewModel)DataContext).AddToCartCommand}"
+                        <Button Command="{Binding $parent[UserControl].((vm:CatalogViewModel)DataContext).AddToCartCommand}"
                                 CommandParameter="{Binding}"
                                 IsEnabled="{Binding IsAvailable}"
                                 Width="165" Height="190" Margin="6" Padding="0" CornerRadius="8" Cursor="Hand"

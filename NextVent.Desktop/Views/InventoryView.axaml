@@ -6,7 +6,7 @@
              x:Class="NextVent.Views.InventoryView"
              x:DataType="vm:InventoryViewModel">
 
-    <Grid RowDefinitions="Auto,Auto,*" Margin="16">
+    <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="16">
 
         <!-- ═══ TOP FUNCTION BANNER BAR ═══ -->
         <Border Grid.Row="0" Margin="0,0,0,16" Padding="16,12"
@@ -63,8 +63,27 @@
             </Grid>
         </Border>
 
+        <!-- ═══ INTELLIGENCE SUPPLY CHAIN PANEL ═══ -->
+        <Border Grid.Row="1" Margin="0,0,0,16" Padding="16,12"
+                Background="#FEF2F2" BorderBrush="#EF4444" BorderThickness="1" CornerRadius="8"
+                IsVisible="{Binding IsIntelligencePanelVisible}">
+            <Grid ColumnDefinitions="Auto,*">
+                <mi:MaterialIcon Kind="Brain" Width="32" Height="32" Foreground="#EF4444" VerticalAlignment="Center" Margin="0,0,16,0" />
+                <StackPanel Grid.Column="1" Spacing="6">
+                    <TextBlock Text="Inteligencia de Abastecimiento (Predictivo)" FontSize="14" FontWeight="Bold" Foreground="#991B1B" />
+                    <ItemsControl ItemsSource="{Binding UrgentRestockAlerts}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Message}" FontSize="13" Foreground="#B91C1C" TextWrapping="Wrap" Margin="0,0,0,4" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </StackPanel>
+            </Grid>
+        </Border>
+
         <!-- Search Bar -->
-        <Border Grid.Row="1" Margin="0,0,0,16" Padding="12,8"
+        <Border Grid.Row="2" Margin="0,0,0,16" Padding="12,8"
                 Background="{DynamicResource BgSecondaryBrush}"
                 BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8">
             <Grid ColumnDefinitions="*,Auto">
@@ -73,14 +92,18 @@
                         BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                     <Grid ColumnDefinitions="Auto,*">
                         <mi:MaterialIcon Kind="Magnify" Width="18" Height="18" Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" Margin="0,0,8,0" />
-                        <TextBox Grid.Column="1" Text="{Binding SearchQuery, Mode=TwoWay}" Watermark="Buscar producto por SKU, código de barras o nombre..." Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="13" VerticalAlignment="Center" />
+                        <TextBox Grid.Column="1" Text="{Binding SearchQuery, Mode=TwoWay}" Watermark="Buscar producto por SKU, código de barras o nombre..." Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="13" VerticalAlignment="Center">
+                            <TextBox.KeyBindings>
+                                <KeyBinding Gesture="Enter" Command="{Binding ScanBarcodeCommand}" CommandParameter="{Binding SearchQuery}" />
+                            </TextBox.KeyBindings>
+                        </TextBox>
                     </Grid>
                 </Border>
             </Grid>
         </Border>
 
         <!-- Products DataGrid -->
-        <Border Grid.Row="2" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="1">
+        <Border Grid.Row="3" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="1">
             <DataGrid ItemsSource="{Binding FilteredProducts}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" DoubleTapped="OnDataGridDoubleTapped">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Código / SKU" Binding="{Binding Barcode}" Width="1.5*" />

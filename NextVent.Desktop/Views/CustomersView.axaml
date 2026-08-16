@@ -54,9 +54,25 @@
             <DataGrid ItemsSource="{Binding Customers}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Nombre del Cliente" Binding="{Binding Name}" Width="2.5*" />
-                    <DataGridTextColumn Header="Teléfono" Binding="{Binding Phone}" Width="1.5*" />
-                    <DataGridTextColumn Header="Deuda Pendiente ($)" Binding="{Binding Debt, StringFormat='${0:N2}'}" Width="1.8*" />
-                    <DataGridTextColumn Header="Puntos Acumulados" Binding="{Binding PuntosSaldo}" Width="1.5*" />
+                    <DataGridTextColumn Header="Teléfono" Binding="{Binding Phone}" Width="1.2*" />
+                    <DataGridTextColumn Header="Deuda Pendiente" Binding="{Binding Debt, StringFormat='${0:N2}'}" Width="1.5*" />
+                    <DataGridTextColumn Header="Límite de Crédito" Binding="{Binding CreditLimit, StringFormat='${0:N2}'}" Width="1.5*" />
+
+                    <!-- Crédito Disponible con badge de color -->
+                    <DataGridTemplateColumn Header="Crédito Disponible" Width="1.6*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="dto:CustomerDto">
+                                <Border CornerRadius="4" Padding="6,2" Margin="4,3" HorizontalAlignment="Left"
+                                        Background="#ECFDF5">
+                                    <TextBlock Text="{Binding AvailableCredit, StringFormat='${0:N2}'}"
+                                               FontWeight="Bold" FontSize="12" FontFamily="Consolas, monospace"
+                                               Foreground="#059669"/>
+                                </Border>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTextColumn Header="Puntos Acumulados" Binding="{Binding PuntosSaldo, StringFormat='{}{0:N0} pts'}" Width="1.3*" />
 
                     <DataGridTemplateColumn Header="Acciones de Crédito y Cuenta" Width="3*">
                         <DataGridTemplateColumn.CellTemplate>
@@ -76,6 +92,7 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
                 </DataGrid.Columns>
+
             </DataGrid>
         </Border>
     </Grid>

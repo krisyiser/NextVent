@@ -16,60 +16,79 @@ namespace NextVent.Services.Implementations;
 /// </summary>
 public sealed class SaleService : ISaleService
 {
-    private readonly AppDbContext _ctx;
+    private readonly IDbContextFactory<AppDbContext> _contextFactory;
+    private readonly CoOccurrenceQueue _coOccurrenceQueue;
+    private readonly NextVent.Services.Interfaces.IAuditService _auditService;
     private static readonly JsonSerializerOptions JsonOpts = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase
     };
 
-    public SaleService(AppDbContext ctx) => _ctx = ctx;
+    public SaleService(IDbContextFactory<AppDbContext> contextFactory, CoOccurrenceQueue coOccurrenceQueue, NextVent.Services.Interfaces.IAuditService auditService)
+    {
+        _contextFactory = contextFactory;
+        _coOccurrenceQueue = coOccurrenceQueue;
+        _auditService = auditService;
+    }
 
     /// <summary>
     /// Atomic sale save: INSERT sale + UPDATE stock + UPDATE debt (if credit) + UPDATE co-occurrences.
     /// Uses EF Core transaction to guarantee all-or-nothing.
     /// </summary>
-    private async Task<string> GenerateNextSaleFolioAsync()
+    private async Task<string> GenerateNextSaleFolioAsync(AppDbContext _ctx)
     {
         string datePrefix = DateTime.Now.ToString("ddMMyy");
-        var lastSale = await _ctx.Sales
-            .Where(s => s.Id.StartsWith(datePrefix))
-            .OrderByDescending(s => s.Id)
-            .FirstOrDefaultAsync();
+        
+        var query = @"
+            INSERT INTO FolioSequences (DatePrefix, LastSequence) 
+            VALUES (@p0, 1) 
+            ON CONFLICT(DatePrefix) 
+            DO UPDATE SET LastSequence = LastSequence + 1 
+            RETURNING LastSequence;";
 
-        if (lastSale == null || string.IsNullOrEmpty(lastSale.Id))
-        {
-            return $"{datePrefix}-0001";
-        }
+        using var connection = _ctx.Database.GetDbConnection();
+        await connection.OpenAsync();
+        
+        using var command = connection.CreateCommand();
+        command.CommandText = query;
+        
+        var param = command.CreateParameter();
+        param.ParameterName = "@p0";
+        param.Value = datePrefix;
+        command.Parameters.Add(param);
 
-        var parts = lastSale.Id.Split('-');
-        if (parts.Length == 2 && int.TryParse(parts[1], out int lastSequence))
-        {
-            return $"{datePrefix}-{(lastSequence + 1):D4}";
-        }
+        var result = await command.ExecuteScalarAsync();
+        int sequence = Convert.ToInt32(result);
 
-        return $"{datePrefix}-0001";
+        return $"{datePrefix}-{sequence:D4}";
     }
 
-    private async Task<string> GenerateNextReturnFolioAsync()
+    private async Task<string> GenerateNextReturnFolioAsync(AppDbContext _ctx)
     {
         string datePrefix = $"DEV-{DateTime.Now.ToString("ddMMyy")}";
-        var lastReturn = await _ctx.Returns
-            .Where(r => r.Id.StartsWith(datePrefix))
-            .OrderByDescending(r => r.Id)
-            .FirstOrDefaultAsync();
+        
+        var query = @"
+            INSERT INTO FolioSequences (DatePrefix, LastSequence) 
+            VALUES (@p0, 1) 
+            ON CONFLICT(DatePrefix) 
+            DO UPDATE SET LastSequence = LastSequence + 1 
+            RETURNING LastSequence;";
 
-        if (lastReturn == null || string.IsNullOrEmpty(lastReturn.Id))
-        {
-            return $"{datePrefix}-0001";
-        }
+        using var connection = _ctx.Database.GetDbConnection();
+        await connection.OpenAsync();
+        
+        using var command = connection.CreateCommand();
+        command.CommandText = query;
+        
+        var param = command.CreateParameter();
+        param.ParameterName = "@p0";
+        param.Value = datePrefix;
+        command.Parameters.Add(param);
 
-        var parts = lastReturn.Id.Split('-');
-        if (parts.Length == 3 && int.TryParse(parts[2], out int lastSequence))
-        {
-            return $"{datePrefix}-{(lastSequence + 1):D4}";
-        }
+        var result = await command.ExecuteScalarAsync();
+        int sequence = Convert.ToInt32(result);
 
-        return $"{datePrefix}-0001";
+        return $"{datePrefix}-{sequence:D4}";
     }
 
     public async Task<SaleDto> SaveAsync(SaleDto sale)
@@ -79,13 +98,14 @@ public sealed class SaleService : ISaleService
             throw new InvalidOperationException("No se puede registrar una venta sin productos.");
         }
 
+        using var _ctx = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await _ctx.Database.BeginTransactionAsync();
         try
         {
             var saleId = sale.Id;
             if (string.IsNullOrEmpty(saleId) || !saleId.Contains("-") || saleId.Length != 11)
             {
-                saleId = await GenerateNextSaleFolioAsync();
+                saleId = await GenerateNextSaleFolioAsync(_ctx);
             }
 
             // Global discount proration & VAT (IVA) calculation
@@ -128,7 +148,7 @@ public sealed class SaleService : ISaleService
             double totalTicketCogs = 0.0;
             foreach (var item in processedItems)
             {
-                double unitCogs = await DeductInventoryRecursiveAsync(item.ProductId, item.Quantity, new System.Collections.Generic.HashSet<string>());
+                double unitCogs = await DeductInventoryRecursiveAsync(_ctx, item.ProductId, item.Quantity, new System.Collections.Generic.HashSet<string>());
                 totalTicketCogs += unitCogs * item.Quantity;
             }
 
@@ -185,8 +205,11 @@ public sealed class SaleService : ISaleService
 
             try
             {
-                await _ctx.SaveChangesAsync();
-                await transaction.CommitAsync();
+                await DbResilienceHelper.ExecuteWithRetryAsync(async () =>
+                {
+                    await _ctx.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                });
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -267,6 +290,7 @@ public sealed class SaleService : ISaleService
 
     public async Task<List<SaleDto>> GetHistoryAsync(int limit = 500)
     {
+        using var _ctx = await _contextFactory.CreateDbContextAsync();
         var entities = await _ctx.Sales
             .AsNoTracking()
             .OrderByDescending(s => s.Date)
@@ -281,6 +305,7 @@ public sealed class SaleService : ISaleService
         string startStr = start.ToString("o");
         string endStr = end.ToString("o");
 
+        using var _ctx = await _contextFactory.CreateDbContextAsync();
         var entities = await _ctx.Sales
             .AsNoTracking()
             .Where(s => string.Compare(s.Date, startStr) >= 0 && string.Compare(s.Date, endStr) <= 0)
@@ -300,6 +325,7 @@ public sealed class SaleService : ISaleService
 
     public async Task<bool> CancelSaleAsync(string saleId, string reason)
     {
+        using var _ctx = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await _ctx.Database.BeginTransactionAsync();
         try
         {
@@ -338,8 +364,11 @@ public sealed class SaleService : ISaleService
             sale.CancellationReason = reason;
             sale.CancellationDate = DateTimeOffset.UtcNow.ToString("o");
 
-            await _ctx.SaveChangesAsync();
-            await transaction.CommitAsync();
+            await DbResilienceHelper.ExecuteWithRetryAsync(async () =>
+            {
+                await _ctx.SaveChangesAsync();
+                await transaction.CommitAsync();
+            });
             return true;
         }
         catch
@@ -351,18 +380,20 @@ public sealed class SaleService : ISaleService
 
     public async Task UpdateFiscalStatusAsync(string saleId, string status, string? uuid, string? folio)
     {
+        using var _ctx = await _contextFactory.CreateDbContextAsync();
         var sale = await _ctx.Sales.FindAsync(saleId);
         if (sale is null) return;
 
         sale.EstadoFiscal = status;
         sale.UuidSat = uuid;
         sale.SerieFolio = folio;
-        await _ctx.SaveChangesAsync();
+        await DbResilienceHelper.ExecuteWithRetryAsync(async () => await _ctx.SaveChangesAsync());
     }
 
     public async Task<bool> ProcessPartialReturnAsync(string saleId, string productId, double returnQty, string reason, string refundMethod = "Efectivo", bool isProductInGoodCondition = true)
     {
         if (returnQty <= 0) return false;
+        using var _ctx = await _contextFactory.CreateDbContextAsync();
         await using var transaction = await _ctx.Database.BeginTransactionAsync();
         try
         {
@@ -385,7 +416,7 @@ public sealed class SaleService : ISaleService
             // 1. Restock product stock recursively in database (only if product is in good condition)
             if (isProductInGoodCondition)
             {
-                await RestockInventoryRecursiveAsync(targetItem.ProductId, returnQty, new System.Collections.Generic.HashSet<string>());
+                await RestockInventoryRecursiveAsync(_ctx, targetItem.ProductId, returnQty, new System.Collections.Generic.HashSet<string>());
             }
             else
             {
@@ -393,16 +424,15 @@ public sealed class SaleService : ISaleService
                 var product = await _ctx.Products.FindAsync(targetItem.ProductId);
                 if (product != null)
                 {
-                    _ctx.AuditLogs.Add(new AuditLogEntity
+                    await _auditService.LogAsync(new NextVent.Data.Entities.AuditLogEntity
                     {
-                        Id = Guid.NewGuid().ToString(),
-                        Timestamp = DateTime.UtcNow.ToString("o"),
-                        ActionType = AuditActionType.InventoryStockAdjustment,
-                        UserId = string.Empty,
-                        Reason = $"Devolución de producto dañado/mermado: {reason}",
-                        FinancialImpact = product.Cost * returnQty,
+                        ActionType = NextVent.Core.Enums.AuditActionType.InventoryStockAdjustment,
+                        RiskLevel = NextVent.Core.Enums.RiskLevel.Warning,
+                        UserId = "SYSTEM",
                         EntityName = "products",
-                        EntityId = targetItem.ProductId
+                        EntityId = targetItem.ProductId,
+                        FinancialImpact = product.Cost * returnQty,
+                        Reason = $"Devolución de producto dañado/mermado: {reason}"
                     });
                 }
             }
@@ -449,7 +479,7 @@ public sealed class SaleService : ISaleService
             // Record Return Audit Entity
             var returnEntity = new ReturnEntity
             {
-                Id = await GenerateNextReturnFolioAsync(),
+                Id = await GenerateNextReturnFolioAsync(_ctx),
                 OriginalSaleId = sale.Id,
                 CashierUserId = null,
                 TotalRefunded = refundedAmount,
@@ -476,8 +506,11 @@ public sealed class SaleService : ISaleService
                 });
             }
 
-            await _ctx.SaveChangesAsync();
-            await transaction.CommitAsync();
+            await DbResilienceHelper.ExecuteWithRetryAsync(async () =>
+            {
+                await _ctx.SaveChangesAsync();
+                await transaction.CommitAsync();
+            });
 
             Serilog.Log.Information("Processed Partial Return for Sale {SaleId}, Product {ProductId}, Qty {Qty}, Refund {Amount}",
                 saleId, productId, returnQty, refundedAmount);
@@ -495,6 +528,7 @@ public sealed class SaleService : ISaleService
     {
         try
         {
+            using var _ctx = await _contextFactory.CreateDbContextAsync();
             var validSales = await _ctx.Sales
                 .AsNoTracking()
                 .Where(s => s.IsCancelled == 0)
@@ -553,7 +587,7 @@ public sealed class SaleService : ISaleService
         }
     }
 
-    private async Task CheckAndFlagLowStockAsync(ProductEntity product)
+    private async Task CheckAndFlagLowStockAsync(AppDbContext _ctx, ProductEntity product)
     {
         if (product.Stock <= product.MinStock)
         {
@@ -577,7 +611,7 @@ public sealed class SaleService : ISaleService
         }
     }
 
-    private async Task<double> DeductInventoryRecursiveAsync(string productId, double quantityMultiplier, System.Collections.Generic.HashSet<string> executionStack)
+    private async Task<double> DeductInventoryRecursiveAsync(AppDbContext _ctx, string productId, double quantityMultiplier, System.Collections.Generic.HashSet<string> executionStack)
     {
         var product = await _ctx.Products.FindAsync(productId)
             ?? throw new InvalidOperationException($"Producto o ingrediente no encontrado: {productId}");
@@ -597,7 +631,7 @@ public sealed class SaleService : ISaleService
             foreach (var component in kit.Components)
             {
                 double totalRequired = quantityMultiplier * component.Quantity;
-                double compUnitCost = await DeductInventoryRecursiveAsync(component.ProductId, totalRequired, executionStack);
+                double compUnitCost = await DeductInventoryRecursiveAsync(_ctx, component.ProductId, totalRequired, executionStack);
                 totalKitUnitCost += component.Quantity * compUnitCost;
             }
 
@@ -608,12 +642,12 @@ public sealed class SaleService : ISaleService
         {
             product.Stock = Math.Max(0.0, Math.Round(product.Stock - quantityMultiplier, 3));
             _ctx.Products.Update(product);
-            await CheckAndFlagLowStockAsync(product);
+            await CheckAndFlagLowStockAsync(_ctx, product);
             return product.Cost;
         }
     }
 
-    private async Task RestockInventoryRecursiveAsync(string productId, double quantityMultiplier, System.Collections.Generic.HashSet<string> executionStack)
+    private async Task RestockInventoryRecursiveAsync(AppDbContext _ctx, string productId, double quantityMultiplier, System.Collections.Generic.HashSet<string> executionStack)
     {
         var product = await _ctx.Products.FindAsync(productId)
             ?? throw new InvalidOperationException($"Producto o ingrediente no encontrado: {productId}");
@@ -631,7 +665,7 @@ public sealed class SaleService : ISaleService
             foreach (var component in kit.Components)
             {
                 double totalRequired = quantityMultiplier * component.Quantity;
-                await RestockInventoryRecursiveAsync(component.ProductId, totalRequired, executionStack);
+                await RestockInventoryRecursiveAsync(_ctx, component.ProductId, totalRequired, executionStack);
             }
 
             executionStack.Remove(productId);

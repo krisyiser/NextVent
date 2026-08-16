@@ -52,6 +52,8 @@ public record CustomerDto(
     public string Phone => Telefono;
     public double CreditLimit => LimiteCredito;
     public double Debt => Deuda;
+    /// <summary>Remaining credit headroom = LimiteCredito - Deuda. Always >= 0.</summary>
+    public double AvailableCredit => Math.Max(0.0, LimiteCredito - Deuda);
     public bool IsWholesale => Name.Contains("Mayorista", StringComparison.OrdinalIgnoreCase);
 }
 
@@ -113,12 +115,48 @@ public partial class CartItemDto : ObservableObject
     public string Unit { get; set; } = "Pza";
     public string Category { get; set; } = "General";
 
-    [ObservableProperty]
-    [NotifyPropertyChangedFor(nameof(TotalPrice))]
-    [NotifyPropertyChangedFor(nameof(FinalUnitPrice))]
-    [NotifyPropertyChangedFor(nameof(IsFractional))]
-    [NotifyPropertyChangedFor(nameof(IsNotFractional))]
     private double _quantity = 1.0;
+    public double Quantity
+    {
+        get => _quantity;
+        private set
+        {
+            if (SetProperty(ref _quantity, value))
+            {
+                OnPropertyChanged(nameof(TotalPrice));
+                OnPropertyChanged(nameof(FinalUnitPrice));
+                OnPropertyChanged(nameof(IsFractional));
+                OnPropertyChanged(nameof(IsNotFractional));
+            }
+        }
+    }
+
+    public (bool Success, string ErrorMessage) IncreaseQuantity(double amountToAdd, double absoluteDbStock)
+    {
+        if (Quantity + amountToAdd > absoluteDbStock)
+        {
+            return (false, $"Stock físico insuficiente. Límite: {absoluteDbStock}");
+        }
+
+        Quantity += amountToAdd;
+        return (true, string.Empty);
+    }
+
+    public void DecreaseQuantity(double amountToSubtract)
+    {
+        if (Quantity - amountToSubtract >= 1)
+        {
+            Quantity -= amountToSubtract;
+        }
+    }
+
+    public void OverrideQuantity(double newQuantity, double absoluteDbStock)
+    {
+        if (newQuantity <= absoluteDbStock)
+        {
+            Quantity = newQuantity;
+        }
+    }
 
     public bool IsFractional => Quantity % 1.0 != 0.0;
     public bool IsNotFractional => !IsFractional;
@@ -136,7 +174,12 @@ public partial class CartItemDto : ObservableObject
 
     public double FinalUnitPrice => Math.Max(0.0, OriginalUnitPrice - (AppliedDiscountAmount / Math.Max(1.0, Quantity)));
 
-    public double TotalPrice => Math.Max(0.0, (OriginalUnitPrice * Quantity) - AppliedDiscountAmount);
+    public double TotalPrice => GetLineTotal();
+
+    public double GetLineTotal() 
+    {
+        return Math.Max(0.0, (OriginalUnitPrice * Quantity) - AppliedDiscountAmount);
+    }
 
     public CartItemDto() { }
 

@@ -140,6 +140,12 @@ public partial class App : Application
 
                 using var context = new AppDbContext(options);
                 await context.Database.MigrateAsync();
+
+                var auditOptions = new DbContextOptionsBuilder<AuditDbContext>()
+                    .UseSqlite($"Data Source={System.IO.Path.Combine(appFolder, "audit_logs.db")};")
+                    .Options;
+                using var auditContext = new AuditDbContext(auditOptions);
+                await auditContext.Database.EnsureCreatedAsync();
                 await context.Database.ExecuteSqlRawAsync("PRAGMA journal_mode=WAL;");
                 await DatabaseSeeder.SeedAsync(context);
                 Log.Information($"Database initialized and seeded successfully at {dbPath}");
@@ -165,10 +171,45 @@ public partial class App : Application
                 Log.Error(ex, "Database initialization or seeding failed");
             }
 
-            desktop.MainWindow = new MainWindow
+            string businessName = "NextVent POS";
+            string contactEmail = "admin@nextvent.com";
+            try
             {
-                DataContext = new MainWindowViewModel()
-            };
+                var options = new DbContextOptionsBuilder<AppDbContext>()
+                    .UseSqlite($"Data Source={System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NextVent", "Database", "nextvent.db")}")
+                    .Options;
+                using var tempCtx = new AppDbContext(options);
+                var bName = await tempCtx.Settings.FirstOrDefaultAsync(s => s.Key == "BusinessName");
+                if (bName != null) businessName = bName.Value;
+                
+                var bEmail = await tempCtx.Settings.FirstOrDefaultAsync(s => s.Key == "ContactEmail");
+                if (bEmail != null) contactEmail = bEmail.Value;
+            }
+            catch { }
+
+            var licenseService = new NextVent.Services.Implementations.LicenseEnforcementService();
+            if (licenseService.IsSystemLocked())
+            {
+                Log.Warning("System locked: Kill Switch activated due to invalid or missing license.jwt.");
+                desktop.MainWindow = new Avalonia.Controls.Window
+                {
+                    Content = new NextVent.Views.LicenseLockedView { DataContext = new NextVent.ViewModels.LicenseLockedViewModel() },
+                    SystemDecorations = Avalonia.Controls.SystemDecorations.None,
+                    WindowState = Avalonia.Controls.WindowState.Maximized,
+                    Topmost = true
+                };
+            }
+            else
+            {
+                Log.Information("License validated successfully. Starting normal operation...");
+                var deviceReg = new NextVent.Services.Implementations.DeviceRegistrationService();
+                _ = deviceReg.PingServerAsync(new NextVent.Services.Implementations.BusinessProfile { BusinessName = businessName, Email = contactEmail });
+
+                desktop.MainWindow = new MainWindow
+                {
+                    DataContext = new MainWindowViewModel()
+                };
+            }
         }
 
         base.OnFrameworkInitializationCompleted();

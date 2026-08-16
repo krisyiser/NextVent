@@ -49,6 +49,9 @@
         <DataTemplate DataType="vm:FirstTimeSetupViewModel">
             <v:FirstTimeSetupView />
         </DataTemplate>
+        <DataTemplate DataType="vm:LicenseLockedViewModel">
+            <v:LicenseLockedView />
+        </DataTemplate>
 
         <!-- Modal Dialog Templates -->
         <DataTemplate DataType="vmDialogs:CheckoutDialogViewModel">

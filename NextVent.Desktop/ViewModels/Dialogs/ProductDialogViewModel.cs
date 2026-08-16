@@ -12,6 +12,14 @@ using System.Threading.Tasks;
 
 namespace NextVent.ViewModels.Dialogs;
 
+public class ProductDialogParameters 
+{ 
+    public bool IsEditMode { get; set; }
+    public ProductDto? PreFilledData { get; set; }
+    public bool ShowAutoFillBanner { get; set; }
+    public string? PreFilledBarcode { get; set; }
+}
+
 public partial class ProductDialogViewModel : ObservableObject
 {
     private readonly IProductService _productService;
@@ -66,6 +74,9 @@ public partial class ProductDialogViewModel : ObservableObject
 
     [ObservableProperty]
     private double _minStock = 5.0;
+
+    [ObservableProperty]
+    private bool _showAutoFillBanner = false;
 
     public string ProfitMargin
     {
@@ -151,6 +162,35 @@ public partial class ProductDialogViewModel : ObservableObject
 
         _originalStockSnapshot = product.Stock;
         _originalMinStockSnapshot = product.MinStock;
+    }
+
+    public void LoadFromParameters(ProductDialogParameters parameters)
+    {
+        if (parameters.IsEditMode && parameters.PreFilledData != null)
+        {
+            LoadProductForEdit(parameters.PreFilledData);
+        }
+        else
+        {
+            Title = "Nuevo Producto";
+            ShowAutoFillBanner = parameters.ShowAutoFillBanner;
+            
+            if (parameters.PreFilledData != null)
+            {
+                Barcode = parameters.PreFilledData.Barcode ?? string.Empty;
+                Name = parameters.PreFilledData.Name;
+                Category = parameters.PreFilledData.Category;
+                // Cost, retail price remain 0
+                if (!string.IsNullOrEmpty(Category) && !Categories.Contains(Category))
+                {
+                    Categories.Add(Category);
+                }
+            }
+            else if (!string.IsNullOrEmpty(parameters.PreFilledBarcode))
+            {
+                Barcode = parameters.PreFilledBarcode;
+            }
+        }
     }
 
     [RelayCommand]
