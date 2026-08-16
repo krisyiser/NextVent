@@ -30,6 +30,14 @@ public static class HardwareIdentityHelper
             // Ignore errors
         }
         
-        return "UNKNOWN_HWID_" + Guid.NewGuid().ToString().Substring(0, 8);
+        string appDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        string idFile = System.IO.Path.Combine(appDataFolder, "NextVent", "hardware_id.txt");
+        if (System.IO.File.Exists(idFile))
+        {
+            return System.IO.File.ReadAllText(idFile).Trim();
+        }
+        var newId = "FALLBACK_HWID_" + Guid.NewGuid().ToString().Substring(0, 8);
+        try { System.IO.File.WriteAllText(idFile, newId); } catch { }
+        return newId;
     }
 }
