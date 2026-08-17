@@ -112,7 +112,12 @@ public sealed class SaleService : ISaleService
             var saleId = sale.Id;
             if (string.IsNullOrEmpty(saleId) || !saleId.Contains("-") || saleId.Length != 11)
             {
-                saleId = await GenerateNextSaleFolioAsync(_ctx);
+                while (true)
+                {
+                    saleId = await GenerateNextSaleFolioAsync(_ctx);
+                    if (!await _ctx.Sales.AnyAsync(s => s.Id == saleId))
+                        break;
+                }
             }
 
             // Global discount proration & VAT (IVA) calculation
