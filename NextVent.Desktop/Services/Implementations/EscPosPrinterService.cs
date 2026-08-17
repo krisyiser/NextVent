@@ -62,7 +62,7 @@ public class EscPosPrinterService : IEscPosPrinterService, IDisposable, IAsyncDi
             WriteString(ms, "SUCURSAL MATRIZ - CENTRO HISTÓRICO\n");
             WriteString(ms, "RFC: XAXX010101000 | TEL: 55-5000-0000\n");
             WriteString(ms, $"FOLIO TICKET: #{sale.Id.Substring(0, Math.Min(8, sale.Id.Length)).ToUpper()}\n");
-            WriteString(ms, $"FECHA: {sale.Date}\n");
+            WriteString(ms, $"FECHA: {sale.LocalDateDisplay}\n");
             WriteString(ms, "================================================\n");
 
             // Items Table
