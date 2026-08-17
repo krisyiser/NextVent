@@ -209,10 +209,20 @@ public partial class App : Application
                 var deviceReg = new NextVent.Services.Implementations.DeviceRegistrationService();
                 _ = deviceReg.PingServerAsync(new NextVent.Services.Implementations.BusinessProfile { BusinessName = businessName, Email = contactEmail });
 
-                desktop.MainWindow = new MainWindow
+                var splash = new SplashWindow();
+                desktop.MainWindow = splash;
+                splash.Show();
+
+                await System.Threading.Tasks.Task.Delay(3000);
+
+                var mainWin = new MainWindow
                 {
                     DataContext = new MainWindowViewModel()
                 };
+                
+                desktop.MainWindow = mainWin;
+                mainWin.Show();
+                splash.Close();
             }
         }
 
