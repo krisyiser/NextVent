@@ -13,12 +13,9 @@ namespace NextVent.Services.Implementations;
 public class FacturamaService : IFacturamaService
 {
     private readonly HttpClient _httpClient;
-    private readonly ILogger _logger;
-
-    public FacturamaService(HttpClient httpClient, ILogger logger)
+    public FacturamaService(HttpClient httpClient)
     {
         _httpClient = httpClient;
-        _logger = logger;
         _httpClient.BaseAddress = new Uri("https://apisandbox.facturama.mx/");
     }
 
@@ -37,7 +34,7 @@ public class FacturamaService : IFacturamaService
             if (!response.IsSuccessStatusCode)
             {
                 var errorMsg = await response.Content.ReadAsStringAsync();
-                _logger.Error($"Error CFDI: {errorMsg}");
+                Log.Error($"Error CFDI: {errorMsg}");
                 throw new Exception($"Rechazo del SAT/Facturama: {errorMsg}");
             }
 
@@ -45,7 +42,7 @@ public class FacturamaService : IFacturamaService
         }
         catch (Exception ex)
         {
-            _logger.Error("Fallo en timbrado", ex);
+            Log.Error(ex, "Fallo en timbrado");
             throw; // Propagate exception to UI
         }
     }
