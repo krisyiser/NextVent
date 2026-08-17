@@ -22,13 +22,13 @@ public class InventorySnapshotService : IInventorySnapshotService
 
             using var context = new AppDbContext(options);
             
-            var products = await context.Products.AsNoTracking().Where(p => p.IsActive).ToListAsync();
+            var products = await context.Products.AsNoTracking().ToListAsync();
             
             var snapshot = new InventorySnapshotEntity
             {
                 Notes = notes,
                 TotalItems = products.Count,
-                TotalValue = products.Sum(p => p.CostPrice * p.StockQuantity)
+                TotalValue = products.Sum(p => (decimal)p.Cost * (decimal)p.Stock)
             };
             
             foreach (var p in products)
@@ -38,9 +38,9 @@ public class InventorySnapshotService : IInventorySnapshotService
                     ProductId = p.Id,
                     Barcode = p.Barcode,
                     Name = p.Name,
-                    Quantity = p.StockQuantity,
-                    CostPrice = p.CostPrice,
-                    SellingPrice = p.SellingPrice
+                    Quantity = (decimal)p.Stock,
+                    CostPrice = (decimal)p.Cost,
+                    SellingPrice = (decimal)p.Price
                 });
             }
             
