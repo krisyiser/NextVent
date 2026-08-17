@@ -46,10 +46,13 @@ public sealed class SaleService : ISaleService
             DO UPDATE SET LastSequence = LastSequence + 1 
             RETURNING LastSequence;";
 
-        using var connection = _ctx.Database.GetDbConnection();
-        await connection.OpenAsync();
+        var connection = _ctx.Database.GetDbConnection();
+        if (connection.State != System.Data.ConnectionState.Open)
+            await connection.OpenAsync();
         
         using var command = connection.CreateCommand();
+        if (_ctx.Database.CurrentTransaction != null)
+            command.Transaction = _ctx.Database.CurrentTransaction.GetDbTransaction();
         command.CommandText = query;
         
         var param = command.CreateParameter();
@@ -74,10 +77,13 @@ public sealed class SaleService : ISaleService
             DO UPDATE SET LastSequence = LastSequence + 1 
             RETURNING LastSequence;";
 
-        using var connection = _ctx.Database.GetDbConnection();
-        await connection.OpenAsync();
+        var connection = _ctx.Database.GetDbConnection();
+        if (connection.State != System.Data.ConnectionState.Open)
+            await connection.OpenAsync();
         
         using var command = connection.CreateCommand();
+        if (_ctx.Database.CurrentTransaction != null)
+            command.Transaction = _ctx.Database.CurrentTransaction.GetDbTransaction();
         command.CommandText = query;
         
         var param = command.CreateParameter();
