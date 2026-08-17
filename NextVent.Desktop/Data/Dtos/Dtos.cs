@@ -24,8 +24,8 @@ public record ProductDto(
     double PointsRewarded = 1.0,
     double ReorderQuantity = 10.0,
     string LocationRack = "Pasillo 1 - Anaquel A",
-    string ClaveSat = "50202306",
-    string UnidadSat = "H87",
+    string SatProductCode = "01010101",
+    string SatUnitCode = "H87",
     double MinStock = 5.0
 )
 {
@@ -114,6 +114,8 @@ public partial class CartItemDto : ObservableObject
     public double Cost { get; set; }
     public string Unit { get; set; } = "Pza";
     public string Category { get; set; } = "General";
+    public string SatProductCode { get; set; } = "01010101";
+    public string SatUnitCode { get; set; } = "H87";
 
     private double _quantity = 1.0;
     public double Quantity
@@ -209,6 +211,8 @@ public record SaleItemSnapshotDto(
     double OriginalUnitPrice = 0.0,
     double AppliedDiscountAmount = 0.0,
     string? AppliedPromotionId = null,
+    string SatProductCode = "01010101",
+    string SatUnitCode = "H87",
     [property: JsonPropertyName("proratedGlobalDiscountAmount")] double ProratedGlobalDiscountAmount = 0.0,
     [property: JsonPropertyName("taxAmount")] double TaxAmount = 0.0,
     [property: JsonPropertyName("returnedQuantity")] double ReturnedQuantity = 0.0
@@ -235,7 +239,9 @@ public record SaleDto(
     string EstadoFiscal = "PENDIENTE",
     string? UuidSat = null,
     string? SerieFolio = null,
-    SaleStatus Status = SaleStatus.Completed
+    SaleStatus Status = SaleStatus.Completed,
+    string? InvoiceId = null,
+    string? InvoiceStatus = null
 )
 {
     public string LocalDateDisplay

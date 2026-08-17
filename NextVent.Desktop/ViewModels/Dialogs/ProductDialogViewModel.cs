@@ -61,10 +61,10 @@ public partial class ProductDialogViewModel : ObservableObject
     private string _locationRack = "Pasillo 1 - Anaquel A";
 
     [ObservableProperty]
-    private string _claveSat = "50202306";
+    private string _satProductCode = "01010101";
 
     [ObservableProperty]
-    private string _unidadSat = "H87";
+    private string _satUnitCode = "H87";
 
     [ObservableProperty]
     private string _errorMessage = string.Empty;
@@ -156,8 +156,8 @@ public partial class ProductDialogViewModel : ObservableObject
         PointsRewarded = product.PointsRewarded;
         ReorderQuantity = product.ReorderQuantity;
         LocationRack = product.LocationRack;
-        ClaveSat = product.ClaveSat;
-        UnidadSat = product.UnidadSat;
+        SatProductCode = product.SatProductCode;
+        SatUnitCode = product.SatUnitCode;
         MinStock = product.MinStock;
 
         _originalStockSnapshot = product.Stock;
@@ -222,8 +222,8 @@ public partial class ProductDialogViewModel : ObservableObject
                 PointsRewarded: PointsRewarded,
                 ReorderQuantity: ReorderQuantity,
                 LocationRack: LocationRack,
-                ClaveSat: ClaveSat,
-                UnidadSat: UnidadSat,
+                SatProductCode: SatProductCode,
+                SatUnitCode: SatUnitCode,
                 MinStock: MinStock
             );
 

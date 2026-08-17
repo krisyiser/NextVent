@@ -44,11 +44,7 @@ public class PredictiveIntelligenceService : IPredictiveIntelligenceService
         var product = await context.Products.FindAsync(topMatch);
         if (product != null && product.Stock > 0)
         {
-            return new ProductDto(
-                product.Id, product.Barcode, product.Name, product.Cost, product.Price,
-                product.WholesalePrice, product.WholesaleThreshold,
-                product.Stock, product.Category, product.Unit, product.ExpiresSoon, product.CreatedAt,
-                product.PointsRewarded, product.ReorderQuantity, product.LocationRack, product.ClaveSat, product.UnidadSat, product.MinStock);
+            return new ProductDto(product.Id, product.Barcode, product.Name, product.Cost, product.Price, product.WholesalePrice, product.WholesaleThreshold, product.Stock, product.Category, product.Unit, product.ExpiresSoon, product.CreatedAt, product.PointsRewarded, product.ReorderQuantity, product.LocationRack, product.SatProductCode, product.SatUnitCode, product.MinStock);
         }
         return null;
     }

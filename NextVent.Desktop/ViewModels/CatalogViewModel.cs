@@ -202,7 +202,9 @@ public partial class CatalogViewModel : ObservableObject
         {
             Category = product.Category ?? "General",
             Cost = product.Cost,
-            OriginalUnitPrice = product.Price
+            OriginalUnitPrice = product.Price,
+            SatProductCode = product.SatProductCode ?? "01010101",
+            SatUnitCode = product.SatUnitCode ?? "H87"
         };
 
         _cartStateStore.AddItem(cartItem, product.Stock);

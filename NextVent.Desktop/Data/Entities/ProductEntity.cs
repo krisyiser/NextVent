@@ -68,11 +68,11 @@ public class ProductEntity
     [Column("location_rack")]
     public string LocationRack { get; set; } = "Pasillo 1 - Anaquel A";
 
-    [Column("clave_sat")]
-    public string ClaveSat { get; set; } = "50202306";
+    [Column("sat_product_code")]
+    public string SatProductCode { get; set; } = "01010101";
 
-    [Column("unidad_sat")]
-    public string UnidadSat { get; set; } = "H87";
+    [Column("sat_unit_code")]
+    public string SatUnitCode { get; set; } = "H87";
 
     [Column("created_at")]
     public string? CreatedAt { get; set; }

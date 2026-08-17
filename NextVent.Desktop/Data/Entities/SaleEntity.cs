@@ -55,6 +55,15 @@ public class SaleEntity
     [Column("cancelledAt")]
     public string? CancelledAt { get; set; }
 
+    [Column("invoice_id")]
+    public string? InvoiceId { get; set; }
+
+    [Column("invoice_status")]
+    public string? InvoiceStatus { get; set; }
+
+    [NotMapped]
+    public bool IsInvoiced => !string.IsNullOrEmpty(InvoiceId);
+
     [Column("estado_fiscal")]
     public string EstadoFiscal { get; set; } = "PENDIENTE";
 

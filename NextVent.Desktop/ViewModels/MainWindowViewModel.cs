@@ -30,6 +30,9 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private ObservableObject? _activeDialogViewModel = null;
     [ObservableProperty] private bool _isDialogOverlayOpen = false;
 
+    [ObservableProperty]
+    private bool _isSplashScreenVisible = true;
+
     [ObservableProperty] private bool _isLocked = false;
     [ObservableProperty] private string _unlockPin = string.Empty;
     [ObservableProperty] private string _unlockErrorMessage = string.Empty;
@@ -687,6 +690,9 @@ public partial class MainWindowViewModel : ObservableObject
 
         bool hasUsers = await _userRepository.HasAnyUsersAsync();
 
+        // Start Splash Screen Timer
+        _ = DismissSplashScreenAsync();
+
         if (!hasUsers)
         {
             // Route to First-Time Setup (OOBE)
@@ -700,6 +706,12 @@ public partial class MainWindowViewModel : ObservableObject
             // Route to standard Login
             ActiveViewModel = _loginVm;
         }
+    }
+
+    private async Task DismissSplashScreenAsync()
+    {
+        await Task.Delay(3000); // 3 seconds animated splash
+        IsSplashScreenVisible = false;
     }
 
     public async Task<int> GetIdleTimeoutMinutesAsync()

@@ -76,8 +76,9 @@ public sealed class ProductService : IProductService
         entity.PointsRewarded = product.PointsRewarded;
         entity.ReorderQuantity = product.ReorderQuantity;
         entity.LocationRack = product.LocationRack;
-        entity.ClaveSat = product.ClaveSat;
-        entity.UnidadSat = product.UnidadSat;
+        entity.SatProductCode = product.SatProductCode;
+        entity.SatUnitCode = product.SatUnitCode;
+        entity.MinStock = product.MinStock;
 
         await _ctx.SaveChangesAsync();
     }
@@ -121,8 +122,9 @@ public sealed class ProductService : IProductService
                 existing.PointsRewarded = p.PointsRewarded;
                 existing.ReorderQuantity = p.ReorderQuantity;
                 existing.LocationRack = p.LocationRack;
-                existing.ClaveSat = p.ClaveSat;
-                existing.UnidadSat = p.UnidadSat;
+                existing.SatProductCode = p.SatProductCode;
+                existing.SatUnitCode = p.SatUnitCode;
+                existing.MinStock = p.MinStock;
             }
         }
         await _ctx.SaveChangesAsync();
@@ -263,7 +265,7 @@ public sealed class ProductService : IProductService
         await connection.OpenAsync();
         
         // Consulta SQL cruda y estricta, mapeada a un DTO por el compilador AOT
-        const string sql = "SELECT Id, Barcode, Name, Cost, Price, WholesalePrice, WholesaleThreshold, Stock, Category, Unit, ExpiresSoon, CreatedAt, PointsRewarded, ReorderQuantity, LocationRack, ClaveSat, UnidadSat, MinStock FROM products WHERE Stock > 0";
+        const string sql = "SELECT Id, Barcode, Name, Cost, Price, WholesalePrice, WholesaleThreshold, Stock, Category, Unit, ExpiresSoon, CreatedAt, PointsRewarded, ReorderQuantity, LocationRack, sat_product_code AS SatProductCode, sat_unit_code AS SatUnitCode, MinStock FROM products WHERE Stock > 0";
         return await Dapper.SqlMapper.QueryAsync<ProductDto>(connection, sql);
     }
 
@@ -271,7 +273,7 @@ public sealed class ProductService : IProductService
         e.Id, e.Barcode, e.Name, e.Cost, e.Price,
         e.WholesalePrice, e.WholesaleThreshold,
         e.Stock, e.Category, e.Unit, e.ExpiresSoon, e.CreatedAt,
-        e.PointsRewarded, e.ReorderQuantity, e.LocationRack, e.ClaveSat, e.UnidadSat, e.MinStock);
+        e.PointsRewarded, e.ReorderQuantity, e.LocationRack, e.SatProductCode, e.SatUnitCode, e.MinStock);
 
     private static ProductEntity MapToEntity(ProductDto d) => new()
     {
@@ -291,7 +293,7 @@ public sealed class ProductService : IProductService
         PointsRewarded = d.PointsRewarded,
         ReorderQuantity = d.ReorderQuantity,
         LocationRack = d.LocationRack,
-        ClaveSat = d.ClaveSat,
-        UnidadSat = d.UnidadSat
+        SatProductCode = d.SatProductCode,
+        SatUnitCode = d.SatUnitCode
     };
 }

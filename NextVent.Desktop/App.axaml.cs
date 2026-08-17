@@ -8,11 +8,16 @@ using NextVent.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System;
+using Microsoft.Extensions.DependencyInjection;
+using NextVent.Services.Interfaces;
+using NextVent.Services.Implementations;
 
 namespace NextVent;
 
 public partial class App : Application
 {
+    public new static App? Current => Application.Current as App;
+    public IServiceProvider? Services { get; private set; }
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -96,6 +101,8 @@ public partial class App : Application
                         "ALTER TABLE sales ADD COLUMN status INTEGER NOT NULL DEFAULT 0;",
                         "ALTER TABLE sales ADD COLUMN cancellation_reason TEXT NULL;",
                         "ALTER TABLE sales ADD COLUMN cancellation_date TEXT NULL;",
+                        "ALTER TABLE sales ADD COLUMN invoice_id TEXT NULL;",
+                        "ALTER TABLE sales ADD COLUMN invoice_status TEXT NULL;",
                         "CREATE TABLE IF NOT EXISTS InventorySnapshots (Id TEXT PRIMARY KEY, CreatedAt TEXT NOT NULL, Notes TEXT NOT NULL, TotalItems INTEGER NOT NULL, TotalValue TEXT NOT NULL);",
                         "CREATE TABLE IF NOT EXISTS InventorySnapshotItems (Id TEXT PRIMARY KEY, SnapshotId TEXT NOT NULL, ProductId TEXT NOT NULL, Barcode TEXT, Name TEXT NOT NULL, Quantity TEXT NOT NULL, CostPrice TEXT NOT NULL, SellingPrice TEXT NOT NULL, FOREIGN KEY(SnapshotId) REFERENCES InventorySnapshots(Id));"
                     };
@@ -190,6 +197,14 @@ public partial class App : Application
                 if (bEmail != null && !string.IsNullOrWhiteSpace(bEmail.Value)) contactEmail = bEmail.Value;
             }
             catch { }
+
+            var services = new ServiceCollection();
+
+
+            services.AddHttpClient<IFacturamaService, FacturamaService>();
+
+
+            this.Services = services.BuildServiceProvider();
 
             var licenseService = new NextVent.Services.Security.LicenseEnforcementService();
             if (licenseService.IsSystemLocked())

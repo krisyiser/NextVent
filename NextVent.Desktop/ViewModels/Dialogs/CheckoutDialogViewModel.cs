@@ -45,6 +45,10 @@ public partial class CheckoutDialogViewModel : ObservableObject
     [ObservableProperty] private double _totalToPay;
     [ObservableProperty] private double _receivedAmount;
     [ObservableProperty] private string _receivedAmountInput = "0";
+
+    [ObservableProperty]
+    private bool _shouldPrintReceipt = true;
+
     [ObservableProperty] private double _paidAmount;
     [ObservableProperty] private decimal _changeAmount;
     [ObservableProperty] private string _paymentMethod = "Efectivo";
@@ -225,6 +229,8 @@ public partial class CheckoutDialogViewModel : ObservableObject
     [ObservableProperty] private string _fiscalRazonSocial = "PÚBLICO EN GENERAL";
     [ObservableProperty] private string _fiscalEmail = string.Empty;
     [ObservableProperty] private string _fiscalUsoCfdi = "G01 - Gastos en General";
+    [ObservableProperty] private string _fiscalZipCode = string.Empty;
+    [ObservableProperty] private string _fiscalRegime = "616 - Sin obligaciones fiscales";
 
     public ObservableCollection<CustomerDto> Customers { get; } = [];
     [ObservableProperty] private CustomerDto? _selectedCustomer;
@@ -263,7 +269,11 @@ public partial class CheckoutDialogViewModel : ObservableObject
     public bool CreditIsInsufficient => IsCreditPayment && AvailableCredit < TotalToPay;
 
     public ObservableCollection<string> UsoCfdiOptions { get; } = [
-        "G01 - Gastos en General", "I03 - Equipo de Transporte", "I04 - Equipo de Cómputo", "P01 - Por Definir"
+        "G01 - Gastos en General", "G03 - Gastos en general", "I03 - Equipo de Transporte", "I04 - Equipo de Cómputo", "P01 - Por Definir", "S01 - Sin efectos fiscales"
+    ];
+
+    public ObservableCollection<string> RegimenFiscalOptions { get; } = [
+        "616 - Sin obligaciones fiscales", "601 - General de Ley Personas Morales", "605 - Sueldos y Salarios", "606 - Arrendamiento", "612 - Personas Físicas con Actividades Empresariales", "626 - RESICO"
     ];
 
     [ObservableProperty] private string _errorMessage = string.Empty;
@@ -477,7 +487,9 @@ public partial class CheckoutDialogViewModel : ObservableObject
                 TotalPrice: i.TotalPrice,
                 OriginalUnitPrice: i.OriginalUnitPrice > 0 ? i.OriginalUnitPrice : i.UnitPrice,
                 AppliedDiscountAmount: i.AppliedDiscountAmount,
-                AppliedPromotionId: i.AppliedPromotionId
+                AppliedPromotionId: i.AppliedPromotionId,
+                SatProductCode: i.SatProductCode,
+                SatUnitCode: i.SatUnitCode
             )).ToList();
 
             var totalCost = snapshots.Sum(s => s.Cost * s.Quantity);
@@ -485,7 +497,7 @@ public partial class CheckoutDialogViewModel : ObservableObject
 
             var saleDto = new SaleDto(
                 Id: Guid.NewGuid().ToString(),
-                Date: DateTimeOffset.UtcNow.ToString("o"),
+                Date: DateTimeOffset.Now.ToString("o"),
                 Items: snapshots,
                 Total: TotalToPay,
                 TotalCost: totalCost,
@@ -500,11 +512,96 @@ public partial class CheckoutDialogViewModel : ObservableObject
                 EstadoFiscal: RequiresInvoice ? "TIMBRADO CFDI 4.0" : "PENDIENTE"
             );
 
+            if (RequiresInvoice)
+            {
+                var facturamaService = Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<IFacturamaService>(App.Current!.Services!);
+                var cfdiRequest = new NextVent.Core.Models.FacturamaCfdiRequest
+                {
+                    Receiver = new NextVent.Core.Models.CfdiReceiver
+                    {
+                        Rfc = FiscalRfc.Trim(),
+                        Name = FiscalRazonSocial.Trim(),
+                        CfdiUse = FiscalUsoCfdi.Split('-')[0].Trim(),
+                        FiscalRegime = FiscalRegime.Split('-')[0].Trim(),
+                        TaxZipCode = FiscalZipCode.Trim()
+                    },
+
+                if (!System.Text.RegularExpressions.Regex.IsMatch(cfdiRequest.Receiver.Rfc, @"^[A-Z&Ñ]{3,4}[0-9]{6}[A-Z0-9]{3}$", System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+                {
+                    ErrorMessage = "El RFC ingresado no tiene un formato válido.";
+                    IsProcessing = false;
+                    return;
+                }
+                    PaymentForm = "01", // Should ideally map from PaymentMethod
+                    PaymentMethod = "PUE",
+                    ExpeditionPlace = "00000" // Configure your local Zip Code
+                };
+
+                foreach (var item in snapshots)
+                {
+                    decimal priceWithIva = (decimal)item.UnitPrice;
+                    decimal basePrice = Math.Round(priceWithIva / 1.16m, 6);
+                    decimal totalTax = Math.Round(basePrice * 0.16m, 6);
+                    decimal subtotal = Math.Round(basePrice * (decimal)item.Quantity, 2);
+
+                    cfdiRequest.Items.Add(new NextVent.Core.Models.CfdiItem
+                    {
+                        ProductCode = item.SatProductCode,
+                        IdentificationNumber = item.ProductId,
+                        Description = item.Name,
+                        Unit = item.Unit,
+                        UnitCode = item.SatUnitCode,
+                        UnitPrice = Math.Round(basePrice, 2),
+                        Quantity = (decimal)item.Quantity,
+                        Subtotal = subtotal,
+                        Taxes = new List<NextVent.Core.Models.CfdiTax>
+                        {
+                            new NextVent.Core.Models.CfdiTax
+                            {
+                                Name = "IVA",
+                                IsRetention = false,
+                                Rate = 0.16m,
+                                Total = Math.Round(totalTax * (decimal)item.Quantity, 2),
+                                Base = subtotal
+                            }
+                        }
+                    });
+                }
+
+                try
+                {
+                    // Use standard sandbox credentials for testing
+                    var response = await facturamaService.CreateInvoiceAsync(cfdiRequest, "Prueba", "Prueba1");
+                    if (response != null)
+                    {
+                        saleDto = saleDto with { InvoiceId = response.Id, InvoiceStatus = response.Status, EstadoFiscal = "TIMBRADO CFDI 4.0" };
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Log.Error(ex, "Error al timbrar factura");
+                    
+                    if (ex.Message.Contains("Código Postal", StringComparison.OrdinalIgnoreCase) || 
+                        ex.Message.Contains("RFC", StringComparison.OrdinalIgnoreCase) ||
+                        ex.Message.Contains("zip", StringComparison.OrdinalIgnoreCase))
+                    {
+                        ErrorMessage = "Código Postal o RFC incorrecto según SAT. Por favor verifica los datos.";
+                        return; // Keep cart intact
+                    }
+                    
+                    ErrorMessage = "No se pudo timbrar. Guardando venta localmente.";
+                    saleDto = saleDto with { InvoiceStatus = "Failed", EstadoFiscal = "ERROR AL TIMBRAR" };
+                }
+            }
+
             var savedSale = await _saleService.SaveAsync(saleDto);
             Log.Information("Sale saved successfully with ID: {SaleId}", savedSale.Id);
 
             // Print routing (Thermal + PDF if applicable)
-            _ = _printDispatcher.DispatchSaleDocumentsAsync(savedSale);
+            if (ShouldPrintReceipt)
+            {
+                _ = _printDispatcher.DispatchSaleDocumentsAsync(savedSale);
+            }
 
             if (_onSuccessCallback != null)
             {

@@ -27,7 +27,7 @@
                 <TextBlock Text="{Binding ErrorMessage}" Foreground="#EF4444" FontWeight="Bold" FontSize="12" HorizontalAlignment="Center" Height="18"/>
 
                 <!-- Numeric Keypad -->
-                <Grid RowDefinitions="44, 44, 44, 44" ColumnDefinitions="60, 60, 60">
+                <Grid RowDefinitions="44, 44, 44, 44" ColumnDefinitions="60, 60, 60" HorizontalAlignment="Center">
                     <Button Grid.Row="0" Grid.Column="0" Content="1" Command="{Binding AppendPinDigitCommand}" CommandParameter="1" Margin="2" FontSize="16" FontWeight="Bold" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
                     <Button Grid.Row="0" Grid.Column="1" Content="2" Command="{Binding AppendPinDigitCommand}" CommandParameter="2" Margin="2" FontSize="16" FontWeight="Bold" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
                     <Button Grid.Row="0" Grid.Column="2" Content="3" Command="{Binding AppendPinDigitCommand}" CommandParameter="3" Margin="2" FontSize="16" FontWeight="Bold" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>

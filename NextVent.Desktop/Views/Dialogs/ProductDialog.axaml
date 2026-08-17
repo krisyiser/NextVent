@@ -124,12 +124,12 @@
                             <Grid ColumnDefinitions="*,*" Margin="0,4,0,0">
                                 <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,6,0">
                                     <TextBlock Text="📄 Clave Prod SAT" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                                    <TextBox Text="{Binding ClaveSat, Mode=TwoWay}" Watermark="50202306" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                                    <TextBox Text="{Binding SatProductCode, Mode=TwoWay}" Watermark="01010101" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="1" Spacing="4" Margin="6,0,0,0">
                                     <TextBlock Text="📄 Clave Unidad SAT" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                                    <TextBox Text="{Binding UnidadSat, Mode=TwoWay}" Watermark="H87" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                                    <TextBox Text="{Binding SatUnitCode, Mode=TwoWay}" Watermark="H87" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
                                 </StackPanel>
                             </Grid>
                         </StackPanel>

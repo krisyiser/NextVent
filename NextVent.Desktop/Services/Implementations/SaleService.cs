@@ -138,7 +138,7 @@ public sealed class SaleService : ISaleService
             var entity = new SaleEntity
             {
                 Id = saleId,
-                Date = string.IsNullOrEmpty(sale.Date) ? DateTimeOffset.UtcNow.ToString("o") : sale.Date,
+                Date = string.IsNullOrEmpty(sale.Date) ? DateTimeOffset.Now.ToString("o") : sale.Date,
                 ItemsJson = itemsJson,
                 Total = total,
                 TotalCost = totalCost,
@@ -151,7 +151,9 @@ public sealed class SaleService : ISaleService
                 IsCancelled = 0,
                 EstadoFiscal = sale.EstadoFiscal,
                 SerieFolio = saleId,
-                Status = SaleStatus.Completed
+                Status = SaleStatus.Completed,
+                InvoiceId = sale.InvoiceId,
+                InvoiceStatus = sale.InvoiceStatus
             };
 
             _ctx.Sales.Add(entity);
@@ -272,7 +274,7 @@ public sealed class SaleService : ISaleService
 
         var saleDto = new SaleDto(
             Id: IdGenerator.NewSaleId(),
-            Date: DateTimeOffset.UtcNow.ToString("o"),
+            Date: DateTimeOffset.Now.ToString("o"),
             Items: snapshots,
             Total: dto.Total,
             TotalCost: totalCost,
@@ -371,10 +373,10 @@ public sealed class SaleService : ISaleService
             }
 
             sale.IsCancelled = 1;
-            sale.CancelledAt = DateTimeOffset.UtcNow.ToString("o");
+            sale.CancelledAt = DateTimeOffset.Now.ToString("o");
             sale.Status = SaleStatus.Canceled;
             sale.CancellationReason = reason;
-            sale.CancellationDate = DateTimeOffset.UtcNow.ToString("o");
+            sale.CancellationDate = DateTimeOffset.Now.ToString("o");
 
             await DbResilienceHelper.ExecuteWithRetryAsync(async () =>
             {
@@ -476,7 +478,7 @@ public sealed class SaleService : ISaleService
             if (allReturned)
             {
                 sale.IsCancelled = 1;
-                sale.CancelledAt = DateTimeOffset.UtcNow.ToString("o");
+                sale.CancelledAt = DateTimeOffset.Now.ToString("o");
                 sale.Status = SaleStatus.Refunded;
             }
             else
@@ -498,7 +500,7 @@ public sealed class SaleService : ISaleService
                 CogsReversed = refundedCost,
                 RefundMethod = refundMethod,
                 Reason = reason,
-                CreatedAt = DateTimeOffset.UtcNow.ToString("o")
+                CreatedAt = DateTimeOffset.Now.ToString("o")
             };
             _ctx.Returns.Add(returnEntity);
 
@@ -695,11 +697,26 @@ public sealed class SaleService : ISaleService
             e.ItemsJson,
             NextVent.Desktop.Core.Helpers.NextVentJsonContext.Default.ListSaleItemSnapshotDto) ?? [];
         return new SaleDto(
-            e.Id, e.Date, items, e.Total, e.TotalCost, e.Profit,
-            e.PaidAmount, e.ChangeAmount, e.PaymentMethod,
-            e.CustomerId, e.IsCredit == 1, e.IsCancelled == 1,
-            e.CancelledAt, e.EstadoFiscal, e.UuidSat, e.SerieFolio,
-            Status: e.Status);
+            Id: e.Id,
+            Date: e.Date,
+            Items: items,
+            Total: e.Total,
+            TotalCost: e.TotalCost,
+            Profit: e.Profit,
+            PaidAmount: e.PaidAmount,
+            ChangeAmount: e.ChangeAmount,
+            PaymentMethod: e.PaymentMethod,
+            CustomerId: e.CustomerId,
+            IsCredit: e.IsCredit == 1,
+            IsCancelled: e.IsCancelled == 1,
+            CancelledAt: e.CancelledAt,
+            EstadoFiscal: e.EstadoFiscal,
+            UuidSat: e.UuidSat,
+            SerieFolio: e.SerieFolio,
+            Status: e.Status,
+            InvoiceId: e.InvoiceId,
+            InvoiceStatus: e.InvoiceStatus
+        );
     }
 
     private List<SaleItemSnapshotDto> ApplyProratedGlobalDiscountAndTaxes(List<SaleItemSnapshotDto> items, double globalDiscountAmount)
