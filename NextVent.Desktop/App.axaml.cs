@@ -95,7 +95,9 @@ public partial class App : Application
                     {
                         "ALTER TABLE sales ADD COLUMN status INTEGER NOT NULL DEFAULT 0;",
                         "ALTER TABLE sales ADD COLUMN cancellation_reason TEXT NULL;",
-                        "ALTER TABLE sales ADD COLUMN cancellation_date TEXT NULL;"
+                        "ALTER TABLE sales ADD COLUMN cancellation_date TEXT NULL;",
+                        "CREATE TABLE IF NOT EXISTS InventorySnapshots (Id TEXT PRIMARY KEY, CreatedAt TEXT NOT NULL, Notes TEXT NOT NULL, TotalItems INTEGER NOT NULL, TotalValue TEXT NOT NULL);",
+                        "CREATE TABLE IF NOT EXISTS InventorySnapshotItems (Id TEXT PRIMARY KEY, SnapshotId TEXT NOT NULL, ProductId TEXT NOT NULL, Barcode TEXT, Name TEXT NOT NULL, Quantity TEXT NOT NULL, CostPrice TEXT NOT NULL, SellingPrice TEXT NOT NULL, FOREIGN KEY(SnapshotId) REFERENCES InventorySnapshots(Id));"
                     };
                     foreach (var q in alterQueries)
                     {
