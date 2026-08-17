@@ -4,12 +4,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:NextVent.ViewModels"
         xmlns:dto="clr-namespace:NextVent.Data.Dtos"
-        xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        xmlns:mi="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="768"
         x:Class="NextVent.Views.ClientDisplayWindow"
         x:DataType="vm:ClientDisplayViewModel"
-        Title="NextVent — Segunda Pantalla de Cliente"
-        Background="#0F172A">
+        WindowStartupLocation="CenterOwner"
+        Title="TICKETFY! — Segunda Pantalla de Cliente"
+        Background="{DynamicResource BgPrimaryBrush}">
 
     <Panel>
         <!-- IDLE CAROUSEL MODE -->
@@ -17,9 +18,9 @@
             <Grid RowDefinitions="Auto,*,Auto">
                 <!-- Branding Header -->
                 <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,30">
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="12">
-                        <materialIcons:MaterialIcon Kind="Storefront" Width="48" Height="48" Foreground="#38BDF8"/>
-                        <TextBlock Text="NEXTVENT POS" FontSize="36" FontWeight="ExtraBold" Foreground="White" VerticalAlignment="Center"/>
+                    <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                        <mi:MaterialIcon Kind="Storefront" Width="32" Height="32" Foreground="White" />
+                        <TextBlock Text="TICKETFY!" FontSize="36" FontWeight="ExtraBold" Foreground="White" VerticalAlignment="Center"/>
                     </StackPanel>
                     <TextBlock Text="¡BIENVENIDO! GRACIAS POR SU PREFERENCIA" FontSize="18" Foreground="#94A3B8" HorizontalAlignment="Center" Margin="0,8,0,0"/>
                 </StackPanel>

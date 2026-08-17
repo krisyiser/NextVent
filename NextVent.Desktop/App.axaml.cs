@@ -67,7 +67,7 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            Log.Information("NextVent POS v3.0 — Avalonia Native Desktop starting");
+            Log.Information("TICKETFY! v3.0 — Avalonia Native Desktop starting");
 
             try
             {
@@ -174,7 +174,7 @@ public partial class App : Application
                 Log.Error(ex, "Database initialization or seeding failed");
             }
 
-            string businessName = "NextVent POS";
+            string businessName = "TICKETFY!";
             string contactEmail = "admin@nextvent.com";
             try
             {

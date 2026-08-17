@@ -63,8 +63,8 @@
                         <DockPanel LastChildFill="True">
                             <Border DockPanel.Dock="Bottom" Padding="16,14" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0">
                                 <StackPanel HorizontalAlignment="Center" Spacing="2">
-                                    <TextBlock Text="NextVent POS v3.0" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" />
-                                    <TextBlock Text="Zima Technologies" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="TICKETFY! v3.0" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="Valcore" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" />
                                 </StackPanel>
                             </Border>
 

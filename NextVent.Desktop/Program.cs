@@ -53,7 +53,8 @@ internal static class Program
                 }
                 catch (Exception ex)
                 {
-                    Log.Fatal(ex, "NextVent POS crashed fatally");
+                    if (ex.GetType().Name != "TaskCanceledException")
+                        Log.Fatal(ex, "TICKETFY! crashed fatally");
                     throw;
                 }
                 finally

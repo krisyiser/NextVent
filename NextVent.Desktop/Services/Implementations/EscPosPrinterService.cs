@@ -55,7 +55,7 @@ public class EscPosPrinterService : IEscPosPrinterService, IDisposable, IAsyncDi
             ms.Write(AlignCenter, 0, AlignCenter.Length);
             ms.Write(DoubleSizeOn, 0, DoubleSizeOn.Length);
             ms.Write(BoldOn, 0, BoldOn.Length);
-            WriteString(ms, "NEXTVENT POS\n");
+            WriteString(ms, "TICKETFY!\n");
             ms.Write(DoubleSizeOff, 0, DoubleSizeOff.Length);
             ms.Write(BoldOff, 0, BoldOff.Length);
 
@@ -295,7 +295,7 @@ public class EscPosPrinterService : IEscPosPrinterService, IDisposable, IAsyncDi
             ms.Write(AlignCenter, 0, AlignCenter.Length);
             ms.Write(DoubleSizeOn, 0, DoubleSizeOn.Length);
             ms.Write(BoldOn, 0, BoldOn.Length);
-            WriteString(ms, "NEXTVENT POS\n");
+            WriteString(ms, "TICKETFY!\n");
             ms.Write(DoubleSizeOff, 0, DoubleSizeOff.Length);
             ms.Write(BoldOff, 0, BoldOff.Length);
             WriteString(ms, "PRUEBA DE IMPRESIÓN TÉRMICA ESC/POS\n");

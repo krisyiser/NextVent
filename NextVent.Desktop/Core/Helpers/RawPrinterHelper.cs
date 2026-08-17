@@ -8,7 +8,7 @@ namespace NextVent.Desktop.Core.Helpers
         [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Ansi)]
         public class DOCINFOA
         {
-            [MarshalAs(UnmanagedType.LPStr)] public string pDocName = "NextVent POS Document";
+            [MarshalAs(UnmanagedType.LPStr)] public string pDocName = "TICKETFY! Document";
             [MarshalAs(UnmanagedType.LPStr)] public string pOutputFile = null;
             [MarshalAs(UnmanagedType.LPStr)] public string pDataType = "RAW";
         }

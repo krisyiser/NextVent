@@ -7,7 +7,7 @@
         xmlns:mi="using:Material.Icons.Avalonia"
         x:Class="NextVent.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
-        Title="NextVent POS — Sistema Nactivo Enterprise"
+        Title="TICKETFY! — Sistema de Gestión de Punto de Venta"
         Width="1280" Height="800"
         MinWidth="1024" MinHeight="680"
         WindowStartupLocation="CenterScreen"

@@ -6,14 +6,13 @@ namespace NextVent.Core.Constants;
 /// </summary>
 public static class AppConstants
 {
-    /// <summary>Application version string.</summary>
-    public const string AppVersion = "3.0.0";
+    /// <summary>App Meta</summary>
+    public const string AppName = "TICKETFY!";
+    public const string AppVersion = "v3.0.0";
 
     /// <summary>Default VAT / IVA rate (16%)</summary>
     public const double DefaultIvaRate = 0.16;
 
-    /// <summary>Application display name.</summary>
-    public const string AppName = "NextVent POS";
 
     /// <summary>Default database filename.</summary>
     public const string DatabaseFileName = "app.db";

@@ -4,15 +4,14 @@
              x:Class="NextVent.Views.Settings.AcercaDeSettingsView"
              x:DataType="vm:SettingsViewModel">
 
-    <StackPanel Spacing="18">
-        <TextBlock Text="Acerca de NextVent POS Enterprise" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+    <StackPanel Spacing="15">
+        <TextBlock Text="Acerca de TICKETFY! Enterprise" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
 
         <Border Padding="20" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
-            <StackPanel Spacing="10">
-                <TextBlock Text="NextVent POS v3.0 — Enterprise Desktop Edition" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                <TextBlock Text="Sistema Punto de Venta Industrial Offline Local." FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" />
-                <TextBlock Text="Stack Tecnológico: C# 12/13 + .NET 9 + Avalonia UI (Skia Direct3D GPU) + SQLite SQLCipher 256-bit." FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
-                <TextBlock Text="© 2026 Studio Kuali / Jóvenes Creadores MX. Todos los derechos reservados." FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,10,0,0" />
+            <StackPanel Spacing="5" Margin="0,0,0,10">
+                <TextBlock Text="TICKETFY! v3.0 — Enterprise Desktop Edition" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                <TextBlock Text="Sistema de Gestión de Punto de Venta" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <TextBlock Text="© 2026 Valcore. Todos los derechos reservados." FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,10,0,0" />
             </StackPanel>
         </Border>
     </StackPanel>
