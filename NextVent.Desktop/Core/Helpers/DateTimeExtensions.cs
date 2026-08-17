@@ -5,7 +5,7 @@ namespace NextVent.Core.Helpers;
 public static class DateTimeExtensions
 {
     private static readonly TimeZoneInfo LocalBusinessTimeZone = 
-        TimeZoneInfo.FindSystemTimeZoneById("America/Mexico_City");
+        TimeZoneInfo.Local;
 
     public static DateTime ToBusinessLocalTime(this DateTime utcDate)
     {
