@@ -12,4 +12,5 @@ public interface IEscPosPrinterService
     Task<bool> PrintTestPageAsync(string printerPortOrName = "COM1");
     Task<bool> IsPrinterOnlineAsync();
     Task<bool> PrintInventoryChecklistAsync(System.Collections.Generic.List<ProductDto> products, string printerPortOrName = "COM1");
+    Task<bool> PrintSnapshotChecklistAsync(NextVent.Data.Entities.InventorySnapshotEntity snapshot, string printerPortOrName = "COM1");
 }

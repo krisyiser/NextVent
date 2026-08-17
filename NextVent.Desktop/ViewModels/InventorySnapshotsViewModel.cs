@@ -64,4 +64,12 @@ public partial class InventorySnapshotsViewModel : ObservableObject
             IsLoading = false;
         }
     }
+
+    [RelayCommand]
+    private async Task PrintSnapshotAsync()
+    {
+        if (SelectedSnapshot == null) return;
+        var printerSvc = new NextVent.Services.Implementations.EscPosPrinterService();
+        await printerSvc.PrintSnapshotChecklistAsync(SelectedSnapshot);
+    }
 }

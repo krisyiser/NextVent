@@ -234,6 +234,57 @@ public class EscPosPrinterService : IEscPosPrinterService, IDisposable, IAsyncDi
         }
     }
 
+    public Task<bool> PrintSnapshotChecklistAsync(NextVent.Data.Entities.InventorySnapshotEntity snapshot, string printerPortOrName = "COM1")
+    {
+        try
+        {
+            using var ms = new MemoryStream();
+            ms.Write(EscInit, 0, EscInit.Length);
+            ms.Write(new byte[] { 0x1B, 0x74, 0x13 }, 0, 3); // CP858
+
+            ms.Write(AlignCenter, 0, AlignCenter.Length);
+            ms.Write(DoubleSizeOn, 0, DoubleSizeOn.Length);
+            ms.Write(BoldOn, 0, BoldOn.Length);
+            WriteString(ms, "REPORTE DE INVENTARIO\n");
+            ms.Write(DoubleSizeOff, 0, DoubleSizeOff.Length);
+            ms.Write(BoldOff, 0, BoldOff.Length);
+            WriteString(ms, $"FECHA: {snapshot.CreatedAt:dd/MM/yyyy HH:mm}\n");
+            if (!string.IsNullOrEmpty(snapshot.Notes))
+                WriteString(ms, $"NOTAS: {snapshot.Notes}\n");
+            WriteString(ms, "================================================\n");
+
+            ms.Write(AlignLeft, 0, AlignLeft.Length);
+            WriteString(ms, "CODIGO     DESC.               STOCK   FISICO\n");
+            WriteString(ms, "------------------------------------------------\n");
+            
+            foreach (var p in snapshot.Items)
+            {
+                string cod = (p.Barcode ?? p.ProductId).Length > 10 ? (p.Barcode ?? p.ProductId).Substring(0,10) : (p.Barcode ?? p.ProductId).PadRight(10);
+                string desc = p.Name.Length > 18 ? p.Name.Substring(0,18) : p.Name.PadRight(18);
+                string stock = p.Quantity.ToString("N2").PadLeft(7);
+                
+                WriteString(ms, $"{cod} {desc} {stock}  [    ]\n");
+            }
+            
+            WriteString(ms, "------------------------------------------------\n");
+            ms.Write(AlignCenter, 0, AlignCenter.Length);
+            WriteString(ms, $"TOTAL ARTICULOS: {snapshot.TotalItems}\n");
+            WriteString(ms, $"VALOR TOTAL: {snapshot.TotalValue:C}\n");
+            WriteString(ms, "\n\n________________________________\n");
+            WriteString(ms, "FIRMA DE SUPERVISOR\n\n\n\n");
+            ms.Write(PaperCut, 0, PaperCut.Length);
+
+            byte[] rawData = ms.ToArray();
+            _printerQueue.Writer.TryWrite(new PrintJob(printerPortOrName, rawData));
+            return Task.FromResult(true);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error preparing snapshot checklist payload");
+            return Task.FromResult(false);
+        }
+    }
+
     public Task<bool> PrintTestPageAsync(string printerPortOrName = "COM1")
     {
         try
