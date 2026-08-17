@@ -23,62 +23,72 @@
                     </StackPanel>
                 </StackPanel>
 
-                <!-- Action Buttons Header (WrapPanel avoids overlapping) -->
-                <WrapPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <Button Command="{Binding GenerateAutoPurchaseOrdersCommand}" Margin="0,2,6,2" Padding="10,6" CornerRadius="6" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource AccentWarningBrush}" BorderThickness="1" ToolTip.Tip="Generar borradores de orden de compra en Compras para productos agotados">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <mi:MaterialIcon Kind="TruckFast" Width="16" Height="16" Foreground="{DynamicResource AccentWarningBrush}" />
-                            <TextBlock Text="AUTO-REABASTECIMIENTO" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentWarningBrush}" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Button>
+                <!-- Action Buttons Header -->
+                <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Spacing="8">
+                    
+                    <!-- Fila 1: Herramientas del Sistema y Catálogo -->
+                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                        <Button Command="{Binding GenerateAutoPurchaseOrdersCommand}" Padding="10,6" CornerRadius="6" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource AccentWarningBrush}" BorderThickness="1" ToolTip.Tip="Generar borradores de orden de compra en Compras para productos agotados">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <mi:MaterialIcon Kind="TruckFast" Width="16" Height="16" Foreground="{DynamicResource AccentWarningBrush}" />
+                                <TextBlock Text="AUTO-REABASTECIMIENTO" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentWarningBrush}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
 
-                    <Button Command="{Binding ToggleLowStockFilterCommand}" Margin="0,2,6,2" Padding="10,6" CornerRadius="6" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource AccentDangerBrush}" BorderThickness="1">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <mi:MaterialIcon Kind="AlertCircleOutline" Width="16" Height="16" Foreground="{DynamicResource AccentDangerBrush}" />
-                            <TextBlock Text="STOCK MÍNIMO" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentDangerBrush}" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Button>
+                        <Button Command="{Binding ToggleLowStockFilterCommand}" Padding="10,6" CornerRadius="6" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource AccentDangerBrush}" BorderThickness="1">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <mi:MaterialIcon Kind="AlertCircleOutline" Width="16" Height="16" Foreground="{DynamicResource AccentDangerBrush}" />
+                                <TextBlock Text="STOCK MÍNIMO" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentDangerBrush}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
 
-                    <Button Command="{Binding OpenManageCategoriesDialogCommand}" Margin="0,2,6,2" Padding="10,6" CornerRadius="6" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <mi:MaterialIcon Kind="FolderMultipleOutline" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                            <TextBlock Text="CATEGORÍAS" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Button>
+                        <Button Command="{Binding OpenManageCategoriesDialogCommand}" Padding="10,6" CornerRadius="6" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <mi:MaterialIcon Kind="FolderMultipleOutline" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                <TextBlock Text="CATEGORÍAS" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
 
-                    <Button Command="{Binding ImportCsvCatalogCommand}" Margin="0,2,6,2" Padding="10,6" CornerRadius="6" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <mi:MaterialIcon Kind="FileImport" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                            <TextBlock Text="IMPORTAR CSV" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Button>
+                        <Button Command="{Binding ImportCsvCatalogCommand}" Padding="10,6" CornerRadius="6" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <mi:MaterialIcon Kind="FileImport" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                <TextBlock Text="IMPORTAR CSV" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
 
-                    <Button Command="{Binding PrintChecklistCommand}" Margin="0,2,6,2" Padding="10,6" CornerRadius="6" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="1">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <mi:MaterialIcon Kind="Printer" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                            <TextBlock Text="IMPRIMIR CHECKLIST" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Button>
-                    <Button Command="{Binding CreateSnapshotCommand}" Margin="0,2,6,2" Padding="10,6" CornerRadius="6" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="1">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <mi:MaterialIcon Kind="Camera" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                            <TextBlock Text="PUNTO GUARDADO" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Button>
-                    <Button Command="{Binding ViewSnapshotsCommand}" Margin="0,2,6,2" Padding="10,6" CornerRadius="6" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="1">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <mi:MaterialIcon Kind="History" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                            <TextBlock Text="HISTORIAL" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Button>
+                    <!-- Fila 2: Reportes, Auditoría y Altas -->
+                    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
+                        <Button Command="{Binding PrintChecklistCommand}" Padding="10,6" CornerRadius="6" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="1">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <mi:MaterialIcon Kind="Printer" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                <TextBlock Text="IMPRIMIR CHECKLIST" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
 
-                    <Button Command="{Binding OpenAddProductDialogCommand}" Classes="primary-action" Margin="0,2,0,2" Padding="12,6">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <mi:MaterialIcon Kind="Plus" Width="16" Height="16" />
-                            <TextBlock Text="+ NUEVO PRODUCTO" FontWeight="Bold" FontSize="12" VerticalAlignment="Center" />
-                        </StackPanel>
-                    </Button>
-                </WrapPanel>
+                        <Button Command="{Binding CreateSnapshotCommand}" Padding="10,6" CornerRadius="6" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="1">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <mi:MaterialIcon Kind="Camera" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                <TextBlock Text="PUNTO GUARDADO" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button Command="{Binding ViewSnapshotsCommand}" Padding="10,6" CornerRadius="6" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="1">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <mi:MaterialIcon Kind="History" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                <TextBlock Text="HISTORIAL" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button Command="{Binding OpenAddProductDialogCommand}" Classes="primary-action" Padding="12,6">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <mi:MaterialIcon Kind="Plus" Width="16" Height="16" />
+                                <TextBlock Text="+ NUEVO PRODUCTO" FontWeight="Bold" FontSize="12" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                    
+                </StackPanel>
             </Grid>
         </Border>
 
