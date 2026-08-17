@@ -258,9 +258,12 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string _newFullName = string.Empty;
     [ObservableProperty] private string _newRole = "CAJERO";
     public ObservableCollection<string> RolesOptions { get; } = ["CAJERO", "GERENTE", "ADMIN", "SUPERVISOR"];
-    [ObservableProperty] private string _newPin = "1234";
     [ObservableProperty] private string _newPassword = string.Empty;
     [ObservableProperty] private string _newPasswordHint = string.Empty;
+    [ObservableProperty] private string _newPin1 = string.Empty;
+    [ObservableProperty] private string _newPin2 = string.Empty;
+    [ObservableProperty] private string _newPin3 = string.Empty;
+    [ObservableProperty] private string _newPin4 = string.Empty;
 
     // Admin Deletion State
     [ObservableProperty] private UserDto? _userToDelete;
@@ -387,12 +390,22 @@ public partial class SettingsViewModel : ObservableObject
         try
         {
             string finalPass = string.IsNullOrWhiteSpace(NewPassword) ? string.Empty : NextVent.Core.Helpers.CryptoHelper.HashPassword(NewPassword);
-            await _userService.SaveAsync(Guid.NewGuid().ToString(), NewFullName, NewRole, finalPass, NewPin, NewPasswordHint);
+            string finalPin = $"{NewPin1}{NewPin2}{NewPin3}{NewPin4}";
+            if (finalPin.Length != 4)
+            {
+                FeedbackMessage = "El PIN debe ser de 4 dígitos";
+                return;
+            }
+
+            await _userService.SaveAsync(Guid.NewGuid().ToString(), NewFullName, NewUsername, NewRole, finalPass, finalPin, NewPasswordHint);
             await LoadUsersAsync();
 
             NewUsername = string.Empty;
             NewFullName = string.Empty;
-            NewPin = "1234";
+            NewPin1 = string.Empty;
+            NewPin2 = string.Empty;
+            NewPin3 = string.Empty;
+            NewPin4 = string.Empty;
             NewPassword = string.Empty;
             NewPasswordHint = string.Empty;
             NewRole = "CAJERO";
