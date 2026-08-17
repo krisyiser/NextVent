@@ -29,7 +29,7 @@
                 <Border Grid.Row="1" Background="#1E293B" CornerRadius="20" BorderBrush="#334155" BorderThickness="1" Padding="32" ClipToBounds="True">
                     <Grid RowDefinitions="*,Auto">
                         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="16">
-                            <materialIcons:MaterialIcon Kind="TagHeart" Width="80" Height="80" Foreground="#F59E0B"/>
+                            <mi:MaterialIcon Kind="TagHeart" Width="80" Height="80" Foreground="#F59E0B"/>
                             <TextBlock Text="PROMOCIONES ESPECIALES DEL DÍA" FontSize="28" FontWeight="Bold" Foreground="#F59E0B" HorizontalAlignment="Center"/>
                             <TextBlock Text="Aprovecha nuestros descuentos de mayoreo y combos 3x2 en abarrotes y perecederos" 
                                        FontSize="20" Foreground="#CBD5E1" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="600"/>
@@ -39,7 +39,7 @@
 
                 <!-- Footer Status -->
                 <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8" Margin="0,20,0,0">
-                    <materialIcons:MaterialIcon Kind="CheckCircle" Width="20" Height="20" Foreground="#10B981"/>
+                    <mi:MaterialIcon Kind="CheckCircle" Width="20" Height="20" Foreground="#10B981"/>
                     <TextBlock Text="Terminal Lista para Escanear Su Compra" FontSize="16" Foreground="#64748B"/>
                 </StackPanel>
             </Grid>
@@ -77,7 +77,7 @@
                 <Border Background="#065F46" BorderBrush="#10B981" BorderThickness="1" CornerRadius="16" Padding="20"
                         IsVisible="{Binding HighlightBannerText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
                     <StackPanel Spacing="8" HorizontalAlignment="Center">
-                        <materialIcons:MaterialIcon Kind="PartyPopper" Width="36" Height="36" Foreground="#34D399" HorizontalAlignment="Center"/>
+                        <mi:MaterialIcon Kind="PartyPopper" Width="36" Height="36" Foreground="#34D399" HorizontalAlignment="Center"/>
                         <TextBlock Text="{Binding HighlightBannerText}" 
                                    FontSize="20" FontWeight="Bold" Foreground="#34D399" 
                                    TextAlignment="Center" TextWrapping="Wrap"/>
