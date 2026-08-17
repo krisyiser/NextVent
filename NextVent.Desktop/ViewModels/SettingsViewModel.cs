@@ -609,6 +609,14 @@ public partial class SettingsViewModel : ObservableObject
             await _settingsService.SetAsync("EmpresaRfc", EmpresaRfc);
         }
 
+        // --- PING HUB EN TIEMPO REAL ---
+        var deviceReg = new NextVent.Services.Implementations.DeviceRegistrationService(_settingsService);
+        _ = deviceReg.PingServerAsync(new NextVent.Services.Implementations.BusinessProfile 
+        { 
+            BusinessName = EmpresaNombreComercial,
+            Email = "contacto@empresa.com"
+        });
+
         if (SettingsSaved != null)
         {
             await SettingsSaved.Invoke();
