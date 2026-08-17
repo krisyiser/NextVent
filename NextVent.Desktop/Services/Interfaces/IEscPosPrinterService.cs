@@ -11,4 +11,5 @@ public interface IEscPosPrinterService
     Task<bool> PrintNonSaleCashMovementSlipAsync(ShiftMovementSlipModel model, string printerPortOrName = "COM1");
     Task<bool> PrintTestPageAsync(string printerPortOrName = "COM1");
     Task<bool> IsPrinterOnlineAsync();
+    Task<bool> PrintInventoryChecklistAsync(System.Collections.Generic.List<ProductDto> products, string printerPortOrName = "COM1");
 }

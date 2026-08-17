@@ -365,4 +365,24 @@ public partial class InventoryViewModel : ObservableObject
             win.ShowDialog(desktop.MainWindow);
         }
     }
+
+    [RelayCommand]
+    private async Task PrintChecklistAsync()
+    {
+        try
+        {
+            var printerSvc = new NextVent.Services.Implementations.EscPosPrinterService();
+            bool result = await printerSvc.PrintInventoryChecklistAsync(Products.ToList());
+            
+            if (result)
+                FeedbackMessage = "Imprimiendo checklist de inventario físico...";
+            else
+                FeedbackMessage = "Error de comunicación con la impresora térmica.";
+        }
+        catch (Exception ex)
+        {
+            FeedbackMessage = "Ocurrió un error al intentar imprimir el checklist.";
+            Log.Error(ex, "Failed to print inventory checklist.");
+        }
+    }
 }

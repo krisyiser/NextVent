@@ -187,6 +187,53 @@ public class EscPosPrinterService : IEscPosPrinterService, IDisposable, IAsyncDi
         return Task.FromResult(true);
     }
 
+    public Task<bool> PrintInventoryChecklistAsync(System.Collections.Generic.List<ProductDto> products, string printerPortOrName = "COM1")
+    {
+        try
+        {
+            using var ms = new MemoryStream();
+            ms.Write(EscInit, 0, EscInit.Length);
+            ms.Write(new byte[] { 0x1B, 0x74, 0x13 }, 0, 3); // CP858
+
+            ms.Write(AlignCenter, 0, AlignCenter.Length);
+            ms.Write(DoubleSizeOn, 0, DoubleSizeOn.Length);
+            ms.Write(BoldOn, 0, BoldOn.Length);
+            WriteString(ms, "INVENTARIO - CHECKLIST\n");
+            ms.Write(DoubleSizeOff, 0, DoubleSizeOff.Length);
+            ms.Write(BoldOff, 0, BoldOff.Length);
+            WriteString(ms, $"FECHA: {DateTime.Now:dd/MM/yyyy HH:mm}\n");
+            WriteString(ms, "================================================\n");
+
+            ms.Write(AlignLeft, 0, AlignLeft.Length);
+            WriteString(ms, "CODIGO     DESC.               STOCK   FISICO\n");
+            WriteString(ms, "------------------------------------------------\n");
+            
+            foreach (var p in products)
+            {
+                string cod = (p.Barcode ?? p.Id).Length > 10 ? (p.Barcode ?? p.Id).Substring(0,10) : (p.Barcode ?? p.Id).PadRight(10);
+                string desc = p.Name.Length > 18 ? p.Name.Substring(0,18) : p.Name.PadRight(18);
+                string stock = p.Stock.ToString("N2").PadLeft(7);
+                
+                WriteString(ms, $"{cod} {desc} {stock}  [    ]\n");
+            }
+            
+            WriteString(ms, "------------------------------------------------\n");
+            ms.Write(AlignCenter, 0, AlignCenter.Length);
+            WriteString(ms, "\n\n________________________________\n");
+            WriteString(ms, "FIRMA DE SUPERVISOR\n\n\n\n");
+            ms.Write(PaperCut, 0, PaperCut.Length);
+
+            byte[] rawData = ms.ToArray();
+            _printerQueue.Writer.TryWrite(new PrintJob(printerPortOrName, rawData));
+            return Task.FromResult(true);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error preparing inventory checklist payload");
+            return Task.FromResult(false);
+        }
+    }
+
     public Task<bool> PrintTestPageAsync(string printerPortOrName = "COM1")
     {
         try

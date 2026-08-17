@@ -53,6 +53,12 @@
                         </StackPanel>
                     </Button>
 
+                    <Button Command="{Binding PrintChecklistCommand}" Margin="0,2,6,2" Padding="10,6" CornerRadius="6" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="1">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <mi:MaterialIcon Kind="Printer" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                            <TextBlock Text="IMPRIMIR CHECKLIST" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
                     <Button Command="{Binding CreateSnapshotCommand}" Margin="0,2,6,2" Padding="10,6" CornerRadius="6" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="1">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <mi:MaterialIcon Kind="Camera" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" />
