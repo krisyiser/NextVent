@@ -42,6 +42,8 @@ public class AppDbContext : DbContext
     public DbSet<CategoryEntity> Categories => Set<CategoryEntity>();
     public DbSet<FolioSequenceEntity> FolioSequences => Set<FolioSequenceEntity>();
     public DbSet<CoOccurrenceEntity> CoOccurrences => Set<CoOccurrenceEntity>();
+    public DbSet<InventorySnapshotEntity> InventorySnapshots => Set<InventorySnapshotEntity>();
+    public DbSet<InventorySnapshotItemEntity> InventorySnapshotItems => Set<InventorySnapshotItemEntity>();
 
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 

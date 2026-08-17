@@ -53,6 +53,19 @@
                         </StackPanel>
                     </Button>
 
+                    <Button Command="{Binding CreateSnapshotCommand}" Margin="0,2,6,2" Padding="10,6" CornerRadius="6" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="1">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <mi:MaterialIcon Kind="Camera" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                            <TextBlock Text="PUNTO GUARDADO" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button Command="{Binding ViewSnapshotsCommand}" Margin="0,2,6,2" Padding="10,6" CornerRadius="6" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="1">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <mi:MaterialIcon Kind="History" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                            <TextBlock Text="HISTORIAL" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
                     <Button Command="{Binding OpenAddProductDialogCommand}" Classes="primary-action" Margin="0,2,0,2" Padding="12,6">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <mi:MaterialIcon Kind="Plus" Width="16" Height="16" />

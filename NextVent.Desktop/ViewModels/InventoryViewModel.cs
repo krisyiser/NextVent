@@ -336,4 +336,33 @@ public partial class InventoryViewModel : ObservableObject
             FeedbackMessage = "Error al generar orden de compra automática";
         }
     }
+
+    [RelayCommand]
+    private async Task CreateSnapshotAsync()
+    {
+        try
+        {
+            var svc = new NextVent.Services.Implementations.InventorySnapshotService();
+            var snap = await svc.CreateSnapshotAsync($"Punto de Guardado Manual - {DateTime.Now:dd/MM/yyyy hh:mm tt}");
+            FeedbackMessage = $"¡Punto de Guardado exitoso! {snap.TotalItems} artículos registrados con un valor de {snap.TotalValue:C}.";
+        }
+        catch (Exception ex)
+        {
+            FeedbackMessage = "Error al crear el punto de guardado.";
+            Log.Error(ex, "Failed to create snapshot from UI.");
+        }
+    }
+
+    [RelayCommand]
+    private void ViewSnapshots()
+    {
+        if (Avalonia.Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop && desktop.MainWindow != null)
+        {
+            var win = new NextVent.Views.InventorySnapshotsWindow
+            {
+                DataContext = new NextVent.ViewModels.InventorySnapshotsViewModel()
+            };
+            win.ShowDialog(desktop.MainWindow);
+        }
+    }
 }
