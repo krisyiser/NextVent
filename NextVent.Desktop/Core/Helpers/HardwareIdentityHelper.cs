@@ -12,16 +12,10 @@ public static class HardwareIdentityHelper
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                // This uses System.Management to query WMI
-                using var searcher = new ManagementObjectSearcher("SELECT UUID FROM Win32_ComputerSystemProduct");
-                using var collection = searcher.Get();
-                foreach (var obj in collection)
+                var guid = Microsoft.Win32.Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Cryptography", "MachineGuid", null) as string;
+                if (!string.IsNullOrWhiteSpace(guid))
                 {
-                    var uuid = obj["UUID"]?.ToString();
-                    if (!string.IsNullOrWhiteSpace(uuid))
-                    {
-                        return uuid;
-                    }
+                    return guid.Trim();
                 }
             }
         }

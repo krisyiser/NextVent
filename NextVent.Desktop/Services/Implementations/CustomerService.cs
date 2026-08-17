@@ -59,6 +59,22 @@ public sealed class CustomerService : ICustomerService
         await _ctx.SaveChangesAsync();
     }
 
+    public async Task UpdateAsync(CustomerDto customer)
+    {
+        var c = await _ctx.Customers.FindAsync(customer.Id);
+        if (c is not null)
+        {
+            c.Name = customer.Name;
+            c.Phone = customer.Phone;
+            c.Email = customer.Email;
+            c.Rfc = customer.Rfc;
+            c.CreditLimit = customer.CreditLimit;
+            c.Debt = customer.Debt;
+            c.CustomerCode = customer.CustomerCode;
+            await _ctx.SaveChangesAsync();
+        }
+    }
+
     public async Task UpdateDebtAsync(string customerId, double newDebt)
     {
         var c = await _ctx.Customers.FindAsync(customerId);

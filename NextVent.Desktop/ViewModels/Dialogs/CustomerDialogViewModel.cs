@@ -33,6 +33,9 @@ public partial class CustomerDialogViewModel : ObservableObject
     [ObservableProperty]
     private string _errorMessage = string.Empty;
 
+    private string? _editingCustomerId;
+    private double _existingDebt;
+
     public event Action? RequestClose;
 
     public CustomerDialogViewModel(ICustomerService customerService)
@@ -44,6 +47,18 @@ public partial class CustomerDialogViewModel : ObservableObject
     private void Cancel()
     {
         RequestClose?.Invoke();
+    }
+
+    public void LoadForEdit(CustomerDto customer)
+    {
+        _editingCustomerId = customer.Id;
+        Name = customer.Name;
+        Phone = customer.Phone;
+        Email = customer.Email;
+        Rfc = customer.Rfc;
+        CreditLimit = customer.CreditLimit;
+        CustomerCode = customer.CustomerCode;
+        _existingDebt = customer.Debt;
     }
 
     [RelayCommand]
@@ -58,16 +73,24 @@ public partial class CustomerDialogViewModel : ObservableObject
             }
 
             var dto = new CustomerDto(
-                Id: Guid.NewGuid().ToString(),
+                Id: _editingCustomerId ?? Guid.NewGuid().ToString(),
                 Nombre: Name.Trim(),
                 Telefono: Phone.Trim(),
                 Email: Email.Trim(),
                 Rfc: Rfc.Trim(),
                 LimiteCredito: CreditLimit,
+                Deuda: _existingDebt,
                 CustomerCode: CustomerCode.Trim()
             );
 
-            await _customerService.AddAsync(dto);
+            if (_editingCustomerId != null)
+            {
+                await _customerService.UpdateAsync(dto);
+            }
+            else
+            {
+                await _customerService.AddAsync(dto);
+            }
             RequestClose?.Invoke();
         }
         catch (Exception ex)

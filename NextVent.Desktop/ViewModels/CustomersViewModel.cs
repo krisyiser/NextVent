@@ -17,6 +17,7 @@ public partial class CustomersViewModel : ObservableObject
 
     [ObservableProperty] private string _searchQuery = string.Empty;
     public event Action? OpenAddCustomerRequested;
+    public event Action<CustomerDto>? OpenEditCustomerRequested;
     public event Action<CustomerDto>? OpenAddPaymentRequested;
     public event Action<CustomerDto>? OpenStatementRequested;
 
@@ -45,6 +46,12 @@ public partial class CustomersViewModel : ObservableObject
 
     [RelayCommand]
     private void OpenAddCustomerDialog() => OpenAddCustomerRequested?.Invoke();
+
+    [RelayCommand]
+    private void OpenEditCustomerDialog(CustomerDto customer)
+    {
+        if (customer != null) OpenEditCustomerRequested?.Invoke(customer);
+    }
 
     [RelayCommand]
     private void OpenAddPaymentDialog(CustomerDto customer)

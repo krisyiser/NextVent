@@ -53,49 +53,51 @@ public class PredictiveIntelligenceService : IPredictiveIntelligenceService
         return null;
     }
 
-    [DapperAot]
     public async Task<List<PredictiveAlertDto>> GetUrgentRestockAlertsAsync()
     {
-        var thresholdDate = DateTime.Now.AddDays(-28).ToString("o"); // Ensure format matches SQLite text date
+        var thresholdDate = DateTime.Now.AddDays(-28).ToString("o"); 
+        using var context = await _contextFactory.CreateDbContextAsync();
         
-        string appDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        string dbPath = Path.Combine(appDataFolder, "NextVent", "Database", "nextvent.db");
-        string securePassword = NextVent.Services.Security.SecurityManager.GetMasterKey();
-        string secureConnectionString = $"Data Source={dbPath};Password={securePassword};";
-
-        using var connection = new Microsoft.Data.Sqlite.SqliteConnection(secureConnectionString);
-        await connection.OpenAsync();
-
-        const string sql = @"
-            SELECT 
-                p.Name,
-                p.Stock,
-                SUM(si.Quantity) as TotalSold28Days
-            FROM products p
-            JOIN sale_items si ON p.Id = si.ProductId
-            JOIN sales s ON si.SaleId = s.Id
-            WHERE s.Date >= @ThresholdDate AND s.Status = 0
-            GROUP BY p.Id, p.Name, p.Stock
-            HAVING SUM(si.Quantity) > 0";
-
-        var stats = await connection.QueryAsync<SalesVelocityModel>(sql, new { ThresholdDate = thresholdDate });
+        var recentSales = await context.Sales
+            .Where(s => string.Compare(s.Date, thresholdDate) >= 0 && s.Status == NextVent.Core.Enums.SaleStatus.Completed)
+            .Select(s => s.ItemsJson)
+            .ToListAsync();
+            
+        var productSales = new Dictionary<string, decimal>();
+        foreach(var json in recentSales)
+        {
+            try {
+                var items = System.Text.Json.JsonSerializer.Deserialize<List<NextVent.Data.Dtos.SaleItemSnapshotDto>>(json);
+                if (items != null) {
+                    foreach(var item in items) {
+                        if (!productSales.ContainsKey(item.ProductId)) productSales[item.ProductId] = 0;
+                        productSales[item.ProductId] += (decimal)item.Quantity;
+                    }
+                }
+            } catch { }
+        }
 
         var alerts = new List<PredictiveAlertDto>();
-
-        foreach (var stat in stats)
+        if (productSales.Count > 0)
         {
-            decimal dailyVelocity = stat.TotalSold28Days / 28m;
-            if (dailyVelocity <= 0) continue;
-
-            decimal daysRemaining = (decimal)stat.Stock / dailyVelocity;
-
-            if (daysRemaining <= 3.0m) // Límite crítico de 3 días
+            var productIds = productSales.Keys.ToList();
+            var products = await context.Products.Where(p => productIds.Contains(p.Id)).ToListAsync();
+            foreach(var p in products)
             {
-                alerts.Add(new PredictiveAlertDto 
+                var totalSold28Days = productSales[p.Id];
+                decimal dailyVelocity = totalSold28Days / 28m;
+                if (dailyVelocity <= 0) continue;
+
+                decimal daysRemaining = (decimal)p.Stock / dailyVelocity;
+
+                if (daysRemaining <= 3.0m) // Límite crítico de 3 días
                 {
-                    Message = $"🚨 URGENTE: Te quedarás sin {stat.Name} en {Math.Round(daysRemaining, 1)} días a tu ritmo de ventas actual. ¡Pide al proveedor hoy!",
-                    DaysRemaining = daysRemaining
-                });
+                    alerts.Add(new PredictiveAlertDto 
+                    {
+                        Message = $"🚨 URGENTE: Te quedarás sin {p.Name} en {Math.Round(daysRemaining, 1)} días a tu ritmo de ventas actual. ¡Pide al proveedor hoy!",
+                        DaysRemaining = daysRemaining
+                    });
+                }
             }
         }
         

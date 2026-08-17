@@ -1,6 +1,7 @@
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using NextVent.Data.Dtos;
 using NextVent.Services;
 using NextVent.Services.Interfaces;
@@ -256,7 +257,15 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private string _newUsername = string.Empty;
     [ObservableProperty] private string _newFullName = string.Empty;
     [ObservableProperty] private string _newRole = "CAJERO";
+    public ObservableCollection<string> RolesOptions { get; } = ["CAJERO", "GERENTE", "ADMIN", "SUPERVISOR"];
     [ObservableProperty] private string _newPin = "1234";
+    [ObservableProperty] private string _newPassword = string.Empty;
+    [ObservableProperty] private string _newPasswordHint = string.Empty;
+
+    // Admin Deletion State
+    [ObservableProperty] private UserDto? _userToDelete;
+    [ObservableProperty] private bool _isConfirmingAdminDelete = false;
+    [ObservableProperty] private string _adminDeletePassword = string.Empty;
 
     // Ticket & Printer Settings
     public ObservableCollection<string> PaperWidths { get; } = ["58mm (32 Columnas)", "80mm (48 Columnas)"];
@@ -377,12 +386,16 @@ public partial class SettingsViewModel : ObservableObject
 
         try
         {
-            await _userService.SaveAsync(Guid.NewGuid().ToString(), NewFullName, NewRole, null, NewPin);
+            string finalPass = string.IsNullOrWhiteSpace(NewPassword) ? string.Empty : NextVent.Core.Helpers.CryptoHelper.HashPassword(NewPassword);
+            await _userService.SaveAsync(Guid.NewGuid().ToString(), NewFullName, NewRole, finalPass, NewPin, NewPasswordHint);
             await LoadUsersAsync();
 
             NewUsername = string.Empty;
             NewFullName = string.Empty;
             NewPin = "1234";
+            NewPassword = string.Empty;
+            NewPasswordHint = string.Empty;
+            NewRole = "CAJERO";
             FeedbackMessage = "¡Cajero / Usuario registrado correctamente!";
         }
         catch (Exception ex)
@@ -393,18 +406,63 @@ public partial class SettingsViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task DeleteUserAsync(UserDto user)
+    private void RequestDeleteUser(UserDto user)
+    {
+        if (user == null) return;
+
+        if (user.Role.ToUpper() == "ADMIN")
+        {
+            UserToDelete = user;
+            IsConfirmingAdminDelete = true;
+            AdminDeletePassword = string.Empty;
+            FeedbackMessage = "Para eliminar un administrador, por favor confirma con su contraseña.";
+        }
+        else
+        {
+            _ = ConfirmDeleteUserAsync(user);
+        }
+    }
+
+    [RelayCommand]
+    private void CancelAdminDelete()
+    {
+        IsConfirmingAdminDelete = false;
+        UserToDelete = null;
+        AdminDeletePassword = string.Empty;
+        FeedbackMessage = string.Empty;
+    }
+
+    [RelayCommand]
+    private async Task ConfirmAdminDeleteAsync()
+    {
+        if (UserToDelete == null || _userService == null) return;
+
+        string savedHash = await _userService.GetPasswordHashAsync(UserToDelete.Id) ?? string.Empty;
+        if (string.IsNullOrEmpty(savedHash) || NextVent.Core.Helpers.CryptoHelper.VerifyPassword(AdminDeletePassword, savedHash) || NextVent.Services.Security.SecurityManager.VerifyPassword(AdminDeletePassword, savedHash))
+        {
+            await ConfirmDeleteUserAsync(UserToDelete);
+            CancelAdminDelete();
+        }
+        else
+        {
+            FeedbackMessage = "Contraseña de administrador incorrecta. No se puede eliminar.";
+        }
+    }
+
+    private async Task ConfirmDeleteUserAsync(UserDto user)
     {
         if (_userService == null || user == null) return;
         try
         {
             await _userService.DeleteAsync(user.Id);
             await LoadUsersAsync();
-            FeedbackMessage = "Usuario eliminado";
+            CommunityToolkit.Mvvm.Messaging.WeakReferenceMessenger.Default.Send(new NextVent.Core.Messages.UserDeletedMessage(user.Id));
+            FeedbackMessage = $"Usuario {user.FullName} eliminado exitosamente.";
         }
         catch (Exception ex)
         {
             Log.Error(ex, "Error deleting user");
+            FeedbackMessage = "Error al eliminar usuario.";
         }
     }
 

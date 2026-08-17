@@ -84,8 +84,9 @@ public partial class MainWindowViewModel : ObservableObject
         if (!Directory.Exists(appFolder)) Directory.CreateDirectory(appFolder);
         string dbPath = Path.Combine(appFolder, "nextvent.db");
 
+        string securePassword = NextVent.Services.Security.SecurityManager.GetMasterKey();
         var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseSqlite($"Data Source={dbPath};Cache=Shared;Mode=ReadWriteCreate;")
+            .UseSqlite($"Data Source={dbPath};Password={securePassword};Cache=Shared;Mode=ReadWriteCreate;")
             .AddInterceptors(new NextVent.Data.Interceptors.SlowQueryInterceptor())
             .Options;
 
@@ -140,6 +141,10 @@ public partial class MainWindowViewModel : ObservableObject
         _sessionManager.LockStateChanged += (locked) =>
         {
             IsLocked = locked;
+        };
+        _sessionManager.CashierChanged += (user) =>
+        {
+            _ = _deviceRegistrationService.PingServerAsync(new BusinessProfile());
         };
         IsLocked = _sessionManager.IsTerminalLocked;
 
@@ -445,6 +450,19 @@ public partial class MainWindowViewModel : ObservableObject
             IsDialogOverlayOpen = true;
         };
 
+        _customersVm.OpenEditCustomerRequested += (customer) =>
+        {
+            var dialog = new CustomerDialogViewModel(_customerService);
+            dialog.LoadForEdit(customer);
+            dialog.RequestClose += () =>
+            {
+                CloseDialog();
+                _ = _customersVm.LoadCustomersAsync();
+            };
+            ActiveDialogViewModel = dialog;
+            IsDialogOverlayOpen = true;
+        };
+
         _customersVm.OpenAddPaymentRequested += (customer) =>
         {
             var dialog = new PaymentDialogViewModel(_customerService, customer.Id, customer.Debt);
@@ -488,6 +506,17 @@ public partial class MainWindowViewModel : ObservableObject
                 ActiveViewModel = _loginVm;
                 CloseDialog();
             });
+        });
+
+        WeakReferenceMessenger.Default.Register<NextVent.Core.Messages.UserDeletedMessage>(this, (r, m) =>
+        {
+            if (_sessionManager.CurrentCashier?.Id.ToString() == m.UserId)
+            {
+                Dispatcher.UIThread.Post(() =>
+                {
+                    WeakReferenceMessenger.Default.Send(new ForceLogoutMessage());
+                });
+            }
         });
     }
 
@@ -546,7 +575,10 @@ public partial class MainWindowViewModel : ObservableObject
     [RelayCommand]
     private async Task NavigateTo(string target)
     {
-        if (ActiveViewModel == _loginVm || IsDialogOverlayOpen)
+        if (ActiveViewModel == _loginVm || 
+            IsDialogOverlayOpen || 
+            ActiveViewModel is LicenseLockedViewModel || 
+            ActiveViewModel is FirstTimeSetupViewModel)
         {
             return;
         }

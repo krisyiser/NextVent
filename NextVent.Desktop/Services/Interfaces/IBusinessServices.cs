@@ -27,7 +27,7 @@ Task<int> GetCountAsync();
 Task<List<UserDto>> GetAllAsync();
 Task<UserDto?> GetByNameAsync(string name);
 Task<List<UserDto>> GetManagersAsync();
-Task SaveAsync(string id, string nombre, string rol, string? passwordHash, string? pinHash);
+Task SaveAsync(string id, string nombre, string rol, string? passwordHash, string? pinHash, string? passwordHint = null);
 Task DeleteAsync(string id);
 Task<string?> GetPasswordHashAsync(string userId);
 Task<string?> GetPinHashAsync(string userId);

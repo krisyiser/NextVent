@@ -42,7 +42,7 @@ public sealed partial class AuthService : ObservableObject
         }
 
         var hash = await _userService.GetPasswordHashAsync(user.Id);
-        if (hash is null || !CryptoHelper.VerifyPassword(password, hash))
+        if (hash is null || (!CryptoHelper.VerifyPassword(password, hash) && !NextVent.Services.Security.SecurityManager.VerifyPassword(password, hash)))
         {
             Log.Warning("Authentication failed: invalid credentials for '{Username}'", username);
             return new AuthenticateResult(false);
@@ -79,8 +79,8 @@ public sealed partial class AuthService : ObservableObject
 
     public async Task<bool> VerifyManagerPinAsync(string userId, string pin)
     {
-        var hash = await _userService.GetPinHashAsync(userId);
-        return hash is not null && CryptoHelper.VerifyPassword(pin, hash);
+        var storedPin = await _userService.GetPinHashAsync(userId);
+        return storedPin == pin;
     }
 
     public async Task<bool> VerifyManagerPasswordAsync(string userId, string password)

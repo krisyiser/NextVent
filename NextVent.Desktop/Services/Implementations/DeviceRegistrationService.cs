@@ -15,40 +15,51 @@ namespace NextVent.Services.Implementations;
 
 public class BusinessProfile
 {
-    public string BusinessName { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
+    [JsonPropertyName("businessName")] public string BusinessName { get; set; } = string.Empty;
+    [JsonPropertyName("email")] public string Email { get; set; } = string.Empty;
 }
 
 public class BusinessData
 {
-    public string CommercialName { get; set; } = string.Empty;
-    public string Industry { get; set; } = string.Empty;
+    [JsonPropertyName("commercialName")] public string CommercialName { get; set; } = string.Empty;
+    [JsonPropertyName("industry")] public string Industry { get; set; } = string.Empty;
 }
 
 public class SystemSpecs
 {
-    public string CpuModel { get; set; } = string.Empty;
-    public string TotalRam { get; set; } = string.Empty;
-    public string PrimaryStorage { get; set; } = string.Empty;
+    [JsonPropertyName("cpuModel")] public string CpuModel { get; set; } = string.Empty;
+    [JsonPropertyName("totalRam")] public string TotalRam { get; set; } = string.Empty;
+    [JsonPropertyName("primaryStorage")] public string PrimaryStorage { get; set; } = string.Empty;
 }
 
 public class SessionInfo
 {
-    public string ActiveUser { get; set; } = string.Empty;
-    public string Role { get; set; } = string.Empty;
+    [JsonPropertyName("activeUser")] public string ActiveUser { get; set; } = string.Empty;
+    [JsonPropertyName("role")] public string Role { get; set; } = string.Empty;
 }
 
 public class ProvisionPayload
 {
-    public string HardwareId { get; set; } = string.Empty;
-    public string LocalIp { get; set; } = string.Empty;
-    public string InstalledVersion { get; set; } = string.Empty;
-    public BusinessData Business { get; set; } = new();
-    public SystemSpecs System { get; set; } = new();
-    public SessionInfo Session { get; set; } = new();
+    [JsonPropertyName("hardwareId")] public string HardwareId { get; set; } = string.Empty;
+    [JsonPropertyName("localIp")] public string LocalIp { get; set; } = string.Empty;
+    [JsonPropertyName("installedVersion")] public string InstalledVersion { get; set; } = string.Empty;
+    [JsonPropertyName("business")] public BusinessData Business { get; set; } = new();
+    [JsonPropertyName("system")] public SystemSpecs System { get; set; } = new();
+    [JsonPropertyName("session")] public SessionInfo Session { get; set; } = new();
+}
+
+public class ProvisionResponse
+{
+    [JsonPropertyName("success")]
+    public bool Success { get; set; }
+    [JsonPropertyName("nodeId")]
+    public string? NodeId { get; set; }
+    [JsonPropertyName("licenseToken")]
+    public string? LicenseToken { get; set; }
 }
 
 [JsonSerializable(typeof(ProvisionPayload))]
+[JsonSerializable(typeof(ProvisionResponse))]
 public partial class TelemetryJsonContext : JsonSerializerContext { }
 
 public class DeviceRegistrationService
@@ -93,52 +104,42 @@ public class DeviceRegistrationService
                 InstalledVersion = "1.0.0"
             };
 
-            // 1. Lectura de Hardware Profunda
+            // 1. Lectura de Hardware Profunda (AOT-Safe)
             try
             {
                 if (OperatingSystem.IsWindows())
                 {
-                    using var cpuSearcher = new ManagementObjectSearcher("SELECT Name FROM Win32_Processor");
-                    foreach (var obj in cpuSearcher.Get())
-                    {
-                        payload.System.CpuModel = obj["Name"]?.ToString() ?? "Unknown CPU";
-                        break;
-                    }
+                    var cpuName = Microsoft.Win32.Registry.GetValue(@"HKEY_LOCAL_MACHINE\HARDWARE\DESCRIPTION\System\CentralProcessor\0", "ProcessorNameString", null) as string;
+                    payload.System.CpuModel = string.IsNullOrWhiteSpace(cpuName) ? "Unknown CPU" : cpuName.Trim();
+                }
+                else
+                {
+                    payload.System.CpuModel = "Unknown CPU";
+                }
 
-                    using var ramSearcher = new ManagementObjectSearcher("SELECT TotalPhysicalMemory FROM Win32_ComputerSystem");
-                    foreach (var obj in ramSearcher.Get())
-                    {
-                        if (ulong.TryParse(obj["TotalPhysicalMemory"]?.ToString(), out ulong bytes))
-                        {
-                            payload.System.TotalRam = $"{(bytes / (1024 * 1024 * 1024.0)):F1} GB";
-                        }
-                        break;
-                    }
+                // RAM (AOT-Safe)
+                var memInfo = GC.GetGCMemoryInfo();
+                payload.System.TotalRam = $"{(memInfo.TotalAvailableMemoryBytes / (1024.0 * 1024 * 1024)):F1} GB";
 
-                    using var diskSearcher = new ManagementObjectSearcher("SELECT MediaType, Size FROM Win32_DiskDrive WHERE Index = 0");
-                    foreach (var obj in diskSearcher.Get())
-                    {
-                        string mediaType = obj["MediaType"]?.ToString() ?? "Unknown";
-                        if (ulong.TryParse(obj["Size"]?.ToString(), out ulong bytes))
-                        {
-                            payload.System.PrimaryStorage = $"{mediaType} - {(bytes / (1024 * 1024 * 1024.0)):F0} GB";
-                        }
-                        break;
-                    }
+                // Storage (AOT-Safe)
+                var mainDrive = System.IO.DriveInfo.GetDrives().FirstOrDefault(d => d.IsReady && d.DriveType == System.IO.DriveType.Fixed);
+                if (mainDrive != null)
+                {
+                    payload.System.PrimaryStorage = $"Disco Local - {(mainDrive.TotalSize / (1024.0 * 1024 * 1024)):F0} GB";
                 }
             }
             catch (Exception ex)
             {
-                Log.Warning(ex, "Failed to read WMI hardware specs");
+                Log.Warning(ex, "Failed to read hardware specs");
             }
 
             // 2. Lectura de Entorno de Negocio
             if (_settingsService != null)
             {
-                var name = await _settingsService.GetAsync("BusinessName");
+                var name = await _settingsService.GetAsync("EmpresaNombreComercial");
                 payload.Business.CommercialName = string.IsNullOrEmpty(name) ? profile.BusinessName : name;
                 
-                var industry = await _settingsService.GetAsync("Industry");
+                var industry = await _settingsService.GetAsync("EmpresaGiroComercial");
                 payload.Business.Industry = string.IsNullOrEmpty(industry) ? "No especificado" : industry;
             }
             else
@@ -165,12 +166,65 @@ public class DeviceRegistrationService
                     
                     if (!response.IsSuccessStatusCode)
                     {
-                        var errorText = await response.Content.ReadAsStringAsync();
+                        var errorText = await response.Content.ReadAsStringAsync(cts.Token);
                         Log.Warning($"Fallo en Phone Home. Status: {response.StatusCode}. Detalle: {errorText}");
+
+                        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized || response.StatusCode == System.Net.HttpStatusCode.Forbidden)
+                        {
+                            if (System.IO.File.Exists("license.jwt"))
+                            {
+                                System.IO.File.Delete("license.jwt");
+                                Log.Warning("❌ LICENCIA REVOCADA POR EL SERVIDOR (Kill Switch Activo).");
+                                Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                                {
+                                    if (App.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
+                                    {
+                                        if (desktop.MainWindow != null)
+                                        {
+                                            desktop.MainWindow.Content = new NextVent.Views.LicenseLockedView { DataContext = new NextVent.ViewModels.LicenseLockedViewModel() };
+                                        }
+                                    }
+                                });
+                            }
+                        }
                     }
                     else
                     {
                         Log.Information("✅ TELEMETRÍA ENVIADA CON ÉXITO AL NEXTVENT HUB.");
+                        try 
+                        {
+                            var jsonResponse = await response.Content.ReadFromJsonAsync(TelemetryJsonContext.Default.ProvisionResponse, cts.Token);
+                            if (jsonResponse != null)
+                            {
+                                if (!string.IsNullOrEmpty(jsonResponse.LicenseToken))
+                                {
+                                    await System.IO.File.WriteAllTextAsync("license.jwt", jsonResponse.LicenseToken, cts.Token);
+                                    Log.Information("✅ LICENCIA ACTUALIZADA DESDE NEXTVENT HUB.");
+                                }
+                                else
+                                {
+                                    if (System.IO.File.Exists("license.jwt"))
+                                    {
+                                        System.IO.File.Delete("license.jwt");
+                                        Log.Warning("❌ LICENCIA REVOCADA POR EL SERVIDOR (Kill Switch Activo).");
+                                        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                                        {
+                                            if (App.Current?.ApplicationLifetime is Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime desktop)
+                                            {
+                                                if (desktop.MainWindow != null && !(desktop.MainWindow.Content is NextVent.Views.LicenseLockedView))
+                                                {
+                                                    desktop.MainWindow.Content = new NextVent.Views.LicenseLockedView { DataContext = new NextVent.ViewModels.LicenseLockedViewModel() };
+                                                }
+                                            }
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                        catch (Exception innerEx)
+                        {
+                            Log.Error(innerEx, "Error al procesar la respuesta de la licencia.");
+                        }
                     }
                 }
                 catch (Exception ex)

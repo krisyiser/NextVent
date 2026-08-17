@@ -10,6 +10,15 @@
             <mi:MaterialIcon Kind="LockAlert" Width="120" Height="120" Foreground="White" HorizontalAlignment="Center"/>
             <TextBlock Text="{Binding LockMessage}" FontSize="28" FontWeight="Bold" Foreground="White" TextAlignment="Center"/>
             <TextBlock Text="El sistema ha bloqueado el acceso operativo para proteger la integridad de la licencia." FontSize="16" Foreground="#FECACA" TextAlignment="Center" TextWrapping="Wrap" MaxWidth="600"/>
+            
+            <Button Content="Validar Licencia" 
+                    Command="{Binding RevalidateLicenseCommand}" 
+                    IsEnabled="{Binding !IsChecking}"
+                    HorizontalAlignment="Center" 
+                    Background="#10B981" Foreground="White" 
+                    FontSize="16" FontWeight="Bold" 
+                    Padding="24,12" CornerRadius="8" 
+                    Margin="0,20,0,0"/>
         </StackPanel>
     </Grid>
 

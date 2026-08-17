@@ -79,8 +79,16 @@ public partial class App : Application
                 }
                 string dbPath = System.IO.Path.Combine(appFolder, "nextvent.db");
 
+                string securePassword = NextVent.Services.Security.SecurityManager.GetMasterKey();
+                var options = new DbContextOptionsBuilder<AppDbContext>()
+                    .UseSqlite($"Data Source={dbPath};Password={securePassword};Cache=Shared;Mode=ReadWriteCreate;")
+                    .Options;
+
+                using var context = new AppDbContext(options);
+                await context.Database.EnsureCreatedAsync();
+
                 // Safely ensure status and cancellation columns exist in SQLite table before EF Core model validation
-                using (var rawConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={dbPath}"))
+                using (var rawConn = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source={dbPath};Password={securePassword};"))
                 {
                     await rawConn.OpenAsync();
                     string[] alterQueries = new[]
@@ -134,13 +142,6 @@ public partial class App : Application
                     await rawConn.CloseAsync();
                 }
 
-                var options = new DbContextOptionsBuilder<AppDbContext>()
-                    .UseSqlite($"Data Source={dbPath};Cache=Shared;Mode=ReadWriteCreate;")
-                    .Options;
-
-                using var context = new AppDbContext(options);
-                await context.Database.MigrateAsync();
-
                 var auditOptions = new DbContextOptionsBuilder<AuditDbContext>()
                     .UseSqlite($"Data Source={System.IO.Path.Combine(appFolder, "audit_logs.db")};")
                     .Options;
@@ -175,19 +176,20 @@ public partial class App : Application
             string contactEmail = "admin@nextvent.com";
             try
             {
+                string securePassword = NextVent.Services.Security.SecurityManager.GetMasterKey();
                 var options = new DbContextOptionsBuilder<AppDbContext>()
-                    .UseSqlite($"Data Source={System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NextVent", "Database", "nextvent.db")}")
+                    .UseSqlite($"Data Source={System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NextVent", "Database", "nextvent.db")};Password={securePassword};")
                     .Options;
                 using var tempCtx = new AppDbContext(options);
-                var bName = await tempCtx.Settings.FirstOrDefaultAsync(s => s.Key == "BusinessName");
-                if (bName != null) businessName = bName.Value;
+                var bName = await tempCtx.Settings.FirstOrDefaultAsync(s => s.Key == "EmpresaNombreComercial");
+                if (bName != null && !string.IsNullOrWhiteSpace(bName.Value)) businessName = bName.Value;
                 
                 var bEmail = await tempCtx.Settings.FirstOrDefaultAsync(s => s.Key == "ContactEmail");
-                if (bEmail != null) contactEmail = bEmail.Value;
+                if (bEmail != null && !string.IsNullOrWhiteSpace(bEmail.Value)) contactEmail = bEmail.Value;
             }
             catch { }
 
-            var licenseService = new NextVent.Services.Implementations.LicenseEnforcementService();
+            var licenseService = new NextVent.Services.Security.LicenseEnforcementService();
             if (licenseService.IsSystemLocked())
             {
                 Log.Warning("System locked: Kill Switch activated due to invalid or missing license.jwt.");

@@ -14,7 +14,7 @@
             <StackPanel Spacing="12">
                 <TextBlock Text="Registrar Nuevo Cajero / Usuario" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
 
-                <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,*">
+                <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,*">
                     <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,10" Spacing="4">
                         <TextBlock Text="Nombre Completo" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
                         <TextBox Text="{Binding NewFullName, Mode=TwoWay}" Padding="8,6" />
@@ -25,13 +25,23 @@
                         <TextBox Text="{Binding NewUsername, Mode=TwoWay}" Padding="8,6" />
                     </StackPanel>
 
-                    <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,0" Spacing="4">
-                        <TextBlock Text="Rol de Sistema" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                        <TextBox Text="{Binding NewRole, Mode=TwoWay}" Padding="8,6" />
+                    <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,10" Spacing="4">
+                        <TextBlock Text="Contraseña (Principal)" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBox Text="{Binding NewPassword, Mode=TwoWay}" PasswordChar="*" Padding="8,6" />
                     </StackPanel>
 
-                    <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,0" Spacing="4">
-                        <TextBlock Text="PIN de Acceso (4 Dígitos)" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,10" Spacing="4">
+                        <TextBlock Text="Pista de Contraseña (ej. Mascota de la infancia)" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBox Text="{Binding NewPasswordHint, Mode=TwoWay}" Padding="8,6" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,8,0" Spacing="4">
+                        <TextBlock Text="Rol de Sistema" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <ComboBox ItemsSource="{Binding RolesOptions}" SelectedItem="{Binding NewRole, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="8,6" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="2" Grid.Column="1" Margin="8,0,0,0" Spacing="4">
+                        <TextBlock Text="PIN rápido de 4 Dígitos" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
                         <TextBox Text="{Binding NewPin, Mode=TwoWay}" PasswordChar="*" Padding="8,6" />
                     </StackPanel>
                 </Grid>
@@ -42,9 +52,22 @@
             </StackPanel>
         </Border>
 
+        <!-- Admin Deletion Confirmation Panel -->
+        <Border IsVisible="{Binding IsConfirmingAdminDelete}" Padding="16" Background="#33DC2626" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource AccentDangerBrush}" BorderThickness="2" Margin="0,8,0,0">
+            <StackPanel Spacing="12">
+                <TextBlock Text="Confirmación de Seguridad Requerida" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource AccentDangerBrush}" />
+                <TextBlock Text="{Binding UserToDelete.FullName, StringFormat='Estás a punto de eliminar al administrador: {0}. Ingresa la contraseña del administrador para continuar.'}" Foreground="{DynamicResource TextPrimaryBrush}" TextWrapping="Wrap" />
+                <Grid ColumnDefinitions="*,Auto,Auto" Margin="0,8,0,0">
+                    <TextBox Grid.Column="0" Text="{Binding AdminDeletePassword, Mode=TwoWay}" PasswordChar="*" Watermark="Contraseña del Administrador" Margin="0,0,8,0" />
+                    <Button Grid.Column="1" Command="{Binding CancelAdminDeleteCommand}" Content="CANCELAR" Padding="12,6" Margin="0,0,8,0" />
+                    <Button Grid.Column="2" Command="{Binding ConfirmAdminDeleteCommand}" Classes="danger" Content="CONFIRMAR ELIMINACIÓN" Padding="12,6" Background="{DynamicResource AccentDangerBrush}" Foreground="White" FontWeight="Bold" />
+                </Grid>
+            </StackPanel>
+        </Border>
+
         <!-- Registered Users Table -->
         <TextBlock Text="Usuarios Registrados" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,8,0,0" />
-        <ItemsControl ItemsSource="{Binding Users}">
+        <ItemsControl ItemsSource="{Binding Users}" IsEnabled="{Binding !IsConfirmingAdminDelete}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="dto:UserDto">
                     <Border Padding="12,8" Margin="0,0,0,6" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
@@ -52,7 +75,7 @@
                             <TextBlock Grid.Column="0" Text="{Binding FullName}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
                             <TextBlock Grid.Column="1" Text="{Binding Role}" FontSize="12" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
                             <TextBlock Grid.Column="2" Text="{Binding Username, StringFormat='Usuario: {0}'}" FontSize="12" Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" />
-                            <Button Grid.Column="3" Command="{Binding $parent[UserControl].((vm:SettingsViewModel)DataContext).DeleteUserCommand}" CommandParameter="{Binding}" Padding="8,4" Background="Transparent" BorderThickness="0">
+                            <Button Grid.Column="3" Command="{Binding $parent[UserControl].((vm:SettingsViewModel)DataContext).RequestDeleteUserCommand}" CommandParameter="{Binding}" Padding="8,4" Background="Transparent" BorderThickness="0">
                                 <mi:MaterialIcon Kind="TrashCanOutline" Width="18" Height="18" Foreground="{DynamicResource AccentDangerBrush}" />
                             </Button>
                         </Grid>

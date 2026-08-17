@@ -27,10 +27,17 @@
             </Grid>
         </Border>
 
-        <!-- Main Body (Left: Suppliers Directory, Right: New Purchase Order) -->
-        <Grid Grid.Row="1" ColumnDefinitions="*,*">
-            <suppliers:SuppliersDirectoryView Grid.Column="0" Margin="0,0,8,0" />
-            <suppliers:PurchaseOrderView Grid.Column="1" Margin="8,0,0,0" />
-        </Grid>
+        <!-- Main Body (Tabs) -->
+        <TabControl Grid.Row="1" Margin="0,8,0,0">
+            <TabItem Header="Reabastecer Inventario" FontSize="14" FontWeight="SemiBold">
+                <suppliers:PurchaseOrderView Margin="0,16,0,0" />
+            </TabItem>
+            <TabItem Header="Directorio de Proveedores" FontSize="14" FontWeight="SemiBold">
+                <suppliers:SuppliersDirectoryView Margin="0,16,0,0" />
+            </TabItem>
+            <TabItem Header="Historial de Compras" FontSize="14" FontWeight="SemiBold">
+                <suppliers:PurchaseHistoryView Margin="0,16,0,0" />
+            </TabItem>
+        </TabControl>
     </Grid>
 </UserControl>

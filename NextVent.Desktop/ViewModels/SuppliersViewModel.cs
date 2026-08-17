@@ -63,19 +63,42 @@ public partial class SuppliersViewModel : ObservableObject
             var suppliers = await _supplierService.GetAllAsync();
             var purchases = await _purchaseService.GetAllAsync();
             var products = await _productService.GetAllAsync();
+            if (suppliers.Count == 0)
+            {
+                await SeedDemoDataAsync(products.ToList());
+                suppliers = await _supplierService.GetAllAsync();
+                purchases = await _purchaseService.GetAllAsync();
+            }
+
+            // Ensure "Proveedor General" exists
+            var generalSupplier = suppliers.FirstOrDefault(s => s.Name == "Proveedor General (Compras Libres)");
+            if (generalSupplier == null)
+            {
+                generalSupplier = await _supplierService.CreateAsync(new SupplierDto(
+                    Guid.NewGuid().ToString(),
+                    "Proveedor General (Compras Libres)",
+                    "N/A",
+                    "N/A",
+                    "N/A",
+                    "Local/Desconocido",
+                    "Compras Varias",
+                    true
+                ));
+                suppliers.Add(generalSupplier);
+            }
 
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 Suppliers.Clear();
-                foreach (var s in suppliers) Suppliers.Add(s);
+                foreach (var s in suppliers.OrderBy(x => x.Name)) Suppliers.Add(s);
 
                 Purchases.Clear();
-                foreach (var p in purchases) Purchases.Add(p);
+                foreach (var p in purchases.OrderByDescending(x => x.Date)) Purchases.Add(p);
 
                 AvailableProducts.Clear();
-                foreach (var pr in products) AvailableProducts.Add(pr);
+                foreach (var pr in products.OrderBy(x => x.Name)) AvailableProducts.Add(pr);
 
-                if (Suppliers.Count > 0) SelectedSupplierForPurchase = Suppliers[0];
+                SelectedSupplierForPurchase = generalSupplier;
             });
         }
         catch (Exception ex)
@@ -256,5 +279,61 @@ public partial class SuppliersViewModel : ObservableObject
         ConfirmPurchaseCommand.NotifyCanExecuteChanged();
         FeedbackMessage = $"¡Orden sugerida generada con {DraftPurchaseItems.Count} productos con stock crítico!";
         await Task.CompletedTask;
+    }
+
+    private async Task SeedDemoDataAsync(System.Collections.Generic.List<ProductDto> availableProducts)
+    {
+        string[] supplierNames = [ "Bimbo de México", "Coca-Cola Femsa", "Sabritas S.A.", "Lala Corporativo", "Grupo Modelo" ];
+        var createdSuppliers = new System.Collections.Generic.List<SupplierDto>();
+
+        for (int i = 0; i < 5; i++)
+        {
+            var s = new SupplierDto(
+                Guid.NewGuid().ToString(),
+                supplierNames[i],
+                $"RFC000{i}XXX",
+                $"555123456{i}",
+                $"contacto@{supplierNames[i].Replace(" ", "").ToLower()}.com",
+                "Av. Principal " + (i + 1) * 100,
+                "Vendedor " + (i + 1),
+                true
+            );
+            var created = await _supplierService.CreateAsync(s);
+            createdSuppliers.Add(created);
+        }
+
+        var rand = new Random();
+        for (int i = 0; i < 10; i++)
+        {
+            var supplier = createdSuppliers[rand.Next(createdSuppliers.Count)];
+            var items = new System.Collections.Generic.List<PurchaseItemDto>();
+
+            int numItems = rand.Next(1, 4);
+            double totalCost = 0;
+            for (int j = 0; j < numItems; j++)
+            {
+                var prod = availableProducts.Count > 0 
+                    ? availableProducts[rand.Next(availableProducts.Count)] 
+                    : new ProductDto(Guid.NewGuid().ToString(), "0000", "Producto Falso", 10, 15);
+
+                double qty = rand.Next(5, 50);
+                double cost = prod.Cost;
+                items.Add(new PurchaseItemDto(Guid.NewGuid().ToString(), "", prod.Id, prod.Name, cost, qty, qty * cost));
+                totalCost += qty * cost;
+            }
+
+            var p = new PurchaseDto(
+                Guid.NewGuid().ToString(),
+                supplier.Id,
+                supplier.Name,
+                $"FAC-2024-{rand.Next(1000, 9999)}",
+                DateTime.Now.AddDays(-rand.Next(1, 30)).ToString("yyyy-MM-dd HH:mm:ss"),
+                totalCost,
+                "Compra de reabastecimiento demo",
+                items
+            );
+
+            await _purchaseService.RegisterPurchaseAsync(p);
+        }
     }
 }

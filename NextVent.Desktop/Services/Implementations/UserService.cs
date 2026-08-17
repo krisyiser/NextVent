@@ -43,7 +43,7 @@ public class UserService : IUserService
         return entities.Select(MapToDto).ToList();
     }
 
-    public async Task SaveAsync(string id, string nombre, string rol, string? passwordHash, string? pinHash)
+    public async Task SaveAsync(string id, string nombre, string rol, string? passwordHash, string? pinHash, string? passwordHint = null)
     {
         Guid guidId = Guid.TryParse(id, out var parsed) ? parsed : Guid.NewGuid();
         var entity = await _context.Users.FindAsync(guidId);
@@ -59,6 +59,7 @@ public class UserService : IUserService
                 Username = nombre.ToLower().Replace(" ", ""),
                 Role = enumRole,
                 PasswordHash = passwordHash ?? string.Empty,
+                PasswordHint = passwordHint ?? string.Empty,
                 PinCode = string.IsNullOrEmpty(pinHash) ? "1234" : pinHash,
                 IsActive = true
             };
@@ -70,6 +71,7 @@ public class UserService : IUserService
             entity.Role = enumRole;
             if (!string.IsNullOrEmpty(pinHash)) entity.PinCode = pinHash;
             if (!string.IsNullOrEmpty(passwordHash)) entity.PasswordHash = passwordHash;
+            if (passwordHint != null) entity.PasswordHint = passwordHint;
         }
         await _context.SaveChangesAsync();
     }

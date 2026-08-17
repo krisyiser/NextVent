@@ -1,0 +1,42 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NextVent.ViewModels"
+             xmlns:dto="using:NextVent.Data.Dtos"
+             x:Class="NextVent.Views.Suppliers.PurchaseHistoryView"
+             x:DataType="vm:SuppliersViewModel">
+    
+    <Border Padding="16"
+            Background="{DynamicResource BgSecondaryBrush}"
+            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
+        <DockPanel LastChildFill="True">
+            <StackPanel DockPanel.Dock="Top" Spacing="8" Margin="0,0,0,12">
+                <TextBlock Text="Historial de Remisiones y Órdenes de Compra" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                <TextBlock Text="Lista completa de las entradas de mercancía y reabastecimientos realizados." FontSize="12" Foreground="{DynamicResource TextMutedBrush}" />
+            </StackPanel>
+
+            <DataGrid ItemsSource="{Binding Purchases}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="No. Remisión / Factura" Binding="{Binding InvoiceNumber}" Width="1.5*" />
+                    <DataGridTextColumn Header="Proveedor" Binding="{Binding SupplierName}" Width="2*" />
+                    <DataGridTextColumn Header="Fecha y Hora" Binding="{Binding Date}" Width="1.5*" />
+                    <DataGridTextColumn Header="Costo Total" Binding="{Binding TotalCost, StringFormat='${0:N2}'}" Width="1*" />
+                    <DataGridTemplateColumn Header="Artículos" Width="2.5*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate x:DataType="dto:PurchaseDto">
+                                <ScrollViewer MaxHeight="80" VerticalScrollBarVisibility="Auto">
+                                    <ItemsControl ItemsSource="{Binding Items}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="dto:PurchaseItemDto">
+                                                <TextBlock Text="{Binding Quantity, StringFormat='{}{0}x '}{Binding ProductName}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </ScrollViewer>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </DockPanel>
+    </Border>
+</UserControl>
