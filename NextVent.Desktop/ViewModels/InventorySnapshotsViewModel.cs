@@ -20,6 +20,31 @@ public partial class InventorySnapshotsViewModel : ObservableObject
     [ObservableProperty]
     private bool _isLoading;
 
+    partial void OnSelectedSnapshotChanged(InventorySnapshotEntity? value)
+    {
+        if (value != null && (value.Items == null || value.Items.Count == 0))
+        {
+            _ = LoadSnapshotDetailsAsync(value.Id);
+        }
+    }
+
+    private async Task LoadSnapshotDetailsAsync(string id)
+    {
+        IsLoading = true;
+        try
+        {
+            var details = await _snapshotService.GetSnapshotDetailsAsync(id);
+            if (details != null && SelectedSnapshot?.Id == id)
+            {
+                SelectedSnapshot = details;
+            }
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
     public InventorySnapshotsViewModel()
     {
         _snapshotService = new InventorySnapshotService();

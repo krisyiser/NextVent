@@ -6,7 +6,7 @@
              x:Class="NextVent.Views.InventoryView"
              x:DataType="vm:InventoryViewModel">
 
-    <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="16">
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,*" Margin="16">
 
         <!-- ═══ TOP FUNCTION BANNER BAR ═══ -->
         <Border Grid.Row="0" Margin="0,0,0,16" Padding="16,12"
@@ -82,8 +82,21 @@
             </Grid>
         </Border>
 
-        <!-- ═══ INTELLIGENCE SUPPLY CHAIN PANEL ═══ -->
+        <!-- ═══ FEEDBACK MESSAGE BANNER ═══ -->
         <Border Grid.Row="1" Margin="0,0,0,16" Padding="16,12"
+                Background="{DynamicResource AccentSuccessBrush}" CornerRadius="8"
+                IsVisible="{Binding FeedbackMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <mi:MaterialIcon Kind="CheckCircleOutline" Width="24" Height="24" Foreground="White" VerticalAlignment="Center" Margin="0,0,16,0" />
+                <TextBlock Grid.Column="1" Text="{Binding FeedbackMessage}" FontSize="14" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" TextWrapping="Wrap" />
+                <Button Grid.Column="2" Background="Transparent" BorderThickness="0" Padding="4" Command="{Binding ClearFeedbackCommand}">
+                    <mi:MaterialIcon Kind="Close" Width="18" Height="18" Foreground="White" />
+                </Button>
+            </Grid>
+        </Border>
+
+        <!-- ═══ INTELLIGENCE SUPPLY CHAIN PANEL ═══ -->
+        <Border Grid.Row="2" Margin="0,0,0,16" Padding="16,12"
                 Background="#FEF2F2" BorderBrush="#EF4444" BorderThickness="1" CornerRadius="8"
                 IsVisible="{Binding IsIntelligencePanelVisible}">
             <Grid ColumnDefinitions="Auto,*">
@@ -102,7 +115,7 @@
         </Border>
 
         <!-- Search Bar -->
-        <Border Grid.Row="2" Margin="0,0,0,16" Padding="12,8"
+        <Border Grid.Row="3" Margin="0,0,0,16" Padding="12,8"
                 Background="{DynamicResource BgSecondaryBrush}"
                 BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8">
             <Grid ColumnDefinitions="*,Auto">
@@ -122,7 +135,7 @@
         </Border>
 
         <!-- Products DataGrid -->
-        <Border Grid.Row="3" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="1">
+        <Border Grid.Row="4" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="1">
             <DataGrid ItemsSource="{Binding FilteredProducts}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" DoubleTapped="OnDataGridDoubleTapped">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Código / SKU" Binding="{Binding Barcode}" Width="1.5*" />

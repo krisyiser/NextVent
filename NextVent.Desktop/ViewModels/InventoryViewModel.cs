@@ -385,4 +385,10 @@ public partial class InventoryViewModel : ObservableObject
             Log.Error(ex, "Failed to print inventory checklist.");
         }
     }
+
+    [RelayCommand]
+    private void ClearFeedback()
+    {
+        FeedbackMessage = string.Empty;
+    }
 }
