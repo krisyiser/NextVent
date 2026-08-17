@@ -41,27 +41,12 @@ public sealed class SaleService : ISaleService
         
         var query = @"
             INSERT INTO FolioSequences (DatePrefix, LastSequence) 
-            VALUES (@p0, 1) 
+            VALUES ({0}, 1) 
             ON CONFLICT(DatePrefix) 
             DO UPDATE SET LastSequence = LastSequence + 1 
             RETURNING LastSequence;";
 
-        var connection = _ctx.Database.GetDbConnection();
-        if (connection.State != System.Data.ConnectionState.Open)
-            await connection.OpenAsync();
-        
-        using var command = connection.CreateCommand();
-        if (_ctx.Database.CurrentTransaction != null)
-            command.Transaction = _ctx.Database.CurrentTransaction.GetDbTransaction();
-        command.CommandText = query;
-        
-        var param = command.CreateParameter();
-        param.ParameterName = "@p0";
-        param.Value = datePrefix;
-        command.Parameters.Add(param);
-
-        var result = await command.ExecuteScalarAsync();
-        int sequence = Convert.ToInt32(result);
+        int sequence = await _ctx.Database.SqlQueryRaw<int>(query, datePrefix).FirstOrDefaultAsync();
 
         return $"{datePrefix}-{sequence:D4}";
     }
@@ -72,27 +57,12 @@ public sealed class SaleService : ISaleService
         
         var query = @"
             INSERT INTO FolioSequences (DatePrefix, LastSequence) 
-            VALUES (@p0, 1) 
+            VALUES ({0}, 1) 
             ON CONFLICT(DatePrefix) 
             DO UPDATE SET LastSequence = LastSequence + 1 
             RETURNING LastSequence;";
 
-        var connection = _ctx.Database.GetDbConnection();
-        if (connection.State != System.Data.ConnectionState.Open)
-            await connection.OpenAsync();
-        
-        using var command = connection.CreateCommand();
-        if (_ctx.Database.CurrentTransaction != null)
-            command.Transaction = _ctx.Database.CurrentTransaction.GetDbTransaction();
-        command.CommandText = query;
-        
-        var param = command.CreateParameter();
-        param.ParameterName = "@p0";
-        param.Value = datePrefix;
-        command.Parameters.Add(param);
-
-        var result = await command.ExecuteScalarAsync();
-        int sequence = Convert.ToInt32(result);
+        int sequence = await _ctx.Database.SqlQueryRaw<int>(query, datePrefix).FirstOrDefaultAsync();
 
         return $"{datePrefix}-{sequence:D4}";
     }
