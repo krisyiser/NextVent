@@ -173,7 +173,8 @@ public partial class MainWindowViewModel : ObservableObject
         _customersVm = new CustomersViewModel(_customerService);
         _historyVm = new HistoryViewModel(_saleService, _printerService);
         _promotionsVm = new PromotionsViewModel(_promotionService);
-        _fiscalVm = new FiscalViewModel();
+        var facturamaService = Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<IFacturamaService>(App.Current!.Services!);
+        _fiscalVm = new FiscalViewModel(_saleService, facturamaService);
         _cashierPerformanceVm = new CashierPerformanceViewModel(performanceAnalyticsService, attendanceService);
         _settingsVm = new SettingsViewModel(userService, settingsService);
         _ = _settingsVm.LoadSavedSettingsAsync();
@@ -615,6 +616,7 @@ public partial class MainWindowViewModel : ObservableObject
         else if (ActiveViewModel == _customersVm) _ = _customersVm.LoadCustomersAsync();
         else if (ActiveViewModel == _historyVm) _ = _historyVm.LoadSalesAsync();
         else if (ActiveViewModel == _promotionsVm) _ = _promotionsVm.LoadPromotionsAsync();
+        else if (ActiveViewModel == _fiscalVm) _ = _fiscalVm.LoadInvoicesCommand.ExecuteAsync(null);
         else if (ActiveViewModel == _suppliersVm) _ = _suppliersVm.LoadDataAsync();
         else if (ActiveViewModel == _expensesVm) _ = _expensesVm.LoadExpensesAsync();
         else if (ActiveViewModel == _settingsVm) _ = _settingsVm.LoadUsersAsync();

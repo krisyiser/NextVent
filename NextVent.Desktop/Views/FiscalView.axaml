@@ -8,14 +8,27 @@
     <DockPanel LastChildFill="True" Margin="16">
         <Border DockPanel.Dock="Top" Margin="0,0,0,16" Padding="16,12"
                 Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8">
-            <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                <mi:MaterialIcon Kind="ReceiptTextOutline" Width="22" Height="22" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                <TextBlock Text="Facturación Electrónica SAT CFDI 4.0" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
-            </StackPanel>
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <mi:MaterialIcon Kind="ReceiptTextOutline" Width="22" Height="22" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                    <TextBlock Text="Facturación Electrónica SAT CFDI 4.0" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                </StackPanel>
+                <Button Grid.Column="1" Command="{Binding LoadInvoicesCommand}" Background="Transparent" BorderThickness="0" Padding="8">
+                    <mi:MaterialIcon Kind="Refresh" Width="20" Height="20" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                </Button>
+            </Grid>
         </Border>
 
-        <Border Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
-            <TextBlock Text="Módulo CFDI 4.0 listo para TIMBRADO SAT." FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        <Border Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="0">
+            <DataGrid ItemsSource="{Binding Invoices}" AutoGenerateColumns="False" CanUserResizeColumns="True" CanUserReorderColumns="True" IsReadOnly="True" GridLinesVisibility="Horizontal" HeadersVisibility="Column">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Folio Venta" Binding="{Binding Id}" Width="2*" />
+                    <DataGridTextColumn Header="Fecha" Binding="{Binding Date}" Width="2*" />
+                    <DataGridTextColumn Header="Estado CFDI" Binding="{Binding EstadoFiscal}" Width="1.5*" />
+                    <DataGridTextColumn Header="Folio SAT (UUID)" Binding="{Binding InvoiceId}" Width="2.5*" />
+                    <DataGridTextColumn Header="Total" Binding="{Binding Total, StringFormat='${0:N2}'}" Width="1.5*" />
+                </DataGrid.Columns>
+            </DataGrid>
         </Border>
     </DockPanel>
 </UserControl>

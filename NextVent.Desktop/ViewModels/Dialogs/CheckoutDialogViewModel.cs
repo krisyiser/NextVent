@@ -525,6 +525,10 @@ public partial class CheckoutDialogViewModel : ObservableObject
                         FiscalRegime = FiscalRegime.Split('-')[0].Trim(),
                         TaxZipCode = FiscalZipCode.Trim()
                     },
+                    PaymentForm = "01", // Should ideally map from PaymentMethod
+                    PaymentMethod = "PUE",
+                    ExpeditionPlace = "00000" // Configure your local Zip Code
+                };
 
                 if (!System.Text.RegularExpressions.Regex.IsMatch(cfdiRequest.Receiver.Rfc, @"^[A-Z&Ñ]{3,4}[0-9]{6}[A-Z0-9]{3}$", System.Text.RegularExpressions.RegexOptions.IgnoreCase))
                 {
@@ -532,10 +536,6 @@ public partial class CheckoutDialogViewModel : ObservableObject
                     IsProcessing = false;
                     return;
                 }
-                    PaymentForm = "01", // Should ideally map from PaymentMethod
-                    PaymentMethod = "PUE",
-                    ExpeditionPlace = "00000" // Configure your local Zip Code
-                };
 
                 foreach (var item in snapshots)
                 {
