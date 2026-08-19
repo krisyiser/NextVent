@@ -20,6 +20,9 @@ public partial class HistoryViewModel : ObservableObject
     private readonly ISaleService _saleService;
     private readonly IEscPosPrinterService _printerService;
     private readonly NextVent.Data.AppDbContext _db;
+    private readonly ISettingsService? _settingsService;
+
+    private const string CommissionKey = "HistoryCommissionPercentage";
 
     public ObservableCollection<SaleDto> Sales { get; } = [];
     public ObservableCollection<HourlySalesDto> HourlyReport { get; } = [];
@@ -35,22 +38,56 @@ public partial class HistoryViewModel : ObservableObject
     [ObservableProperty] private bool _isLoading = false;
     [ObservableProperty] private double _commissionPercentage = 3.0;
 
+    // Custom Tab State
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsTabArqueos))]
+    private bool _isTabVentas = true;
+    public bool IsTabArqueos => !IsTabVentas;
+
+    [RelayCommand]
+    private void SelectHistoryTab(string tab)
+    {
+        IsTabVentas = tab == "ventas";
+    }
+
     partial void OnCommissionPercentageChanged(double value)
     {
+        _ = SaveCommissionAsync(value);
         _ = LoadCashierPerformanceAsync();
+    }
+
+    private async Task SaveCommissionAsync(double value)
+    {
+        if (_settingsService == null) return;
+        try { await _settingsService.SetAsync(CommissionKey, value.ToString("F1")); }
+        catch (Exception ex) { Log.Warning(ex, "Could not persist commission percentage"); }
     }
 
     public event Action? OpenCashupRequested;
     public event Action<SaleDto>? OpenReturnRequested;
     public event Action<string, Action<bool>>? OpenSupervisorPinRequested;
 
-    public HistoryViewModel(ISaleService saleService, IEscPosPrinterService printerService, NextVent.Data.AppDbContext db)
+    public HistoryViewModel(ISaleService saleService, IEscPosPrinterService printerService, NextVent.Data.AppDbContext db, ISettingsService? settingsService = null)
     {
         _saleService = saleService;
         _printerService = printerService;
         _db = db;
+        _settingsService = settingsService;
+        _ = LoadSavedCommissionAsync();
         _ = LoadSalesAsync();
         _ = LoadCashierPerformanceAsync();
+    }
+
+    private async Task LoadSavedCommissionAsync()
+    {
+        if (_settingsService == null) return;
+        try
+        {
+            var saved = await _settingsService.GetAsync(CommissionKey);
+            if (double.TryParse(saved, out double v) && v >= 0)
+                CommissionPercentage = v;
+        }
+        catch (Exception ex) { Log.Warning(ex, "Could not load saved commission percentage"); }
     }
 
     public Task LoadSalesAsync() => FetchSalesHistoryAsync();

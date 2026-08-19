@@ -6,10 +6,10 @@
              x:Class="NextVent.Views.HistoryView"
              x:DataType="vm:HistoryViewModel">
 
-    <Grid RowDefinitions="Auto,*" Margin="16">
+    <Grid RowDefinitions="Auto,Auto,*" Margin="16">
 
         <!-- ═══ 1. TOP FUNCTION BANNER BAR ═══ -->
-        <Border Grid.Row="0" Margin="0,0,0,16" Padding="16,12"
+        <Border Grid.Row="0" Margin="0,0,0,12" Padding="16,12"
                 Background="{DynamicResource BgSecondaryBrush}"
                 BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
             <Grid ColumnDefinitions="Auto,*">
@@ -18,7 +18,7 @@
                         <mi:MaterialIcon Kind="History" Width="22" Height="22" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="Auditoría de Ventas, Hora Pico y Corte final" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        <TextBlock Text="Auditória de Ventas, Hora Pico y Corte final" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
                         <TextBlock Text="Historial Chronológico, Desglose por Hora e Impresión de Tickets" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
                     </StackPanel>
                 </StackPanel>
@@ -38,36 +38,96 @@
 
                     <TextBlock Text="{Binding FeedbackMessage}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource AccentSuccessBrush}" VerticalAlignment="Center" Margin="12,4" />
 
-                    <!-- Sprint J: Cashup Audit Button -->
+                    <!-- Cashup Audit Button -->
                     <Button Command="{Binding PerformCashCutoffCommand}" Margin="0,2,0,2" Padding="12,6" CornerRadius="{DynamicResource AppCornerRadius}"
                             Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource AccentWarningBrush}" BorderThickness="2" ToolTip.Tip="Abrir matriz de arqueo físico por billetes y monedas">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <mi:MaterialIcon Kind="CashMultiple" Width="16" Height="16" Foreground="{DynamicResource AccentWarningBrush}" />
-                            <TextBlock Text="CORTE DE CAJA (CASHUP)" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentWarningBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="ARQUEO DE CAJA" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentWarningBrush}" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
                 </WrapPanel>
             </Grid>
         </Border>
 
-        <TabControl Grid.Row="1" Margin="0">
-            <TabItem Header="Ventas y Rendimiento">
-                <Grid RowDefinitions="Auto,Auto,*">
-                    <!-- ═══ 2. HOURLY SALES & PEAK HOUR CARD ═══ -->
-                    <history:HistoryHourlyReportView Grid.Row="0" Margin="0,0,0,16" />
+        <!-- ═══ 2. PROMINENT TAB SELECTOR ═══ -->
+        <Border Grid.Row="1" Margin="0,0,0,12" Padding="6"
+                Background="{DynamicResource BgTertiaryBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
+            <Grid ColumnDefinitions="*,*">
 
-                    <!-- ═══ 3. CASHIER PERFORMANCE & COMMISSIONS CARD ═══ -->
-                    <history:CashierPerformanceView Grid.Row="1" Margin="0,0,0,16" />
+                <!-- Tab 1: Ventas y Rendimiento (Active) -->
+                <Button Grid.Column="0" Command="{Binding SelectHistoryTabCommand}" CommandParameter="ventas"
+                        Margin="0,0,4,0" Height="52" CornerRadius="{DynamicResource AppCornerRadius}"
+                        Background="{DynamicResource AccentPrimaryBrush}"
+                        IsVisible="{Binding IsTabVentas}">
+                    <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+                        <mi:MaterialIcon Kind="ChartLine" Width="20" Height="20" Foreground="White" />
+                        <StackPanel>
+                            <TextBlock Text="Ventas y Rendimiento" FontSize="13" FontWeight="Bold" Foreground="White" />
+                            <TextBlock Text="Histórico, comisiones y reporte horario" FontSize="10" Foreground="#BFDBFE" />
+                        </StackPanel>
+                    </StackPanel>
+                </Button>
+                <Button Grid.Column="0" Command="{Binding SelectHistoryTabCommand}" CommandParameter="ventas"
+                        Margin="0,0,4,0" Height="52" CornerRadius="{DynamicResource AppCornerRadius}"
+                        Background="Transparent" BorderThickness="0"
+                        IsVisible="{Binding IsTabArqueos}">
+                    <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+                        <mi:MaterialIcon Kind="ChartLine" Width="20" Height="20" Foreground="#64748B" />
+                        <StackPanel>
+                            <TextBlock Text="Ventas y Rendimiento" FontSize="13" FontWeight="Bold" Foreground="#94A3B8" />
+                            <TextBlock Text="Histórico, comisiones y reporte horario" FontSize="10" Foreground="#64748B" />
+                        </StackPanel>
+                    </StackPanel>
+                </Button>
 
-                    <!-- ═══ 4. MAIN TRANSACTIONS TABLE ═══ -->
-                    <history:HistorySalesTableView Grid.Row="2" />
-                </Grid>
-            </TabItem>
-            
-            <TabItem Header="Registro de Arqueos">
-                <history:HistoryCashupsTableView />
-            </TabItem>
-        </TabControl>
+                <!-- Tab 2: Registro de Arqueos (Active) -->
+                <Button Grid.Column="1" Command="{Binding SelectHistoryTabCommand}" CommandParameter="arqueos"
+                        Margin="4,0,0,0" Height="52" CornerRadius="{DynamicResource AppCornerRadius}"
+                        Background="#D97706"
+                        IsVisible="{Binding IsTabArqueos}">
+                    <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+                        <mi:MaterialIcon Kind="CashRegister" Width="20" Height="20" Foreground="White" />
+                        <StackPanel>
+                            <TextBlock Text="Registro de Arqueos" FontSize="13" FontWeight="Bold" Foreground="White" />
+                            <TextBlock Text="Cortes de caja y balances de turno" FontSize="10" Foreground="#FDE68A" />
+                        </StackPanel>
+                    </StackPanel>
+                </Button>
+                <Button Grid.Column="1" Command="{Binding SelectHistoryTabCommand}" CommandParameter="arqueos"
+                        Margin="4,0,0,0" Height="52" CornerRadius="{DynamicResource AppCornerRadius}"
+                        Background="Transparent" BorderThickness="0"
+                        IsVisible="{Binding IsTabVentas}">
+                    <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+                        <mi:MaterialIcon Kind="CashRegister" Width="20" Height="20" Foreground="#64748B" />
+                        <StackPanel>
+                            <TextBlock Text="Registro de Arqueos" FontSize="13" FontWeight="Bold" Foreground="#94A3B8" />
+                            <TextBlock Text="Cortes de caja y balances de turno" FontSize="10" Foreground="#64748B" />
+                        </StackPanel>
+                    </StackPanel>
+                </Button>
+
+            </Grid>
+        </Border>
+
+        <!-- ═══ 3. CONTENT PANELS ═══ -->
+        <Grid Grid.Row="2">
+            <!-- Panel: Ventas y Rendimiento -->
+            <Grid RowDefinitions="Auto,Auto,*" IsVisible="{Binding IsTabVentas}">
+                <!-- ═══ 2. HOURLY SALES & PEAK HOUR CARD ═══ -->
+                <history:HistoryHourlyReportView Grid.Row="0" Margin="0,0,0,16" />
+
+                <!-- ═══ 3. CASHIER PERFORMANCE & COMMISSIONS CARD ═══ -->
+                <history:CashierPerformanceView Grid.Row="1" Margin="0,0,0,16" />
+
+                <!-- ═══ 4. MAIN TRANSACTIONS TABLE ═══ -->
+                <history:HistorySalesTableView Grid.Row="2" />
+            </Grid>
+
+            <!-- Panel: Registro de Arqueos -->
+            <history:HistoryCashupsTableView IsVisible="{Binding IsTabArqueos}" />
+        </Grid>
 
     </Grid>
 </UserControl>

@@ -181,13 +181,13 @@ public partial class MainWindowViewModel : ObservableObject
         _posVm = new PosViewModel(_productService, _db, shiftNoteService, kitService, _customerService, sessionManager, userRepository, _promotionService, _auditService, attendanceService, predictiveService, externalCatalogService);
         _inventoryVm = new InventoryViewModel(_productService, externalCatalogService, purchaseService, predictiveService);
         _customersVm = new CustomersViewModel(_customerService);
-        _historyVm = new HistoryViewModel(_saleService, _printerService, _db);
+        _historyVm = new HistoryViewModel(_saleService, _printerService, _db, settingsService);
         _promotionsVm = new PromotionsViewModel(_promotionService);
         var facturamaService = Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<IFacturamaService>(App.Current!.Services!);
         _fiscalVm = new FiscalViewModel(_saleService, facturamaService);
         _cashierPerformanceVm = new CashierPerformanceViewModel(performanceAnalyticsService, attendanceService);
         _settingsVm = new SettingsViewModel(userService, settingsService);
-        _suppliersVm = new SuppliersViewModel(supplierService, purchaseService, _productService);
+        _suppliersVm = new SuppliersViewModel(supplierService, purchaseService, _productService, _printerService);
         _expensesVm = new ExpensesViewModel(expenseService, shiftService);
         _userRepository = userRepository;
 
@@ -542,6 +542,23 @@ public partial class MainWindowViewModel : ObservableObject
                 CloseDialog();
                 _ = _promotionsVm.LoadPromotionsAsync();
             };
+            ActiveDialogViewModel = dialog;
+            IsDialogOverlayOpen = true;
+        };
+
+        // ── Wire POS Header X-Report (Parcial) & Z-Report (Final) Cashup ──
+        _posVm.OpenPartialCashupRequested += () =>
+        {
+            var dialog = new CashupDialogViewModel(_db, _shiftService, _sessionManager, _printerService, _backupService, attendanceService: _attendanceService, isFinalZCut: false);
+            dialog.RequestClose += CloseDialog;
+            ActiveDialogViewModel = dialog;
+            IsDialogOverlayOpen = true;
+        };
+
+        _posVm.OpenFinalCashupRequested += () =>
+        {
+            var dialog = new CashupDialogViewModel(_db, _shiftService, _sessionManager, _printerService, _backupService, attendanceService: _attendanceService, isFinalZCut: true);
+            dialog.RequestClose += CloseDialog;
             ActiveDialogViewModel = dialog;
             IsDialogOverlayOpen = true;
         };

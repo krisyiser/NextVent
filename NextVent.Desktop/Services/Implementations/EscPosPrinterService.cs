@@ -285,6 +285,71 @@ public class EscPosPrinterService : IEscPosPrinterService, IDisposable, IAsyncDi
         }
     }
 
+    public Task<bool> PrintPurchaseOrderAsync(NextVent.Data.Dtos.PurchaseDto purchase, string printerPortOrName = "COM1")
+    {
+        try
+        {
+            using var ms = new MemoryStream();
+            ms.Write(EscInit, 0, EscInit.Length);
+            ms.Write(new byte[] { 0x1B, 0x74, 0x13 }, 0, 3); // CP858
+
+            // Header
+            ms.Write(AlignCenter, 0, AlignCenter.Length);
+            ms.Write(DoubleSizeOn, 0, DoubleSizeOn.Length);
+            ms.Write(BoldOn, 0, BoldOn.Length);
+            WriteString(ms, "TICKETFY!\n");
+            ms.Write(DoubleSizeOff, 0, DoubleSizeOff.Length);
+            ms.Write(BoldOff, 0, BoldOff.Length);
+            WriteString(ms, "REMISION / ENTRADA DE MERCANCIA\n");
+            WriteString(ms, "================================================\n");
+
+            ms.Write(AlignLeft, 0, AlignLeft.Length);
+            WriteString(ms, $"FOLIO: {purchase.InvoiceNumber}\n");
+            WriteString(ms, $"PROVEEDOR: {purchase.SupplierName}\n");
+            if (DateTime.TryParse(purchase.Date, out var dt))
+                WriteString(ms, $"FECHA: {dt:dd/MM/yyyy HH:mm}\n");
+            else
+                WriteString(ms, $"FECHA: {purchase.Date}\n");
+            WriteString(ms, "------------------------------------------------\n");
+
+            // Items
+            WriteString(ms, "DESC.                   CANT    COSTO\n");
+            WriteString(ms, "------------------------------------------------\n");
+            if (purchase.Items != null)
+            {
+                foreach (var item in purchase.Items)
+                {
+                    string desc = item.ProductName.Length > 22 ? item.ProductName.Substring(0, 22) : item.ProductName.PadRight(22);
+                    string qty = item.Quantity.ToString("N2").PadLeft(6);
+                    string cost = $"${item.TotalPrice:N2}".PadLeft(8);
+                    WriteString(ms, $"{desc} {qty} {cost}\n");
+                }
+            }
+
+            WriteString(ms, "------------------------------------------------\n");
+            ms.Write(AlignRight, 0, AlignRight.Length);
+            ms.Write(BoldOn, 0, BoldOn.Length);
+            ms.Write(DoubleSizeOn, 0, DoubleSizeOn.Length);
+            WriteString(ms, $"TOTAL: ${purchase.TotalCost:N2}\n");
+            ms.Write(DoubleSizeOff, 0, DoubleSizeOff.Length);
+            ms.Write(BoldOff, 0, BoldOff.Length);
+
+            ms.Write(AlignCenter, 0, AlignCenter.Length);
+            WriteString(ms, "\n\n________________________________\n");
+            WriteString(ms, "FIRMA DE RECIBIDO\n\n\n");
+            ms.Write(PaperCut, 0, PaperCut.Length);
+
+            byte[] rawData = ms.ToArray();
+            _printerQueue.Writer.TryWrite(new PrintJob(printerPortOrName, rawData));
+            return Task.FromResult(true);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error preparing purchase order receipt payload");
+            return Task.FromResult(false);
+        }
+    }
+
     public Task<bool> PrintTestPageAsync(string printerPortOrName = "COM1")
     {
         try

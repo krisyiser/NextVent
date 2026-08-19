@@ -16,6 +16,7 @@ public partial class SuppliersViewModel : ObservableObject
     private readonly ISupplierService _supplierService;
     private readonly IPurchaseService _purchaseService;
     private readonly IProductService _productService;
+    private readonly IEscPosPrinterService? _printerService;
 
     public ObservableCollection<SupplierDto> Suppliers { get; } = [];
     public ObservableCollection<PurchaseDto> Purchases { get; } = [];
@@ -48,11 +49,12 @@ public partial class SuppliersViewModel : ObservableObject
     [ObservableProperty]
     private string _submitButtonText = "PROCESAR ENTRADA Y REABASTECER INVENTARIO";
 
-    public SuppliersViewModel(ISupplierService supplierService, IPurchaseService purchaseService, IProductService productService)
+    public SuppliersViewModel(ISupplierService supplierService, IPurchaseService purchaseService, IProductService productService, IEscPosPrinterService? printerService = null)
     {
         _supplierService = supplierService;
         _purchaseService = purchaseService;
         _productService = productService;
+        _printerService = printerService;
         _ = LoadDataAsync();
     }
 
@@ -338,6 +340,30 @@ public partial class SuppliersViewModel : ObservableObject
             );
 
             await _purchaseService.RegisterPurchaseAsync(p);
+        }
+    }
+
+    /// <summary>
+    /// Generates and queues an ESC/POS purchase receipt for the selected purchase record.
+    /// </summary>
+    [RelayCommand]
+    private async Task PrintPurchaseTicketAsync(PurchaseDto? purchase)
+    {
+        if (purchase == null || _printerService == null)
+        {
+            FeedbackMessage = "No hay impresora configurada o registro de compra seleccionado.";
+            return;
+        }
+
+        try
+        {
+            await _printerService.PrintPurchaseOrderAsync(purchase, "ImpresoraTickets");
+            FeedbackMessage = $"Ticket de compra {purchase.InvoiceNumber} enviado a impresora.";
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error printing purchase ticket");
+            FeedbackMessage = "Error al imprimir el ticket de compra.";
         }
     }
 }
