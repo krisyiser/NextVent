@@ -26,7 +26,9 @@ public partial class SettingsViewModel : ObservableObject
     private readonly ISettingsService? _settingsService;
 
     // Application Version
-    public string AppVersion => $"v{System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "3.0"}";
+    public string AppVersion => NextVent.Core.Helpers.AppVersionHelper.DisplayVersion;
+    public string CurrentAppVersion => NextVent.Core.Helpers.AppVersionHelper.DisplayVersion;
+    public string FullAppVersionTitle => NextVent.Core.Helpers.AppVersionHelper.FullTitle;
 
     // Active Main Category Tab
     [ObservableProperty] private bool _isEmpresaTab = true;

@@ -52,6 +52,9 @@ public partial class MainWindowViewModel : ObservableObject
         set => ActiveViewModel = value;
     }
 
+    public string CurrentAppVersion => NextVent.Core.Helpers.AppVersionHelper.DisplayVersion;
+    public string FullAppVersionTitle => NextVent.Core.Helpers.AppVersionHelper.FullTitle;
+
     [ObservableProperty] private string _sidebarDockPosition = "Left";
     [ObservableProperty] private double _sidebarWidth = 80;
     [ObservableProperty] private double _sidebarHeight = double.NaN;

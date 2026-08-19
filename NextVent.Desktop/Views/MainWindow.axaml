@@ -222,16 +222,27 @@
 
                     </StackPanel>
 
-                    <!-- Nav: System / Update Button at Bottom -->
-                    <StackPanel DockPanel.Dock="Bottom" Margin="8,8,8,16" Spacing="10" HorizontalAlignment="Center">
-                        <Button Classes="nav-item"
-                                Command="{Binding CheckForUpdatesCommand}"
-                                ToolTip.Tip="Buscar Actualizaciones">
-                            <StackPanel Spacing="2">
-                                <mi:MaterialIcon Kind="Update" Width="22" Height="22" HorizontalAlignment="Center" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                                <TextBlock Text="Actualizar" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                    <!-- Nav: System / Update Button & Version Badge at Bottom -->
+                    <StackPanel DockPanel.Dock="Bottom" Margin="4,8,4,14" Spacing="6" HorizontalAlignment="Center">
+                        <!-- Prominent High-Visibility Update Button -->
+                        <Button Command="{Binding CheckForUpdatesCommand}"
+                                ToolTip.Tip="Buscar e instalar actualizaciones OTA del sistema"
+                                Padding="6,6" Width="68" Height="50"
+                                CornerRadius="{DynamicResource AppCornerRadius}"
+                                Background="#1E3A8A"
+                                BorderBrush="#38BDF8"
+                                BorderThickness="1.5"
+                                Cursor="Hand">
+                            <StackPanel Spacing="2" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <mi:MaterialIcon Kind="Update" Width="20" Height="20" HorizontalAlignment="Center" Foreground="#38BDF8" />
+                                <TextBlock Text="Actualizar" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" Foreground="#F8FAFC" />
                             </StackPanel>
                         </Button>
+
+                        <!-- Dynamic Version Badge always visible under Actualizar button -->
+                        <Border Background="#0F172A" Padding="6,2" CornerRadius="8" BorderBrush="#334155" BorderThickness="1" HorizontalAlignment="Center" ToolTip.Tip="Versión actual del sistema">
+                            <TextBlock Text="{Binding CurrentAppVersion}" FontSize="10" FontWeight="Bold" Foreground="#94A3B8" HorizontalAlignment="Center" />
+                        </Border>
                     </StackPanel>
                 </DockPanel>
             </Border>

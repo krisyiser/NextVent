@@ -10,7 +10,7 @@ $ReleaseDir = ".\Output\Releases"
 Write-Host "Compilando Ticketfy v$Version..." -ForegroundColor Cyan
 
 # 1. Publish the .NET Application
-dotnet publish $ProjectPath -c Release -r win-x64 --self-contained
+dotnet publish $ProjectPath -c Release -r win-x64 --self-contained -p:Version=$Version -p:AssemblyVersion=$Version.0 -p:FileVersion=$Version.0
 
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Error en la compilacion (dotnet publish)." -ForegroundColor Red

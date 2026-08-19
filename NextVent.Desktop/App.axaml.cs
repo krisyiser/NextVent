@@ -72,7 +72,7 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            Log.Information("TICKETFY! v3.0.12 — Avalonia Native Desktop starting");
+            Log.Information("TICKETFY! {Version} — Avalonia Native Desktop starting", NextVent.Core.Helpers.AppVersionHelper.DisplayVersion);
 
             try
             {
