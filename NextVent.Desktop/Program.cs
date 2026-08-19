@@ -3,6 +3,7 @@ using Serilog;
 using System;
 using System.IO;
 using System.Threading;
+using Velopack;
 
 namespace NextVent;
 
@@ -14,6 +15,12 @@ internal static class Program
     [STAThread]
     public static void Main(string[] args)
     {
+        // 0. Disable SSL globally for Velopack auto-updates on self-signed Forgejo
+        System.Net.ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+
+        // 1. Initialize Velopack (crucial for shortcuts, uninstalls, and OTA background updates)
+        VelopackApp.Build().Run();
+
         _mutex = new Mutex(true, MutexName, out bool createdNew);
 
         if (!createdNew)
@@ -35,7 +42,7 @@ internal static class Program
             {
                 var logDir = Path.Combine(
                     Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "NextVent", "logs");
+                    "ticketfy", "Logs");
                 Directory.CreateDirectory(logDir);
 
                 Log.Logger = new LoggerConfiguration()

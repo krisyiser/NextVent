@@ -1,0 +1,59 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:NextVent.ViewModels.Dialogs"
+        xmlns:mi="using:Material.Icons.Avalonia"
+        x:Class="NextVent.Views.Dialogs.PrintPreviewWindow"
+        x:DataType="vm:PrintPreviewWindowViewModel"
+        Title="Confirmar Impresión"
+        Width="450" Height="280"
+        WindowStartupLocation="CenterOwner"
+        SystemDecorations="None"
+        Background="Transparent"
+        TransparencyLevelHint="Transparent"
+        CanResize="False">
+
+    <Grid Background="#80000000">
+        <Border Width="450" HorizontalAlignment="Center" VerticalAlignment="Center"
+                Background="{DynamicResource BgSecondaryBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                CornerRadius="{DynamicResource AppCornerRadius}" Padding="24">
+            <StackPanel Spacing="16">
+                <!-- Header -->
+                <Grid ColumnDefinitions="*, Auto">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <mi:MaterialIcon Kind="PrinterPreview" Width="24" Height="24" Foreground="{DynamicResource AccentPrimaryBrush}"/>
+                        <TextBlock Text="PREVISUALIZACIÓN DE IMPRESIÓN" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <Button Grid.Column="1" Command="{Binding CancelCommand}" Width="28" Height="28" Padding="0" Background="Transparent" BorderThickness="0">
+                        <mi:MaterialIcon Kind="Close" Width="18" Height="18" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    </Button>
+                </Grid>
+
+                <Border Height="1" Background="{DynamicResource BorderBrush}" />
+
+                <!-- Content -->
+                <StackPanel Spacing="12" HorizontalAlignment="Center" Margin="0,8,0,16">
+                    <mi:MaterialIcon Kind="FileDocumentOutline" Width="64" Height="64" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" />
+                    <TextBlock Text="Documento a Imprimir:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" />
+                    <TextBlock Text="{Binding DocumentName}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" />
+                    <TextBlock Text="Se enviará a la impresora térmica predeterminada." FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" Margin="0,4,0,0" />
+                </StackPanel>
+
+                <!-- Action Buttons -->
+                <Grid ColumnDefinitions="*, *" Margin="0,8,0,0">
+                    <Button Grid.Column="0" Content="CANCELAR" Command="{Binding CancelCommand}" 
+                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="10,12" Margin="0,0,6,0"
+                            Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" FontWeight="Bold"/>
+                    <Button Grid.Column="1" Command="{Binding ConfirmCommand}" 
+                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Padding="10,12" Margin="6,0,0,0"
+                            Classes="primary-action" CornerRadius="{DynamicResource AppCornerRadius}">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <mi:MaterialIcon Kind="Printer" Width="18" Height="18" Foreground="White" />
+                            <TextBlock Text="IMPRIMIR" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

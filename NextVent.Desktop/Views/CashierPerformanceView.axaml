@@ -23,7 +23,10 @@
                     <DatePicker SelectedDate="{Binding StartDate}"/>
                     <TextBlock Text="a" Foreground="#94A3B8" VerticalAlignment="Center"/>
                     <DatePicker SelectedDate="{Binding EndDate}"/>
-                    <Button Command="{Binding LoadReportsCommand}" Background="#10B981" Foreground="White" CornerRadius="8" Padding="14,8">
+                    <TextBlock Text="Comisión %:" Foreground="#94A3B8" VerticalAlignment="Center" Margin="12,0,0,0"/>
+                    <NumericUpDown Value="{Binding CommissionPercentage}" Minimum="0" Maximum="100" Increment="0.1" FormatString="F1" Width="80" VerticalAlignment="Center"/>
+                    
+                    <Button Command="{Binding LoadReportsCommand}" Background="#10B981" Foreground="White" CornerRadius="8" Padding="14,8" Margin="12,0,0,0">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <materialIcons:MaterialIcon Kind="Refresh" Width="18" Height="18"/>
                             <TextBlock Text="Filtrar"/>
@@ -55,7 +58,7 @@
                                             Foreground="#10B981"/>
 
                         <DataGridTextColumn Header="TICKETS / HORA" Binding="{Binding TicketsPerHour, StringFormat='{}{0:F1}'}" Width="130"/>
-                        <DataGridTextColumn Header="COMISIÓN EST. (1.5%)" Binding="{Binding EstimatedCommission, StringFormat='{}{0:C}'}" Width="150"/>
+                        <DataGridTextColumn Header="{Binding CommissionPercentage, StringFormat='COMISIÓN EST. ({0:F1}%)'}" Binding="{Binding EstimatedCommission, StringFormat='{}{0:C}'}" Width="150"/>
                     </DataGrid.Columns>
                 </DataGrid>
 
@@ -65,3 +68,4 @@
         </Border>
     </Grid>
 </UserControl>
+

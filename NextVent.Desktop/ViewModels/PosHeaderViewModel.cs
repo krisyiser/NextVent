@@ -27,6 +27,7 @@ public partial class PosHeaderViewModel : ObservableObject
     [ObservableProperty] private bool _isDbEncrypted = true;
 
     public ObservableCollection<ShiftNoteDto> ActiveShiftNotes { get; } = [];
+    public bool HasShiftNotes => ActiveShiftNotes.Count > 0;
     [ObservableProperty] private string _newShiftNoteText = string.Empty;
 
     public ObservableCollection<ParkedTicketModel> ParkedTickets { get; } = new();
@@ -52,6 +53,7 @@ public partial class PosHeaderViewModel : ObservableObject
         _cartStateStore = cartStateStore;
 
         ParkedTickets.CollectionChanged += (s, e) => OnPropertyChanged(nameof(HasParkedTickets));
+        ActiveShiftNotes.CollectionChanged += (s, e) => OnPropertyChanged(nameof(HasShiftNotes));
 
         if (_sessionManager != null)
         {
@@ -179,13 +181,13 @@ public partial class PosHeaderViewModel : ObservableObject
     private void GenerateXReport()
     {
         // TODO: Implement X Report
-        FeedbackMessage = "Generando Corte X...";
+        FeedbackMessage = "Generando Corte parcial de caja...";
     }
 
     [RelayCommand]
     private void GenerateZReport()
     {
         // TODO: Implement Z Report
-        FeedbackMessage = "Generando Corte Z...";
+        FeedbackMessage = "Generando Corte final...";
     }
 }

@@ -289,7 +289,7 @@ public sealed class ProductService : IProductService
         Category = d.Category,
         Unit = d.Unit,
         ExpiresSoon = d.ExpiresSoon,
-        CreatedAt = d.CreatedAt ?? DateTimeOffset.UtcNow.ToString("o"),
+        CreatedAt = d.CreatedAt ?? DateTimeOffset.Now.ToString("o"),
         PointsRewarded = d.PointsRewarded,
         ReorderQuantity = d.ReorderQuantity,
         LocationRack = d.LocationRack,

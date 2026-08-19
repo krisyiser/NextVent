@@ -1,4 +1,5 @@
 using System;
+using Microsoft.EntityFrameworkCore;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
@@ -16,13 +17,34 @@ public class FacturamaService : IFacturamaService
     public FacturamaService(HttpClient httpClient)
     {
         _httpClient = httpClient;
-        _httpClient.BaseAddress = new Uri("https://apisandbox.facturama.mx/");
     }
 
-    public async Task<FacturamaCfdiResponse?> CreateInvoiceAsync(FacturamaCfdiRequest request, string user, string pass)
+    public async Task<FacturamaCfdiResponse?> CreateInvoiceAsync(FacturamaCfdiRequest request)
     {
         try
         {
+            string securePassword = NextVent.Services.Security.SecurityManager.GetMasterKey();
+            var options = new Microsoft.EntityFrameworkCore.DbContextOptionsBuilder<NextVent.Data.AppDbContext>()
+                .UseSqlite($"Data Source={System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ticketfy", "Database", "nextvent.db")};Password={securePassword};")
+                .Options;
+            
+            using var tempCtx = new NextVent.Data.AppDbContext(options);
+            var userSetting = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.FirstOrDefaultAsync(tempCtx.Settings, s => s.Key == "FacturamaApiUser");
+            var passSetting = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.FirstOrDefaultAsync(tempCtx.Settings, s => s.Key == "FacturamaApiPassword");
+            var ambSetting = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.FirstOrDefaultAsync(tempCtx.Settings, s => s.Key == "FacturamaAmbiente");
+
+            string user = userSetting?.Value ?? "";
+            string pass = passSetting?.Value ?? "";
+            string ambiente = ambSetting?.Value ?? "Sandbox";
+
+            if (string.IsNullOrWhiteSpace(user) || string.IsNullOrWhiteSpace(pass))
+            {
+                throw new Exception("Credenciales de Facturama no configuradas en Ajustes -> Empresa.");
+            }
+
+            string baseUrl = ambiente == "Producción" ? "https://api.facturama.mx/" : "https://apisandbox.facturama.mx/";
+            _httpClient.BaseAddress = new Uri(baseUrl);
+
             var base64Auth = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{user}:{pass}"));
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", base64Auth);
 

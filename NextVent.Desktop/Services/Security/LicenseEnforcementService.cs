@@ -20,7 +20,23 @@ iwIDAQAB
 
     public bool IsSystemLocked()
     {
-        string licensePath = "license.jwt";
+        string localAppFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ticketfy");
+        string licensePath = Path.Combine(localAppFolder, "license.jwt");
+
+        // Si no existe en AppData, intentar copiarla del directorio de instalación original (Program Files)
+        if (!File.Exists(licensePath))
+        {
+            string baseLicense = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "license.jwt");
+            if (File.Exists(baseLicense))
+            {
+                try
+                {
+                    Directory.CreateDirectory(localAppFolder);
+                    File.Copy(baseLicense, licensePath);
+                }
+                catch { }
+            }
+        }
 
         if (!File.Exists(licensePath))
         {

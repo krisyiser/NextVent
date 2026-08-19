@@ -51,7 +51,7 @@
                 <Grid RowDefinitions="Auto" ColumnDefinitions="*,*">
                     <StackPanel Grid.Column="0" Margin="0,0,4,0" Spacing="4">
                         <TextBlock Text="Cantidad a Devolver *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                        <TextBox Text="{Binding ReturnQuantity, Mode=TwoWay}" Watermark="1.0" Padding="8" FontSize="14" FontWeight="Bold" />
+                        <NumericUpDown Value="{Binding ReturnQuantity}" ShowButtonSpinner="False" FormatString="0.00" Minimum="0" Watermark="1.0" Padding="8" FontSize="14" FontWeight="Bold" />
                     </StackPanel>
 
                     <StackPanel Grid.Column="1" Margin="4,0,0,0" Spacing="4">
@@ -79,3 +79,4 @@
         </Border>
     </Grid>
 </UserControl>
+

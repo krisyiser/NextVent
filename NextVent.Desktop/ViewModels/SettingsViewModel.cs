@@ -25,6 +25,9 @@ public partial class SettingsViewModel : ObservableObject
     private readonly IUserService? _userService;
     private readonly ISettingsService? _settingsService;
 
+    // Application Version
+    public string AppVersion => $"v{System.Reflection.Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "3.0"}";
+
     // Active Main Category Tab
     [ObservableProperty] private bool _isEmpresaTab = true;
     [ObservableProperty] private bool _isInterfazTab = false;
@@ -53,13 +56,13 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _isSubAnimaciones = false;
 
     // ═══ EMPRESA SUB-TABS ═══
-    [ObservableProperty] private string _empresaNombreComercial = "Abarrotes & Vinos El Trébol";
-    [ObservableProperty] private string _empresaRazonSocial = "Comercializadora El Trébol S.A. de C.V.";
-    [ObservableProperty] private string _empresaGiroComercial = "Abarrotes / Minisuper";
-    [ObservableProperty] private string _empresaEslogan = "Calidad y Frescura en tu Colonia";
-    [ObservableProperty] private string _empresaMonedaPrincipal = "MXN";
+    [ObservableProperty] private string _empresaNombreComercial = string.Empty;
+    [ObservableProperty] private string _empresaRazonSocial = string.Empty;
+    [ObservableProperty] private string _empresaGiroComercial = string.Empty;
+    [ObservableProperty] private string _empresaEslogan = string.Empty;
+    [ObservableProperty] private string _empresaMonedaPrincipal = string.Empty;
     [ObservableProperty] private string _empresaSimboloMoneda = "$";
-    [ObservableProperty] private string _empresaZonaHoraria = "America/Mexico_City";
+    [ObservableProperty] private string _empresaZonaHoraria = string.Empty;
 
     public ObservableCollection<string> EmpresaGiroOptions { get; } = [
         "Abarrotes / Minisuper", "Restaurante / Cafetería", "Boutique / Ropa",
@@ -77,16 +80,21 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _empresaSincronizarColorSistema = true;
     [ObservableProperty] private double _empresaThermalLogoThreshold = 128.0;
 
-    [ObservableProperty] private string _empresaRfc = "XAXX010101000";
-    [ObservableProperty] private string _empresaRegimenFiscal = "601 - General de Ley Personas Morales";
-    [ObservableProperty] private string _empresaCodigoPostalFiscal = "03100";
+    [ObservableProperty] private string _empresaRfc = string.Empty;
+    [ObservableProperty] private string _empresaRegimenFiscal = string.Empty;
+    [ObservableProperty] private string _empresaCodigoPostalFiscal = string.Empty;
     [ObservableProperty] private string _empresaCertificadoCerPath = "";
     [ObservableProperty] private string _empresaCertificadoKeyPath = "";
     [ObservableProperty] private string _empresaPasswordKeyCsd = "";
-    [ObservableProperty] private string _empresaUsoCfdiPorDefecto = "G03 - Gastos en general";
+    [ObservableProperty] private string _empresaUsoCfdiPorDefecto = string.Empty;
     [ObservableProperty] private string _empresaPrefijoFolioInterno = "F-";
     [ObservableProperty] private int _empresaFolioInicial = 1;
     [ObservableProperty] private string _csdValidityStatus = "VÁLIDO";
+
+    [ObservableProperty] private string _facturamaApiUser = string.Empty;
+    [ObservableProperty] private string _facturamaApiPassword = string.Empty;
+    [ObservableProperty] private string _facturamaAmbiente = "Sandbox";
+    public ObservableCollection<string> FacturamaAmbienteOptions { get; } = ["Sandbox", "Producción"];
 
     public ObservableCollection<string> RegimenFiscalOptions { get; } = [
         "601 - General de Ley Personas Morales",
@@ -103,13 +111,13 @@ public partial class SettingsViewModel : ObservableObject
         "P01 - Por definir"
     ];
 
-    [ObservableProperty] private string _empresaNombreSucursal = "Matriz Centro";
-    [ObservableProperty] private string _empresaCalleYNumero = "Av. Universidad 1200";
-    [ObservableProperty] private string _empresaColonia = "Col. del Valle";
-    [ObservableProperty] private string _empresaCiudadMunicipio = "Benito Juárez";
-    [ObservableProperty] private string _empresaEstado = "Ciudad de México";
-    [ObservableProperty] private string _empresaTelefonoFijo = "5551234567";
-    [ObservableProperty] private string _empresaWhatsappContacto = "5559876543";
+    [ObservableProperty] private string _empresaNombreSucursal = string.Empty;
+    [ObservableProperty] private string _empresaCalleYNumero = string.Empty;
+    [ObservableProperty] private string _empresaColonia = string.Empty;
+    [ObservableProperty] private string _empresaCiudadMunicipio = string.Empty;
+    [ObservableProperty] private string _empresaEstado = string.Empty;
+    [ObservableProperty] private string _empresaTelefonoFijo = string.Empty;
+    [ObservableProperty] private string _empresaWhatsappContacto = string.Empty;
 
     public ObservableCollection<string> MexicanStates { get; } = [
         "Aguascalientes", "Baja California", "Baja California Sur", "Campeche", "Chiapas",
@@ -120,13 +128,13 @@ public partial class SettingsViewModel : ObservableObject
         "Veracruz", "Yucatán", "Zacatecas"
     ];
 
-    [ObservableProperty] private string _empresaEmailContacto = "contacto@eltrebol.com";
-    [ObservableProperty] private string _empresaSitioWeb = "https://eltrebol.com";
-    [ObservableProperty] private string _empresaFacebook = "@eltreboloficial";
-    [ObservableProperty] private string _empresaInstagram = "@eltrebol_mx";
-    [ObservableProperty] private string _empresaTiktok = "@eltrebolpos";
-    [ObservableProperty] private string _empresaMensajeBienvenidaTicket = "¡Gracias por su preferencia! Síguenos en redes para promociones exclusivas.";
-    [ObservableProperty] private string _empresaQrRedesUrl = "https://eltrebol.com/qr";
+    [ObservableProperty] private string _empresaEmailContacto = string.Empty;
+    [ObservableProperty] private string _empresaSitioWeb = string.Empty;
+    [ObservableProperty] private string _empresaFacebook = string.Empty;
+    [ObservableProperty] private string _empresaInstagram = string.Empty;
+    [ObservableProperty] private string _empresaTiktok = string.Empty;
+    [ObservableProperty] private string _empresaMensajeBienvenidaTicket = string.Empty;
+    [ObservableProperty] private string _empresaQrRedesUrl = string.Empty;
 
     // ═══ INTERFAZ SUB-TAB 1: TEMA (7 PRESETS + GLASSMORPHISM) ═══
     [ObservableProperty] private string _currentTheme = "Modo Claro";
@@ -276,16 +284,16 @@ public partial class SettingsViewModel : ObservableObject
     [ObservableProperty] private bool _autoPrintTicketOnCheckout = true;
     [ObservableProperty] private bool _autoCutPaper = true;
     [ObservableProperty] private bool _printCashierName = true;
-    [ObservableProperty] private string _ticketHeaderLine1 = "ABARROTES & VINOS EL TRÉBOL";
-    [ObservableProperty] private string _ticketHeaderLine2 = "RFC: XAXX010101000 | Tel: 555-123-4567";
-    [ObservableProperty] private string _ticketFooterLine1 = "¡Gracias por su compra!";
-    [ObservableProperty] private string _ticketFooterLine2 = "Conserve su ticket para cambios o aclaraciones.";
+    [ObservableProperty] private string _ticketHeaderLine1 = string.Empty;
+    [ObservableProperty] private string _ticketHeaderLine2 = string.Empty;
+    [ObservableProperty] private string _ticketFooterLine1 = string.Empty;
+    [ObservableProperty] private string _ticketFooterLine2 = string.Empty;
 
     // Conexiones / Periféricos
-    [ObservableProperty] private string _printerPort = "COM1 (9600 8N1)";
-    [ObservableProperty] private string _barcodeScannerMode = "Teclado HID / USB Virtual COM";
-    [ObservableProperty] private string _scalePort = "RS-232 COM2";
-    [ObservableProperty] private string _cashDrawerPort = "RJ11 Puerto Impresora";
+    [ObservableProperty] private string _printerPort = string.Empty;
+    [ObservableProperty] private string _barcodeScannerMode = string.Empty;
+    [ObservableProperty] private string _scalePort = string.Empty;
+    [ObservableProperty] private string _cashDrawerPort = string.Empty;
 
     // Shortcuts List
     public ObservableCollection<KeyboardShortcutItem> KeyboardShortcuts { get; } = [
@@ -335,6 +343,15 @@ public partial class SettingsViewModel : ObservableObject
             if (dict.TryGetValue("EmpresaRazonSocial", out var rs)) EmpresaRazonSocial = rs;
             if (dict.TryGetValue("EmpresaGiroComercial", out var gc)) EmpresaGiroComercial = gc;
             if (dict.TryGetValue("EmpresaRfc", out var rfc)) EmpresaRfc = rfc;
+            if (dict.TryGetValue("EmpresaEstado", out var est)) EmpresaEstado = est;
+            
+            // Clean up old stubborn DB defaults
+            if (PrinterPort == "COM1 (9600 8N1)") PrinterPort = string.Empty;
+            if (EmpresaEstado == "Ciudad de México") EmpresaEstado = string.Empty;
+
+            if (dict.TryGetValue("FacturamaApiUser", out var fUser)) FacturamaApiUser = fUser;
+            if (dict.TryGetValue("FacturamaApiPassword", out var fPass)) FacturamaApiPassword = fPass;
+            if (dict.TryGetValue("FacturamaAmbiente", out var fAmbiente)) FacturamaAmbiente = fAmbiente;
 
             if (dict.TryGetValue("CurrentTheme", out var theme)) CurrentTheme = theme;
             if (dict.TryGetValue("AccentColor", out var accent)) AccentColor = accent;
@@ -607,6 +624,10 @@ public partial class SettingsViewModel : ObservableObject
             await _settingsService.SetAsync("EmpresaRazonSocial", EmpresaRazonSocial);
             await _settingsService.SetAsync("EmpresaGiroComercial", EmpresaGiroComercial);
             await _settingsService.SetAsync("EmpresaRfc", EmpresaRfc);
+
+            await _settingsService.SetAsync("FacturamaApiUser", FacturamaApiUser);
+            await _settingsService.SetAsync("FacturamaApiPassword", FacturamaApiPassword);
+            await _settingsService.SetAsync("FacturamaAmbiente", FacturamaAmbiente);
         }
 
         // --- PING HUB EN TIEMPO REAL ---

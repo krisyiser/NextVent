@@ -9,10 +9,11 @@
 
         <Border Padding="20" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
             <StackPanel Spacing="5" Margin="0,0,0,10">
-                <TextBlock Text="TICKETFY! v3.0 — Enterprise Desktop Edition" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                <TextBlock Text="TICKETFY! v3.0.12 — Enterprise Desktop Edition" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
                 <TextBlock Text="Sistema de Gestión de Punto de Venta" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" />
                 <TextBlock Text="© 2026 Valcore. Todos los derechos reservados." FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,10,0,0" />
             </StackPanel>
         </Border>
     </StackPanel>
 </UserControl>
+

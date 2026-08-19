@@ -9,3 +9,4 @@
         <TextBlock Text="Sistema de alertas automáticas para inventario bajo y notificaciones de turno." FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" />
     </StackPanel>
 </UserControl>
+

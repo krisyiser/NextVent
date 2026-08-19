@@ -25,7 +25,7 @@
                 <!-- Input Field -->
                 <StackPanel Spacing="6">
                     <TextBlock Text="Fondo Inicial ($ Float)" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                    <TextBox Text="{Binding InitialFloatAmount, Mode=TwoWay}" Watermark="0.00" Padding="12" FontSize="16" Height="46" VerticalContentAlignment="Center" />
+                    <NumericUpDown Value="{Binding InitialFloatAmount}" ShowButtonSpinner="False" FormatString="0.00" Minimum="0" Watermark="0.00" Padding="12" FontSize="16" Height="46" VerticalContentAlignment="Center" />
                 </StackPanel>
 
                 <!-- Error Message -->
@@ -40,3 +40,4 @@
         </Border>
     </Grid>
 </UserControl>
+

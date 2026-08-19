@@ -33,7 +33,7 @@ public class ItemKitEntity
     public string Description { get; set; } = string.Empty;
 
     [Column("created_at")]
-    public string CreatedAt { get; set; } = DateTime.UtcNow.ToString("s");
+    public string CreatedAt { get; set; } = DateTime.Now.ToString("s");
 
     /// <summary>Navigation: components / bill of materials for this kit</summary>
     public ICollection<ItemKitItemEntity> Components { get; set; } = [];

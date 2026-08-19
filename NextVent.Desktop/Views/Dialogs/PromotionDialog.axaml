@@ -43,7 +43,7 @@
 
                         <StackPanel Grid.Column="1" Spacing="4" Margin="6,0,0,0">
                             <TextBlock Text="Valor Descuento *" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                            <TextBox Text="{Binding DiscountValue, Mode=TwoWay}" Watermark="Ej. 15.0" Background="{DynamicResource BgTertiaryBrush}" Padding="10" />
+                            <NumericUpDown Value="{Binding DiscountValue}" ShowButtonSpinner="False" FormatString="0.00" Minimum="0" Watermark="Ej. 15.0" Background="{DynamicResource BgTertiaryBrush}" Padding="10" />
                         </StackPanel>
                     </Grid>
                 </StackPanel>
@@ -51,3 +51,4 @@
         </DockPanel>
     </Border>
 </UserControl>
+

@@ -34,9 +34,10 @@
 
                 <StackPanel Spacing="6">
                     <TextBlock Text="Monto a Abonar ($) *" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                    <TextBox Text="{Binding Amount, Mode=TwoWay}" Watermark="0.00" Background="{DynamicResource BgTertiaryBrush}" FontSize="18" FontWeight="Bold" Padding="10" />
+                    <NumericUpDown Value="{Binding Amount}" ShowButtonSpinner="False" FormatString="0.00" Minimum="0" Watermark="0.00" Background="{DynamicResource BgTertiaryBrush}" FontSize="18" FontWeight="Bold" Padding="10" />
                 </StackPanel>
             </StackPanel>
         </DockPanel>
     </Border>
 </UserControl>
+

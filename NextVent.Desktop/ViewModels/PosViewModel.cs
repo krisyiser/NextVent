@@ -37,6 +37,7 @@ public partial class PosViewModel : ObservableObject, IDisposable
     private ProductDto? _suggestedProduct;
 
     public event Action? OpenCheckoutRequested;
+    public event Action? OpenAddCustomerRequested;
     public event Action? ToggleFullscreenRequested;
     public event Action? LogoutRequested;
     public event Action? OpenShiftNotesRequested;
@@ -68,6 +69,7 @@ public partial class PosViewModel : ObservableObject, IDisposable
         _cartStateStore.ProductAddedToCart += OnProductAddedToCart;
 
         Cart.OpenCheckoutRequested += () => OpenCheckoutRequested?.Invoke();
+        Cart.OpenAddCustomerRequested += () => OpenAddCustomerRequested?.Invoke();
         Header.ToggleFullscreenRequested += () => ToggleFullscreenRequested?.Invoke();
         Header.LogoutRequested += () => LogoutRequested?.Invoke();
         Header.OpenShiftNotesRequested += () => OpenShiftNotesRequested?.Invoke();

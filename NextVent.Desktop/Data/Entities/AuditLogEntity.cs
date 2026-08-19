@@ -13,7 +13,7 @@ public class AuditLogEntity
     public string Id { get; set; } = Guid.NewGuid().ToString();
 
     [Column("timestamp")]
-    public string Timestamp { get; set; } = DateTime.UtcNow.ToString("s");
+    public string Timestamp { get; set; } = DateTime.Now.ToString("s");
 
     [Column("user_id")]
     public string UserId { get; set; } = string.Empty;

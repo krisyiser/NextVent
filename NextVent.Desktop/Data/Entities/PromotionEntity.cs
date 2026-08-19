@@ -57,10 +57,10 @@ public class PromotionEntity
     public int PayQty { get; set; }
 
     [Column("start_date")]
-    public string StartDate { get; set; } = DateTime.UtcNow.AddDays(-1).ToString("s");
+    public string StartDate { get; set; } = DateTime.Now.AddDays(-1).ToString("s");
 
     [Column("end_date")]
-    public string EndDate { get; set; } = DateTime.UtcNow.AddMonths(1).ToString("s");
+    public string EndDate { get; set; } = DateTime.Now.AddMonths(1).ToString("s");
 
     [Column("isActive")]
     public int IsActive { get; set; } = 1;

@@ -17,7 +17,7 @@ public partial class AttendanceEntity
     public Guid UserId { get; set; }
 
     [Column("check_in_time")]
-    public DateTime CheckInTime { get; set; } = DateTime.UtcNow;
+    public DateTime CheckInTime { get; set; } = DateTime.Now;
 
     [Column("check_out_time")]
     public DateTime? CheckOutTime { get; set; }
@@ -34,7 +34,7 @@ public partial class AttendanceEntity
     [NotMapped]
     public double TotalWorkedHours => CheckOutTime.HasValue
         ? (CheckOutTime.Value - CheckInTime).TotalHours
-        : (DateTime.UtcNow - CheckInTime).TotalHours;
+        : (DateTime.Now - CheckInTime).TotalHours;
 
     [ForeignKey(nameof(UserId))]
     public UserEntity? Usuario { get; set; }

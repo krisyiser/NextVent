@@ -68,32 +68,32 @@
 
                             <Grid ColumnDefinitions="80,*">
                                 <TextBlock Text="$1,000" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" />
-                                <TextBox Grid.Column="1" Text="{Binding Count1000, Mode=TwoWay}" Watermark="Cant." Padding="4" />
+                                <NumericUpDown Grid.Column="1" Value="{Binding Count1000}" ShowButtonSpinner="False" FormatString="0" Minimum="0" Watermark="0" Padding="4" />
                             </Grid>
 
                             <Grid ColumnDefinitions="80,*">
                                 <TextBlock Text="$500" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" />
-                                <TextBox Grid.Column="1" Text="{Binding Count500, Mode=TwoWay}" Watermark="Cant." Padding="4" />
+                                <NumericUpDown Grid.Column="1" Value="{Binding Count500}" ShowButtonSpinner="False" FormatString="0" Minimum="0" Watermark="0" Padding="4" />
                             </Grid>
 
                             <Grid ColumnDefinitions="80,*">
                                 <TextBlock Text="$200" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" />
-                                <TextBox Grid.Column="1" Text="{Binding Count200, Mode=TwoWay}" Watermark="Cant." Padding="4" />
+                                <NumericUpDown Grid.Column="1" Value="{Binding Count200}" ShowButtonSpinner="False" FormatString="0" Minimum="0" Watermark="0" Padding="4" />
                             </Grid>
 
                             <Grid ColumnDefinitions="80,*">
                                 <TextBlock Text="$100" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" />
-                                <TextBox Grid.Column="1" Text="{Binding Count100, Mode=TwoWay}" Watermark="Cant." Padding="4" />
+                                <NumericUpDown Grid.Column="1" Value="{Binding Count100}" ShowButtonSpinner="False" FormatString="0" Minimum="0" Watermark="0" Padding="4" />
                             </Grid>
 
                             <Grid ColumnDefinitions="80,*">
                                 <TextBlock Text="$50" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" />
-                                <TextBox Grid.Column="1" Text="{Binding Count50, Mode=TwoWay}" Watermark="Cant." Padding="4" />
+                                <NumericUpDown Grid.Column="1" Value="{Binding Count50}" ShowButtonSpinner="False" FormatString="0" Minimum="0" Watermark="0" Padding="4" />
                             </Grid>
 
                             <Grid ColumnDefinitions="80,*">
                                 <TextBlock Text="$20" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" />
-                                <TextBox Grid.Column="1" Text="{Binding Count20, Mode=TwoWay}" Watermark="Cant." Padding="4" />
+                                <NumericUpDown Grid.Column="1" Value="{Binding Count20}" ShowButtonSpinner="False" FormatString="0" Minimum="0" Watermark="0" Padding="4" />
                             </Grid>
                         </StackPanel>
 
@@ -103,27 +103,27 @@
 
                             <Grid ColumnDefinitions="80,*">
                                 <TextBlock Text="$10" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" />
-                                <TextBox Grid.Column="1" Text="{Binding Count10, Mode=TwoWay}" Watermark="Cant." Padding="4" />
+                                <NumericUpDown Grid.Column="1" Value="{Binding Count10}" ShowButtonSpinner="False" FormatString="0" Minimum="0" Watermark="0" Padding="4" />
                             </Grid>
 
                             <Grid ColumnDefinitions="80,*">
                                 <TextBlock Text="$5" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" />
-                                <TextBox Grid.Column="1" Text="{Binding Count5, Mode=TwoWay}" Watermark="Cant." Padding="4" />
+                                <NumericUpDown Grid.Column="1" Value="{Binding Count5}" ShowButtonSpinner="False" FormatString="0" Minimum="0" Watermark="0" Padding="4" />
                             </Grid>
 
                             <Grid ColumnDefinitions="80,*">
                                 <TextBlock Text="$2" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" />
-                                <TextBox Grid.Column="1" Text="{Binding Count2, Mode=TwoWay}" Watermark="Cant." Padding="4" />
+                                <NumericUpDown Grid.Column="1" Value="{Binding Count2}" ShowButtonSpinner="False" FormatString="0" Minimum="0" Watermark="0" Padding="4" />
                             </Grid>
 
                             <Grid ColumnDefinitions="80,*">
                                 <TextBlock Text="$1" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" />
-                                <TextBox Grid.Column="1" Text="{Binding Count1, Mode=TwoWay}" Watermark="Cant." Padding="4" />
+                                <NumericUpDown Grid.Column="1" Value="{Binding Count1}" ShowButtonSpinner="False" FormatString="0" Minimum="0" Watermark="0" Padding="4" />
                             </Grid>
 
                             <Grid ColumnDefinitions="80,*">
                                 <TextBlock Text="$0.50" VerticalAlignment="Center" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" />
-                                <TextBox Grid.Column="1" Text="{Binding Count050, Mode=TwoWay}" Watermark="Cant." Padding="4" />
+                                <NumericUpDown Grid.Column="1" Value="{Binding Count050}" ShowButtonSpinner="False" FormatString="0" Minimum="0" Watermark="0" Padding="4" />
                             </Grid>
                         </StackPanel>
                     </UniformGrid>
@@ -137,3 +137,4 @@
         </DockPanel>
     </Border>
 </UserControl>
+

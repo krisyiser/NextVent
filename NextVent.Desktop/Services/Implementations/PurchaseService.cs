@@ -122,7 +122,7 @@ public class PurchaseService : IPurchaseService
                     IsOutflow = true,
                     Description = $"Compra Proveedor: {dto.SupplierName} - Factura: {dto.InvoiceNumber}",
                     ReferenceId = purchaseId,
-                    Timestamp = DateTime.UtcNow.ToString("s")
+                    Timestamp = DateTime.Now.ToString("s")
                 };
                 _context.ShiftMovements.Add(outflow);
             }

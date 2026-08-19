@@ -116,7 +116,7 @@ public sealed class CustomerService : ICustomerService
                 Id = IdGenerator.NewPaymentId(),
                 CustomerId = customerId,
                 ShiftId = activeShift?.Id,
-                Date = DateTimeOffset.UtcNow.ToString("o"),
+                Date = DateTimeOffset.Now.ToString("o"),
                 Amount = roundedAmount,
                 Method = method,
                 Notes = notes
@@ -134,7 +134,7 @@ public sealed class CustomerService : ICustomerService
                     MovementType = NextVent.Core.Enums.MovementType.AbonoCliente,
                     Amount = roundedAmount,
                     Description = $"Abono a deuda - Cliente: {customer.Name}",
-                    Timestamp = DateTimeOffset.UtcNow.ToString("o")
+                    Timestamp = DateTimeOffset.Now.ToString("o")
                 };
                 _ctx.ShiftMovements.Add(cashMovement);
             }

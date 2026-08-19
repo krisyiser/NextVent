@@ -31,7 +31,7 @@ public class ReturnEntity
     public string Reason { get; set; } = string.Empty;
 
     [Column("created_at")]
-    public string CreatedAt { get; set; } = DateTime.UtcNow.ToString("s");
+    public string CreatedAt { get; set; } = DateTime.Now.ToString("s");
 
     [ForeignKey(nameof(OriginalSaleId))]
     public SaleEntity? OriginalSale { get; set; }

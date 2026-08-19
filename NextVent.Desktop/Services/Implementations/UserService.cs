@@ -33,7 +33,8 @@ public class UserService : IUserService
 
     public async Task<UserDto?> GetByNameAsync(string name)
     {
-        var entity = await _context.Users.FirstOrDefaultAsync(u => u.FullName.ToLower() == name.ToLower() || u.Username.ToLower() == name.ToLower());
+        // Explicitly ONLY match the exact Username credential, never the FullName
+        var entity = await _context.Users.FirstOrDefaultAsync(u => u.Username.ToLower() == name.ToLower());
         return entity == null ? null : MapToDto(entity);
     }
 
@@ -111,7 +112,7 @@ public class UserService : IUserService
 
     public async Task<string?> GetPasswordHintAsync(string username)
     {
-        var entity = await _context.Users.FirstOrDefaultAsync(u => u.Username.ToLower() == username.ToLower() || u.FullName.ToLower() == username.ToLower());
+        var entity = await _context.Users.FirstOrDefaultAsync(u => u.Username.ToLower() == username.ToLower());
         return entity?.PasswordHint;
     }
 

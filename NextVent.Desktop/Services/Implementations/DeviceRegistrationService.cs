@@ -23,6 +23,7 @@ public class BusinessData
 {
     [JsonPropertyName("commercialName")] public string CommercialName { get; set; } = string.Empty;
     [JsonPropertyName("industry")] public string Industry { get; set; } = string.Empty;
+    [JsonPropertyName("location")] public string Location { get; set; } = "Ubicación Desconocida";
 }
 
 public class SystemSpecs
@@ -68,7 +69,8 @@ public class DeviceRegistrationService
     private readonly ISettingsService? _settingsService;
     private readonly ISessionManager? _sessionManager;
     private const string NEXTVENT_API_KEY = "nv_sk_valcore_5f8a9"; 
-    private const string API_URL = "https://api.valcore/api/v1/nodes/provision";
+    private const string API_HOST = "api.valcore";
+    private const string API_URL = "https://100.109.190.105/api/v1/nodes/provision";
 
     public DeviceRegistrationService(ISettingsService? settingsService = null, ISessionManager? sessionManager = null)
     {
@@ -141,6 +143,10 @@ public class DeviceRegistrationService
                 
                 var industry = await _settingsService.GetAsync("EmpresaGiroComercial");
                 payload.Business.Industry = string.IsNullOrEmpty(industry) ? "No especificado" : industry;
+                
+                var estado = await _settingsService.GetAsync("EmpresaEstado");
+                var colonia = await _settingsService.GetAsync("EmpresaColonia");
+                payload.Business.Location = string.IsNullOrEmpty(estado) ? "Ubicación Desconocida" : $"{colonia}, {estado}".Trim(',', ' ');
             }
             else
             {
@@ -159,10 +165,13 @@ public class DeviceRegistrationService
             {
                 try
                 {
-                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5)); // Aumentado a 5s para el primer handshake TLS
+                    using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(15)); // Aumentado a 15s para redes lentas
                     
-                    // Uso estricto del Source Generator para AOT
-                    var response = await _httpClient.PostAsJsonAsync(API_URL, payload, TelemetryJsonContext.Default.ProvisionPayload, cts.Token);
+                    var request = new HttpRequestMessage(HttpMethod.Post, API_URL);
+                    request.Headers.Host = API_HOST;
+                    request.Content = System.Net.Http.Json.JsonContent.Create(payload, TelemetryJsonContext.Default.ProvisionPayload);
+                    
+                    var response = await _httpClient.SendAsync(request, cts.Token);
                     
                     if (!response.IsSuccessStatusCode)
                     {
@@ -171,9 +180,12 @@ public class DeviceRegistrationService
 
                         if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized || response.StatusCode == System.Net.HttpStatusCode.Forbidden)
                         {
-                            if (System.IO.File.Exists("license.jwt"))
+                            var localAppFolder = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ticketfy");
+                            var licensePath = System.IO.Path.Combine(localAppFolder, "license.jwt");
+                            
+                            if (System.IO.File.Exists(licensePath))
                             {
-                                System.IO.File.Delete("license.jwt");
+                                await System.IO.File.WriteAllTextAsync(licensePath, "REVOKED", cts.Token);
                                 Log.Warning("❌ LICENCIA REVOCADA POR EL SERVIDOR (Kill Switch Activo).");
                                 Avalonia.Threading.Dispatcher.UIThread.Post(() =>
                                 {
@@ -198,14 +210,20 @@ public class DeviceRegistrationService
                             {
                                 if (!string.IsNullOrEmpty(jsonResponse.LicenseToken))
                                 {
-                                    await System.IO.File.WriteAllTextAsync("license.jwt", jsonResponse.LicenseToken, cts.Token);
+                                    var localAppFolder = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ticketfy");
+                                    System.IO.Directory.CreateDirectory(localAppFolder);
+                                    var licensePath = System.IO.Path.Combine(localAppFolder, "license.jwt");
+                                    await System.IO.File.WriteAllTextAsync(licensePath, jsonResponse.LicenseToken, cts.Token);
                                     Log.Information("✅ LICENCIA ACTUALIZADA DESDE NEXTVENT HUB.");
                                 }
                                 else
                                 {
-                                    if (System.IO.File.Exists("license.jwt"))
+                                    var localAppFolder = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ticketfy");
+                                    var licensePath = System.IO.Path.Combine(localAppFolder, "license.jwt");
+                                    
+                                    if (System.IO.File.Exists(licensePath))
                                     {
-                                        System.IO.File.Delete("license.jwt");
+                                        await System.IO.File.WriteAllTextAsync(licensePath, "REVOKED", cts.Token);
                                         Log.Warning("❌ LICENCIA REVOCADA POR EL SERVIDOR (Kill Switch Activo).");
                                         Avalonia.Threading.Dispatcher.UIThread.Post(() =>
                                         {

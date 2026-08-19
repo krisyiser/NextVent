@@ -110,7 +110,7 @@
 
         <!-- 1.3 SUB-TAB FISCAL / SAT -->
         <StackPanel IsVisible="{Binding IsSubEmpresaFiscal}" Spacing="16">
-            <Grid RowDefinitions="Auto,Auto,Auto,Auto" ColumnDefinitions="*,*">
+            <Grid RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto" ColumnDefinitions="*,*">
                 <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,12" Spacing="6">
                     <TextBlock Text="RFC de la Empresa" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
                     <TextBox Text="{Binding EmpresaRfc, Mode=TwoWay}" Padding="10,8" />
@@ -146,11 +146,32 @@
                     <TextBox Text="{Binding EmpresaPasswordKeyCsd, Mode=TwoWay}" PasswordChar="*" Padding="10,8" />
                 </StackPanel>
 
-                <StackPanel Grid.Row="3" Grid.Column="1" Margin="8,0,0,0" Spacing="6">
+                <StackPanel Grid.Row="3" Grid.Column="1" Margin="8,0,0,12" Spacing="6">
                     <TextBlock Text="Estatus CSD SAT" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
                     <Border Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="12,8">
                         <TextBlock Text="{Binding CsdValidityStatus}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource AccentSuccessBrush}" HorizontalAlignment="Center" />
                     </Border>
+                </StackPanel>
+
+                <!-- Facturama API Config -->
+                <TextBlock Grid.Row="4" Grid.Column="0" Grid.ColumnSpan="2" Text="Credenciales API Facturama (Timbrado de Cliente)" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,16,0,8" IsVisible="False"/>
+
+                <StackPanel Grid.Row="5" Grid.Column="0" Margin="0,0,8,0" Spacing="6" IsVisible="False">
+                    <TextBlock Text="Ambiente API" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <ComboBox ItemsSource="{Binding FacturamaAmbienteOptions}" SelectedItem="{Binding FacturamaAmbiente, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="10,8" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="5" Grid.Column="1" Margin="8,0,0,0" Spacing="6" IsVisible="False">
+                    <Grid ColumnDefinitions="*,*">
+                        <StackPanel Grid.Column="0" Margin="0,0,4,0" Spacing="6">
+                            <TextBlock Text="Usuario API" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <TextBox Text="{Binding FacturamaApiUser, Mode=TwoWay}" Padding="10,8" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" Margin="4,0,0,0" Spacing="6">
+                            <TextBlock Text="Contraseña API" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <TextBox Text="{Binding FacturamaApiPassword, Mode=TwoWay}" PasswordChar="*" Padding="10,8" />
+                        </StackPanel>
+                    </Grid>
                 </StackPanel>
             </Grid>
         </StackPanel>
@@ -226,3 +247,4 @@
         </StackPanel>
     </StackPanel>
 </UserControl>
+

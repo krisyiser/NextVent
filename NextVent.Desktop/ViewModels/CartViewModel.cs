@@ -41,6 +41,7 @@ public partial class CartViewModel : ObservableObject
     public bool HasParkedTickets => ParkedTickets.Count > 0;
 
     public event Action? OpenCheckoutRequested;
+    public event Action? OpenAddCustomerRequested;
 
     public CartViewModel(CartStateStore cartState, ISaleService saleService, ICustomerService customerService)
     {
@@ -58,11 +59,14 @@ public partial class CartViewModel : ObservableObject
             var list = await _customerService.GetAllAsync();
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
+                var publicoGeneral = new CustomerDto("", "Público General", "", "", "", 0.0, 0.0, 0.0, 0.0, "");
                 Customers.Clear();
+                Customers.Add(publicoGeneral);
                 foreach (var c in list) Customers.Add(c);
-                if (SelectedCustomer == null && Customers.Count > 0)
+                
+                if (SelectedCustomer == null)
                 {
-                    SelectedCustomer = Customers.FirstOrDefault(c => c.Name.Contains("Público", StringComparison.OrdinalIgnoreCase)) ?? Customers[0];
+                    SelectedCustomer = publicoGeneral;
                 }
             });
         }
@@ -75,7 +79,7 @@ public partial class CartViewModel : ObservableObject
     [RelayCommand]
     private void OpenCustomerSelect()
     {
-        // For simplicity, just request focus search or trigger a modal event.
+        OpenAddCustomerRequested?.Invoke();
     }
 
     [RelayCommand]
@@ -118,6 +122,6 @@ public partial class CartViewModel : ObservableObject
     private void ClearCart()
     {
         CartState.Clear();
-        SelectedCustomer = Customers.FirstOrDefault(c => c.Name.Contains("Público", StringComparison.OrdinalIgnoreCase)) ?? Customers.FirstOrDefault();
+        SelectedCustomer = Customers.FirstOrDefault(c => string.IsNullOrEmpty(c.Id));
     }
 }

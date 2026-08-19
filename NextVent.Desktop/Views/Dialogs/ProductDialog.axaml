@@ -25,7 +25,7 @@
                 </Grid>
             </StackPanel>
 
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <ScrollViewer VerticalScrollBarVisibility="Visible" Padding="0,0,12,0" Margin="0,0,-12,0">
                 <StackPanel Spacing="16">
                     
                     <!-- AUTOFILL BANNER -->
@@ -73,12 +73,12 @@
                             <Grid ColumnDefinitions="*,*">
                                 <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,6,0">
                                     <TextBlock Text="Costo ($) *" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                                    <TextBox Text="{Binding CostPrice, Mode=TwoWay}" Watermark="0.00" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                                    <NumericUpDown Value="{Binding CostPrice}" ShowButtonSpinner="False" FormatString="0.00" Minimum="0" Watermark="0.00" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="1" Spacing="4" Margin="6,0,0,0">
                                     <TextBlock Text="Precio Venta ($) *" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                                    <TextBox Text="{Binding RetailPrice, Mode=TwoWay}" Watermark="0.00" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                                    <NumericUpDown Value="{Binding RetailPrice}" ShowButtonSpinner="False" FormatString="0.00" Minimum="0" Watermark="0.00" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
                                 </StackPanel>
                             </Grid>
 
@@ -95,41 +95,41 @@
                             <Grid ColumnDefinitions="*,*">
                                 <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,6,0">
                                     <TextBlock Text="Stock Actual *" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                                    <TextBox Text="{Binding Stock, Mode=TwoWay}" Watermark="0" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                                    <NumericUpDown Value="{Binding Stock}" ShowButtonSpinner="False" FormatString="0" Watermark="0" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="1" Spacing="4" Margin="6,0,0,0">
                                     <TextBlock Text="Stock Mínimo (Alerta) *" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                                    <TextBox Text="{Binding MinStock, Mode=TwoWay}" Watermark="5" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                                    <NumericUpDown Value="{Binding MinStock}" ShowButtonSpinner="False" FormatString="0" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
                                 </StackPanel>
                             </Grid>
 
                             <Grid ColumnDefinitions="*,*,*" Margin="0,4,0,0">
                                 <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,4,0">
-                                    <TextBlock Text="⭐ Puntos Regalo" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                                    <TextBox Text="{Binding PointsRewarded, Mode=TwoWay}" Watermark="1.0" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                                    <TextBlock Text="Puntos Regalo" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    <NumericUpDown Value="{Binding PointsRewarded}" ShowButtonSpinner="False" FormatString="0.0" Minimum="0" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="1" Spacing="4" Margin="2,0,2,0">
-                                    <TextBlock Text="📦 Cant. Reorden" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource AccentWarningBrush}" />
-                                    <TextBox Text="{Binding ReorderQuantity, Mode=TwoWay}" Watermark="10.0" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                                    <TextBlock Text="Cant. Reorden" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource AccentWarningBrush}" />
+                                    <NumericUpDown Value="{Binding ReorderQuantity}" ShowButtonSpinner="False" FormatString="0.0" Minimum="0" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="2" Spacing="4" Margin="4,0,0,0">
-                                    <TextBlock Text="📍 Pasillo / Rack" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                                    <TextBox Text="{Binding LocationRack, Mode=TwoWay}" Watermark="Pasillo 1 - A" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                                    <TextBlock Text="Pasillo / Rack" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    <TextBox Text="{Binding LocationRack, Mode=TwoWay}" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
                                 </StackPanel>
                             </Grid>
 
                             <Grid ColumnDefinitions="*,*" Margin="0,4,0,0">
                                 <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,6,0">
-                                    <TextBlock Text="📄 Clave Prod SAT" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                                    <TextBox Text="{Binding SatProductCode, Mode=TwoWay}" Watermark="01010101" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                                    <TextBlock Text="Clave Prod SAT" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    <TextBox Text="{Binding SatProductCode, Mode=TwoWay}" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="1" Spacing="4" Margin="6,0,0,0">
-                                    <TextBlock Text="📄 Clave Unidad SAT" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                                    <TextBox Text="{Binding SatUnitCode, Mode=TwoWay}" Watermark="H87" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                                    <TextBlock Text="Clave Unidad SAT" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    <TextBox Text="{Binding SatUnitCode, Mode=TwoWay}" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
                                 </StackPanel>
                             </Grid>
                         </StackPanel>
@@ -140,3 +140,4 @@
         </DockPanel>
     </Border>
 </UserControl>
+

@@ -12,6 +12,7 @@ public interface ISaleService
 {
     Task<SaleDto> SaveAsync(SaleDto sale);
     Task<SaleResultModel> ProcessSaleAsync(SaleCreationDto dto);
+    Task<SaleDto?> GetByIdAsync(string saleId);
     Task<List<SaleDto>> GetHistoryAsync(int limit = 500);
     Task CancelAsync(string saleId);
     Task<bool> CancelSaleAsync(string saleId, string reason);

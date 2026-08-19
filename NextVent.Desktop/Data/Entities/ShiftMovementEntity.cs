@@ -32,7 +32,7 @@ public class ShiftMovementEntity
     public string ReferenceId { get; set; } = string.Empty;
 
     [Column("timestamp")]
-    public string Timestamp { get; set; } = DateTime.UtcNow.ToString("s");
+    public string Timestamp { get; set; } = DateTime.Now.ToString("s");
 
     [ForeignKey(nameof(ShiftId))]
     public ShiftEntity? Shift { get; set; }

@@ -22,8 +22,12 @@ public partial class InventoryViewModel : ObservableObject
 
     [ObservableProperty] private string _searchQuery = string.Empty;
     [ObservableProperty] private string _feedbackMessage = string.Empty;
+    [ObservableProperty] private bool _isFeedbackError = false;
     [ObservableProperty] private bool _showOnlyLowStock = false;
     [ObservableProperty] private bool _isIntelligencePanelVisible = false;
+
+    public double TotalStockCost => FilteredProducts.Sum(p => p.Cost * p.Stock);
+    public double TotalStockSale => FilteredProducts.Sum(p => p.Price * p.Stock);
 
     private readonly IPurchaseService? _purchaseService;
     private readonly IPredictiveIntelligenceService? _predictiveService;
@@ -151,11 +155,13 @@ public partial class InventoryViewModel : ObservableObject
         {
             await _productService.DeleteAsync(product.Id);
             await LoadProductsAsync();
+            IsFeedbackError = false;
             FeedbackMessage = $"Producto '{product.Name}' eliminado exitosamente.";
         }
         catch (Exception ex)
         {
             Log.Error(ex, "Error deleting product");
+            IsFeedbackError = true;
             FeedbackMessage = $"Error al eliminar producto: {ex.Message}";
         }
     }
@@ -193,6 +199,9 @@ public partial class InventoryViewModel : ObservableObject
         }
 
         foreach (var m in matches) FilteredProducts.Add(m);
+        
+        OnPropertyChanged(nameof(TotalStockCost));
+        OnPropertyChanged(nameof(TotalStockSale));
     }
 
     [RelayCommand]
@@ -230,10 +239,12 @@ public partial class InventoryViewModel : ObservableObject
                             var text = await System.IO.File.ReadAllTextAsync(filePath);
                             int count = await _productService.ImportFromCsvTextAsync(text);
                             await LoadProductsAsync();
+                            IsFeedbackError = false;
                             FeedbackMessage = $"¡Se importaron e integraron {count} productos del archivo CSV exitosamente!";
                         }
                         else
                         {
+                            IsFeedbackError = true;
                             FeedbackMessage = "El archivo seleccionado no existe.";
                         }
                     }
@@ -241,6 +252,7 @@ public partial class InventoryViewModel : ObservableObject
                 catch (Exception ex)
                 {
                     Log.Error(ex, "Error importing CSV catalog");
+                    IsFeedbackError = true;
                     FeedbackMessage = $"Error al importar catálogo CSV: {ex.Message}";
                 }
             }
@@ -295,6 +307,7 @@ public partial class InventoryViewModel : ObservableObject
             var lowStockItems = Products.Where(p => p.Stock <= 5.0 || p.Stock <= p.ReorderQuantity).ToList();
             if (lowStockItems.Count == 0)
             {
+                IsFeedbackError = false;
                 FeedbackMessage = "No se detectaron productos en nivel crítico de reabastecimiento.";
                 return;
             }
@@ -323,16 +336,19 @@ public partial class InventoryViewModel : ObservableObject
                 );
 
                 await _purchaseService.RegisterPurchaseAsync(order);
+                IsFeedbackError = false;
                 FeedbackMessage = $"¡Orden de Reabastecimiento '{order.InvoiceNumber}' generada exitosamente en Compras para {lowStockItems.Count} productos!";
             }
             else
             {
+                IsFeedbackError = false;
                 FeedbackMessage = $"Se identificaron {lowStockItems.Count} productos en bajo stock sugeridos para compra.";
             }
         }
         catch (Exception ex)
         {
             Log.Error(ex, "Error generating auto purchase orders");
+            IsFeedbackError = true;
             FeedbackMessage = "Error al generar orden de compra automática";
         }
     }
@@ -344,10 +360,12 @@ public partial class InventoryViewModel : ObservableObject
         {
             var svc = new NextVent.Services.Implementations.InventorySnapshotService();
             var snap = await svc.CreateSnapshotAsync($"Punto de Guardado Manual - {DateTime.Now:dd/MM/yyyy hh:mm tt}");
-            FeedbackMessage = $"¡Punto de Guardado exitoso! {snap.TotalItems} artículos registrados con un valor de {snap.TotalValue:C}.";
+            IsFeedbackError = false;
+            FeedbackMessage = $"¡Guardado exitoso!";
         }
         catch (Exception ex)
         {
+            IsFeedbackError = true;
             FeedbackMessage = "Error al crear el punto de guardado.";
             Log.Error(ex, "Failed to create snapshot from UI.");
         }
@@ -369,18 +387,34 @@ public partial class InventoryViewModel : ObservableObject
     [RelayCommand]
     private async Task PrintChecklistAsync()
     {
+        var desktop = Avalonia.Application.Current?.ApplicationLifetime as Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime;
+        if (desktop?.MainWindow == null) return;
+
+        var vm = new NextVent.ViewModels.Dialogs.PrintPreviewWindowViewModel("Checklist de Inventario Físico");
+        var win = new NextVent.Views.Dialogs.PrintPreviewWindow { DataContext = vm };
+        
+        var confirmed = await win.ShowDialog<bool>(desktop.MainWindow);
+        if (!confirmed) return;
+
         try
         {
             var printerSvc = new NextVent.Services.Implementations.EscPosPrinterService();
             bool result = await printerSvc.PrintInventoryChecklistAsync(Products.ToList());
             
             if (result)
+            {
+                IsFeedbackError = false;
                 FeedbackMessage = "Imprimiendo checklist de inventario físico...";
+            }
             else
+            {
+                IsFeedbackError = true;
                 FeedbackMessage = "Error de comunicación con la impresora térmica.";
+            }
         }
         catch (Exception ex)
         {
+            IsFeedbackError = true;
             FeedbackMessage = "Ocurrió un error al intentar imprimir el checklist.";
             Log.Error(ex, "Failed to print inventory checklist.");
         }

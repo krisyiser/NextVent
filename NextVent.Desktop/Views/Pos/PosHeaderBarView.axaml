@@ -144,8 +144,17 @@
                     </StackPanel>
                 </Button>
 
-                <Button Command="{Binding OpenShiftNotesDialogCommand}" Padding="8,6" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" ToolTip.Tip="Notas entre cajeros">
-                    <mi:MaterialIcon Kind="NotebookOutline" Width="16" Height="16" Foreground="{DynamicResource TextPrimaryBrush}" />
+                <!-- Gestor de Notas -->
+                <Button Command="{Binding OpenShiftNotesDialogCommand}" 
+                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="6" Padding="10,6" Cursor="Hand"
+                        ToolTip.Tip="Gestor de notas y avisos entre cajeros">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <mi:MaterialIcon Kind="NotebookOutline" Width="16" Height="16" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                        <TextBlock Text="Notas" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                        <Border IsVisible="{Binding HasShiftNotes}" Background="#EF4444" CornerRadius="10" Padding="6,2" Margin="4,0,0,0">
+                            <TextBlock Text="{Binding ActiveShiftNotes.Count}" Foreground="White" FontSize="10" FontWeight="Bold"/>
+                        </Border>
+                    </StackPanel>
                 </Button>
 
 
@@ -160,3 +169,4 @@
         </Grid>
     </Border>
 </UserControl>
+

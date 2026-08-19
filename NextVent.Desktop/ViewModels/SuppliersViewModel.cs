@@ -34,8 +34,8 @@ public partial class SuppliersViewModel : ObservableObject
     [ObservableProperty] private SupplierDto? _selectedSupplierForPurchase;
     [ObservableProperty] private string _invoiceNumber = string.Empty;
     [ObservableProperty] private ProductDto? _selectedProductForPurchase;
-    [ObservableProperty] private double _purchaseUnitPrice;
-    [ObservableProperty] private double _purchaseQuantity = 1;
+    [ObservableProperty] private string _purchaseUnitPrice = string.Empty;
+    [ObservableProperty] private string _purchaseQuantity = "1";
     [ObservableProperty] private double _totalPurchaseCost;
 
     [ObservableProperty] private string _feedbackMessage = string.Empty;
@@ -65,9 +65,11 @@ public partial class SuppliersViewModel : ObservableObject
             var products = await _productService.GetAllAsync();
             if (suppliers.Count == 0)
             {
+#if DEBUG
                 await SeedDemoDataAsync(products.ToList());
                 suppliers = await _supplierService.GetAllAsync();
                 purchases = await _purchaseService.GetAllAsync();
+#endif
             }
 
             // Ensure "Proveedor General" exists
@@ -152,16 +154,18 @@ public partial class SuppliersViewModel : ObservableObject
     private void AddItemToPurchaseDraft()
     {
         if (SelectedProductForPurchase == null) return;
-        if (PurchaseQuantity <= 0 || PurchaseUnitPrice < 0) return;
+        
+        if (!double.TryParse(PurchaseQuantity, out double qty) || qty <= 0) return;
+        if (!double.TryParse(PurchaseUnitPrice, out double price) || price < 0) return;
 
-        var total = PurchaseUnitPrice * PurchaseQuantity;
+        var total = price * qty;
         DraftPurchaseItems.Add(new PurchaseItemDto(
             Guid.NewGuid().ToString(),
             string.Empty,
             SelectedProductForPurchase.Id,
             SelectedProductForPurchase.Name,
-            PurchaseUnitPrice,
-            PurchaseQuantity,
+            price,
+            qty,
             total
         ));
 

@@ -67,7 +67,7 @@ public class PromotionService : IPromotionService
     {
         if (cartItems == null || cartItems.Count == 0) return cartItems ?? [];
 
-        var nowIso = DateTime.UtcNow.ToString("s");
+        var nowIso = DateTime.Now.ToString("s");
         var activePromotions = await _ctx.Promotions
             .AsNoTracking()
             .Where(p => p.IsActive == 1 && string.Compare(p.StartDate, nowIso) <= 0 && string.Compare(p.EndDate, nowIso) >= 0)

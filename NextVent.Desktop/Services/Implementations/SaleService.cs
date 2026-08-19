@@ -302,6 +302,18 @@ public sealed class SaleService : ISaleService
         }
     }
 
+    public async Task<SaleDto?> GetByIdAsync(string saleId)
+    {
+        using var _ctx = await _contextFactory.CreateDbContextAsync();
+        var entity = await _ctx.Sales
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.Id == saleId);
+
+        if (entity == null) return null;
+        
+        return MapToDto(entity);
+    }
+
     public async Task<List<SaleDto>> GetHistoryAsync(int limit = 500)
     {
         using var _ctx = await _contextFactory.CreateDbContextAsync();
@@ -516,7 +528,7 @@ public sealed class SaleService : ISaleService
                     IsOutflow = true,
                     Description = $"Devolución Ticket #{sale.Id} - {reason}",
                     ReferenceId = returnEntity.Id,
-                    Timestamp = DateTime.UtcNow.ToString("s")
+                    Timestamp = DateTime.Now.ToString("s")
                 });
             }
 
@@ -617,7 +629,7 @@ public sealed class SaleService : ISaleService
                     SupplierId = product.DefaultSupplierId,
                     Title = $"Stock Crítico: {product.Name}",
                     Message = $"Stock actual ({product.Stock}) por debajo del mínimo permitido ({product.MinStock}).",
-                    CreatedAt = DateTime.UtcNow.ToString("s"),
+                    CreatedAt = DateTime.Now.ToString("s"),
                     IsResolved = false
                 };
                 _ctx.SystemAlerts.Add(alert);

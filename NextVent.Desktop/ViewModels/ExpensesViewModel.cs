@@ -13,6 +13,7 @@ namespace NextVent.ViewModels;
 public partial class ExpensesViewModel : ObservableObject
 {
     private readonly IExpenseService _expenseService;
+    private readonly IShiftService _shiftService;
 
     public ObservableCollection<ExpenseDto> Expenses { get; } = [];
     public ObservableCollection<string> Categories { get; } = [
@@ -45,9 +46,10 @@ public partial class ExpensesViewModel : ObservableObject
 
     [ObservableProperty] private string _feedbackMessage = string.Empty;
 
-    public ExpensesViewModel(IExpenseService expenseService)
+    public ExpensesViewModel(IExpenseService expenseService, IShiftService shiftService)
     {
         _expenseService = expenseService;
+        _shiftService = shiftService;
         _ = LoadExpensesAsync();
     }
 
@@ -57,6 +59,8 @@ public partial class ExpensesViewModel : ObservableObject
         {
             var list = await _expenseService.GetAllAsync();
             var summary = await _expenseService.GetFinancialSummaryAsync();
+            var activeShift = await _shiftService.GetActiveAsync();
+            decimal openingBalance = activeShift != null ? (decimal)activeShift.OpeningBalance : 0m;
 
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
@@ -71,9 +75,9 @@ public partial class ExpensesViewModel : ObservableObject
 
                 Ingresos = (decimal)summary.TotalRevenue;
                 Egresos = (decimal)summary.TotalExpenses;
-                TotalEnCaja = Ingresos - Egresos;
+                TotalEnCaja = openingBalance + Ingresos - Egresos;
                 Reinversion = (decimal)summary.TotalCostOfGoodsSold;
-                UtilidadNeta = TotalEnCaja - Reinversion;
+                UtilidadNeta = Ingresos - Egresos - Reinversion;
             });
         }
         catch (Exception ex)

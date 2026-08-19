@@ -12,7 +12,7 @@
 
             <StackPanel Spacing="6">
                 <TextBlock Text="Stock Mínimo Predeterminado *" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                <TextBox Text="{Binding MinStockValue, Mode=TwoWay}" Watermark="Ej. 5.0" Background="{DynamicResource BgTertiaryBrush}" Padding="10" />
+                <NumericUpDown Value="{Binding MinStockValue}" ShowButtonSpinner="False" FormatString="0" Minimum="0" Watermark="Ej. 5" Background="{DynamicResource BgTertiaryBrush}" Padding="10" />
             </StackPanel>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10" Margin="0,10,0,0">
@@ -22,3 +22,4 @@
         </StackPanel>
     </Border>
 </UserControl>
+

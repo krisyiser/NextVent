@@ -37,6 +37,15 @@ public partial class MainWindowViewModel : ObservableObject
     [ObservableProperty] private string _unlockPin = string.Empty;
     [ObservableProperty] private string _unlockErrorMessage = string.Empty;
 
+    [ObservableProperty] private bool _isUpdateAvailable = false;
+    [ObservableProperty] private bool _isUpdateReady = false;
+    [ObservableProperty] private double _updateProgress = 0;
+    
+    // Auto-Updater Feedback Properties
+    [ObservableProperty] private bool _isUpdateUpToDate = false;
+    [ObservableProperty] private bool _isUpdateFailed = false;
+    [ObservableProperty] private string _updateErrorMessage = string.Empty;
+    
     public ObservableObject CurrentView
     {
         get => ActiveViewModel;
@@ -79,11 +88,12 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly IUserService _authService;
     private readonly IAuditService _auditService;
     private readonly DeviceRegistrationService _deviceRegistrationService;
+    private readonly AutoUpdateService _autoUpdateService;
 
     public MainWindowViewModel()
     {
         string appDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        string appFolder = Path.Combine(appDataFolder, "NextVent", "Database");
+        string appFolder = Path.Combine(appDataFolder, "ticketfy", "Database");
         if (!Directory.Exists(appFolder)) Directory.CreateDirectory(appFolder);
         string dbPath = Path.Combine(appFolder, "nextvent.db");
 
@@ -177,13 +187,34 @@ public partial class MainWindowViewModel : ObservableObject
         _fiscalVm = new FiscalViewModel(_saleService, facturamaService);
         _cashierPerformanceVm = new CashierPerformanceViewModel(performanceAnalyticsService, attendanceService);
         _settingsVm = new SettingsViewModel(userService, settingsService);
-        _ = _settingsVm.LoadSavedSettingsAsync();
         _suppliersVm = new SuppliersViewModel(supplierService, purchaseService, _productService);
-        _expensesVm = new ExpensesViewModel(expenseService);
+        _expensesVm = new ExpensesViewModel(expenseService, shiftService);
         _userRepository = userRepository;
 
         _satBillingQueue = new SatBillingQueueService();
         _ = _satBillingQueue.StartAsync(System.Threading.CancellationToken.None);
+
+        _autoUpdateService = new AutoUpdateService();
+        _autoUpdateService.UpdateAvailableEvent += () => IsUpdateAvailable = true;
+        _autoUpdateService.DownloadProgressChangedEvent += (progress) => UpdateProgress = progress;
+        _autoUpdateService.UpdateReadyToInstallEvent += () =>
+        {
+            IsUpdateAvailable = false;
+            IsUpdateReady = true;
+        };
+        _autoUpdateService.UpdateFailedEvent += (msg) =>
+        {
+            IsUpdateAvailable = false;
+            IsUpdateFailed = true;
+            UpdateErrorMessage = $"Fallo al buscar actualizaciones: {msg}";
+            Task.Delay(5000).ContinueWith(_ => Dispatcher.UIThread.Post(() => IsUpdateFailed = false));
+        };
+        _autoUpdateService.UpdateUpToDateEvent += () =>
+        {
+            IsUpdateUpToDate = true;
+            Task.Delay(3000).ContinueWith(_ => Dispatcher.UIThread.Post(() => IsUpdateUpToDate = false));
+        };
+        _autoUpdateService.StartPeriodicChecks(TimeSpan.FromHours(4));
 
         var dialogService = new DialogService(async (vmObj) =>
         {
@@ -454,6 +485,18 @@ public partial class MainWindowViewModel : ObservableObject
             IsDialogOverlayOpen = true;
         };
 
+        _posVm.OpenAddCustomerRequested += () =>
+        {
+            var dialog = new CustomerDialogViewModel(_customerService);
+            dialog.RequestClose += () =>
+            {
+                CloseDialog();
+                _ = _posVm.Cart.LoadCustomersAsync();
+            };
+            ActiveDialogViewModel = dialog;
+            IsDialogOverlayOpen = true;
+        };
+
         _customersVm.OpenEditCustomerRequested += (customer) =>
         {
             var dialog = new CustomerDialogViewModel(_customerService);
@@ -561,6 +604,28 @@ public partial class MainWindowViewModel : ObservableObject
         }
     }
 
+
+
+    [RelayCommand]
+    private void ApplyUpdateAndRestart()
+    {
+        _autoUpdateService.ApplyUpdatesAndRestart();
+    }
+
+    [RelayCommand]
+    private async Task CheckForUpdates()
+    {
+        // Indicate to user that we are checking via UI if needed, or simply trigger the silent check.
+        // It will raise UpdateAvailableEvent if an update is found.
+        IsUpdateFailed = false;
+        IsUpdateUpToDate = false;
+        await _autoUpdateService.CheckAndDownloadUpdatesAsync();
+    }
+
+    private void ExecuteLogout()
+    {
+    }
+
     [RelayCommand]
     private void TriggerPosCheckout()
     {
@@ -636,7 +701,7 @@ public partial class MainWindowViewModel : ObservableObject
                 // Orphaned Shift Recovery (Z-Cut Ciego)
                 var confirmVm = new ConfirmDialogViewModel(
                     "Turno Suspendido Detectado",
-                    "Se detectó un turno del día anterior que no fue cerrado correctamente. Debe realizar el Corte de Caja Z antes de iniciar uno nuevo. ¿Proceder al corte ciego?",
+                    "Se detectó un turno del día anterior que no fue cerrado correctamente. Debe realizar el Corte final antes de iniciar uno nuevo. ¿Proceder al corte ciego?",
                     (confirmed) =>
                     {
                         if (confirmed)
@@ -682,18 +747,20 @@ public partial class MainWindowViewModel : ObservableObject
 
     public async Task InitializeApplicationStateAsync()
     {
-        var licenseService = new NextVent.Services.Security.LicenseEnforcementService();
-        if (licenseService.IsSystemLocked())
+        try
         {
-            // KILL SWITCH ACTIVADO
-            ActiveViewModel = new LicenseLockedViewModel();
-            return;
-        }
+            // Always dismiss splash screen to prevent UI freeze
+            _ = DismissSplashScreenAsync();
 
-        bool hasUsers = await _userRepository.HasAnyUsersAsync();
+            var licenseService = new NextVent.Services.Security.LicenseEnforcementService();
+            if (licenseService.IsSystemLocked())
+            {
+                // KILL SWITCH ACTIVADO
+                ActiveViewModel = new LicenseLockedViewModel();
+                return;
+            }
 
-        // Start Splash Screen Timer
-        _ = DismissSplashScreenAsync();
+            bool hasUsers = await _userRepository.HasAnyUsersAsync();
 
         if (!hasUsers)
         {
@@ -707,6 +774,13 @@ public partial class MainWindowViewModel : ObservableObject
         {
             // Route to standard Login
             ActiveViewModel = _loginVm;
+        }
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Error(ex, "Failed to initialize application state. This is why the splash screen hangs.");
+            _ = DismissSplashScreenAsync();
+            UnlockErrorMessage = $"CRITICAL ERROR: {ex.Message}";
         }
     }
 

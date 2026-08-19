@@ -7,6 +7,7 @@ using NextVent.Data.Entities;
 using NextVent.ViewModels.Base;
 using NextVent.Core.Services;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace NextVent.ViewModels;
@@ -18,11 +19,20 @@ public partial class FirstTimeSetupViewModel : ValidatableViewModelBase
     private readonly Action _navigateToLogin;
 
     [ObservableProperty] private string _adminFullName = string.Empty;
-    [ObservableProperty] private string _adminUsername = "admin";
+    [ObservableProperty] private string _adminUsername = string.Empty;
     [ObservableProperty] private string _adminPassword = string.Empty;
     [ObservableProperty] private string _passwordHint = string.Empty;
-    [ObservableProperty] private string _adminPin = string.Empty;
+    
+    [ObservableProperty] private string _adminPin1 = string.Empty;
+    [ObservableProperty] private string _adminPin2 = string.Empty;
+    [ObservableProperty] private string _adminPin3 = string.Empty;
+    [ObservableProperty] private string _adminPin4 = string.Empty;
+
+    public string AdminPin => $"{AdminPin1}{AdminPin2}{AdminPin3}{AdminPin4}";
+
     [ObservableProperty] private string _errorMessage = string.Empty;
+
+    // Removed OnAdminPinChanged as we are using 4 separate text boxes
 
     public FirstTimeSetupViewModel(IUserRepository userRepository, IDialogService dialogService, Action navigateToLogin)
     {

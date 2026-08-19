@@ -67,9 +67,19 @@ public partial class InventorySnapshotsViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private async Task PrintSnapshotAsync()
+    private async System.Threading.Tasks.Task PrintSnapshotAsync()
     {
         if (SelectedSnapshot == null) return;
+        
+        var desktop = Avalonia.Application.Current?.ApplicationLifetime as Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime;
+        if (desktop?.MainWindow == null) return;
+
+        var vm = new NextVent.ViewModels.Dialogs.PrintPreviewWindowViewModel($"Reporte de Captura Física: {SelectedSnapshot.CreatedAt:g}");
+        var win = new NextVent.Views.Dialogs.PrintPreviewWindow { DataContext = vm };
+        
+        var confirmed = await win.ShowDialog<bool>(desktop.MainWindow);
+        if (!confirmed) return;
+
         var printerSvc = new NextVent.Services.Implementations.EscPosPrinterService();
         await printerSvc.PrintSnapshotChecklistAsync(SelectedSnapshot);
     }

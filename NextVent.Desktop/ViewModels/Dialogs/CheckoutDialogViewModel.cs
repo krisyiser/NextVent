@@ -204,7 +204,7 @@ public partial class CheckoutDialogViewModel : ObservableObject
     [RelayCommand]
     private void AddCashDenomination(string amountArg)
     {
-        if (double.TryParse(amountArg, out double addValue))
+        if (double.TryParse(amountArg, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double addValue))
         {
             ReceivedAmount += addValue;
             PaidAmount = ReceivedAmount;
@@ -571,7 +571,7 @@ public partial class CheckoutDialogViewModel : ObservableObject
                 try
                 {
                     // Use standard sandbox credentials for testing
-                    var response = await facturamaService.CreateInvoiceAsync(cfdiRequest, "Prueba", "Prueba1");
+                    var response = await facturamaService.CreateInvoiceAsync(cfdiRequest);
                     if (response != null)
                     {
                         saleDto = saleDto with { InvoiceId = response.Id, InvoiceStatus = response.Status, EstadoFiscal = "TIMBRADO CFDI 4.0" };

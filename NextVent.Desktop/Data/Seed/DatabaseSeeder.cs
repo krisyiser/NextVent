@@ -10,7 +10,7 @@ public static class DatabaseSeeder
 {
     public static async Task SeedAsync(AppDbContext context)
     {
-        var now = DateTimeOffset.UtcNow.ToString("o");
+        var now = DateTimeOffset.Now.ToString("o");
 
         // 1. Seed/Upsert 25 Varied Test Products unconditionally
         var seedList = new[]

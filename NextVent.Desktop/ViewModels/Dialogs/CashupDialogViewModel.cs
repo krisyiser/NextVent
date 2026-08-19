@@ -141,7 +141,7 @@ public partial class CashupDialogViewModel : ObservableObject
                 TheoreticalCash = TheoreticalCash,
                 Difference = DifferenceAmount,
                 Notes = Notes,
-                Timestamp = DateTime.UtcNow.ToBusinessLocalTime().ToString("g")
+                Timestamp = DateTime.Now.ToBusinessLocalTime().ToString("g")
             };
 
             _db.Cashups.Add(entity);

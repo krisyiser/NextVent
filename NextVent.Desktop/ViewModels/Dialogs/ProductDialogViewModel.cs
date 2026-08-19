@@ -32,14 +32,14 @@ public partial class ProductDialogViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ProfitMargin))]
-    private double _costPrice;
+    private double? _costPrice;
 
     [ObservableProperty]
     [NotifyPropertyChangedFor(nameof(ProfitMargin))]
-    private double _retailPrice;
+    private double? _retailPrice;
 
     [ObservableProperty]
-    private int _stock;
+    private int? _stock;
 
     [ObservableProperty]
     private string _category = "General";
@@ -52,19 +52,19 @@ public partial class ProductDialogViewModel : ObservableObject
     private string _attributesText = string.Empty;
 
     [ObservableProperty]
-    private double _pointsRewarded = 1.0;
+    private double? _pointsRewarded;
 
     [ObservableProperty]
-    private double _reorderQuantity = 10.0;
+    private double? _reorderQuantity;
 
     [ObservableProperty]
-    private string _locationRack = "Pasillo 1 - Anaquel A";
+    private string _locationRack = string.Empty;
 
     [ObservableProperty]
-    private string _satProductCode = "01010101";
+    private string _satProductCode = string.Empty;
 
     [ObservableProperty]
-    private string _satUnitCode = "H87";
+    private string _satUnitCode = string.Empty;
 
     [ObservableProperty]
     private string _errorMessage = string.Empty;
@@ -73,7 +73,7 @@ public partial class ProductDialogViewModel : ObservableObject
     private string _title = "Nuevo Producto";
 
     [ObservableProperty]
-    private double _minStock = 5.0;
+    private double? _minStock;
 
     [ObservableProperty]
     private bool _showAutoFillBanner = false;
@@ -82,10 +82,12 @@ public partial class ProductDialogViewModel : ObservableObject
     {
         get
         {
-            if (RetailPrice <= 0 || CostPrice < 0) return "Margen: 0.00%";
-            if (CostPrice == 0) return "Margen: 100.00%";
+            double retail = RetailPrice ?? 0;
+            double cost = CostPrice ?? 0;
+            if (retail <= 0 || cost < 0) return "Margen: 0.00%";
+            if (cost == 0) return "Margen: 100.00%";
             
-            double margin = ((RetailPrice - CostPrice) / RetailPrice) * 100.0;
+            double margin = ((retail - cost) / retail) * 100.0;
             return $"Margen: {margin:F2}%";
         }
     }
@@ -217,14 +219,14 @@ public partial class ProductDialogViewModel : ObservableObject
             }
 
             var dto = new ProductDto(
-                _editingProductId ?? Guid.NewGuid().ToString(), Barcode, Name, CostPrice, RetailPrice,
-                Stock: Stock, Category: Category,
-                PointsRewarded: PointsRewarded,
-                ReorderQuantity: ReorderQuantity,
+                _editingProductId ?? Guid.NewGuid().ToString(), Barcode, Name, CostPrice ?? 0, RetailPrice ?? 0,
+                Stock: Stock ?? 0, Category: Category,
+                PointsRewarded: PointsRewarded ?? 1.0,
+                ReorderQuantity: ReorderQuantity ?? 10.0,
                 LocationRack: LocationRack,
                 SatProductCode: SatProductCode,
                 SatUnitCode: SatUnitCode,
-                MinStock: MinStock
+                MinStock: MinStock ?? 5.0
             );
 
             if (_editingProductId != null)
@@ -232,9 +234,9 @@ public partial class ProductDialogViewModel : ObservableObject
                 await _productService.UpdateAsync(dto);
 
                 // INJECT SILENT AUDIT FOR MANUAL ADJUSTMENTS
-                if (Math.Abs(_originalStockSnapshot - Stock) > 0.0001)
+                if (Math.Abs(_originalStockSnapshot - (Stock ?? 0)) > 0.0001)
                 {
-                    double difference = Stock - _originalStockSnapshot;
+                    double difference = (Stock ?? 0) - _originalStockSnapshot;
                     string verb = difference > 0 ? "Incremento" : "Disminución";
                     var currentUserId = _sessionManager?.CurrentCashier?.Id.ToString() ?? "cajero_matriz";
 
@@ -248,9 +250,9 @@ public partial class ProductDialogViewModel : ObservableObject
                             EntityName = "ProductEntity",
                             EntityId = dto.Id,
                             OldValue = $"Stock: {_originalStockSnapshot:N2}",
-                            NewValue = $"Stock: {Stock:N2}",
-                            FinancialImpact = Math.Abs(difference) * CostPrice,
-                            Reason = $"Ajuste Manual: {Name} | {verb} de {Math.Abs(difference):N2} unidades. (Anterior: {_originalStockSnapshot:N2}, Nuevo: {Stock:N2})"
+                            NewValue = $"Stock: {Stock ?? 0:N2}",
+                            FinancialImpact = Math.Abs(difference) * (CostPrice ?? 0),
+                            Reason = $"Ajuste Manual: {Name} | {verb} de {Math.Abs(difference):N2} unidades. (Anterior: {_originalStockSnapshot:N2}, Nuevo: {Stock ?? 0:N2})"
                         };
                         await _auditService.LogAsync(auditEntry);
                     }

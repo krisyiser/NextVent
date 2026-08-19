@@ -24,8 +24,8 @@
                 </Grid>
             </StackPanel>
 
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
-                <StackPanel Spacing="14">
+            <ScrollViewer VerticalScrollBarVisibility="Visible" Padding="0,0,12,0" Margin="0,0,-12,0">
+                <StackPanel Spacing="16">
                     <StackPanel Spacing="4">
                         <TextBlock Text="Nombre Completo / Razón Social *" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
                         <TextBox Text="{Binding Name, Mode=TwoWay}" Watermark="Ej. María López Morales" Background="{DynamicResource BgTertiaryBrush}" Padding="10" />
@@ -44,7 +44,7 @@
 
                         <StackPanel Grid.Column="1" Spacing="4" Margin="6,0,0,0">
                             <TextBlock Text="Límite de Crédito ($)" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                            <TextBox Text="{Binding CreditLimit, Mode=TwoWay}" Watermark="0.00" Background="{DynamicResource BgTertiaryBrush}" Padding="10" />
+                            <NumericUpDown Value="{Binding CreditLimit}" ShowButtonSpinner="False" FormatString="0.00" Minimum="0" Watermark="0.00" Background="{DynamicResource BgTertiaryBrush}" Padding="10" />
                         </StackPanel>
                     </Grid>
 
@@ -62,3 +62,4 @@
         </DockPanel>
     </Border>
 </UserControl>
+

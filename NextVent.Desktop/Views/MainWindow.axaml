@@ -124,7 +124,7 @@
                         <Border Width="{DynamicResource AppLogoHeight}" Height="{DynamicResource AppLogoHeight}" CornerRadius="{DynamicResource AppCornerRadius}"
                                 Background="{DynamicResource AccentPrimaryBrush}" Margin="4"
                                 HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock Text="NV" FontSize="16" FontWeight="Bold"
+                            <TextBlock Text="TF!" FontSize="16" FontWeight="Bold"
                                        Foreground="White"
                                        HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
@@ -202,7 +202,8 @@
                         <!-- Nav: Fiscal (F9) -->
                         <Button Classes="nav-item"
                                 Command="{Binding NavigateToCommand}" CommandParameter="fiscal"
-                                ToolTip.Tip="Facturación SAT">
+                                ToolTip.Tip="Facturación SAT"
+                                IsVisible="False">
                             <StackPanel Spacing="2">
                                 <mi:MaterialIcon Kind="ReceiptTextOutline" Width="22" Height="22" HorizontalAlignment="Center" />
                                 <TextBlock Text="Factura" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" />
@@ -220,11 +221,55 @@
                         </Button>
 
                     </StackPanel>
+
+                    <!-- Nav: System / Update Button at Bottom -->
+                    <StackPanel DockPanel.Dock="Bottom" Margin="8,8,8,16" Spacing="10" HorizontalAlignment="Center">
+                        <Button Classes="nav-item"
+                                Command="{Binding CheckForUpdatesCommand}"
+                                ToolTip.Tip="Buscar Actualizaciones">
+                            <StackPanel Spacing="2">
+                                <mi:MaterialIcon Kind="Update" Width="22" Height="22" HorizontalAlignment="Center" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                <TextBlock Text="Actualizar" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
                 </DockPanel>
             </Border>
 
             <!-- ═══ MAIN CONTENT AREA ═══ -->
             <DockPanel LastChildFill="True">
+                <!-- UPDATE BANNERS -->
+                <Border DockPanel.Dock="Top" Background="#3B82F6" Padding="16,10" IsVisible="{Binding IsUpdateAvailable}">
+                    <Grid ColumnDefinitions="Auto, *, Auto">
+                        <mi:MaterialIcon Kind="CloudDownload" Width="24" Height="24" Foreground="White" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                        <TextBlock Grid.Column="1" Text="Descargando nueva actualización en segundo plano..." FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
+                        <ProgressBar Grid.Column="2" Width="150" Height="8" Minimum="0" Maximum="100" Value="{Binding UpdateProgress}" VerticalAlignment="Center" Foreground="White" Background="#1D4ED8"/>
+                    </Grid>
+                </Border>
+                
+                <Border DockPanel.Dock="Top" Background="#10B981" Padding="16,10" IsVisible="{Binding IsUpdateReady}">
+                    <Grid ColumnDefinitions="Auto, *, Auto">
+                        <mi:MaterialIcon Kind="CheckCircleOutline" Width="24" Height="24" Foreground="White" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                        <TextBlock Grid.Column="1" Text="Actualización lista para instalarse. Reinicia el sistema." FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
+                        <Button Grid.Column="2" Content="REINICIAR AHORA" Command="{Binding ApplyUpdateAndRestartCommand}" Background="White" Foreground="#10B981" FontWeight="Bold" CornerRadius="4" Padding="12,6"/>
+                    </Grid>
+                </Border>
+
+                <!-- FEEDBACK BANNERS (Up To Date & Error) -->
+                <Border DockPanel.Dock="Top" Background="#10B981" Padding="16,10" IsVisible="{Binding IsUpdateUpToDate}">
+                    <Grid ColumnDefinitions="Auto, *">
+                        <mi:MaterialIcon Kind="CheckAll" Width="24" Height="24" Foreground="White" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                        <TextBlock Grid.Column="1" Text="El sistema ya está en la versión más reciente." FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
+                    </Grid>
+                </Border>
+
+                <Border DockPanel.Dock="Top" Background="#EF4444" Padding="16,10" IsVisible="{Binding IsUpdateFailed}">
+                    <Grid ColumnDefinitions="Auto, *">
+                        <mi:MaterialIcon Kind="AlertCircleOutline" Width="24" Height="24" Foreground="White" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                        <TextBlock Grid.Column="1" Text="{Binding UpdateErrorMessage}" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                    </Grid>
+                </Border>
+
                 <!-- Active Module Content -->
                 <ContentControl Content="{Binding ActiveViewModel}" IsEnabled="{Binding !IsLocked}" />
             </DockPanel>
@@ -290,3 +335,4 @@
         </Grid>
     </Panel>
 </Window>
+

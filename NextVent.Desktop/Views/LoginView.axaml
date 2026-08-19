@@ -12,9 +12,9 @@
             <StackPanel Spacing="20">
                 <StackPanel HorizontalAlignment="Center" Spacing="8">
                     <Border Width="56" Height="56" CornerRadius="8" Background="{DynamicResource AccentPrimaryBrush}" HorizontalAlignment="Center">
-                        <TextBlock Text="NV" FontSize="22" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        <TextBlock Text="TF!" FontSize="22" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
-                    <TextBlock Text="TICKETFY! v3.0" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" />
+                    <TextBlock Text="TICKETFY! v3.0.12" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" />
                     <TextBlock Text="Ingrese sus credenciales de cajero" FontSize="13" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" />
                 </StackPanel>
 
@@ -35,3 +35,4 @@
         </Border>
     </Grid>
 </UserControl>
+

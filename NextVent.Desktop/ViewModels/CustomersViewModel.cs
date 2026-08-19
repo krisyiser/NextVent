@@ -5,6 +5,7 @@ using NextVent.Data.Dtos;
 using NextVent.Services.Interfaces;
 using Serilog;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
@@ -13,6 +14,7 @@ namespace NextVent.ViewModels;
 public partial class CustomersViewModel : ObservableObject
 {
     private readonly ICustomerService _customerService;
+    private List<CustomerDto> _allCustomers = [];
     public ObservableCollection<CustomerDto> Customers { get; } = [];
 
     [ObservableProperty] private string _searchQuery = string.Empty;
@@ -34,13 +36,34 @@ public partial class CustomersViewModel : ObservableObject
             var items = await _customerService.GetAllAsync();
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
-                Customers.Clear();
-                foreach (var item in items) Customers.Add(item);
+                _allCustomers = new List<CustomerDto>(items);
+                ApplySearchFilter();
             });
         }
         catch (Exception ex)
         {
             Log.Error(ex, "Error loading customers");
+        }
+    }
+
+    partial void OnSearchQueryChanged(string value)
+    {
+        ApplySearchFilter();
+    }
+
+    private void ApplySearchFilter()
+    {
+        Customers.Clear();
+        var q = SearchQuery?.ToLowerInvariant() ?? string.Empty;
+
+        foreach (var c in _allCustomers)
+        {
+            if (string.IsNullOrWhiteSpace(q) || 
+                c.Name.ToLowerInvariant().Contains(q) || 
+                (c.Phone != null && c.Phone.Contains(q)))
+            {
+                Customers.Add(c);
+            }
         }
     }
 

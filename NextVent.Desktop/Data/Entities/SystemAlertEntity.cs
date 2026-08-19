@@ -26,7 +26,7 @@ public class SystemAlertEntity
     public string Message { get; set; } = string.Empty;
 
     [Column("created_at")]
-    public string CreatedAt { get; set; } = DateTime.UtcNow.ToString("s");
+    public string CreatedAt { get; set; } = DateTime.Now.ToString("s");
 
     [Column("is_resolved")]
     public bool IsResolved { get; set; } = false;

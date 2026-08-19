@@ -60,7 +60,7 @@ public class ExpenseService : IExpenseService
                     IsOutflow = true,
                     Description = $"Gasto: {entity.Category} - {entity.Description}",
                     ReferenceId = entity.Id,
-                    Timestamp = DateTime.UtcNow.ToString("s")
+                    Timestamp = DateTime.Now.ToString("s")
                 };
                 _context.ShiftMovements.Add(outflow);
             }

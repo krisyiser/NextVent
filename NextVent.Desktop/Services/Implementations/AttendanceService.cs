@@ -53,7 +53,7 @@ public class AttendanceService : IAttendanceService
         {
             Id = Guid.NewGuid().ToString(),
             UserId = guid,
-            CheckInTime = DateTime.UtcNow,
+            CheckInTime = DateTime.Now,
             Status = AttendanceStatus.Active,
             TerminalName = Environment.MachineName,
             Notes = notes
@@ -93,7 +93,7 @@ public class AttendanceService : IAttendanceService
             return new AttendanceResultModel { IsSuccess = false, ErrorMessage = "No tienes un registro de entrada activo." };
         }
 
-        activeAttendance.CheckOutTime = DateTime.UtcNow;
+        activeAttendance.CheckOutTime = DateTime.Now;
         activeAttendance.Status = AttendanceStatus.Completed;
         _dbContext.Attendances.Update(activeAttendance);
         await _dbContext.SaveChangesAsync();
@@ -105,7 +105,7 @@ public class AttendanceService : IAttendanceService
     {
         try
         {
-            var cutoff = DateTime.UtcNow.AddHours(-24);
+            var cutoff = DateTime.Now.AddHours(-24);
             var forgotten = await _dbContext.Attendances
                 .Where(a => a.CheckOutTime == null && a.CheckInTime < cutoff && a.Status == AttendanceStatus.Active)
                 .ToListAsync();

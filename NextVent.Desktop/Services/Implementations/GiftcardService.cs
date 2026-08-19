@@ -103,7 +103,7 @@ public sealed class GiftcardService : IGiftcardService
                 Amount = (double)amount,
                 IsOutflow = false,
                 Description = $"Recarga Monedero {card.CardNumber}",
-                Timestamp = DateTime.UtcNow.ToString("s")
+                Timestamp = DateTime.Now.ToString("s")
             });
         }
 

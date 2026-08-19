@@ -31,6 +31,12 @@ public partial class HistoryViewModel : ObservableObject
     [ObservableProperty] private DateTime? _startDate = DateTime.Today;
     [ObservableProperty] private DateTime? _endDate = DateTime.Today;
     [ObservableProperty] private bool _isLoading = false;
+    [ObservableProperty] private double _commissionPercentage = 3.0;
+
+    partial void OnCommissionPercentageChanged(double value)
+    {
+        _ = LoadCashierPerformanceAsync();
+    }
 
     public event Action? OpenCashupRequested;
     public event Action<SaleDto>? OpenReturnRequested;
@@ -88,7 +94,7 @@ public partial class HistoryViewModel : ObservableObject
     {
         try
         {
-            var list = await _saleService.GetCashierPerformanceReportAsync();
+            var list = await _saleService.GetCashierPerformanceReportAsync(CommissionPercentage);
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 CashierPerformanceReport.Clear();
@@ -151,6 +157,16 @@ public partial class HistoryViewModel : ObservableObject
     private async Task RePrintTicketAsync(SaleDto sale)
     {
         if (sale == null) return;
+        
+        var desktop = Avalonia.Application.Current?.ApplicationLifetime as Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime;
+        if (desktop?.MainWindow == null) return;
+
+        var vm = new NextVent.ViewModels.Dialogs.PrintPreviewWindowViewModel($"Reimpresión de Ticket #{sale.Id}");
+        var win = new NextVent.Views.Dialogs.PrintPreviewWindow { DataContext = vm };
+        
+        var confirmed = await win.ShowDialog<bool>(desktop.MainWindow);
+        if (!confirmed) return;
+
         try
         {
             var success = await _printerService.PrintTicketAsync(sale, "COM1");

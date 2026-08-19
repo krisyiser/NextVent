@@ -55,6 +55,8 @@ public partial class LoginViewModel : ObservableObject
         {
             _sessionManager.StartSession(authResult.User);
             LoginSuccessful?.Invoke();
+            Username = string.Empty;
+            Password = string.Empty;
         }
         else
         {

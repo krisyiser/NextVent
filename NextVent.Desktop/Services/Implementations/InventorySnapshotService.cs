@@ -17,7 +17,7 @@ public class InventorySnapshotService : IInventorySnapshotService
         try
         {
             var options = new DbContextOptionsBuilder<AppDbContext>()
-                .UseSqlite($"Data Source={System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NextVent", "Database", "nextvent.db")};Password={NextVent.Services.Security.SecurityManager.GetMasterKey()};")
+                .UseSqlite($"Data Source={System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ticketfy", "Database", "nextvent.db")};Password={NextVent.Services.Security.SecurityManager.GetMasterKey()};")
                 .Options;
 
             using var context = new AppDbContext(options);
@@ -60,7 +60,7 @@ public class InventorySnapshotService : IInventorySnapshotService
     public async Task<List<InventorySnapshotEntity>> GetSnapshotsAsync()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseSqlite($"Data Source={System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NextVent", "Database", "nextvent.db")};Password={NextVent.Services.Security.SecurityManager.GetMasterKey()};")
+            .UseSqlite($"Data Source={System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ticketfy", "Database", "nextvent.db")};Password={NextVent.Services.Security.SecurityManager.GetMasterKey()};")
             .Options;
         using var context = new AppDbContext(options);
         return await context.InventorySnapshots.AsNoTracking().OrderByDescending(s => s.CreatedAt).ToListAsync();
@@ -69,7 +69,7 @@ public class InventorySnapshotService : IInventorySnapshotService
     public async Task<InventorySnapshotEntity?> GetSnapshotDetailsAsync(string snapshotId)
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
-            .UseSqlite($"Data Source={System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NextVent", "Database", "nextvent.db")};Password={NextVent.Services.Security.SecurityManager.GetMasterKey()};")
+            .UseSqlite($"Data Source={System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ticketfy", "Database", "nextvent.db")};Password={NextVent.Services.Security.SecurityManager.GetMasterKey()};")
             .Options;
         using var context = new AppDbContext(options);
         return await context.InventorySnapshots

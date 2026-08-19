@@ -6,7 +6,7 @@
              x:Class="NextVent.Views.InventoryView"
              x:DataType="vm:InventoryViewModel">
 
-    <Grid RowDefinitions="Auto,Auto,Auto,Auto,*" Margin="16">
+    <Grid RowDefinitions="Auto,Auto,Auto,Auto,*,Auto" Margin="16">
 
         <!-- ═══ TOP FUNCTION BANNER BAR ═══ -->
         <Border Grid.Row="0" Margin="0,0,0,16" Padding="16,12"
@@ -19,7 +19,7 @@
                     </Border>
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock Text="Catálogo e Inventario General" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
-                        <TextBlock Text="Control de Stock, Precios y Promedio Ponderado" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
+                        <TextBlock Text="Control de Stock y Precios" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
                     </StackPanel>
                 </StackPanel>
 
@@ -28,62 +28,56 @@
                     
                     <!-- Fila 1: Herramientas del Sistema y Catálogo -->
                     <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
-                        <Button Command="{Binding GenerateAutoPurchaseOrdersCommand}" Padding="10,6" CornerRadius="6" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource AccentWarningBrush}" BorderThickness="1" ToolTip.Tip="Generar borradores de orden de compra en Compras para productos agotados">
+
+                        <Button Command="{Binding ToggleLowStockFilterCommand}" Padding="10,6" CornerRadius="6" Cursor="Hand" Background="#FEF2F2" BorderBrush="#EF4444" BorderThickness="1">
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <mi:MaterialIcon Kind="TruckFast" Width="16" Height="16" Foreground="{DynamicResource AccentWarningBrush}" />
-                                <TextBlock Text="AUTO-REABASTECIMIENTO" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentWarningBrush}" VerticalAlignment="Center" />
+                                <mi:MaterialIcon Kind="AlertCircleOutline" Width="16" Height="16" Foreground="#DC2626" />
+                                <TextBlock Text="STOCK MÍNIMO" FontWeight="Bold" FontSize="11" Foreground="#DC2626" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
 
-                        <Button Command="{Binding ToggleLowStockFilterCommand}" Padding="10,6" CornerRadius="6" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource AccentDangerBrush}" BorderThickness="1">
+                        <Button Command="{Binding OpenManageCategoriesDialogCommand}" Padding="10,6" CornerRadius="6" Cursor="Hand" Background="#EFF6FF" BorderBrush="#3B82F6" BorderThickness="1">
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <mi:MaterialIcon Kind="AlertCircleOutline" Width="16" Height="16" Foreground="{DynamicResource AccentDangerBrush}" />
-                                <TextBlock Text="STOCK MÍNIMO" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentDangerBrush}" VerticalAlignment="Center" />
+                                <mi:MaterialIcon Kind="FolderMultipleOutline" Width="16" Height="16" Foreground="#2563EB" />
+                                <TextBlock Text="CATEGORÍAS" FontWeight="Bold" FontSize="11" Foreground="#2563EB" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
 
-                        <Button Command="{Binding OpenManageCategoriesDialogCommand}" Padding="10,6" CornerRadius="6" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                        <Button Command="{Binding ImportCsvCatalogCommand}" Padding="10,6" CornerRadius="6" Cursor="Hand" Background="#EFF6FF" BorderBrush="#3B82F6" BorderThickness="1">
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <mi:MaterialIcon Kind="FolderMultipleOutline" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                                <TextBlock Text="CATEGORÍAS" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
-                            </StackPanel>
-                        </Button>
-
-                        <Button Command="{Binding ImportCsvCatalogCommand}" Padding="10,6" CornerRadius="6" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
-                            <StackPanel Orientation="Horizontal" Spacing="6">
-                                <mi:MaterialIcon Kind="FileImport" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                                <TextBlock Text="IMPORTAR CSV" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
+                                <mi:MaterialIcon Kind="FileImport" Width="16" Height="16" Foreground="#2563EB" />
+                                <TextBlock Text="IMPORTAR CSV" FontWeight="Bold" FontSize="11" Foreground="#2563EB" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
                     </StackPanel>
 
                     <!-- Fila 2: Reportes, Auditoría y Altas -->
                     <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
-                        <Button Command="{Binding PrintChecklistCommand}" Padding="10,6" CornerRadius="6" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="1">
+                        <Button Command="{Binding PrintChecklistCommand}" Padding="10,6" CornerRadius="6" Cursor="Hand" Background="#EFF6FF" BorderBrush="#3B82F6" BorderThickness="1">
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <mi:MaterialIcon Kind="Printer" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                                <TextBlock Text="IMPRIMIR CHECKLIST" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
+                                <mi:MaterialIcon Kind="Printer" Width="16" Height="16" Foreground="#2563EB" />
+                                <TextBlock Text="IMPRIMIR CHECKLIST" FontWeight="Bold" FontSize="11" Foreground="#2563EB" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
 
-                        <Button Command="{Binding CreateSnapshotCommand}" Padding="10,6" CornerRadius="6" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="1">
+                        <Button Command="{Binding CreateSnapshotCommand}" Padding="10,6" CornerRadius="6" Cursor="Hand" Background="#EFF6FF" BorderBrush="#3B82F6" BorderThickness="1">
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <mi:MaterialIcon Kind="Camera" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                                <TextBlock Text="PUNTO GUARDADO" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
+                                <mi:MaterialIcon Kind="Camera" Width="16" Height="16" Foreground="#2563EB" />
+                                <TextBlock Text="COPIA DE SEGURIDAD" FontWeight="Bold" FontSize="11" Foreground="#2563EB" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
 
-                        <Button Command="{Binding ViewSnapshotsCommand}" Padding="10,6" CornerRadius="6" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="1">
+                        <Button Command="{Binding ViewSnapshotsCommand}" Padding="10,6" CornerRadius="6" Cursor="Hand" Background="#EFF6FF" BorderBrush="#3B82F6" BorderThickness="1">
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <mi:MaterialIcon Kind="History" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                                <TextBlock Text="HISTORIAL" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
+                                <mi:MaterialIcon Kind="History" Width="16" Height="16" Foreground="#2563EB" />
+                                <TextBlock Text="HISTORIAL" FontWeight="Bold" FontSize="11" Foreground="#2563EB" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
 
-                        <Button Command="{Binding OpenAddProductDialogCommand}" Classes="primary-action" Padding="12,6">
+                        <Button Command="{Binding OpenAddProductDialogCommand}" Classes="primary-action" Cursor="Hand" Padding="12,6">
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <mi:MaterialIcon Kind="Plus" Width="16" Height="16" />
-                                <TextBlock Text="+ NUEVO PRODUCTO" FontWeight="Bold" FontSize="12" VerticalAlignment="Center" />
+                                <mi:MaterialIcon Kind="Plus" Width="16" Height="16" Foreground="White" />
+                                <TextBlock Text="NUEVO PRODUCTO" FontWeight="Bold" FontSize="12" Foreground="White" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
                     </StackPanel>
@@ -93,17 +87,31 @@
         </Border>
 
         <!-- ═══ FEEDBACK MESSAGE BANNER ═══ -->
-        <Border Grid.Row="1" Margin="0,0,0,16" Padding="16,12"
-                Background="{DynamicResource AccentSuccessBrush}" CornerRadius="8"
-                IsVisible="{Binding FeedbackMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-            <Grid ColumnDefinitions="Auto,*,Auto">
-                <mi:MaterialIcon Kind="CheckCircleOutline" Width="24" Height="24" Foreground="White" VerticalAlignment="Center" Margin="0,0,16,0" />
-                <TextBlock Grid.Column="1" Text="{Binding FeedbackMessage}" FontSize="14" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" TextWrapping="Wrap" />
-                <Button Grid.Column="2" Background="Transparent" BorderThickness="0" Padding="4" Command="{Binding ClearFeedbackCommand}">
-                    <mi:MaterialIcon Kind="Close" Width="18" Height="18" Foreground="White" />
-                </Button>
-            </Grid>
-        </Border>
+        <Panel Grid.Row="1" Margin="0,0,0,16" IsVisible="{Binding FeedbackMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+            
+            <!-- Success Banner -->
+            <Border Padding="16,12" Background="{DynamicResource AccentSuccessBrush}" CornerRadius="8" IsVisible="{Binding !IsFeedbackError}">
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <mi:MaterialIcon Kind="CheckCircleOutline" Width="24" Height="24" Foreground="White" VerticalAlignment="Center" Margin="0,0,16,0" />
+                    <TextBlock Grid.Column="1" Text="{Binding FeedbackMessage}" FontSize="14" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" TextWrapping="Wrap" />
+                    <Button Grid.Column="2" Background="Transparent" BorderThickness="0" Padding="4" Command="{Binding ClearFeedbackCommand}">
+                        <mi:MaterialIcon Kind="Close" Width="18" Height="18" Foreground="White" />
+                    </Button>
+                </Grid>
+            </Border>
+
+            <!-- Error Banner -->
+            <Border Padding="16,12" Background="{DynamicResource AccentDangerBrush}" CornerRadius="8" IsVisible="{Binding IsFeedbackError}">
+                <Grid ColumnDefinitions="Auto,*,Auto">
+                    <mi:MaterialIcon Kind="AlertCircleOutline" Width="24" Height="24" Foreground="White" VerticalAlignment="Center" Margin="0,0,16,0" />
+                    <TextBlock Grid.Column="1" Text="{Binding FeedbackMessage}" FontSize="14" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" TextWrapping="Wrap" />
+                    <Button Grid.Column="2" Background="Transparent" BorderThickness="0" Padding="4" Command="{Binding ClearFeedbackCommand}">
+                        <mi:MaterialIcon Kind="Close" Width="18" Height="18" Foreground="White" />
+                    </Button>
+                </Grid>
+            </Border>
+            
+        </Panel>
 
         <!-- ═══ INTELLIGENCE SUPPLY CHAIN PANEL ═══ -->
         <Border Grid.Row="2" Margin="0,0,0,16" Padding="16,12"
@@ -149,13 +157,13 @@
             <DataGrid ItemsSource="{Binding FilteredProducts}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" DoubleTapped="OnDataGridDoubleTapped">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Código / SKU" Binding="{Binding Barcode}" Width="1.5*" />
-                    <DataGridTextColumn Header="Descripción" Binding="{Binding Name}" Width="3*" />
-                    <DataGridTextColumn Header="Categoría" Binding="{Binding Category}" Width="1.5*" />
-                    <DataGridTextColumn Header="Precio Costo Ponderado ($)" Binding="{Binding CostPrice, StringFormat='${0:N2}'}" Width="1.8*" />
-                    <DataGridTextColumn Header="Precio Venta ($)" Binding="{Binding SalePrice, StringFormat='${0:N2}'}" Width="1.5*" />
+                    <DataGridTextColumn Header="Descripción" Binding="{Binding Name}" Width="2.5*" />
+                    <DataGridTextColumn Header="Categoría" Binding="{Binding Category}" Width="1.2*" />
+                    <DataGridTextColumn Header="Precio Costo" Binding="{Binding Cost, StringFormat='${0:N2}'}" Width="1.2*" />
+                    <DataGridTextColumn Header="Precio Venta" Binding="{Binding SalePrice, StringFormat='${0:N2}'}" Width="1.2*" />
                     <DataGridTextColumn Header="Stock Actual" Binding="{Binding Stock, StringFormat='{}{0:N2}'}" Width="1.2*" />
                     <DataGridTextColumn Header="Stock Mínimo" Binding="{Binding MinStock, StringFormat='{}{0:N2}'}" Width="1.2*" />
-                    <DataGridTextColumn Header="Puntos" Binding="{Binding PointsRewarded, StringFormat='{}{0:N2}'}" Width="1.0*" />
+                    <DataGridTextColumn Header="Puntos" Binding="{Binding PointsRewarded, StringFormat='{}{0:N2}'}" Width="0.8*" />
 
                     <!-- Action Column -->
                     <DataGridTemplateColumn Header="Acciones" Width="1.5*">
@@ -177,5 +185,20 @@
                 </DataGrid.Columns>
             </DataGrid>
         </Border>
+
+        <!-- Footer / Indicators -->
+        <Border Grid.Row="5" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="12" Margin="0,16,0,0">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="24">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="Total Precio Costo:" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding TotalStockCost, StringFormat='${0:N2}'}" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="16" VerticalAlignment="Center"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="Total Precio Venta:" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center"/>
+                    <TextBlock Text="{Binding TotalStockSale, StringFormat='${0:N2}'}" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="16" VerticalAlignment="Center"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
     </Grid>
 </UserControl>
+

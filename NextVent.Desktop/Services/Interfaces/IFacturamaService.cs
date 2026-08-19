@@ -5,5 +5,5 @@ namespace NextVent.Services.Interfaces;
 
 public interface IFacturamaService
 {
-    Task<FacturamaCfdiResponse?> CreateInvoiceAsync(FacturamaCfdiRequest request, string user, string pass);
+    Task<FacturamaCfdiResponse?> CreateInvoiceAsync(FacturamaCfdiRequest request);
 }

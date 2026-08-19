@@ -25,7 +25,7 @@ public class CustomerPaymentEntity
 
     [Required]
     [Column("date")]
-    public string Date { get; set; } = DateTime.UtcNow.ToString("s");
+    public string Date { get; set; } = DateTime.Now.ToString("s");
 
     [Column("amount")]
     public double Amount { get; set; }

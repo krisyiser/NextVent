@@ -45,7 +45,7 @@ public partial class App : Application
         try
         {
             string appDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            string logDirectory = System.IO.Path.Combine(appDataFolder, "NextVent", "Logs");
+            string logDirectory = System.IO.Path.Combine(appDataFolder, "ticketfy", "Logs");
 
             if (!System.IO.Directory.Exists(logDirectory))
             {
@@ -72,12 +72,12 @@ public partial class App : Application
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            Log.Information("TICKETFY! v3.0 — Avalonia Native Desktop starting");
+            Log.Information("TICKETFY! v3.0.12 — Avalonia Native Desktop starting");
 
             try
             {
                 string appDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-                string appFolder = System.IO.Path.Combine(appDataFolder, "NextVent", "Database");
+                string appFolder = System.IO.Path.Combine(appDataFolder, "ticketfy", "Database");
                 if (!System.IO.Directory.Exists(appFolder))
                 {
                     System.IO.Directory.CreateDirectory(appFolder);
@@ -157,7 +157,9 @@ public partial class App : Application
                 using var auditContext = new AuditDbContext(auditOptions);
                 await auditContext.Database.EnsureCreatedAsync();
                 await context.Database.ExecuteSqlRawAsync("PRAGMA journal_mode=WAL;");
+#if DEBUG
                 await DatabaseSeeder.SeedAsync(context);
+#endif
                 Log.Information($"Database initialized and seeded successfully at {dbPath}");
 
                 // Migrate any legacy non-ISO-8601 sale dates in the database
@@ -187,7 +189,7 @@ public partial class App : Application
             {
                 string securePassword = NextVent.Services.Security.SecurityManager.GetMasterKey();
                 var options = new DbContextOptionsBuilder<AppDbContext>()
-                    .UseSqlite($"Data Source={System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "NextVent", "Database", "nextvent.db")};Password={securePassword};")
+                    .UseSqlite($"Data Source={System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ticketfy", "Database", "nextvent.db")};Password={securePassword};")
                     .Options;
                 using var tempCtx = new AppDbContext(options);
                 var bName = await tempCtx.Settings.FirstOrDefaultAsync(s => s.Key == "EmpresaNombreComercial");
@@ -200,9 +202,7 @@ public partial class App : Application
 
             var services = new ServiceCollection();
 
-
-            services.AddHttpClient<IFacturamaService, FacturamaService>();
-
+            services.AddSingleton<IFacturamaService>(sp => new FacturamaService(new System.Net.Http.HttpClient()));
 
             this.Services = services.BuildServiceProvider();
 

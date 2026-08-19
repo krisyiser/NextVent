@@ -30,7 +30,7 @@ public sealed class ShiftService : IShiftService
         var entity = new ShiftEntity
         {
             Id = IdGenerator.NewShiftId(),
-            StartTime = DateTimeOffset.UtcNow.ToString("o"),
+            StartTime = DateTimeOffset.Now.ToString("o"),
             OpeningBalance = openingBalance,
             IsOpen = 1
         };
@@ -79,7 +79,7 @@ public sealed class ShiftService : IShiftService
             .Where(m => m.ShiftId == entity.Id && m.MovementType == NextVent.Core.Enums.MovementType.DevolucionCliente)
             .SumAsync(m => m.Amount);
 
-        entity.EndTime = DateTimeOffset.UtcNow.ToString("o");
+        entity.EndTime = DateTimeOffset.Now.ToString("o");
         entity.TotalCashSales = cashSales;
         entity.TotalCreditSales = creditSales;
         entity.ExpectedBalance = entity.OpeningBalance + cashSales + customerAbonosCash - cashExpenses - cashPurchases - cashReturns;
@@ -97,8 +97,8 @@ public sealed class ShiftService : IShiftService
                 MovementType = diff < 0 ? NextVent.Core.Enums.MovementType.GastoOperativo : NextVent.Core.Enums.MovementType.AperturaCaja,
                 Amount = Math.Abs(diff),
                 IsOutflow = diff < 0,
-                Description = diff < 0 ? "Faltante de Caja en Corte Z" : "Sobrante de Caja en Corte Z",
-                Timestamp = DateTime.UtcNow.ToString("s")
+                Description = diff < 0 ? "Faltante de Caja en Corte final" : "Sobrante de Caja en Corte final",
+                Timestamp = DateTime.Now.ToString("s")
             });
         }
 

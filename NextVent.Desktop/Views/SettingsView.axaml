@@ -27,9 +27,7 @@
                             <TextBlock Text="Configuración General del Sistema" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
                         </StackPanel>
 
-                        <Button Grid.Column="1" Command="{Binding CloseCommand}" Width="36" Height="36" Padding="0" Background="Transparent" BorderThickness="0" CornerRadius="{DynamicResource AppCornerRadius}" Cursor="Hand">
-                            <mi:MaterialIcon Kind="Close" Width="20" Height="20" Foreground="{DynamicResource TextSecondaryBrush}" />
-                        </Button>
+                        <!-- Close button removed per user request -->
                     </Grid>
                 </Border>
 
@@ -63,7 +61,7 @@
                         <DockPanel LastChildFill="True">
                             <Border DockPanel.Dock="Bottom" Padding="16,14" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0">
                                 <StackPanel HorizontalAlignment="Center" Spacing="2">
-                                    <TextBlock Text="TICKETFY! v3.0" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="TICKETFY! v3.0.12" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" />
                                     <TextBlock Text="Valcore" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" />
                                 </StackPanel>
                             </Border>
@@ -168,3 +166,4 @@
         </Border>
     </Grid>
 </UserControl>
+

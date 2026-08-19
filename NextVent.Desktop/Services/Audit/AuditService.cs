@@ -28,7 +28,7 @@ public class AuditService : IAuditService
         try
         {
             if (string.IsNullOrEmpty(log.Id)) log.Id = Guid.NewGuid().ToString();
-            if (string.IsNullOrEmpty(log.Timestamp)) log.Timestamp = DateTime.UtcNow.ToString("s");
+            if (string.IsNullOrEmpty(log.Timestamp)) log.Timestamp = DateTime.Now.ToString("s");
             if (string.IsNullOrEmpty(log.TerminalName)) log.TerminalName = Environment.MachineName;
 
             using var context = await _contextFactory.CreateDbContextAsync();
