@@ -44,6 +44,8 @@ public partial class PosViewModel : ObservableObject, IDisposable
     public event Action? OpenSwitchUserPinRequested;
     public event Action? OpenLockScreenRequested;
     public event Action<string, Action<bool>>? OpenSupervisorPinRequested;
+    public event Action? OpenPartialCashupRequested;
+    public event Action? OpenFinalCashupRequested;
 
     public PosViewModel(
         IProductService productService,
@@ -76,6 +78,8 @@ public partial class PosViewModel : ObservableObject, IDisposable
         Header.OpenSwitchUserPinRequested += () => OpenSwitchUserPinRequested?.Invoke();
         Header.OpenLockScreenRequested += () => OpenLockScreenRequested?.Invoke();
         Header.OpenSupervisorPinRequested += (title, cb) => OpenSupervisorPinRequested?.Invoke(title, cb);
+        Header.OpenPartialCashupRequested += () => OpenPartialCashupRequested?.Invoke();
+        Header.OpenFinalCashupRequested += () => OpenFinalCashupRequested?.Invoke();
 
         ThemeService.Instance.CartWidthChanged += width => Dispatcher.UIThread.Post(() => CartWidthPx = width);
         ThemeService.Instance.CartPositionChanged += pos => Dispatcher.UIThread.Post(() => ApplyCartPosition(pos));
@@ -130,7 +134,7 @@ public partial class PosViewModel : ObservableObject, IDisposable
         if (suggestion != null)
         {
             _suggestedProduct = suggestion;
-            SmartSuggestionText = $"💡 Sugerencia: Ofrece {suggestion.Name} (${suggestion.Price}). ¡Se venden juntos a menudo!";
+            SmartSuggestionText = $"Sugerencia: Ofrece {suggestion.Name} (${suggestion.Price}). ¡Se venden juntos a menudo!";
             IsSuggestionVisible = true;
             
             // Auto-ocultar la sugerencia después de 10 segundos

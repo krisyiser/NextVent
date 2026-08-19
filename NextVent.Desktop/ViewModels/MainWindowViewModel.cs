@@ -181,7 +181,7 @@ public partial class MainWindowViewModel : ObservableObject
         _posVm = new PosViewModel(_productService, _db, shiftNoteService, kitService, _customerService, sessionManager, userRepository, _promotionService, _auditService, attendanceService, predictiveService, externalCatalogService);
         _inventoryVm = new InventoryViewModel(_productService, externalCatalogService, purchaseService, predictiveService);
         _customersVm = new CustomersViewModel(_customerService);
-        _historyVm = new HistoryViewModel(_saleService, _printerService);
+        _historyVm = new HistoryViewModel(_saleService, _printerService, _db);
         _promotionsVm = new PromotionsViewModel(_promotionService);
         var facturamaService = Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<IFacturamaService>(App.Current!.Services!);
         _fiscalVm = new FiscalViewModel(_saleService, facturamaService);
@@ -363,6 +363,9 @@ public partial class MainWindowViewModel : ObservableObject
         _posVm.ToggleFullscreenRequested += () => ToggleFullscreenRequested?.Invoke();
         _posVm.LogoutRequested += () => 
         {
+            _loginVm.Username = string.Empty;
+            _loginVm.Password = string.Empty;
+            _loginVm.ErrorMessage = string.Empty;
             ActiveViewModel = _loginVm;
             // Ping Telemetry on Logout
             _ = _deviceRegistrationService.PingServerAsync(new BusinessProfile());
@@ -550,6 +553,9 @@ public partial class MainWindowViewModel : ObservableObject
         {
             Dispatcher.UIThread.Post(() =>
             {
+                _loginVm.Username = string.Empty;
+                _loginVm.Password = string.Empty;
+                _loginVm.ErrorMessage = string.Empty;
                 ActiveViewModel = _loginVm;
                 CloseDialog();
             });

@@ -19,10 +19,12 @@ public partial class HistoryViewModel : ObservableObject
 {
     private readonly ISaleService _saleService;
     private readonly IEscPosPrinterService _printerService;
+    private readonly NextVent.Data.AppDbContext _db;
 
     public ObservableCollection<SaleDto> Sales { get; } = [];
     public ObservableCollection<HourlySalesDto> HourlyReport { get; } = [];
     public ObservableCollection<CashierPerformanceDto> CashierPerformanceReport { get; } = [];
+    public ObservableCollection<NextVent.Data.Entities.CashupEntity> Cashups { get; } = [];
 
     [ObservableProperty] private string _feedbackMessage = string.Empty;
     [ObservableProperty] private string _peakHourLabel = "Ninguna";
@@ -42,10 +44,11 @@ public partial class HistoryViewModel : ObservableObject
     public event Action<SaleDto>? OpenReturnRequested;
     public event Action<string, Action<bool>>? OpenSupervisorPinRequested;
 
-    public HistoryViewModel(ISaleService saleService, IEscPosPrinterService printerService)
+    public HistoryViewModel(ISaleService saleService, IEscPosPrinterService printerService, NextVent.Data.AppDbContext db)
     {
         _saleService = saleService;
         _printerService = printerService;
+        _db = db;
         _ = LoadSalesAsync();
         _ = LoadCashierPerformanceAsync();
     }
@@ -68,12 +71,25 @@ public partial class HistoryViewModel : ObservableObject
 
             var salesList = await _saleService.GetSalesByDateRangeAsync(utcStart, utcEnd);
 
+            var cashupsQuery = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync(
+                System.Linq.Queryable.OrderByDescending(
+                    System.Linq.Queryable.Where(_db.Cashups, c => string.Compare(c.Timestamp, queryStart.ToString("g")) >= 0 && string.Compare(c.Timestamp, queryEnd.ToString("g")) <= 0),
+                    c => c.Timestamp
+                )
+            );
+
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 Sales.Clear();
                 foreach (var sale in salesList.OrderByDescending(s => s.Date).Take(500))
                 {
                     Sales.Add(sale);
+                }
+
+                Cashups.Clear();
+                foreach (var cashup in cashupsQuery)
+                {
+                    Cashups.Add(cashup);
                 }
 
                 CalculateHourlyReport(Sales.ToList());

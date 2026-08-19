@@ -90,7 +90,7 @@ public class PredictiveIntelligenceService : IPredictiveIntelligenceService
                 {
                     alerts.Add(new PredictiveAlertDto 
                     {
-                        Message = $"🚨 URGENTE: Te quedarás sin {p.Name} en {Math.Round(daysRemaining, 1)} días a tu ritmo de ventas actual. ¡Pide al proveedor hoy!",
+                        Message = $"URGENTE: Te quedarás sin {p.Name} en {Math.Round(daysRemaining, 1)} días a tu ritmo de ventas actual. ¡Pide al proveedor hoy!",
                         DaysRemaining = daysRemaining
                     });
                 }

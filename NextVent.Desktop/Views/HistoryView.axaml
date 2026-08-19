@@ -6,7 +6,7 @@
              x:Class="NextVent.Views.HistoryView"
              x:DataType="vm:HistoryViewModel">
 
-    <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="16">
+    <Grid RowDefinitions="Auto,*" Margin="16">
 
         <!-- ═══ 1. TOP FUNCTION BANNER BAR ═══ -->
         <Border Grid.Row="0" Margin="0,0,0,16" Padding="16,12"
@@ -50,14 +50,24 @@
             </Grid>
         </Border>
 
-        <!-- ═══ 2. HOURLY SALES & PEAK HOUR CARD ═══ -->
-        <history:HistoryHourlyReportView Grid.Row="1" Margin="0,0,0,16" />
+        <TabControl Grid.Row="1" Margin="0">
+            <TabItem Header="Ventas y Rendimiento">
+                <Grid RowDefinitions="Auto,Auto,*">
+                    <!-- ═══ 2. HOURLY SALES & PEAK HOUR CARD ═══ -->
+                    <history:HistoryHourlyReportView Grid.Row="0" Margin="0,0,0,16" />
 
-        <!-- ═══ 3. CASHIER PERFORMANCE & COMMISSIONS CARD ═══ -->
-        <history:CashierPerformanceView Grid.Row="2" Margin="0,0,0,16" />
+                    <!-- ═══ 3. CASHIER PERFORMANCE & COMMISSIONS CARD ═══ -->
+                    <history:CashierPerformanceView Grid.Row="1" Margin="0,0,0,16" />
 
-        <!-- ═══ 4. MAIN TRANSACTIONS TABLE ═══ -->
-        <history:HistorySalesTableView Grid.Row="3" />
+                    <!-- ═══ 4. MAIN TRANSACTIONS TABLE ═══ -->
+                    <history:HistorySalesTableView Grid.Row="2" />
+                </Grid>
+            </TabItem>
+            
+            <TabItem Header="Registro de Arqueos">
+                <history:HistoryCashupsTableView />
+            </TabItem>
+        </TabControl>
 
     </Grid>
 </UserControl>

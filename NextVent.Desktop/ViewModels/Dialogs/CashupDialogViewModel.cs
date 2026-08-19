@@ -35,17 +35,17 @@ public partial class CashupDialogViewModel : ObservableObject
     private NextVent.Data.Dtos.ShiftDto? _activeShift;
 
     // Denomination Counts
-    [ObservableProperty] private int _count1000;
-    [ObservableProperty] private int _count500;
-    [ObservableProperty] private int _count200;
-    [ObservableProperty] private int _count100;
-    [ObservableProperty] private int _count50;
-    [ObservableProperty] private int _count20;
-    [ObservableProperty] private int _count10;
-    [ObservableProperty] private int _count5;
-    [ObservableProperty] private int _count2;
-    [ObservableProperty] private int _count1;
-    [ObservableProperty] private int _count050;
+    [ObservableProperty] private string _count1000 = "0";
+    [ObservableProperty] private string _count500 = "0";
+    [ObservableProperty] private string _count200 = "0";
+    [ObservableProperty] private string _count100 = "0";
+    [ObservableProperty] private string _count50 = "0";
+    [ObservableProperty] private string _count20 = "0";
+    [ObservableProperty] private string _count10 = "0";
+    [ObservableProperty] private string _count5 = "0";
+    [ObservableProperty] private string _count2 = "0";
+    [ObservableProperty] private string _count1 = "0";
+    [ObservableProperty] private string _count050 = "0";
 
     [ObservableProperty] private string _notes = string.Empty;
     [ObservableProperty] private string _feedbackMessage = string.Empty;
@@ -75,32 +75,44 @@ public partial class CashupDialogViewModel : ObservableObject
         RecalculatePhysicalTotal();
     }
 
-    partial void OnCount1000Changed(int value) => RecalculatePhysicalTotal();
-    partial void OnCount500Changed(int value) => RecalculatePhysicalTotal();
-    partial void OnCount200Changed(int value) => RecalculatePhysicalTotal();
-    partial void OnCount100Changed(int value) => RecalculatePhysicalTotal();
-    partial void OnCount50Changed(int value) => RecalculatePhysicalTotal();
-    partial void OnCount20Changed(int value) => RecalculatePhysicalTotal();
-    partial void OnCount10Changed(int value) => RecalculatePhysicalTotal();
-    partial void OnCount5Changed(int value) => RecalculatePhysicalTotal();
-    partial void OnCount2Changed(int value) => RecalculatePhysicalTotal();
-    partial void OnCount1Changed(int value) => RecalculatePhysicalTotal();
-    partial void OnCount050Changed(int value) => RecalculatePhysicalTotal();
+    partial void OnCount1000Changed(string value) => RecalculatePhysicalTotal();
+    partial void OnCount500Changed(string value) => RecalculatePhysicalTotal();
+    partial void OnCount200Changed(string value) => RecalculatePhysicalTotal();
+    partial void OnCount100Changed(string value) => RecalculatePhysicalTotal();
+    partial void OnCount50Changed(string value) => RecalculatePhysicalTotal();
+    partial void OnCount20Changed(string value) => RecalculatePhysicalTotal();
+    partial void OnCount10Changed(string value) => RecalculatePhysicalTotal();
+    partial void OnCount5Changed(string value) => RecalculatePhysicalTotal();
+    partial void OnCount2Changed(string value) => RecalculatePhysicalTotal();
+    partial void OnCount1Changed(string value) => RecalculatePhysicalTotal();
+    partial void OnCount050Changed(string value) => RecalculatePhysicalTotal();
 
     private void RecalculatePhysicalTotal()
     {
+        double.TryParse(Count1000, out double c1000);
+        double.TryParse(Count500, out double c500);
+        double.TryParse(Count200, out double c200);
+        double.TryParse(Count100, out double c100);
+        double.TryParse(Count50, out double c50);
+        double.TryParse(Count20, out double c20);
+        double.TryParse(Count10, out double c10);
+        double.TryParse(Count5, out double c5);
+        double.TryParse(Count2, out double c2);
+        double.TryParse(Count1, out double c1);
+        double.TryParse(Count050, out double c050);
+
         TotalPhysicalCash =
-            (Count1000 * 1000.0) +
-            (Count500 * 500.0) +
-            (Count200 * 200.0) +
-            (Count100 * 100.0) +
-            (Count50 * 50.0) +
-            (Count20 * 20.0) +
-            (Count10 * 10.0) +
-            (Count5 * 5.0) +
-            (Count2 * 2.0) +
-            (Count1 * 1.0) +
-            (Count050 * 0.50);
+            (c1000 * 1000.0) +
+            (c500 * 500.0) +
+            (c200 * 200.0) +
+            (c100 * 100.0) +
+            (c50 * 50.0) +
+            (c20 * 20.0) +
+            (c10 * 10.0) +
+            (c5 * 5.0) +
+            (c2 * 2.0) +
+            (c1 * 1.0) +
+            (c050 * 0.50);
 
         DifferenceAmount = TotalPhysicalCash - TheoreticalCash;
     }
@@ -127,17 +139,17 @@ public partial class CashupDialogViewModel : ObservableObject
                 Id = Guid.NewGuid().ToString(),
                 OpenCashAmount = OpenCashAmount,
                 ClosedCashAmount = TotalPhysicalCash,
-                Count1000 = Count1000,
-                Count500 = Count500,
-                Count200 = Count200,
-                Count100 = Count100,
-                Count50 = Count50,
-                Count20 = Count20,
-                Count10 = Count10,
-                Count5 = Count5,
-                Count2 = Count2,
-                Count1 = Count1,
-                Count050 = Count050,
+                Count1000 = int.TryParse(Count1000, out int i1000) ? i1000 : 0,
+                Count500 = int.TryParse(Count500, out int i500) ? i500 : 0,
+                Count200 = int.TryParse(Count200, out int i200) ? i200 : 0,
+                Count100 = int.TryParse(Count100, out int i100) ? i100 : 0,
+                Count50 = int.TryParse(Count50, out int i50) ? i50 : 0,
+                Count20 = int.TryParse(Count20, out int i20) ? i20 : 0,
+                Count10 = int.TryParse(Count10, out int i10) ? i10 : 0,
+                Count5 = int.TryParse(Count5, out int i5) ? i5 : 0,
+                Count2 = int.TryParse(Count2, out int i2) ? i2 : 0,
+                Count1 = int.TryParse(Count1, out int i1) ? i1 : 0,
+                Count050 = int.TryParse(Count050, out int i050) ? i050 : 0,
                 TheoreticalCash = TheoreticalCash,
                 Difference = DifferenceAmount,
                 Notes = Notes,

@@ -1,0 +1,24 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:NextVent.ViewModels"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             x:Class="NextVent.Views.History.HistoryCashupsTableView"
+             x:DataType="vm:HistoryViewModel">
+
+    <Border Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}" Padding="16">
+        <Grid RowDefinitions="Auto,*">
+            <TextBlock Grid.Row="0" Text="Registro de Arqueos Físicos y Cortes de Caja" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,12" />
+
+            <DataGrid Grid.Row="1" ItemsSource="{Binding Cashups}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" HeadersVisibility="Column" SelectionMode="Single">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Fecha / Hora" Binding="{Binding Timestamp}" Width="Auto" />
+                    <DataGridTextColumn Header="Fondo Inicial" Binding="{Binding OpenCashAmount, StringFormat='{}{0:C2}'}" Width="Auto" />
+                    <DataGridTextColumn Header="Total Físico" Binding="{Binding ClosedCashAmount, StringFormat='{}{0:C2}'}" Width="Auto" />
+                    <DataGridTextColumn Header="Faltante/Sobrante" Binding="{Binding Difference, StringFormat='{}{0:C2}'}" Width="Auto" />
+                    <DataGridTextColumn Header="Notas" Binding="{Binding Notes}" Width="*" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Grid>
+    </Border>
+
+</UserControl>

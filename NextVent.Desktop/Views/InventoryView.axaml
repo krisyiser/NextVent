@@ -120,7 +120,7 @@
             <Grid ColumnDefinitions="Auto,*">
                 <mi:MaterialIcon Kind="Brain" Width="32" Height="32" Foreground="#EF4444" VerticalAlignment="Center" Margin="0,0,16,0" />
                 <StackPanel Grid.Column="1" Spacing="6">
-                    <TextBlock Text="Inteligencia de Abastecimiento (Predictivo)" FontSize="14" FontWeight="Bold" Foreground="#991B1B" />
+                    <TextBlock Text="Inteligencia de Abastecimiento Predictivo" FontSize="14" FontWeight="Bold" Foreground="#991B1B" />
                     <ItemsControl ItemsSource="{Binding UrgentRestockAlerts}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>

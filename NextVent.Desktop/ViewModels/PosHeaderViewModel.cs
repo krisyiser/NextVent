@@ -45,6 +45,8 @@ public partial class PosHeaderViewModel : ObservableObject
     public event Action? OpenSwitchUserPinRequested;
     public event Action? OpenLockScreenRequested;
     public event Action<string, Action<bool>>? OpenSupervisorPinRequested;
+    public event Action? OpenPartialCashupRequested;
+    public event Action? OpenFinalCashupRequested;
 
     public PosHeaderViewModel(ISessionManager? sessionManager, IShiftNoteService? shiftNoteService, CartStateStore cartStateStore)
     {
@@ -180,14 +182,12 @@ public partial class PosHeaderViewModel : ObservableObject
     [RelayCommand]
     private void GenerateXReport()
     {
-        // TODO: Implement X Report
-        FeedbackMessage = "Generando Corte parcial de caja...";
+        OpenPartialCashupRequested?.Invoke();
     }
 
     [RelayCommand]
     private void GenerateZReport()
     {
-        // TODO: Implement Z Report
-        FeedbackMessage = "Generando Corte final...";
+        OpenFinalCashupRequested?.Invoke();
     }
 }
