@@ -1,0 +1,154 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ticketfy.ViewModels"
+             xmlns:entity="using:Ticketfy.Data.Entities"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             x:Class="Ticketfy.Views.History.HistoryCashupsTableView"
+             x:DataType="vm:HistoryViewModel">
+
+    <Grid>
+        <Border Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}" Padding="16">
+            <Grid RowDefinitions="Auto,*">
+                <TextBlock Grid.Row="0" Text="Registro de cortes de caja y cortes de turno" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,12" />
+
+                <DataGrid Grid.Row="1" ItemsSource="{Binding Cashups}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" HeadersVisibility="Column" SelectionMode="Single">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Fecha / Hora" Binding="{Binding Timestamp}" Width="1.5*" />
+                        <DataGridTextColumn Header="Fondo Inicial" Binding="{Binding OpenCashAmount, StringFormat='${0:N2}'}" Width="1.2*" />
+                        <DataGridTextColumn Header="Fondo Final" Binding="{Binding ClosedCashAmount, StringFormat='${0:N2}'}" Width="1.2*" />
+                        <DataGridTextColumn Header="Total Final" Binding="{Binding TheoreticalCash, StringFormat='${0:N2}'}" Width="1.2*" />
+                        <DataGridTextColumn Header="Ingresos (Ventas)" Binding="{Binding TotalSales, StringFormat='${0:N2}'}" Width="1.2*" />
+                        <DataGridTemplateColumn Header="Acciones" Width="Auto">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="entity:CashupEntity">
+                                    <Button Command="{Binding $parent[DataGrid].((vm:HistoryViewModel)DataContext).ViewCashupDetailCommand}"
+                                            CommandParameter="{Binding}"
+                                            Padding="8,4" CornerRadius="4" Margin="2"
+                                            ToolTip.Tip="Ver reporte detallado de este corte"
+                                            Background="{DynamicResource BgTertiaryBrush}"
+                                            BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="1">
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <mi:MaterialIcon Kind="Eye" Width="13" Height="13" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                            <TextBlock Text="Ver Detalle" FontSize="11" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+
+        <!-- ═══ DETALLE DE CORTE DE CAJA MODAL DIALOG ═══ -->
+        <Border Background="#80000000" IsVisible="{Binding IsCashupDetailDialogOpen}" Padding="20">
+            <Border Width="600" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="20"
+                    Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12">
+                <DockPanel LastChildFill="True" DataContext="{Binding SelectedCashupForDetail}">
+                    <!-- Title Bar -->
+                    <Border DockPanel.Dock="Top" Margin="0,0,0,16">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <mi:MaterialIcon Kind="CashRegister" Width="22" Height="22" Foreground="{DynamicResource AccentWarningBrush}" />
+                                <TextBlock Text="Reporte Detallado de Corte de Caja y Turno" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                            </StackPanel>
+
+                            <Button Grid.Column="1" Command="{Binding $parent[UserControl].((vm:HistoryViewModel)DataContext).CloseCashupDetailCommand}" Background="Transparent" BorderThickness="0" Padding="4">
+                                <mi:MaterialIcon Kind="Close" Width="20" Height="20" Foreground="{DynamicResource TextMutedBrush}" />
+                            </Button>
+                        </Grid>
+                    </Border>
+
+                    <!-- Bottom Action Buttons -->
+                    <StackPanel DockPanel.Dock="Bottom" Margin="0,16,0,0" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+                        <Button Command="{Binding $parent[UserControl].((vm:HistoryViewModel)DataContext).PrintCashupTicketCommand}"
+                                CommandParameter="{Binding}" Padding="14,8" CornerRadius="6"
+                                Background="{DynamicResource BgPrimaryBrush}" BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="1">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <mi:MaterialIcon Kind="Printer" Width="15" Height="15" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                <TextBlock Text="REIMPRIMIR TICKET" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button Command="{Binding $parent[UserControl].((vm:HistoryViewModel)DataContext).CloseCashupDetailCommand}"
+                                Content="CERRAR" Padding="16,8" CornerRadius="6" Classes="primary-action" FontWeight="Bold" />
+                    </StackPanel>
+
+                    <!-- Detailed Content -->
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Spacing="14">
+                            <!-- Metrics Cards Grid -->
+                            <Border Background="{DynamicResource BgPrimaryBrush}" Padding="14" CornerRadius="6" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,*,*">
+                                    <StackPanel Grid.Row="0" Grid.Column="0" Spacing="2">
+                                        <TextBlock Text="Fecha y Hora:" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" />
+                                        <TextBlock Text="{Binding Timestamp}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="0" Grid.Column="1" Spacing="2">
+                                        <TextBlock Text="Fondo Inicial:" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" />
+                                        <TextBlock Text="{Binding OpenCashAmount, StringFormat='${0:N2}'}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="0" Grid.Column="2" Spacing="2">
+                                        <TextBlock Text="Ingresos (Ventas):" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" />
+                                        <TextBlock Text="{Binding TotalSales, StringFormat='${0:N2}'}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,10,0,0" Spacing="2">
+                                        <TextBlock Text="Total Teórico Esperado:" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" />
+                                        <TextBlock Text="{Binding TheoreticalCash, StringFormat='${0:N2}'}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,10,0,0" Spacing="2">
+                                        <TextBlock Text="Total Físico en Caja:" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" />
+                                        <TextBlock Text="{Binding ClosedCashAmount, StringFormat='${0:N2}'}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource AccentSuccessBrush}" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="1" Grid.Column="2" Margin="0,10,0,0" Spacing="2">
+                                        <TextBlock Text="Faltante / Sobrante:" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" />
+                                        <TextBlock Text="{Binding Difference, StringFormat='${0:N2}'}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource AccentWarningBrush}" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <!-- Denomination Breakdown Grid -->
+                            <TextBlock Text="Desglose Físico por Denominación" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+
+                            <Border Background="{DynamicResource BgPrimaryBrush}" Padding="12" CornerRadius="6" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                <Grid ColumnDefinitions="*,*">
+                                    <StackPanel Grid.Column="0" Spacing="4">
+                                        <TextBlock Text="Billetes" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" Margin="0,0,0,4" />
+                                        <TextBlock Text="{Binding Count1000, StringFormat='{}• $1,000: {0} piezas'}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                        <TextBlock Text="{Binding Count500, StringFormat='{}• $500: {0} piezas'}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                        <TextBlock Text="{Binding Count200, StringFormat='{}• $200: {0} piezas'}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                        <TextBlock Text="{Binding Count100, StringFormat='{}• $100: {0} piezas'}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                        <TextBlock Text="{Binding Count50, StringFormat='{}• $50: {0} piezas'}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                        <TextBlock Text="{Binding Count20, StringFormat='{}• $20: {0} piezas'}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="1" Spacing="4">
+                                        <TextBlock Text="Monedas" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentWarningBrush}" Margin="0,0,0,4" />
+                                        <TextBlock Text="{Binding Count10, StringFormat='{}• $10: {0} piezas'}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                        <TextBlock Text="{Binding Count5, StringFormat='{}• $5: {0} piezas'}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                        <TextBlock Text="{Binding Count2, StringFormat='{}• $2: {0} piezas'}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                        <TextBlock Text="{Binding Count1, StringFormat='{}• $1: {0} piezas'}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                        <TextBlock Text="{Binding Count050, StringFormat='{}• $0.50: {0} piezas'}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <!-- Notes Section -->
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Notas u Observaciones del Turno:" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                <Border Background="{DynamicResource BgPrimaryBrush}" Padding="10" CornerRadius="6" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" MinHeight="45">
+                                    <TextBlock Text="{Binding Notes}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" />
+                                </Border>
+                            </StackPanel>
+                        </StackPanel>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+        </Border>
+    </Grid>
+</UserControl>

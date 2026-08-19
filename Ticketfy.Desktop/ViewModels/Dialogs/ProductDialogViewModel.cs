@@ -1,0 +1,274 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Ticketfy.Data.Dtos;
+using Ticketfy.Data;
+using Microsoft.EntityFrameworkCore;
+using Ticketfy.Services.Interfaces;
+using Ticketfy.Core.Services;
+using Ticketfy.Data.Entities;
+using Serilog;
+using System;
+using System.Threading.Tasks;
+
+namespace Ticketfy.ViewModels.Dialogs;
+
+public class ProductDialogParameters 
+{ 
+    public bool IsEditMode { get; set; }
+    public ProductDto? PreFilledData { get; set; }
+    public bool ShowAutoFillBanner { get; set; }
+    public string? PreFilledBarcode { get; set; }
+}
+
+public partial class ProductDialogViewModel : ObservableObject
+{
+    private readonly IProductService _productService;
+
+    [ObservableProperty]
+    private string _barcode = string.Empty;
+
+    [ObservableProperty]
+    private string _name = string.Empty;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ProfitMargin))]
+    private double? _costPrice;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(ProfitMargin))]
+    private double? _retailPrice;
+
+    [ObservableProperty]
+    private int? _stock;
+
+    [ObservableProperty]
+    private string _category = "General";
+
+    // Sprint K: Attributes & Serial / IMEI
+    [ObservableProperty]
+    private string _serialNumber = string.Empty;
+
+    [ObservableProperty]
+    private string _attributesText = string.Empty;
+
+    [ObservableProperty]
+    private double? _pointsRewarded;
+
+    [ObservableProperty]
+    private double? _reorderQuantity;
+
+    [ObservableProperty]
+    private string _locationRack = string.Empty;
+
+    [ObservableProperty]
+    private string _satProductCode = string.Empty;
+
+    [ObservableProperty]
+    private string _satUnitCode = string.Empty;
+
+    [ObservableProperty]
+    private string _errorMessage = string.Empty;
+
+    [ObservableProperty]
+    private string _title = "Nuevo Producto";
+
+    [ObservableProperty]
+    private double? _minStock;
+
+    [ObservableProperty]
+    private bool _showAutoFillBanner = false;
+
+    public string ProfitMargin
+    {
+        get
+        {
+            double retail = RetailPrice ?? 0;
+            double cost = CostPrice ?? 0;
+            if (retail <= 0 || cost < 0) return "Margen: 0.00%";
+            if (cost == 0) return "Margen: 100.00%";
+            
+            double margin = ((retail - cost) / retail) * 100.0;
+            return $"Margen: {margin:F2}%";
+        }
+    }
+
+    private string? _editingProductId = null;
+    private double _originalStockSnapshot = 0.0;
+    private double _originalMinStockSnapshot = 5.0;
+
+    private readonly ISessionManager? _sessionManager;
+    private readonly IAuditService? _auditService;
+    private readonly AppDbContext _db;
+
+    public System.Collections.ObjectModel.ObservableCollection<string> Categories { get; } = [];
+
+    public event Action? RequestClose;
+
+    public ProductDialogViewModel(IProductService productService, AppDbContext db, ISessionManager? sessionManager = null, IAuditService? auditService = null)
+    {
+        _productService = productService;
+        _db = db;
+        _sessionManager = sessionManager;
+        _auditService = auditService;
+        _ = LoadCategoriesAsync();
+    }
+
+    public async Task LoadCategoriesAsync()
+    {
+        try
+        {
+            var list = await _db.Categories
+                .AsNoTracking()
+                .OrderBy(c => c.Name)
+                .Select(c => c.Name)
+                .ToListAsync();
+
+            Categories.Clear();
+            foreach (var item in list)
+            {
+                Categories.Add(item);
+            }
+
+            if (!string.IsNullOrEmpty(Category) && !Categories.Contains(Category))
+            {
+                Categories.Add(Category);
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error loading categories in dialog");
+        }
+    }
+
+    public void LoadProductForEdit(ProductDto product)
+    {
+        _editingProductId = product.Id;
+        Title = "Editar Producto";
+        Barcode = product.Barcode ?? string.Empty;
+        Name = product.Name;
+        CostPrice = product.Cost;
+        RetailPrice = product.Price;
+        Stock = (int)product.Stock;
+        Category = product.Category;
+        if (!string.IsNullOrEmpty(Category) && !Categories.Contains(Category))
+        {
+            Categories.Add(Category);
+        }
+        SerialNumber = product.LocationRack; // Wait, let's keep attributes / serial number empty or set them if present.
+        PointsRewarded = product.PointsRewarded;
+        ReorderQuantity = product.ReorderQuantity;
+        LocationRack = product.LocationRack;
+        SatProductCode = product.SatProductCode;
+        SatUnitCode = product.SatUnitCode;
+        MinStock = product.MinStock;
+
+        _originalStockSnapshot = product.Stock;
+        _originalMinStockSnapshot = product.MinStock;
+    }
+
+    public void LoadFromParameters(ProductDialogParameters parameters)
+    {
+        if (parameters.IsEditMode && parameters.PreFilledData != null)
+        {
+            LoadProductForEdit(parameters.PreFilledData);
+        }
+        else
+        {
+            Title = "Nuevo Producto";
+            ShowAutoFillBanner = parameters.ShowAutoFillBanner;
+            
+            if (parameters.PreFilledData != null)
+            {
+                Barcode = parameters.PreFilledData.Barcode ?? string.Empty;
+                Name = parameters.PreFilledData.Name;
+                Category = parameters.PreFilledData.Category;
+                // Cost, retail price remain 0
+                if (!string.IsNullOrEmpty(Category) && !Categories.Contains(Category))
+                {
+                    Categories.Add(Category);
+                }
+            }
+            else if (!string.IsNullOrEmpty(parameters.PreFilledBarcode))
+            {
+                Barcode = parameters.PreFilledBarcode;
+            }
+        }
+    }
+
+    [RelayCommand]
+    private void GenerateBarcode()
+    {
+        Barcode = new Random().Next(10000000, 99999999).ToString();
+    }
+
+    [RelayCommand]
+    private void Cancel()
+    {
+        RequestClose?.Invoke();
+    }
+
+    [RelayCommand]
+    private async Task SaveAsync()
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(Name) || string.IsNullOrWhiteSpace(Barcode))
+            {
+                ErrorMessage = "Código y nombre son obligatorios.";
+                return;
+            }
+
+            var dto = new ProductDto(
+                _editingProductId ?? Guid.NewGuid().ToString(), Barcode, Name, CostPrice ?? 0, RetailPrice ?? 0,
+                Stock: Stock ?? 0, Category: Category,
+                PointsRewarded: PointsRewarded ?? 1.0,
+                ReorderQuantity: ReorderQuantity ?? 10.0,
+                LocationRack: LocationRack,
+                SatProductCode: SatProductCode,
+                SatUnitCode: SatUnitCode,
+                MinStock: MinStock ?? 5.0
+            );
+
+            if (_editingProductId != null)
+            {
+                await _productService.UpdateAsync(dto);
+
+                // INJECT SILENT AUDIT FOR MANUAL ADJUSTMENTS
+                if (Math.Abs(_originalStockSnapshot - (Stock ?? 0)) > 0.0001)
+                {
+                    double difference = (Stock ?? 0) - _originalStockSnapshot;
+                    string verb = difference > 0 ? "Incremento" : "Disminución";
+                    var currentUserId = _sessionManager?.CurrentCashier?.Id.ToString() ?? "cajero_matriz";
+
+                    if (_auditService != null)
+                    {
+                        var auditEntry = new AuditLogEntity
+                        {
+                            UserId = currentUserId,
+                            ActionType = Ticketfy.Core.Enums.AuditActionType.InventoryStockAdjustment,
+                            RiskLevel = Math.Abs(difference) > 10.0 ? Ticketfy.Core.Enums.RiskLevel.HighRisk : Ticketfy.Core.Enums.RiskLevel.Warning,
+                            EntityName = "ProductEntity",
+                            EntityId = dto.Id,
+                            OldValue = $"Stock: {_originalStockSnapshot:N2}",
+                            NewValue = $"Stock: {Stock ?? 0:N2}",
+                            FinancialImpact = Math.Abs(difference) * (CostPrice ?? 0),
+                            Reason = $"Ajuste Manual: {Name} | {verb} de {Math.Abs(difference):N2} unidades. (Anterior: {_originalStockSnapshot:N2}, Nuevo: {Stock ?? 0:N2})"
+                        };
+                        await _auditService.LogAsync(auditEntry);
+                    }
+                }
+            }
+            else
+            {
+                await _productService.AddAsync(dto);
+            }
+
+            RequestClose?.Invoke();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error saving product");
+            ErrorMessage = ex.Message;
+        }
+    }
+}

@@ -1,0 +1,123 @@
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
+using Ticketfy.Core.Helpers;
+using Ticketfy.Data;
+using Ticketfy.Data.Dtos;
+using Ticketfy.Services.Auth;
+using Ticketfy.Services.Implementations;
+using System;
+using System.Threading.Tasks;
+using Xunit;
+
+namespace Ticketfy.Desktop.Tests;
+
+public sealed class CustomerAndAuthServiceTests : IDisposable
+{
+    private readonly SqliteConnection _connection;
+    private readonly AppDbContext _context;
+    private readonly CustomerService _customerService;
+    private readonly UserService _userService;
+    private readonly AuthService _authService;
+
+    public CustomerAndAuthServiceTests()
+    {
+        _connection = new SqliteConnection("DataSource=:memory:");
+        _connection.Open();
+
+        var options = new DbContextOptionsBuilder<AppDbContext>()
+            .UseSqlite(_connection)
+            .Options;
+
+        _context = new AppDbContext(options);
+        _context.Database.EnsureCreated();
+
+        _customerService = new CustomerService(_context);
+        _userService = new UserService(_context);
+        _authService = new AuthService(_userService);
+    }
+
+    [Fact]
+    public async Task AddPaymentAsync_ShouldReduceDebtAtomically()
+    {
+        // Customer initial debt = 500
+        var customer = new CustomerDto("CUST-PAY-1", "Carlos M.", "5553334444", "carlos@carlos.com", "RFC123", 1000.0, 500.0);
+        await _customerService.AddAsync(customer);
+
+        // Make payment of 200
+        var payment = new CustomerPaymentDto("PAY-1", "CUST-PAY-1", DateTimeOffset.UtcNow.ToString("o"), 200.0);
+        await _customerService.AddPaymentAsync(payment);
+
+        // Verify remaining debt = 300
+        var updated = await _customerService.GetByIdAsync("CUST-PAY-1");
+        Assert.NotNull(updated);
+        Assert.Equal(300.0, updated.Debt);
+
+        var payments = await _customerService.GetPaymentsAsync("CUST-PAY-1");
+        Assert.Single(payments);
+        Assert.Equal(200.0, payments[0].Amount);
+    }
+
+    [Fact]
+    public async Task AuthService_Login_ShouldAuthenticateValidUserWithBCrypt()
+    {
+        var passwordHash = CryptoHelper.HashSecret("securePass123");
+        var guidId = "00000000-0000-0000-0000-000000000001";
+        await _userService.SaveAsync(guidId, "AdminUser", "ADMIN", passwordHash, null);
+
+        // Valid Login
+        var success = await _authService.LoginAsync("AdminUser", "securePass123");
+        Assert.True(success);
+        Assert.True(_authService.IsAuthenticated);
+        Assert.Equal("ADMIN", _authService.CurrentUser?.Rol);
+
+        // Invalid Login
+        var invalid = await _authService.LoginAsync("AdminUser", "wrongPass");
+        Assert.False(invalid);
+    }
+
+    [Fact]
+    public async Task AddPaymentAsync_ShouldThrowForZeroOrNegativeAmount()
+    {
+        var payment = new CustomerPaymentDto("PAY-INV", "CUST-PAY-1", DateTimeOffset.UtcNow.ToString("o"), 0.0);
+        await Assert.ThrowsAsync<InvalidOperationException>(() => _customerService.AddPaymentAsync(payment));
+    }
+
+    [Fact]
+    public async Task AuthService_Login_ShouldFailForInactiveUser()
+    {
+        var passwordHash = CryptoHelper.HashSecret("pass123");
+        var guidId = "00000000-0000-0000-0000-000000000002";
+        await _userService.SaveAsync(guidId, "DisabledUser", "CAJERO", passwordHash, null);
+
+        // Deactivate user in DB
+        var userEntity = await _context.Users.FindAsync(Guid.Parse(guidId));
+        if (userEntity != null)
+        {
+            userEntity.IsActive = false;
+            await _context.SaveChangesAsync();
+        }
+
+        var result = await _authService.LoginAsync("DisabledUser", "pass123");
+        Assert.False(result);
+    }
+
+    [Fact]
+    public async Task AuthService_VerifyManagerPin_ShouldReturnTrueForValidPin()
+    {
+        var pinHash = CryptoHelper.HashSecret("9999");
+        var guidId = "00000000-0000-0000-0000-000000000003";
+        await _userService.SaveAsync(guidId, "Manager", "GERENTE", null, pinHash);
+
+        var valid = await _authService.VerifyManagerPinAsync(guidId, "9999");
+        Assert.True(valid);
+
+        var invalid = await _authService.VerifyManagerPinAsync(guidId, "0000");
+        Assert.False(invalid);
+    }
+
+    public void Dispose()
+    {
+        _context.Dispose();
+        _connection.Dispose();
+    }
+}

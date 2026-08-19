@@ -1,0 +1,141 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ticketfy.ViewModels"
+             xmlns:dto="using:Ticketfy.Data.Dtos"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             x:Class="Ticketfy.Views.Suppliers.PurchaseHistoryView"
+             x:DataType="vm:SuppliersViewModel">
+    
+    <Grid>
+        <Border Padding="16"
+                Background="{DynamicResource BgSecondaryBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
+            <DockPanel LastChildFill="True">
+                <StackPanel DockPanel.Dock="Top" Spacing="8" Margin="0,0,0,12">
+                    <TextBlock Text="Historial de Remisiones y Órdenes de Compra" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                    <TextBlock Text="Lista completa de las entradas de mercancía y reabastecimientos realizados." FontSize="12" Foreground="{DynamicResource TextMutedBrush}" />
+                    <TextBlock Text="{Binding FeedbackMessage}" FontSize="12" Foreground="{DynamicResource AccentSuccessBrush}" />
+                </StackPanel>
+
+                <DataGrid ItemsSource="{Binding Purchases}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="No. Remisión / Factura" Binding="{Binding InvoiceNumber}" Width="1.5*" />
+                        <DataGridTextColumn Header="Proveedor" Binding="{Binding SupplierName}" Width="2*" />
+                        <DataGridTextColumn Header="Fecha y Hora" Binding="{Binding Date}" Width="1.5*" />
+                        <DataGridTextColumn Header="Costo Total" Binding="{Binding TotalCost, StringFormat='${0:N2}'}" Width="1*" />
+                        <DataGridTemplateColumn Header="Acciones" Width="Auto">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate x:DataType="dto:PurchaseDto">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <Button Command="{Binding $parent[DataGrid].((vm:SuppliersViewModel)DataContext).ViewPurchaseDetailCommand}"
+                                                CommandParameter="{Binding}"
+                                                Padding="8,4" CornerRadius="4"
+                                                ToolTip.Tip="Ver desglose detallado de artículos de esta compra"
+                                                Background="{DynamicResource BgTertiaryBrush}"
+                                                BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="1">
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <mi:MaterialIcon Kind="Eye" Width="13" Height="13" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                                <TextBlock Text="Ver Detalle" FontSize="11" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                            </StackPanel>
+                                        </Button>
+
+                                        <Button Command="{Binding $parent[DataGrid].((vm:SuppliersViewModel)DataContext).PrintPurchaseTicketCommand}"
+                                                CommandParameter="{Binding}"
+                                                Padding="8,4" CornerRadius="4"
+                                                ToolTip.Tip="Imprimir ticket de esta compra"
+                                                Background="{DynamicResource BgTertiaryBrush}"
+                                                BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="1">
+                                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                                <mi:MaterialIcon Kind="Printer" Width="13" Height="13" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                                <TextBlock Text="Imprimir" FontSize="11" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                            </StackPanel>
+                                        </Button>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </DockPanel>
+        </Border>
+
+        <!-- ═══ DETALLE DE COMPRA MODAL DIALOG ═══ -->
+        <Border Background="#80000000" IsVisible="{Binding IsPurchaseDetailDialogOpen}" Padding="20">
+            <Border Width="550" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="20"
+                    Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12">
+                <DockPanel LastChildFill="True" DataContext="{Binding SelectedPurchaseForDetail}">
+                    <!-- Title Bar -->
+                    <Border DockPanel.Dock="Top" Margin="0,0,0,16">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <mi:MaterialIcon Kind="ReceiptText" Width="22" Height="22" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                <TextBlock Text="Detalle de Remisión de Compra" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                            </StackPanel>
+
+                            <Button Grid.Column="1" Command="{Binding $parent[UserControl].((vm:SuppliersViewModel)DataContext).ClosePurchaseDetailCommand}" Background="Transparent" BorderThickness="0" Padding="4">
+                                <mi:MaterialIcon Kind="Close" Width="20" Height="20" Foreground="{DynamicResource TextMutedBrush}" />
+                            </Button>
+                        </Grid>
+                    </Border>
+
+                    <!-- Bottom Close Button -->
+                    <StackPanel DockPanel.Dock="Bottom" Margin="0,16,0,0" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+                        <Button Command="{Binding $parent[UserControl].((vm:SuppliersViewModel)DataContext).PrintPurchaseTicketCommand}"
+                                CommandParameter="{Binding}" Padding="14,8" CornerRadius="6"
+                                Background="{DynamicResource BgPrimaryBrush}" BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="1">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <mi:MaterialIcon Kind="Printer" Width="15" Height="15" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                <TextBlock Text="IMPRIMIR TICKET" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                            </StackPanel>
+                        </Button>
+
+                        <Button Command="{Binding $parent[UserControl].((vm:SuppliersViewModel)DataContext).ClosePurchaseDetailCommand}"
+                                Content="CERRAR" Padding="16,8" CornerRadius="6" Classes="primary-action" FontWeight="Bold" />
+                    </StackPanel>
+
+                    <!-- Info & Items List -->
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Spacing="12">
+                            <!-- Metadata Header Banner -->
+                            <Border Background="{DynamicResource BgPrimaryBrush}" Padding="12" CornerRadius="6" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,*">
+                                    <StackPanel Grid.Row="0" Grid.Column="0" Spacing="2">
+                                        <TextBlock Text="No. Remisión / Factura:" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" />
+                                        <TextBlock Text="{Binding InvoiceNumber}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="0" Grid.Column="1" Spacing="2">
+                                        <TextBlock Text="Proveedor:" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" />
+                                        <TextBlock Text="{Binding SupplierName}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,8,0,0" Spacing="2">
+                                        <TextBlock Text="Fecha y Hora:" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" />
+                                        <TextBlock Text="{Binding Date}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,8,0,0" Spacing="2">
+                                        <TextBlock Text="Costo Total:" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" />
+                                        <TextBlock Text="{Binding TotalCost, StringFormat='${0:N2}'}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource AccentSuccessBrush}" />
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+
+                            <!-- Items DataGrid -->
+                            <TextBlock Text="Artículos e Insumos Ingresados:" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+
+                            <DataGrid ItemsSource="{Binding Items}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" MaxHeight="220">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Descripción Artículo" Binding="{Binding ProductName}" Width="2*" />
+                                    <DataGridTextColumn Header="Cantidad" Binding="{Binding Quantity, StringFormat='{}{0:N2}'}" Width="1*" />
+                                    <DataGridTextColumn Header="Costo Unit." Binding="{Binding UnitPrice, StringFormat='${0:N2}'}" Width="1*" />
+                                    <DataGridTextColumn Header="Importe Total" Binding="{Binding TotalPrice, StringFormat='${0:N2}'}" Width="1*" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </StackPanel>
+                    </ScrollViewer>
+                </DockPanel>
+            </Border>
+        </Border>
+    </Grid>
+</UserControl>

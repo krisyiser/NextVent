@@ -1,0 +1,49 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ticketfy.ViewModels"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             x:Class="Ticketfy.Views.History.HistoryHourlyReportView"
+             x:DataType="vm:HistoryViewModel">
+
+    <!-- ═══ HOURLY SALES & PEAK HOUR CARD ═══ -->
+    <Grid ColumnDefinitions="*,340">
+        <!-- Left: Peak Hour Metric Badge Card -->
+        <Border Grid.Column="0" Margin="0,0,12,0" Padding="16,12" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="2" CornerRadius="{DynamicResource AppCornerRadius}">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <Border Grid.Column="0" Width="44" Height="44" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,14,0">
+                    <mi:MaterialIcon Kind="ChartTimelineVariant" Width="26" Height="26" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                    <TextBlock Text="HORA PICO DE MAYOR VENTA DETECTADA" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                    <TextBlock Text="{Binding PeakHourLabel, StringFormat='Franja Horaria: {0}'}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                    <TextBlock Text="{Binding PeakHourRevenue, StringFormat='Venta en Hora Pico: ${0:N2}'}" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" />
+                </StackPanel>
+                <StackPanel Grid.Column="2" VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <TextBlock Text="Total del Día" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Right" />
+                    <TextBlock Text="{Binding TotalDayRevenue, StringFormat='${0:N2}'}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource AccentSuccessBrush}" HorizontalAlignment="Right" />
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Right: Hourly Breakdown Table -->
+        <Border Grid.Column="1" Padding="12" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
+            <DockPanel LastChildFill="True">
+                <TextBlock DockPanel.Dock="Top" Text="Ventas por Franja Horaria" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" Margin="0,0,0,8" />
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Height="70">
+                    <ItemsControl ItemsSource="{Binding HourlyReport}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="vm:HourlySalesDto">
+                                <Grid ColumnDefinitions="*,Auto,Auto" Margin="0,2">
+                                    <TextBlock Grid.Column="0" Text="{Binding HourLabel}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                    <TextBlock Grid.Column="1" Text="{Binding TicketCount, StringFormat='{}{0} tkts'}" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="8,0" />
+                                    <TextBlock Grid.Column="2" Text="{Binding TotalRevenue, StringFormat='${0:N2}'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </DockPanel>
+        </Border>
+    </Grid>
+</UserControl>
+

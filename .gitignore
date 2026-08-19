@@ -1,0 +1,39 @@
+## .NET ##
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.log
+*.vs/
+.vs/
+*.DotSettings.user
+TestResults/
+BenchmarkDotNet.Artifacts/
+
+## SQLite ##
+*.db
+*.db-shm
+*.db-wal
+
+## IDE ##
+.idea/
+*.sln.iml
+
+## OS ##
+Thumbs.db
+.DS_Store
+
+## Publish ##
+publish/
+Output/
+
+## Scratch & Temporary ##
+.agents/
+ref_opensourcepos/
+fix_all_views.py
+restore.py
+tmp/
+*.pem
+*.jwt
+task.md

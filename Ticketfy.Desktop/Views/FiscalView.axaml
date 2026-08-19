@@ -1,0 +1,144 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ticketfy.ViewModels"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             x:Class="Ticketfy.Views.FiscalView"
+             x:DataType="vm:FiscalViewModel">
+
+    <Grid RowDefinitions="Auto,*" Margin="16">
+        
+        <!-- Header -->
+        <Border Grid.Row="0" Margin="0,0,0,16" Padding="16,12" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8">
+            <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                <mi:MaterialIcon Kind="ReceiptTextOutline" Width="22" Height="22" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                <TextBlock Text="Facturación Electrónica SAT CFDI 4.0" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+            </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="1" ColumnDefinitions="3*,2*" RowDefinitions="Auto,*" Margin="0,0,0,0">
+            <!-- Left Column: Search & Forms -->
+            <StackPanel Grid.Column="0" Grid.Row="0" Spacing="16" Margin="0,0,16,16">
+                <!-- Search Sale -->
+                <Border Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
+                    <StackPanel Spacing="12">
+                        <TextBlock Text="Paso 1: Buscar Venta" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                        <Grid ColumnDefinitions="*,Auto" Margin="0,4,0,0">
+                            <TextBox Grid.Column="0" Text="{Binding SearchFolio, Mode=TwoWay}" Watermark="Folio de Venta (ej. TCK-1002)" Background="{DynamicResource BgTertiaryBrush}" Padding="10"/>
+                            <Button Grid.Column="1" Command="{Binding SearchSaleCommand}" Classes="primary-action" Margin="8,0,0,0" Padding="16,8" CornerRadius="4">
+                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                    <mi:MaterialIcon Kind="Search" />
+                                    <TextBlock Text="Buscar" VerticalAlignment="Center" FontWeight="Bold" />
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                        <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource AccentDangerBrush}" IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" TextWrapping="Wrap"/>
+                        <TextBlock Text="{Binding SuccessMessage}" Foreground="{DynamicResource AccentSafeBrush}" IsVisible="{Binding SuccessMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" TextWrapping="Wrap" FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Customer Info & Facturama Options -->
+                <Border Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16"
+                        IsVisible="{Binding SelectedSale, Converter={x:Static ObjectConverters.IsNotNull}}">
+                    <StackPanel Spacing="16">
+                        <TextBlock Text="Paso 2: Datos de Facturación" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                        
+                        <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto,Auto" Margin="0,4,0,0">
+                            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,12">
+                                <TextBlock Text="RFC *" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding CustomerRfc, Mode=TwoWay}" Watermark="XAXX010101000" Background="{DynamicResource BgTertiaryBrush}" Padding="8"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,12">
+                                <TextBlock Text="Razón Social *" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding CustomerName, Mode=TwoWay}" Watermark="Público en General" Background="{DynamicResource BgTertiaryBrush}" Padding="8"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,12">
+                                <TextBlock Text="Código Postal *" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,4"/>
+                                <TextBox Text="{Binding CustomerZipCode, Mode=TwoWay}" Watermark="00000" Background="{DynamicResource BgTertiaryBrush}" Padding="8"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,12">
+                                <TextBlock Text="Régimen Fiscal *" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,4"/>
+                                <ComboBox ItemsSource="{Binding Regimenes}" SelectedItem="{Binding SelectedRegimen, Mode=TwoWay}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,8,12">
+                                <TextBlock Text="Uso de CFDI *" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,4"/>
+                                <ComboBox ItemsSource="{Binding UsosCfdi}" SelectedItem="{Binding SelectedUsoCfdi, Mode=TwoWay}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                            <StackPanel Grid.Row="2" Grid.Column="1" Margin="8,0,0,12">
+                                <TextBlock Text="Forma de Pago *" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,4"/>
+                                <ComboBox ItemsSource="{Binding FormasPago}" SelectedItem="{Binding SelectedFormaPago, Mode=TwoWay}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <StackPanel>
+                            <TextBlock Text="Método de Pago *" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,0,0,4"/>
+                            <ComboBox ItemsSource="{Binding MetodosPago}" SelectedItem="{Binding SelectedMetodoPago, Mode=TwoWay}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch"/>
+                        </StackPanel>
+
+                        <Button Command="{Binding EmitInvoiceCommand}" Classes="primary-action" HorizontalAlignment="Right" Padding="16,10" CornerRadius="4" Margin="0,8,0,0" IsEnabled="{Binding !IsLoading}">
+                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                <mi:MaterialIcon Kind="Send" />
+                                <TextBlock Text="TIMBRAR FACTURA" FontWeight="Bold" VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+
+            <!-- Right Column: Selected Ticket Summary -->
+            <Border Grid.Column="1" Grid.Row="0" Margin="0,0,0,16" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16"
+                    IsVisible="{Binding SelectedSale, Converter={x:Static ObjectConverters.IsNotNull}}">
+                <StackPanel Spacing="10">
+                    <TextBlock Text="Resumen de la Venta" FontWeight="SemiBold" FontSize="14" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    <Separator Background="{DynamicResource BorderBrush}" Margin="0,4"/>
+                    
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="Folio:" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBlock Grid.Column="1" Text="{Binding SelectedSale.Id}" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                    </Grid>
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="Fecha:" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBlock Grid.Column="1" Text="{Binding SelectedSale.Date}" Foreground="{DynamicResource TextPrimaryBrush}" />
+                    </Grid>
+                    
+                    <Separator Background="{DynamicResource BorderBrush}" Margin="0,8"/>
+                    <TextBlock Text="Conceptos:" Foreground="{DynamicResource TextSecondaryBrush}" FontSize="12" />
+                    
+                    <ItemsControl ItemsSource="{Binding SelectedSale.Items}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,4">
+                                    <TextBlock Text="{Binding Quantity}" Foreground="{DynamicResource TextPrimaryBrush}" Width="24"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Name}" Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis" Margin="8,0"/>
+                                    <TextBlock Grid.Column="2" Text="{Binding TotalPrice, StringFormat='${0:N2}'}" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold"/>
+                                </Grid>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+
+                    <Separator Background="{DynamicResource BorderBrush}" Margin="0,8"/>
+                    
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="TOTAL:" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        <TextBlock Grid.Column="1" Text="{Binding SelectedSale.Total, StringFormat='${0:N2}'}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource AccentSafeBrush}" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Bottom: Invoices History DataGrid -->
+            <Border Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="1" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="0">
+                <DataGrid ItemsSource="{Binding Invoices}" AutoGenerateColumns="False" CanUserResizeColumns="True" CanUserReorderColumns="True" IsReadOnly="True" GridLinesVisibility="Horizontal" HeadersVisibility="Column">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Folio Venta" Binding="{Binding Id}" Width="2*" />
+                        <DataGridTextColumn Header="Fecha" Binding="{Binding Date}" Width="2*" />
+                        <DataGridTextColumn Header="Estado CFDI" Binding="{Binding EstadoFiscal}" Width="1.5*" />
+                        <DataGridTextColumn Header="Folio SAT (UUID)" Binding="{Binding InvoiceId}" Width="2.5*" />
+                        <DataGridTextColumn Header="Total" Binding="{Binding Total, StringFormat='${0:N2}'}" Width="1.5*" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>
+

@@ -1,0 +1,17 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ticketfy.ViewModels"
+             x:Class="Ticketfy.Views.Settings.AtajosSettingsView"
+             x:DataType="vm:SettingsViewModel">
+
+    <StackPanel Spacing="20" Margin="10">
+        <TextBlock Text="Configuración de Atajos de Teclado" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+        <Border Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}" Padding="20">
+            <StackPanel Spacing="10">
+                <TextBlock Text="Atajos de teclado en rediseño" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                <TextBlock Text="El sistema de atajos de teclado dinámicos está en mantenimiento y se reactivará en la próxima actualización con soporte para personalización avanzada conflict-free." FontSize="12" Foreground="{DynamicResource TextMutedBrush}" TextWrapping="Wrap" />
+            </StackPanel>
+        </Border>
+    </StackPanel>
+</UserControl>
+

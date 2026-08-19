@@ -1,0 +1,25 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ticketfy.ViewModels.Dialogs"
+             x:Class="Ticketfy.Views.Dialogs.ConfigureMinStockDialog"
+             x:DataType="vm:ConfigureMinStockDialogViewModel">
+
+    <Border Width="400" Padding="20" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8">
+        <StackPanel Spacing="16">
+            <TextBlock Text="Configurar Stock Mínimo Global" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+            <TextBlock Text="Defina el stock mínimo predeterminado para las alertas automáticas en el punto de venta cuando no se haya especificado un valor personalizado por producto." 
+                       FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" />
+
+            <StackPanel Spacing="6">
+                <TextBlock Text="Stock Mínimo Predeterminado *" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <NumericUpDown Value="{Binding MinStockValue}" ShowButtonSpinner="False" FormatString="0" Minimum="0" Watermark="Ej. 5" Background="{DynamicResource BgTertiaryBrush}" Padding="10" />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10" Margin="0,10,0,0">
+                <Button Content="Cancelar" Command="{Binding CancelCommand}" HotKey="Escape" />
+                <Button Content="Guardar" Command="{Binding SaveCommand}" Classes="accent" IsDefault="True" />
+            </StackPanel>
+        </StackPanel>
+    </Border>
+</UserControl>
+

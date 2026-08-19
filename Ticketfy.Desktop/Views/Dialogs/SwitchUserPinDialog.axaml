@@ -1,0 +1,84 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ticketfy.ViewModels.Dialogs"
+             xmlns:models="using:Ticketfy.Core.Models"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             x:Class="Ticketfy.Views.Dialogs.SwitchUserPinDialog"
+             x:DataType="vm:SwitchUserPinDialogViewModel">
+
+    <Grid Background="#80000000">
+        <Border Width="440" HorizontalAlignment="Center" VerticalAlignment="Center"
+                Background="{DynamicResource BgSecondaryBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                CornerRadius="{DynamicResource AppCornerRadius}" Padding="24">
+            <StackPanel Spacing="16">
+                <!-- Header -->
+                <Grid ColumnDefinitions="*, Auto">
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Cambio Rápido de Cajero" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                        <TextBlock Text="Seleccione su usuario e ingrese su PIN de 4 dígitos" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                    </StackPanel>
+                    <Button Grid.Column="1" Command="{Binding CloseModalCommand}" Width="28" Height="28" Padding="0" Background="Transparent" BorderThickness="0">
+                        <mi:MaterialIcon Kind="Close" Width="18" Height="18" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    </Button>
+                </Grid>
+
+                <Border Height="1" Background="{DynamicResource BorderBrush}" />
+
+                <!-- Cashier Selector ComboBox -->
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Usuario / Cajero:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                    <ComboBox ItemsSource="{Binding AvailableUsers}" 
+                              SelectedItem="{Binding SelectedUser, Mode=TwoWay}" 
+                              HorizontalAlignment="Stretch" Padding="8">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate DataType="models:UserModel">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <mi:MaterialIcon Kind="AccountCircle" Width="18" Height="18" Foreground="{DynamicResource AccentPrimaryBrush}"/>
+                                    <TextBlock Text="{Binding FullName}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{Binding Role, StringFormat='({0})'}" FontSize="11" Foreground="{DynamicResource TextMutedBrush}"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+
+                <!-- PIN Display Mask -->
+                <StackPanel Spacing="12" HorizontalAlignment="Center">
+                    <Border Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Height="48" Width="240">
+                        <TextBlock Text="{Binding EnteredPin}" FontSize="24" FontWeight="Bold" LetterSpacing="12" 
+                                   HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                    </Border>
+
+                    <!-- Error Banner -->
+                    <TextBlock Text="{Binding ErrorMessage}" Foreground="#EF4444" FontWeight="Bold" FontSize="13" 
+                               HorizontalAlignment="Center" Height="20"/>
+
+                    <!-- Numeric Keypad -->
+                    <Grid RowDefinitions="44, 44, 44, 44" ColumnDefinitions="60, 60, 60" HorizontalAlignment="Center">
+                        <Button Grid.Row="0" Grid.Column="0" Content="1" Command="{Binding AppendPinDigitCommand}" CommandParameter="1" Margin="3" FontSize="18" FontWeight="Bold" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                        <Button Grid.Row="0" Grid.Column="1" Content="2" Command="{Binding AppendPinDigitCommand}" CommandParameter="2" Margin="3" FontSize="18" FontWeight="Bold" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                        <Button Grid.Row="0" Grid.Column="2" Content="3" Command="{Binding AppendPinDigitCommand}" CommandParameter="3" Margin="3" FontSize="18" FontWeight="Bold" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+
+                        <Button Grid.Row="1" Grid.Column="0" Content="4" Command="{Binding AppendPinDigitCommand}" CommandParameter="4" Margin="3" FontSize="18" FontWeight="Bold" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                        <Button Grid.Row="1" Grid.Column="1" Content="5" Command="{Binding AppendPinDigitCommand}" CommandParameter="5" Margin="3" FontSize="18" FontWeight="Bold" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                        <Button Grid.Row="1" Grid.Column="2" Content="6" Command="{Binding AppendPinDigitCommand}" CommandParameter="6" Margin="3" FontSize="18" FontWeight="Bold" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+
+                        <Button Grid.Row="2" Grid.Column="0" Content="7" Command="{Binding AppendPinDigitCommand}" CommandParameter="7" Margin="3" FontSize="18" FontWeight="Bold" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                        <Button Grid.Row="2" Grid.Column="1" Content="8" Command="{Binding AppendPinDigitCommand}" CommandParameter="8" Margin="3" FontSize="18" FontWeight="Bold" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                        <Button Grid.Row="2" Grid.Column="2" Content="9" Command="{Binding AppendPinDigitCommand}" CommandParameter="9" Margin="3" FontSize="18" FontWeight="Bold" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+
+                        <Button Grid.Row="3" Grid.Column="0" Content="C" Command="{Binding ClearPinCommand}" Margin="3" Background="#FEF2F2" Foreground="#EF4444" FontWeight="Bold" CornerRadius="6" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                        <Button Grid.Row="3" Grid.Column="1" Content="0" Command="{Binding AppendPinDigitCommand}" CommandParameter="0" Margin="3" FontSize="18" FontWeight="Bold" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                        <Button Grid.Row="3" Grid.Column="2" Content="✕" Command="{Binding CloseModalCommand}" Margin="3" Background="{DynamicResource BgTertiaryBrush}" Foreground="{DynamicResource TextSecondaryBrush}" CornerRadius="6" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                    </Grid>
+                </StackPanel>
+
+                <!-- Footer Cancel Button -->
+                <Button Content="Cancelar" Command="{Binding CloseModalCommand}" 
+                        HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Height="40" Margin="0,8,0,0"/>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
+

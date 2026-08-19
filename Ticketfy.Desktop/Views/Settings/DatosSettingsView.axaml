@@ -1,0 +1,28 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ticketfy.ViewModels"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             x:Class="Ticketfy.Views.Settings.DatosSettingsView"
+             x:DataType="vm:SettingsViewModel">
+
+    <StackPanel Spacing="18">
+        <TextBlock Text="Mantenimiento de Base de Datos &amp; Respaldos" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+
+        <StackPanel Orientation="Horizontal" Spacing="12">
+            <Button Command="{Binding CreateBackupNowCommand}" Classes="primary-action" Padding="16,10" CornerRadius="{DynamicResource AppCornerRadius}">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <mi:MaterialIcon Kind="BackupRestore" Width="18" Height="18" />
+                    <TextBlock Text="CREAR COPIA DE SEGURIDAD LOCAL" FontWeight="Bold" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+
+            <Button Command="{Binding ExportCatalogCsvCommand}" Padding="16,10" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <mi:MaterialIcon Kind="FileExport" Width="18" Height="18" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                    <TextBlock Text="EXPORTAR CATÁLOGO CSV" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                </StackPanel>
+            </Button>
+        </StackPanel>
+    </StackPanel>
+</UserControl>
+

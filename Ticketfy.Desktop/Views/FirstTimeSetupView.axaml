@@ -1,0 +1,46 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ticketfy.ViewModels"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             x:Class="Ticketfy.Views.FirstTimeSetupView"
+             x:DataType="vm:FirstTimeSetupViewModel">
+
+    <Grid Background="{DynamicResource BgPrimaryBrush}">
+        <Border Width="450" Padding="32" CornerRadius="12"
+                Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                HorizontalAlignment="Center" VerticalAlignment="Center">
+            <StackPanel Spacing="20">
+                <StackPanel HorizontalAlignment="Center" Spacing="8">
+                    <Border Width="56" Height="56" CornerRadius="8" Background="{DynamicResource AccentPrimaryBrush}" HorizontalAlignment="Center">
+                        <mi:MaterialIcon Kind="Security" Width="32" Height="32" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <TextBlock Text="Configuración Inicial" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" />
+                    <TextBlock Text="Cree la cuenta de Administrador Maestro" FontSize="13" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" />
+                </StackPanel>
+
+                <StackPanel Spacing="12">
+                    <TextBox Text="{Binding AdminFullName, Mode=TwoWay}" Watermark="Nombre Completo" Background="{DynamicResource BgTertiaryBrush}" Padding="12" />
+                    <TextBox Text="{Binding AdminUsername, Mode=TwoWay}" Watermark="Nombre de Usuario" Background="{DynamicResource BgTertiaryBrush}" Padding="12" />
+                    <TextBox Text="{Binding AdminPassword, Mode=TwoWay}" PasswordChar="•" Watermark="Contraseña" Background="{DynamicResource BgTertiaryBrush}" Padding="12" />
+                    <TextBox Text="{Binding PasswordHint, Mode=TwoWay}" Watermark="Pista de Contraseña (ej. Mascota de la infancia)" Background="{DynamicResource BgTertiaryBrush}" Padding="12" />
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="PIN rápido de 4 Dígitos" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBox x:Name="Pin1" Text="{Binding AdminPin1, Mode=TwoWay}" MaxLength="1" PasswordChar="•" Padding="12,6" Width="40" TextAlignment="Center" KeyUp="OnPinKeyUp"/>
+                            <TextBox x:Name="Pin2" Text="{Binding AdminPin2, Mode=TwoWay}" MaxLength="1" PasswordChar="•" Padding="12,6" Width="40" TextAlignment="Center" KeyUp="OnPinKeyUp"/>
+                            <TextBox x:Name="Pin3" Text="{Binding AdminPin3, Mode=TwoWay}" MaxLength="1" PasswordChar="•" Padding="12,6" Width="40" TextAlignment="Center" KeyUp="OnPinKeyUp"/>
+                            <TextBox x:Name="Pin4" Text="{Binding AdminPin4, Mode=TwoWay}" MaxLength="1" PasswordChar="•" Padding="12,6" Width="40" TextAlignment="Center" KeyUp="OnPinKeyUp"/>
+                        </StackPanel>
+                    </StackPanel>
+                    
+                    <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource AccentDangerBrush}" FontSize="12" HorizontalAlignment="Center" TextWrapping="Wrap" IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                </StackPanel>
+
+                <Button Command="{Binding CreateAdminAccountCommand}" Classes="primary-action" Height="44" HorizontalAlignment="Stretch">
+                    <TextBlock Text="CREAR CUENTA ADMINISTRADOR" FontWeight="Bold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Button>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
+

@@ -1,0 +1,352 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ticketfy.ViewModels.Dialogs"
+             xmlns:dto="using:Ticketfy.Data.Dtos"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             x:Class="Ticketfy.Views.Dialogs.CheckoutDialog"
+             x:DataType="vm:CheckoutDialogViewModel">
+
+    <Border Width="520" Padding="24" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12">
+        <Grid>
+            <DockPanel LastChildFill="True">
+            <!-- Header -->
+            <StackPanel DockPanel.Dock="Top" Spacing="4" Margin="0,0,0,16">
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Orientation="Horizontal" Spacing="8">
+                        <mi:MaterialIcon Kind="CashRegister" Width="22" Height="22" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                        <TextBlock Text="Procesar Cobro de Venta" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                    </StackPanel>
+                    <Button Grid.Column="1" Command="{Binding CancelCommand}" Background="Transparent" BorderThickness="0" Padding="4">
+                        <mi:MaterialIcon Kind="Close" Width="20" Height="20" Foreground="{DynamicResource TextMutedBrush}" />
+                    </Button>
+                </Grid>
+                <TextBlock Text="Seleccione el método de pago y configure los datos de facturación CFDI 4.0 si es requerido." FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
+            </StackPanel>
+
+            <!-- Bottom Action Buttons -->
+            <StackPanel DockPanel.Dock="Bottom" Margin="0,16,0,0" Spacing="10">
+                <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource AccentDangerBrush}" FontSize="12" FontWeight="Bold" TextWrapping="Wrap" HorizontalAlignment="Center" />
+
+                <Grid ColumnDefinitions="*,Auto,Auto">
+                    <Button Grid.Column="0" Command="{Binding CancelCommand}" Content="CANCELAR" Margin="0,0,16,0" Padding="16,12"
+                            Background="#F87171" BorderBrush="#DC2626" BorderThickness="1"
+                            Foreground="White" FontWeight="Bold" CornerRadius="8" HorizontalAlignment="Left" />
+                    
+                    <ToggleSwitch Grid.Column="1" IsChecked="{Binding ShouldPrintReceipt}" 
+                                  OnContent="Imprimir Ticket" OffContent="Sin Ticket"
+                                  VerticalAlignment="Center" Margin="0,0,16,0" FontWeight="SemiBold"
+                                  Foreground="{DynamicResource TextPrimaryBrush}" />
+
+                    <Button Grid.Column="2" Command="{Binding ConfirmPaymentCommand}" IsEnabled="{Binding IsSufficientAmount}" IsDefault="True" Padding="24,12"
+                            Background="#10B981" Foreground="White" FontWeight="Bold" CornerRadius="8" HorizontalContentAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                            <mi:MaterialIcon Kind="CheckDecagram" Width="22" Height="22"/>
+                            <TextBlock Text="COBRAR" FontWeight="ExtraBold" FontSize="16" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </StackPanel>
+
+            <!-- Middle Payment Details & CFDI 4.0 -->
+            <ScrollViewer VerticalScrollBarVisibility="Visible" Padding="0,0,12,0" Margin="0,0,-12,0">
+                <StackPanel Spacing="16">
+                    <!-- Total Display Box -->
+                    <Border Background="#EFF6FF" BorderBrush="#BFDBFE" BorderThickness="1" CornerRadius="8" Padding="16">
+                        <Grid ColumnDefinitions="*, Auto">
+                            <TextBlock Text="Total a Cobrar:" FontSize="16" FontWeight="SemiBold" Foreground="#1E40AF" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1" Text="{Binding TotalToPay, StringFormat='${0:N2}'}" 
+                                       FontSize="32" FontWeight="ExtraBold" Foreground="#2563EB" FontFamily="Consolas, monospace"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Quick Cash Denominations Strip -->
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="Monedas Rápidas:" FontSize="12" FontWeight="SemiBold" Foreground="#475569"/>
+                        <WrapPanel Orientation="Horizontal">
+                            <Button Content="+$0.50" Command="{Binding AddCashDenominationCommand}" CommandParameter="0.5" Margin="0,0,6,6" Padding="8,5" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4"/>
+                            <Button Content="+$1" Command="{Binding AddCashDenominationCommand}" CommandParameter="1" Margin="0,0,6,6" Padding="8,5" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4"/>
+                            <Button Content="+$2" Command="{Binding AddCashDenominationCommand}" CommandParameter="2" Margin="0,0,6,6" Padding="8,5" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4"/>
+                            <Button Content="+$5" Command="{Binding AddCashDenominationCommand}" CommandParameter="5" Margin="0,0,6,6" Padding="8,5" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4"/>
+                            <Button Content="+$10" Command="{Binding AddCashDenominationCommand}" CommandParameter="10" Margin="0,0,6,6" Padding="8,5" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4"/>
+                        </WrapPanel>
+
+                        <TextBlock Text="Billetes Rápidos:" FontSize="12" FontWeight="SemiBold" Foreground="#475569"/>
+                        <WrapPanel Orientation="Horizontal">
+                            <Button Content="+$20" Command="{Binding AddCashDenominationCommand}" CommandParameter="20" Margin="0,0,6,6" Padding="8,5" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4"/>
+                            <Button Content="+$50" Command="{Binding AddCashDenominationCommand}" CommandParameter="50" Margin="0,0,6,6" Padding="8,5" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4"/>
+                            <Button Content="+$100" Command="{Binding AddCashDenominationCommand}" CommandParameter="100" Margin="0,0,6,6" Padding="8,5" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4"/>
+                            <Button Content="+$200" Command="{Binding AddCashDenominationCommand}" CommandParameter="200" Margin="0,0,6,6" Padding="8,5" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4"/>
+                            <Button Content="+$500" Command="{Binding AddCashDenominationCommand}" CommandParameter="500" Margin="0,0,6,6" Padding="8,5" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4"/>
+                            <Button Content="Exacto" Command="{Binding SetExactCashCommand}" Margin="0,0,6,6" Padding="8,5" Background="{DynamicResource AccentPrimaryBrush}" Foreground="White" FontWeight="Bold" CornerRadius="4"/>
+                        </WrapPanel>
+                    </StackPanel>
+
+                    <StackPanel Spacing="10">
+                        <!-- Standard Received Amount Input (Visible if NOT Mixed) -->
+                        <Grid ColumnDefinitions="*,*" IsVisible="{Binding IsNotMixedPayment}">
+                            <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,6,0">
+                                <TextBlock Text="Monto Recibido ($):" FontSize="12" FontWeight="SemiBold" Foreground="#334155"/>
+                                <TextBox x:Name="ReceivedAmountTextBox" Text="{Binding ReceivedAmountInput, Mode=TwoWay}" FontSize="20" FontWeight="Bold" 
+                                         FontFamily="Consolas, monospace" HorizontalContentAlignment="Right" Padding="8"/>
+                            </StackPanel>
+
+                            <StackPanel Grid.Column="1" Spacing="4" Margin="6,0,0,0">
+                                <TextBlock Text="Estado de Cambio:" FontSize="12" FontWeight="SemiBold" Foreground="#334155"/>
+                                <Border Background="{Binding ChangeBgColor}" CornerRadius="4" Padding="10,6" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                    <TextBlock Text="{Binding ChangeOrShortageText}" 
+                                               Foreground="{Binding ChangeTextColor}" 
+                                               FontSize="18" FontWeight="ExtraBold" FontFamily="Consolas, monospace" HorizontalAlignment="Right"/>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Mixed Payment Inputs Grid (Visible if Mixed) -->
+                        <StackPanel Spacing="8" IsVisible="{Binding IsMixedPayment}">
+                            <TextBlock Text="Desglose de Pago Mixto:" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}"/>
+                            <Grid ColumnDefinitions="*,*,*">
+                                <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,4,0">
+                                    <TextBlock Text="Efectivo ($):" FontSize="11" FontWeight="SemiBold" Foreground="#334155"/>
+                                    <NumericUpDown Value="{Binding CashAmount}" ShowButtonSpinner="False" FormatString="0.00" Minimum="0" FontSize="14" FontWeight="Bold" 
+                                             Background="{DynamicResource BgTertiaryBrush}" Padding="8" Watermark="0.00" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Spacing="4" Margin="4,0,4,0">
+                                    <TextBlock Text="Tarjeta ($):" FontSize="11" FontWeight="SemiBold" Foreground="#334155"/>
+                                    <NumericUpDown Value="{Binding CardAmount}" ShowButtonSpinner="False" FormatString="0.00" Minimum="0" FontSize="14" FontWeight="Bold" 
+                                             Background="{DynamicResource BgTertiaryBrush}" Padding="8" Watermark="0.00" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="2" Spacing="4" Margin="4,0,0,0">
+                                    <TextBlock Text="Monedero ($):" FontSize="11" FontWeight="SemiBold" Foreground="#334155"/>
+                                    <NumericUpDown Value="{Binding WalletAmount}" ShowButtonSpinner="False" FormatString="0.00" Minimum="0" FontSize="14" FontWeight="Bold" 
+                                             Background="{DynamicResource BgTertiaryBrush}" Padding="8" Watermark="0.00" />
+                                </StackPanel>
+                            </Grid>
+                            
+                            <Grid ColumnDefinitions="*,*">
+                                <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,6,0">
+                                    <TextBlock Text="Total Recibido (Mixto):" FontSize="11" FontWeight="SemiBold" Foreground="#334155"/>
+                                    <TextBlock Text="{Binding TotalMixedReceived, StringFormat='${0:N2}'}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" FontFamily="Consolas, monospace"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Spacing="4" Margin="6,0,0,0">
+                                    <TextBlock Text="Cambio (Mixto):" FontSize="11" FontWeight="SemiBold" Foreground="#334155"/>
+                                    <Border Background="{Binding ChangeBgColor}" CornerRadius="4" Padding="8,4" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                        <TextBlock Text="{Binding ChangeAmount, StringFormat='Cambio: ${0:N2}'}" 
+                                                   Foreground="{Binding ChangeTextColor}" 
+                                                   FontSize="16" FontWeight="ExtraBold" FontFamily="Consolas, monospace" HorizontalAlignment="Right"/>
+                                    </Border>
+                                </StackPanel>
+                            </Grid>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- ══ CLIENTE DEL TICKET (solo lectura) + Puntos ══ -->
+                    <Border Background="{DynamicResource BgTertiaryBrush}" Padding="12,8" CornerRadius="6"
+                            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                            <mi:MaterialIcon Kind="AccountCircle" Width="28" Height="28"
+                                             Foreground="{DynamicResource AccentPrimaryBrush}"
+                                             VerticalAlignment="Center" Margin="0,0,10,0"/>
+                            <StackPanel Grid.Column="1" Spacing="2" VerticalAlignment="Center">
+                                <!-- Nombre del cliente pre-seleccionado en el ticket -->
+                                <TextBlock Text="{Binding SelectedCustomer.Name, FallbackValue='Sin cliente asignado'}"
+                                           FontWeight="Bold" FontSize="13"
+                                           Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <mi:MaterialIcon Kind="StarCircle" Width="12" Height="12"
+                                                     Foreground="#F59E0B" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding CustomerPointsBalance, StringFormat='Puntos: {0:N0}  |  '}"
+                                               FontSize="11" Foreground="{DynamicResource TextMutedBrush}"/>
+                                    <TextBlock Text="{Binding PointsEarnedThisSale, StringFormat='Acumula: +{0:N0} pts esta compra'}"
+                                               FontSize="11" Foreground="#10B981"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <Button Grid.Column="2" Content="Canjear Puntos"
+                                    Command="{Binding RedeemLoyaltyPointsCommand}"
+                                    Padding="6,3" FontSize="11"
+                                    Background="{DynamicResource AccentBrandSubtleBrush}"
+                                    Foreground="{DynamicResource AccentPrimaryBrush}"
+                                    BorderBrush="{DynamicResource AccentPrimaryBrush}"
+                                    BorderThickness="1" CornerRadius="4"
+                                    VerticalAlignment="Center"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- ══ MÉTODO DE PAGO ══ -->
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Método de Pago" FontSize="12" FontWeight="Bold"
+                                   Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <ComboBox ItemsSource="{Binding PaymentMethods}"
+                                  SelectedItem="{Binding PaymentMethod, Mode=TwoWay}"
+                                  HorizontalAlignment="Stretch" Padding="8">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="x:String">
+                                    <TextBlock Text="{Binding}" Foreground="#1E293B" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <!-- ══ CRÉDITO DE CLIENTE — visible solo cuando se elige "Crédito de Cliente" ══ -->
+                    <Border IsVisible="{Binding IsCreditPayment}"
+                            CornerRadius="8" Padding="14,12" BorderThickness="1"
+                            BorderBrush="#10B981" Background="#ECFDF5">
+                        <StackPanel Spacing="8">
+
+                            <!-- Header del panel -->
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <mi:MaterialIcon Kind="CreditCardCheckOutline" Width="18" Height="18"
+                                                 Foreground="#10B981" VerticalAlignment="Center"/>
+                                <TextBlock Text="Crédito de Cuenta Corriente"
+                                           FontWeight="Bold" FontSize="13" Foreground="#065F46"
+                                           VerticalAlignment="Center"/>
+                            </StackPanel>
+
+                            <!-- Tabla de saldos del crédito -->
+                            <Border Background="White" CornerRadius="6" Padding="12,8"
+                                    BorderBrush="#A7F3D0" BorderThickness="1">
+                                <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto">
+                                    <!-- Headers -->
+                                    <TextBlock Grid.Row="0" Grid.Column="0" Text="LÍMITE" FontSize="10"
+                                               FontWeight="Bold" Foreground="#6B7280"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="DEUDA ACTUAL" FontSize="10"
+                                               FontWeight="Bold" Foreground="#6B7280" HorizontalAlignment="Center"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="2" Text="DISPONIBLE" FontSize="10"
+                                               FontWeight="Bold" Foreground="#6B7280" HorizontalAlignment="Right"/>
+                                    <!-- Values -->
+                                    <TextBlock Grid.Row="1" Grid.Column="0"
+                                               Text="{Binding CustomerCreditLimit, StringFormat='${0:N2}'}"
+                                               FontSize="15" FontWeight="ExtraBold" Foreground="#1E293B"
+                                               FontFamily="Consolas, monospace"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="1"
+                                               Text="{Binding CustomerCurrentDebt, StringFormat='${0:N2}'}"
+                                               FontSize="15" FontWeight="ExtraBold" Foreground="#DC2626"
+                                               HorizontalAlignment="Center" FontFamily="Consolas, monospace"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="2"
+                                               Text="{Binding AvailableCredit, StringFormat='${0:N2}'}"
+                                               FontSize="15" FontWeight="ExtraBold" Foreground="#059669"
+                                               HorizontalAlignment="Right" FontFamily="Consolas, monospace"/>
+                                </Grid>
+                            </Border>
+
+                            <!-- Estado: crédito suficiente -->
+                            <TextBlock IsVisible="{Binding !CreditIsInsufficient}"
+                                       Text="✓ La venta de {0:N2} se cargará a la cuenta corriente del cliente. Su deuda aumentará en ese monto."
+                                       FontSize="11" Foreground="#065F46" TextWrapping="Wrap"/>
+
+                            <!-- Estado: crédito insuficiente -->
+                            <Border IsVisible="{Binding CreditIsInsufficient}"
+                                    Background="#FEF2F2" BorderBrush="#EF4444" BorderThickness="1"
+                                    CornerRadius="4" Padding="8,6">
+                                <TextBlock Text="⚠ Crédito insuficiente. Realice un abono primero o cambie el método de pago."
+                                           FontSize="11" FontWeight="SemiBold" Foreground="#DC2626"
+                                           TextWrapping="Wrap"/>
+                            </Border>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- ══ FOLIO MONEDERO / GIFTCARD ══ -->
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Folio de Tarjeta de Regalo / Monedero" FontSize="11" FontWeight="Bold"
+                                   Foreground="{DynamicResource AccentPrimaryBrush}" />
+                        <TextBox Text="{Binding GiftcardNumber, Mode=TwoWay}"
+                                 Watermark="Ingrese o escanee el número de tarjeta (Ej. GC-89123)" Padding="8" />
+                    </StackPanel>
+
+                    <!-- MULTI-TENDER APPLIED PAYMENTS TRAIL -->
+                    <StackPanel Spacing="6" IsVisible="{Binding AppliedTenders.Count}">
+                        <TextBlock Text="Desglose de Pagos Aplicados (Mixto / Puntos):" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}"/>
+                        <ItemsControl ItemsSource="{Binding AppliedTenders}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="vm:TenderEntryModel">
+                                    <Border BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="10,6" Margin="0,0,0,4" Background="{DynamicResource BgSecondaryBrush}">
+                                        <Grid ColumnDefinitions="*, Auto, Auto">
+                                            <StackPanel Grid.Column="0">
+                                                <TextBlock Text="{Binding MethodName}" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="12"/>
+                                                <TextBlock Text="{Binding ReferenceOrFolio}" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                            </StackPanel>
+                                            <TextBlock Grid.Column="1" Text="{Binding AmountPaid, StringFormat='${0:N2}'}" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" Margin="10,0" FontFamily="Consolas, monospace"/>
+                                            <Button Grid.Column="2" Command="{Binding $parent[ItemsControl].((vm:CheckoutDialogViewModel)DataContext).RemoveTenderCommand}" CommandParameter="{Binding}" Background="Transparent" BorderThickness="0" Padding="4">
+                                                <mi:MaterialIcon Kind="TrashCanOutline" Width="16" Height="16" Foreground="#EF4444"/>
+                                            </Button>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+
+                    <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,4" />
+
+                    <!-- Sprint C: CFDI 4.0 Invoicing Toggle & Fields -->
+                    <StackPanel Spacing="10" IsVisible="False">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Grid.Column="0" Spacing="2">
+                                <TextBlock Text="¿Requiere Factura CFDI 4.0?" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                <TextBlock Text="Genera la factura timbrada SAT con los datos fiscales del cliente." FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
+                            </StackPanel>
+                            <ToggleSwitch Grid.Column="1" IsChecked="{Binding RequiresInvoice, Mode=TwoWay}" OnContent="" OffContent="" />
+                        </Grid>
+
+                        <StackPanel IsVisible="{Binding RequiresInvoice}" Spacing="10" Margin="0,4,0,0">
+                            <Grid ColumnDefinitions="*,*">
+                                <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,4,0">
+                                    <TextBlock Text="RFC Fiscal" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    <TextBox Text="{Binding FiscalRfc, Mode=TwoWay}" Watermark="XAXX010101000" Padding="8" />
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Spacing="4" Margin="4,0,0,0">
+                                    <TextBlock Text="Código Postal" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    <TextBox Text="{Binding FiscalZipCode, Mode=TwoWay}" Watermark="00000" Padding="8" />
+                                </StackPanel>
+                            </Grid>
+
+                            <Grid ColumnDefinitions="*,*">
+                                <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,4,0">
+                                    <TextBlock Text="Uso de CFDI" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    <ComboBox ItemsSource="{Binding UsoCfdiOptions}" SelectedItem="{Binding FiscalUsoCfdi, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="6">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate x:DataType="x:String">
+                                                <TextBlock Text="{Binding}" Foreground="#1E293B" />
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Spacing="4" Margin="4,0,0,0">
+                                    <TextBlock Text="Régimen Fiscal" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    <ComboBox ItemsSource="{Binding RegimenFiscalOptions}" SelectedItem="{Binding FiscalRegime, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="6">
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate x:DataType="x:String">
+                                                <TextBlock Text="{Binding}" Foreground="#1E293B" />
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                </StackPanel>
+                            </Grid>
+
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Nombre / Razón Social" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                <TextBox Text="{Binding FiscalRazonSocial, Mode=TwoWay}" Watermark="PÚBLICO EN GENERAL" Padding="8" />
+                            </StackPanel>
+
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="Correo Electrónico (Envío de XML + PDF)" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                <TextBox Text="{Binding FiscalEmail, Mode=TwoWay}" Watermark="cliente@empresa.com" Padding="8" />
+                            </StackPanel>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </ScrollViewer>
+            </DockPanel>
+            
+            <!-- Overlay para Espera de Terminal Física -->
+            <Border IsVisible="{Binding IsWaitingForTerminal}" Background="#D9000000" CornerRadius="8" Margin="-24">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="16">
+                    <mi:MaterialIcon Kind="CreditCardWireless" Width="64" Height="64" Foreground="#10B981" />
+                    <TextBlock Text="{Binding TerminalStatusMessage}" FontSize="18" FontWeight="Bold" Foreground="White" TextAlignment="Center" />
+                    <ProgressBar IsIndeterminate="True" Width="200" Foreground="#10B981" Height="4" />
+                    <Button Content="CANCELAR COBRO EN TERMINAL" Command="{Binding CancelTerminalPaymentCommand}"
+                            Background="#EF4444" Foreground="White" FontWeight="Bold" CornerRadius="6" Padding="16,10" HorizontalAlignment="Center" Margin="0,16,0,0"/>
+                </StackPanel>
+            </Border>
+        </Grid>
+    </Border>
+</UserControl>
+

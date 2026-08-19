@@ -1,0 +1,62 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Ticketfy.Data.Dtos;
+using Ticketfy.Services.Interfaces;
+using Serilog;
+using System;
+using System.Threading.Tasks;
+
+namespace Ticketfy.ViewModels.Dialogs;
+
+public partial class PaymentDialogViewModel : ObservableObject
+{
+    private readonly ICustomerService _customerService;
+    private readonly string _customerId;
+
+    [ObservableProperty] private double _currentBalance;
+    [ObservableProperty] private double _amount;
+    [ObservableProperty] private string _errorMessage = string.Empty;
+
+    public event Action? RequestClose;
+
+    public PaymentDialogViewModel(ICustomerService customerService, string customerId, double balance = 0.0)
+    {
+        _customerService = customerService;
+        _customerId = customerId;
+        CurrentBalance = balance;
+    }
+
+    [RelayCommand]
+    private void Cancel()
+    {
+        RequestClose?.Invoke();
+    }
+
+    [RelayCommand]
+    private async Task SaveAsync()
+    {
+        try
+        {
+            if (Amount <= 0)
+            {
+                ErrorMessage = "El monto a abonar debe ser mayor a 0.";
+                return;
+            }
+
+            var dto = new CustomerPaymentDto(
+                Id: Guid.NewGuid().ToString(),
+                CustomerId: _customerId,
+                Date: DateTime.Now.ToString("o"),
+                Amount: Amount
+            );
+
+            await _customerService.AddPaymentAsync(dto);
+            RequestClose?.Invoke();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error adding payment in PaymentDialogViewModel");
+            ErrorMessage = ex.Message;
+        }
+    }
+}

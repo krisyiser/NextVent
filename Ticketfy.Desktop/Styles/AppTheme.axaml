@@ -1,0 +1,162 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <!-- ═══════════════════════════════════════════════════════════
+         TICKETFY POS — NEXT.JS AESTHETIC DESIGN TOKEN SYSTEM
+         Protocol VALCORE v4.0 — Dynamic Theme Token System
+         ═══════════════════════════════════════════════════════════ -->
+
+    <Style Selector=":root">
+        <Style.Resources>
+            <!-- Dimensions -->
+            <x:Double x:Key="SidebarWidth">80</x:Double>
+            <x:Double x:Key="TopBarHeight">64</x:Double>
+            <CornerRadius x:Key="RadiusSm">4</CornerRadius>
+            <CornerRadius x:Key="RadiusMd">8</CornerRadius>
+            <CornerRadius x:Key="RadiusLg">12</CornerRadius>
+        </Style.Resources>
+    </Style>
+
+    <!-- ─── GLOBAL BODY & TYPOGRAPHY ─── -->
+    <Style Selector="Window">
+        <Setter Property="Background" Value="{DynamicResource BgPrimaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="FontFamily" Value="{DynamicResource AppFontFamily}" />
+        <Setter Property="FontSize" Value="{DynamicResource AppBaseFontSize}" />
+    </Style>
+
+    <Style Selector="UserControl">
+        <Setter Property="Background" Value="{DynamicResource BgPrimaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="FontFamily" Value="{DynamicResource AppFontFamily}" />
+        <Setter Property="FontSize" Value="{DynamicResource AppBaseFontSize}" />
+    </Style>
+
+    <Style Selector="TextBlock">
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="FontFamily" Value="{DynamicResource AppFontFamily}" />
+        <Setter Property="FontSize" Value="{DynamicResource AppBaseFontSize}" />
+    </Style>
+
+    <Style Selector="TextBox">
+        <Setter Property="FontFamily" Value="{DynamicResource AppFontFamily}" />
+        <Setter Property="FontSize" Value="{DynamicResource AppBaseFontSize}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Background" Value="#FFFFFF" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="MinHeight" Value="38" />
+        <Setter Property="Padding" Value="10,8" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentPrimaryBrush}" />
+        <Setter Property="BorderThickness" Value="2" />
+        <Setter Property="Background" Value="#FFFFFF" />
+    </Style>
+
+    <Style Selector="ComboBox">
+        <Setter Property="FontFamily" Value="{DynamicResource AppFontFamily}" />
+        <Setter Property="FontSize" Value="{DynamicResource AppBaseFontSize}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="Background" Value="#FFFFFF" />
+        <Setter Property="Foreground" Value="#1E293B" />
+        <Setter Property="MinHeight" Value="38" />
+        <Setter Property="Padding" Value="10,8" />
+    </Style>
+
+    <Style Selector="ComboBoxItem">
+        <Setter Property="Background" Value="#FFFFFF"/>
+        <Setter Property="Foreground" Value="#1E293B"/>
+        <Setter Property="Padding" Value="12,10"/>
+    </Style>
+
+    <Style Selector="ComboBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource AccentBrandSubtleBrush}"/>
+        <Setter Property="Foreground" Value="{DynamicResource AccentPrimaryBrush}"/>
+    </Style>
+
+    <Style Selector="ComboBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="#DBEAFE"/>
+        <Setter Property="Foreground" Value="#1D4ED8"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+    </Style>
+
+    <!-- ─── CLEAN CARDS WITH DYNAMIC CORNER RADIUS & GLASS BLUR EFFECT ─── -->
+    <Style Selector="Border.clean-card">
+        <Setter Property="Background" Value="{DynamicResource BgSecondaryBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{DynamicResource AppCornerRadius}" />
+        <Setter Property="Effect">
+            <BlurEffect Radius="{DynamicResource GlassmorphismBlurRadius}" />
+        </Setter>
+    </Style>
+
+    <Style Selector="Border.clean-card-sm">
+        <Setter Property="Background" Value="{DynamicResource BgSecondaryBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="{DynamicResource AppCornerRadius}" />
+    </Style>
+
+    <!-- ─── ANIMATED BUTTONS WITH DYNAMIC FONT SIZE & CORNER RADIUS ─── -->
+    <Style Selector="Button">
+        <Setter Property="CornerRadius" Value="{DynamicResource AppCornerRadius}" />
+        <Setter Property="FontSize" Value="{DynamicResource AppBaseFontSize}" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Transitions">
+            <Transitions>
+                <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.15">
+                    <TransformOperationsTransition.Easing>
+                        <CubicEaseOut />
+                    </TransformOperationsTransition.Easing>
+                </TransformOperationsTransition>
+            </Transitions>
+        </Setter>
+    </Style>
+
+    <Style Selector="Button:pointerover">
+        <Setter Property="RenderTransform" Value="translateY(-2px)" />
+    </Style>
+
+    <Style Selector="Button.primary-action">
+        <Setter Property="Background" Value="{DynamicResource AccentPrimaryBrush}" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <Style Selector="Button.success-action">
+        <Setter Property="Background" Value="{DynamicResource AccentSuccessBrush}" />
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <!-- ─── NAVIGATION BUTTONS ─── -->
+    <Style Selector="Button.nav-item">
+        <Setter Property="Width" Value="48" />
+        <Setter Property="Height" Value="48" />
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="Foreground" Value="{DynamicResource SidebarNavIconBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="{DynamicResource AppCornerRadius}" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+
+    <Style Selector="Button.nav-item:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="#33FFFFFF" />
+        <Setter Property="Foreground" Value="#FFFFFF" />
+    </Style>
+
+    <Style Selector="Button.nav-item-active /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="#33FFFFFF" />
+        <Setter Property="Foreground" Value="#FFFFFF" />
+    </Style>
+
+</Styles>

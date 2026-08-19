@@ -1,0 +1,46 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ticketfy.ViewModels"
+             xmlns:dto="using:Ticketfy.Data.Dtos"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             x:Class="Ticketfy.Views.PromotionsView"
+             x:DataType="vm:PromotionsViewModel">
+
+    <DockPanel LastChildFill="True" Margin="16">
+        <Border DockPanel.Dock="Top" Margin="0,0,0,16" Padding="12,8"
+                Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8">
+            <Grid ColumnDefinitions="*,Auto">
+                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <mi:MaterialIcon Kind="TagMultiple" Width="22" Height="22" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                    <TextBlock Text="Gestor de Promociones y Ofertas" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8">
+                    <Button Command="{Binding OpenCreateItemKitDialogCommand}" Classes="secondary-action" Padding="16,8" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <mi:MaterialIcon Kind="PackageVariantPlus" Width="18" Height="18" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                            <TextBlock Text="CREAR COMBO / PAQUETE" FontWeight="Bold" FontSize="13" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                    <Button Command="{Binding OpenAddPromotionDialogCommand}" Classes="primary-action" Padding="16,8">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <mi:MaterialIcon Kind="TagPlus" Width="18" Height="18" />
+                            <TextBlock Text="NUEVA PROMOCIÓN" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <Border Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="1">
+            <DataGrid ItemsSource="{Binding Promotions}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Promoción" Binding="{Binding Name}" Width="2*" />
+                    <DataGridTextColumn Header="Descuento ($)" Binding="{Binding DiscountValue}" Width="*" />
+                    <DataGridTextColumn Header="Estado" Binding="{Binding IsActive}" Width="*" />
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </DockPanel>
+</UserControl>
+

@@ -1,0 +1,90 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:vm="clr-namespace:Ticketfy.ViewModels"
+        xmlns:dto="clr-namespace:Ticketfy.Data.Dtos"
+        xmlns:mi="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        mc:Ignorable="d" d:DesignWidth="1024" d:DesignHeight="768"
+        x:Class="Ticketfy.Views.ClientDisplayWindow"
+        x:DataType="vm:ClientDisplayViewModel"
+        WindowStartupLocation="CenterOwner"
+        Title="TICKETFY! — Segunda Pantalla de Cliente"
+        Background="{DynamicResource BgPrimaryBrush}">
+
+    <Panel>
+        <!-- IDLE CAROUSEL MODE -->
+        <Border IsVisible="{Binding IsIdleMode}" Background="#0F172A" Padding="40">
+            <Grid RowDefinitions="Auto,*,Auto">
+                <!-- Branding Header -->
+                <StackPanel Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,30">
+                    <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                        <mi:MaterialIcon Kind="Storefront" Width="32" Height="32" Foreground="White" />
+                        <TextBlock Text="TICKETFY!" FontSize="36" FontWeight="ExtraBold" Foreground="White" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <TextBlock Text="¡BIENVENIDO! GRACIAS POR SU PREFERENCIA" FontSize="18" Foreground="#94A3B8" HorizontalAlignment="Center" Margin="0,8,0,0"/>
+                </StackPanel>
+
+                <!-- Promotional Banners & Carousel -->
+                <Border Grid.Row="1" Background="#1E293B" CornerRadius="20" BorderBrush="#334155" BorderThickness="1" Padding="32" ClipToBounds="True">
+                    <Grid RowDefinitions="*,Auto">
+                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="16">
+                            <mi:MaterialIcon Kind="TagHeart" Width="80" Height="80" Foreground="#F59E0B"/>
+                            <TextBlock Text="PROMOCIONES ESPECIALES DEL DÍA" FontSize="28" FontWeight="Bold" Foreground="#F59E0B" HorizontalAlignment="Center"/>
+                            <TextBlock Text="Aprovecha nuestros descuentos de mayoreo y combos 3x2 en abarrotes y perecederos" 
+                                       FontSize="20" Foreground="#CBD5E1" HorizontalAlignment="Center" TextWrapping="Wrap" TextAlignment="Center" MaxWidth="600"/>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Footer Status -->
+                <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="8" Margin="0,20,0,0">
+                    <mi:MaterialIcon Kind="CheckCircle" Width="20" Height="20" Foreground="#10B981"/>
+                    <TextBlock Text="Terminal Lista para Escanear Su Compra" FontSize="16" Foreground="#64748B"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ACTIVE SALE CHECKOUT MIRROR MODE -->
+        <Grid IsVisible="{Binding !IsIdleMode}" ColumnDefinitions="2*,1*" Margin="24">
+            <!-- Left: Cart Items List -->
+            <Border Grid.Column="0" Background="#1E293B" CornerRadius="16" BorderBrush="#334155" BorderThickness="1" Padding="16">
+                <Grid RowDefinitions="Auto,*">
+                    <TextBlock Grid.Row="0" Text="DETALLE DE SU COMPRA" FontSize="18" FontWeight="Bold" Foreground="#38BDF8" Margin="8,8,8,16"/>
+                    <DataGrid Grid.Row="1" ItemsSource="{Binding CustomerCartItems}" IsReadOnly="True"
+                              GridLinesVisibility="Horizontal" HorizontalGridLinesBrush="#334155" Background="Transparent">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="PRODUCTO" Binding="{Binding Name}" Width="*"/>
+                            <DataGridTextColumn Header="CANT." Binding="{Binding Quantity, StringFormat='{}{0:N2}'}" Width="90"/>
+                            <DataGridTextColumn Header="P. UNIT." Binding="{Binding FinalUnitPrice, StringFormat='{}{0:C}'}" Width="120"/>
+                            <DataGridTextColumn Header="TOTAL" Binding="{Binding TotalPrice, StringFormat='{}{0:C}'}" Width="130"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+
+            <!-- Right: Totals & Savings Card -->
+            <StackPanel Grid.Column="1" Margin="24,0,0,0" VerticalAlignment="Center" Spacing="16">
+                <Border Background="#0F172A" CornerRadius="16" BorderBrush="#38BDF8" BorderThickness="2" Padding="24">
+                    <StackPanel Spacing="8">
+                        <TextBlock Text="TOTAL A PAGAR" FontSize="16" FontWeight="SemiBold" Foreground="#94A3B8"/>
+                        <TextBlock Text="{Binding GrandTotal, StringFormat='{}{0:C}'}" 
+                                   FontSize="46" FontWeight="ExtraBold" Foreground="#38BDF8"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Dynamic Savings Highlight Banner -->
+                <Border Background="#065F46" BorderBrush="#10B981" BorderThickness="1" CornerRadius="16" Padding="20"
+                        IsVisible="{Binding HighlightBannerText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                    <StackPanel Spacing="8" HorizontalAlignment="Center">
+                        <mi:MaterialIcon Kind="PartyPopper" Width="36" Height="36" Foreground="#34D399" HorizontalAlignment="Center"/>
+                        <TextBlock Text="{Binding HighlightBannerText}" 
+                                   FontSize="20" FontWeight="Bold" Foreground="#34D399" 
+                                   TextAlignment="Center" TextWrapping="Wrap"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </Grid>
+    </Panel>
+</Window>
+

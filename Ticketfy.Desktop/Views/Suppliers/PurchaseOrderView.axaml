@@ -1,0 +1,98 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ticketfy.ViewModels"
+             xmlns:dto="using:Ticketfy.Data.Dtos"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             x:Class="Ticketfy.Views.Suppliers.PurchaseOrderView"
+             x:DataType="vm:SuppliersViewModel">
+
+    <!-- Right Panel: Register Purchase Order (Entrada de Mercancía) -->
+    <Border Padding="16"
+            Background="{DynamicResource BgSecondaryBrush}"
+            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
+        <DockPanel LastChildFill="True">
+            <StackPanel DockPanel.Dock="Top" Spacing="10" Margin="0,0,0,12">
+                <TextBlock Text="Nueva Orden de Compra (Reabastecimiento)" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                
+                <Grid ColumnDefinitions="*,*">
+                    <StackPanel Grid.Column="0" Margin="0,0,4,0" Spacing="4">
+                        <TextBlock Text="Proveedor" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <ComboBox PlaceholderText="Seleccione Proveedor..." ItemsSource="{Binding Suppliers}" SelectedItem="{Binding SelectedSupplierForPurchase, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="8">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="dto:SupplierDto">
+                                    <TextBlock Text="{Binding Name}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Margin="4,0,0,0" Spacing="4">
+                        <TextBlock Text="No. Factura / Remisión" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBox Text="{Binding InvoiceNumber, Mode=TwoWay}" Watermark="Ej. FAC-9904" Padding="10,8" />
+                    </StackPanel>
+                </Grid>
+
+                <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,4" />
+
+                <!-- Add Item Row -->
+                <Grid ColumnDefinitions="2.5*, 1*, 1*, Auto">
+                    <StackPanel Grid.Column="0" Margin="0,0,4,0" Spacing="4">
+                        <TextBlock Text="Producto" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <ComboBox PlaceholderText="Seleccione Producto..." ItemsSource="{Binding AvailableProducts}" SelectedItem="{Binding SelectedProductForPurchase, Mode=TwoWay}" HorizontalAlignment="Stretch">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate x:DataType="dto:ProductDto">
+                                    <TextBlock Text="{Binding Name}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Margin="2,0" Spacing="4">
+                        <TextBlock Text="Costo Unid." FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBox Text="{Binding PurchaseUnitPrice, Mode=TwoWay}" Watermark="$ Costo" Padding="8" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="2" Margin="2,0" Spacing="4">
+                        <TextBlock Text="Cantidad" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBox Text="{Binding PurchaseQuantity, Mode=TwoWay}" Watermark="Cant." Padding="8" />
+                    </StackPanel>
+
+                    <Button Grid.Column="3" Command="{Binding AddItemToPurchaseDraftCommand}" Padding="10,8" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource AccentSuccessBrush}" Foreground="White" Margin="4,0,0,0" VerticalAlignment="Bottom">
+                        <mi:MaterialIcon Kind="Plus" Width="18" Height="18" />
+                    </Button>
+                </Grid>
+            </StackPanel>
+
+            <!-- Bottom Action Bar -->
+            <StackPanel DockPanel.Dock="Bottom" Spacing="10" Margin="0,12,0,0">
+                <Border Height="1" Background="{DynamicResource BorderBrush}" />
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Text="COSTO TOTAL COMPRA:" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1" Text="{Binding TotalPurchaseCost, StringFormat='${0:N2}'}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                </Grid>
+                <Button Command="{Binding ConfirmPurchaseCommand}" Content="{Binding SubmitButtonText}" Padding="16,12" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource AccentSuccessBrush}" Foreground="White" FontWeight="Bold" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" />
+            </StackPanel>
+
+            <!-- Purchase Draft Items Table -->
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding DraftPurchaseItems}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="dto:PurchaseItemDto">
+                            <Border Margin="0,0,0,4" Padding="10,8" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+                                    <TextBlock Grid.Column="0" Text="{Binding ProductName}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                    <TextBlock Grid.Column="1" Text="{Binding Quantity, StringFormat='{}{0} Pza'}" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="8,0" />
+                                    <TextBlock Grid.Column="2" Text="{Binding TotalPrice, StringFormat='${0:N2}'}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" Margin="8,0" />
+                                    <Button Grid.Column="3" Command="{Binding $parent[UserControl].((vm:SuppliersViewModel)DataContext).RemoveItemFromPurchaseDraftCommand}" CommandParameter="{Binding}" Background="Transparent" BorderThickness="0" Padding="2">
+                                        <mi:MaterialIcon Kind="Close" Width="14" Height="14" Foreground="{DynamicResource AccentDangerBrush}" />
+                                    </Button>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </DockPanel>
+    </Border>
+</UserControl>
+

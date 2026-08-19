@@ -1,0 +1,51 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ticketfy.ViewModels"
+             x:Class="Ticketfy.Views.Expenses.NetProfitAnalyticsView"
+             x:DataType="vm:ExpensesViewModel">
+
+    <!-- Financial Metrics Cards (Ingresos, Egresos, Total en Caja, Reinversion, Utilidad Neta) -->
+    <UniformGrid Columns="5">
+        
+        <!-- 1. INGRESOS (VENTAS) -->
+        <Border Margin="0,0,6,0" Padding="12" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
+            <StackPanel Spacing="4">
+                <TextBlock Text="Ingresos (Ventas)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" />
+                <TextBlock Text="{Binding Ingresos, StringFormat='${0:N2}'}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+            </StackPanel>
+        </Border>
+
+        <!-- 2. EGRESOS (GASTOS) -->
+        <Border Margin="3,0" Padding="12" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
+            <StackPanel Spacing="4">
+                <TextBlock Text="Egresos (Gastos)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" />
+                <TextBlock Text="{Binding Egresos, StringFormat='${0:N2}'}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource AccentDangerBrush}" />
+            </StackPanel>
+        </Border>
+
+        <!-- 3. TOTAL EN CAJA FÍSICO -->
+        <Border Margin="3,0" Padding="12" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="2" CornerRadius="{DynamicResource AppCornerRadius}">
+            <StackPanel Spacing="4">
+                <TextBlock Text="Total en Caja Físico" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                <TextBlock Text="{Binding TotalEnCaja, StringFormat='${0:N2}'}" FontSize="16" FontWeight="ExtraBold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+            </StackPanel>
+        </Border>
+
+        <!-- 4. REINVERSIÓN (MERCANCÍA) -->
+        <Border Margin="3,0" Padding="12" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
+            <StackPanel Spacing="4">
+                <TextBlock Text="Reinversión (Mercancía)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" />
+                <TextBlock Text="{Binding Reinversion, StringFormat='${0:N2}'}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource AccentWarningBrush}" />
+            </StackPanel>
+        </Border>
+
+        <!-- 5. UTILIDAD NETA (GANANCIA) -->
+        <Border Margin="6,0,0,0" Padding="12" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{Binding UtilidadNetaColor}" BorderThickness="2" CornerRadius="{DynamicResource AppCornerRadius}">
+            <StackPanel Spacing="4">
+                <TextBlock Text="Utilidad Neta (Ganancia)" FontSize="11" FontWeight="Bold" Foreground="{Binding UtilidadNetaColor}" />
+                <TextBlock Text="{Binding UtilidadNeta, StringFormat='${0:N2}'}" FontSize="18" FontWeight="Bold" Foreground="{Binding UtilidadNetaColor}" />
+            </StackPanel>
+        </Border>
+    </UniformGrid>
+</UserControl>
+

@@ -1,0 +1,172 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ticketfy.ViewModels"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             x:Class="Ticketfy.Views.Pos.PosHeaderBarView"
+             x:DataType="vm:PosHeaderViewModel">
+
+    <!-- ═══ HEADER STATUS BAR CONTAINER (ZERO EMOJIS - PURE VECTOR MATERIAL ICONS) ═══ -->
+    <Border Padding="12,8"
+            Background="{DynamicResource BgSecondaryBrush}"
+            BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
+        <Grid ColumnDefinitions="Auto, *, Auto">
+            
+            <!-- Cashier Info Capsule with MenuFlyout & Telemetry LEDs -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                <Button Background="{DynamicResource AccentPrimaryBrush}" Foreground="White" CornerRadius="20" Padding="12,5" Cursor="Hand">
+                    <Button.Flyout>
+                        <MenuFlyout Placement="BottomEdgeAlignedLeft">
+                            <MenuItem Header="Cambiar de Usuario" Command="{Binding SwitchCashierCommand}">
+                                <MenuItem.Icon>
+                                    <mi:MaterialIcon Kind="AccountSwitch" Width="16" Height="16"/>
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="Bloquear Terminal" Command="{Binding LockTerminalCommand}">
+                                <MenuItem.Icon>
+                                    <mi:MaterialIcon Kind="LockOutline" Width="16" Height="16"/>
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <Separator/>
+                            <MenuItem Header="Corte Parcial de Caja" Command="{Binding GenerateXReportCommand}">
+                                <MenuItem.Icon>
+                                    <mi:MaterialIcon Kind="FileChartOutline" Width="16" Height="16"/>
+                                </MenuItem.Icon>
+                            </MenuItem>
+                            <MenuItem Header="Corte Final de Turno" Command="{Binding GenerateZReportCommand}" Foreground="#EF4444">
+                                <MenuItem.Icon>
+                                    <mi:MaterialIcon Kind="CashRegister" Width="16" Height="16" Foreground="#EF4444"/>
+                                </MenuItem.Icon>
+                            </MenuItem>
+                        </MenuFlyout>
+                    </Button.Flyout>
+
+                    <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                        <mi:MaterialIcon Kind="AccountCircle" Width="20" Height="20"/>
+                        <TextBlock Text="{Binding ActiveCashierName, FallbackValue='Alexa S. (Caja 01)'}" FontWeight="Bold" FontSize="12" VerticalAlignment="Center"/>
+                        <mi:MaterialIcon Kind="ChevronDown" Width="16" Height="16"/>
+                    </StackPanel>
+                </Button>
+
+                <!-- Hardware Status LEDs -->
+                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                    <!-- Printer Status -->
+                    <StackPanel Orientation="Horizontal" Spacing="4" ToolTip.Tip="Impresora Térmica Conectada">
+                        <mi:MaterialIcon Kind="Printer" Width="16" Height="16" Foreground="{DynamicResource AccentSuccessBrush}"/>
+                        <TextBlock Text="Impresora" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- Scanner Status -->
+                    <StackPanel Orientation="Horizontal" Spacing="4" ToolTip.Tip="Lector de Código de Barras Conectado">
+                        <mi:MaterialIcon Kind="BarcodeScanner" Width="16" Height="16" Foreground="{DynamicResource AccentSuccessBrush}"/>
+                        <TextBlock Text="Lector" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- Database Security Status -->
+                    <StackPanel Orientation="Horizontal" Spacing="4" ToolTip.Tip="Cifrado SQLCipher 256-bit FTS5 Activo">
+                        <mi:MaterialIcon Kind="ShieldLock" Width="16" Height="16" Foreground="#10B981"/>
+                        <TextBlock Text="SQLCipher" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </StackPanel>
+            </StackPanel>
+
+            <TextBlock Grid.Column="1" Text="{Binding FeedbackMessage}" FontSize="11" FontWeight="Bold" Foreground="{Binding FeedbackColor}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="8,0" />
+
+            <!-- Top Action Buttons (Right) -->
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                <!-- EXPLICIT PAUSE ACTION BUTTON (F7) -->
+                <Button Command="{Binding ParkCurrentCartCommand}" 
+                        Background="#EFF6FF" Foreground="#2563EB" BorderBrush="#2563EB" BorderThickness="1"
+                        CornerRadius="6" Padding="10,6" Cursor="Hand"
+                        ToolTip.Tip="Pausar y guardar el ticket actual en la lista en espera">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <mi:MaterialIcon Kind="PauseCircle" Width="16" Height="16" Foreground="#2563EB"/>
+                        <TextBlock Text="Pausar" FontSize="11" FontWeight="Bold" Foreground="#2563EB" VerticalAlignment="Center"/>
+                    </StackPanel>
+                </Button>
+
+                <!-- Functional Parked Tickets Menu Trigger -->
+                <Button BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="6" Padding="10,6" Cursor="Hand">
+                    <Button.Flyout>
+                        <Flyout Placement="BottomEdgeAlignedRight">
+                            <Border Width="360" Background="White" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="14">
+                                <StackPanel Spacing="10">
+                                    <Grid ColumnDefinitions="*, Auto">
+                                        <TextBlock Text="Cuentas en Espera (Pausadas)" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                                        <TextBlock Text="{Binding ParkedTickets.Count, StringFormat='{}{0} cuenta(s)'}" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" Grid.Column="1"/>
+                                    </Grid>
+
+                                    <Separator Background="{DynamicResource BorderBrush}" Height="1"/>
+
+                                    <TextBlock Text="No hay ventas pausadas en espera" 
+                                               Foreground="{DynamicResource TextMutedBrush}" FontStyle="Italic" 
+                                               IsVisible="{Binding !HasParkedTickets}" 
+                                               HorizontalAlignment="Center" Margin="0,12"/>
+
+                                    <ItemsControl ItemsSource="{Binding ParkedTickets}" IsVisible="{Binding HasParkedTickets}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate DataType="vm:ParkedTicketModel">
+                                                <Border Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0,0,0,8">
+                                                    <Grid ColumnDefinitions="*, Auto, Auto">
+                                                        <StackPanel Grid.Column="0" Spacing="2">
+                                                            <TextBlock Text="{Binding TicketId}" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="13"/>
+                                                            <TextBlock Text="{Binding CustomerName}" FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                                            <TextBlock Text="{Binding TotalAmount, StringFormat='${0:N2}'}" FontSize="13" Foreground="{DynamicResource AccentPrimaryBrush}" FontWeight="ExtraBold" FontFamily="Consolas, monospace"/>
+                                                        </StackPanel>
+
+                                                        <Button Grid.Column="1" Content="Reanudar" 
+                                                                Command="{Binding $parent[ItemsControl].((vm:PosHeaderViewModel)DataContext).RestoreTicketCommand}" 
+                                                                CommandParameter="{Binding}" 
+                                                                Background="{DynamicResource AccentBrandSubtleBrush}" Foreground="{DynamicResource AccentPrimaryBrush}" BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="1" 
+                                                                CornerRadius="4" Padding="10,6" Margin="8,0,4,0"/>
+
+                                                        <Button Grid.Column="2" 
+                                                                Command="{Binding $parent[ItemsControl].((vm:PosHeaderViewModel)DataContext).DiscardParkedTicketCommand}" 
+                                                                CommandParameter="{Binding}" 
+                                                                Background="Transparent" BorderThickness="0" Padding="6">
+                                                            <mi:MaterialIcon Kind="TrashCanOutline" Width="18" Height="18" Foreground="#EF4444"/>
+                                                        </Button>
+                                                    </Grid>
+                                                </Border>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                </StackPanel>
+                            </Border>
+                        </Flyout>
+                    </Button.Flyout>
+
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <mi:MaterialIcon Kind="PauseCircleOutline" Width="16" Height="16" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                        <TextBlock Text="En Espera" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                        <Border Background="#F59E0B" CornerRadius="10" Padding="6,2" Margin="4,0,0,0">
+                            <TextBlock Text="{Binding ParkedTickets.Count, FallbackValue='0'}" Foreground="White" FontSize="10" FontWeight="Bold"/>
+                        </Border>
+                    </StackPanel>
+                </Button>
+
+                <!-- Gestor de Notas -->
+                <Button Command="{Binding OpenShiftNotesDialogCommand}" 
+                        BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="6" Padding="10,6" Cursor="Hand"
+                        ToolTip.Tip="Gestor de notas y avisos entre cajeros">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <mi:MaterialIcon Kind="NotebookOutline" Width="16" Height="16" Foreground="{DynamicResource TextPrimaryBrush}"/>
+                        <TextBlock Text="Notas" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                        <Border IsVisible="{Binding HasShiftNotes}" Background="#EF4444" CornerRadius="10" Padding="6,2" Margin="4,0,0,0">
+                            <TextBlock Text="{Binding ActiveShiftNotes.Count}" Foreground="White" FontSize="10" FontWeight="Bold"/>
+                        </Border>
+                    </StackPanel>
+                </Button>
+
+
+                <Button Command="{Binding ToggleFullscreenCommand}" Padding="8,6" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" ToolTip.Tip="Pantalla Completa">
+                    <mi:MaterialIcon Kind="Fullscreen" Width="16" Height="16" Foreground="{DynamicResource TextPrimaryBrush}" />
+                </Button>
+
+                <Button Command="{Binding LogoutCommand}" Padding="8,6" CornerRadius="{DynamicResource AppCornerRadius}" Background="Transparent" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" ToolTip.Tip="Salir del Sistema POS">
+                    <mi:MaterialIcon Kind="Logout" Width="16" Height="16" Foreground="#EF4444"/>
+                </Button>
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>
+
