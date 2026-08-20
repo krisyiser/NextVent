@@ -802,13 +802,13 @@ public partial class MainWindowViewModel : ObservableObject
                 "Registra gastos operativos (luz, renta, sueldos) y monitorea tu utilidad neta real.",
                 TargetName: "NavExpensesBtn", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Right),
             new("📋 Historial",
-                "Consulta todas las ventas anteriores, realiza devoluciones y genera cortes de caja X/Z.",
+                "Consulta todas las ventas anteriores, realiza devoluciones e historial de cortes.",
                 TargetName: "NavHistoryBtn", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Right),
             new("🏷️ Promociones",
                 "Crea descuentos automáticos, kits de productos y ofertas por tiempo limitado.",
                 TargetName: "NavPromotionsBtn", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Right),
             new("⚙️ Ajustes",
-                "Configura impresoras, usuarios, tema visual, telemetría y parámetros del sistema.",
+                "Configura impresoras, usuarios, tema visual y parámetros del sistema.",
                 TargetName: "NavSettingsBtn", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Right),
         };
     }
