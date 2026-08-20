@@ -6,7 +6,7 @@
              x:DataType="vm:SuppliersViewModel">
 
     <!-- Left Panel: Supplier Registry & Directory List -->
-    <Border Padding="16"
+    <Border x:Name="SuppliersDirectoryContainer" Padding="16"
             Background="{DynamicResource BgSecondaryBrush}"
             BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
         <DockPanel LastChildFill="True">

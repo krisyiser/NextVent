@@ -7,7 +7,7 @@
              x:DataType="vm:SuppliersViewModel">
     
     <Grid>
-        <Border Padding="16"
+        <Border x:Name="PurchaseHistoryContainer" Padding="16"
                 Background="{DynamicResource BgSecondaryBrush}"
                 BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
             <DockPanel LastChildFill="True">

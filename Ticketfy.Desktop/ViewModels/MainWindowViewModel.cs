@@ -876,9 +876,21 @@ public partial class MainWindowViewModel : ObservableObject
             },
             "Module.Suppliers" => new()
             {
-                new("🚚 Proveedores Registrados",
-                    "Lista de todos tus proveedores activos. Haz clic para ver su historial de pedidos.",
-                    TargetName: "SuppliersDataGridBorder", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Top),
+                new("📦 Nueva Orden de Compra",
+                    "Formulario completo para seleccionar proveedor, número de factura y reabastecer inventario.",
+                    TargetName: "PurchaseOrderForm", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Top),
+                new("➕ Agregar Producto",
+                    "Ingresa el producto, costo unitario y cantidad para añadirlo al borrador de la orden.",
+                    TargetName: "AddPurchaseItemRow", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
+                new("✅ Procesar Entrada",
+                    "Guarda la orden de compra y actualiza automáticamente el stock en tu catálogo de inventario.",
+                    TargetName: "ConfirmPurchaseBtn", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Top),
+                new("🚚 Directorio",
+                    "Registra y administra a tus proveedores, RFC, teléfonos y datos de contacto.",
+                    TargetName: "SuppliersDirectoryContainer", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Top),
+                new("📜 Historial",
+                    "Consulta todas las remisiones, órdenes de compra pasadas y tickets de entradas.",
+                    TargetName: "PurchaseHistoryContainer", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Top),
             },
             "Module.Expenses" => new()
             {
