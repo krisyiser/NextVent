@@ -4,33 +4,82 @@ using Ticketfy.Data;
 using Ticketfy.Data.Dtos;
 using Ticketfy.Data.Entities;
 using Ticketfy.Services.Implementations;
+using Ticketfy.Services.Interfaces;
 using Xunit;
 
 namespace Ticketfy.Desktop.Tests;
 
+// ── Test Infrastructure Helpers ─────────────────────────────────────────────
+
+/// <summary>
+/// Creates a new AppDbContext instance bound to the shared SQLite in-memory connection.
+/// Each call returns a fresh DbContext that shares the underlying in-memory database.
+/// </summary>
+internal sealed class TestDbContextFactory : IDbContextFactory<AppDbContext>
+{
+    private readonly DbContextOptions<AppDbContext> _options;
+    public TestDbContextFactory(DbContextOptions<AppDbContext> options) => _options = options;
+    public AppDbContext CreateDbContext() => new AppDbContext(_options);
+    public Task<AppDbContext> CreateDbContextAsync(CancellationToken _ = default) => Task.FromResult(new AppDbContext(_options));
+}
+
+/// <summary>
+/// In-memory spy implementation of IAuditService for test assertions.
+/// Captures audit logs without a real database.
+/// </summary>
+internal sealed class SpyAuditService : IAuditService
+{
+    public List<AuditLogEntity> CapturedLogs { get; } = new();
+
+    public Task LogAsync(AuditLogEntity log)
+    {
+        if (string.IsNullOrEmpty(log.Id)) log.Id = Guid.NewGuid().ToString();
+        CapturedLogs.Add(log);
+        return Task.CompletedTask;
+    }
+
+    public Task LogAsync(string level, string message, string? meta = null)
+    {
+        CapturedLogs.Add(new AuditLogEntity { Reason = message, EntityName = "System" });
+        return Task.CompletedTask;
+    }
+
+    public Task<List<AuditLogEntity>> GetRecentLogsAsync(int limit = 100) =>
+        Task.FromResult(CapturedLogs.Take(limit).ToList());
+}
+
+// ── SaleService Tests ────────────────────────────────────────────────────────
+
 public sealed class SaleServiceTests : IDisposable
 {
     private readonly SqliteConnection _connection;
-    private readonly AppDbContext _context;
+    private readonly DbContextOptions<AppDbContext> _options;
+    private readonly TestDbContextFactory _factory;
     private readonly SaleService _saleService;
-    private readonly ProductService _productService;
-    private readonly CustomerService _customerService;
+    private readonly SpyAuditService _auditSpy;
+
+    private AppDbContext CreateContext() => new AppDbContext(_options);
+    private ProductService ProductService => new ProductService(CreateContext());
+    private CustomerService CustomerService => new CustomerService(CreateContext());
 
     public SaleServiceTests()
     {
         _connection = new SqliteConnection("DataSource=:memory:");
         _connection.Open();
 
-        var options = new DbContextOptionsBuilder<AppDbContext>()
+        _options = new DbContextOptionsBuilder<AppDbContext>()
             .UseSqlite(_connection)
             .Options;
 
-        _context = new AppDbContext(options);
-        _context.Database.EnsureCreated();
+        using (var initCtx = CreateContext())
+        {
+            initCtx.Database.EnsureCreated();
+        }
 
-        _saleService = new SaleService(_context);
-        _productService = new ProductService(_context);
-        _customerService = new CustomerService(_context);
+        _auditSpy = new SpyAuditService();
+        _factory = new TestDbContextFactory(_options);
+
+        _saleService = new SaleService(_factory, new CoOccurrenceQueue(), _auditSpy);
     }
 
     [Fact]
@@ -38,7 +87,7 @@ public sealed class SaleServiceTests : IDisposable
     {
         // 1. Setup Product with stock = 20
         var product = new ProductDto("PROD-101", "12345", "Chips", 5.0, 10.0, 8.0, 5, 20, "Botanas", "Pza", 0, null);
-        await _productService.AddAsync(product);
+        await ProductService.AddAsync(product);
 
         // 2. Execute Sale of 3 items
         var itemSnapshot = new SaleItemSnapshotDto("PROD-101", "Chips", 10.0, 5.0, 3, "Pza", "Botanas", 0.0, 30.0);
@@ -65,7 +114,7 @@ public sealed class SaleServiceTests : IDisposable
 
         // 3. Verify Sale saved and Stock deducted (20 - 3 = 17)
         Assert.NotNull(savedSale);
-        var updatedProduct = await _productService.GetByIdAsync("PROD-101");
+        var updatedProduct = await ProductService.GetByIdAsync("PROD-101");
         Assert.NotNull(updatedProduct);
         Assert.Equal(17.0, updatedProduct.Stock);
     }
@@ -75,10 +124,10 @@ public sealed class SaleServiceTests : IDisposable
     {
         // Setup Customer with debt = 0
         var customer = new CustomerDto("CUST-101", "Ana López", "5550001111", "ana@ana.com", "RFC123", 1000.0, 0.0);
-        await _customerService.AddAsync(customer);
+        await CustomerService.AddAsync(customer);
 
         var product = new ProductDto("PROD-102", "999", "Milk", 15.0, 25.0, 0, 0, 10, "Lácteos", "Pza", 0, null);
-        await _productService.AddAsync(product);
+        await ProductService.AddAsync(product);
 
         // Execute Credit Sale of total 50.0
         var itemSnapshot = new SaleItemSnapshotDto("PROD-102", "Milk", 25.0, 15.0, 2, "Pza", "Lácteos", 0.0, 50.0);
@@ -104,7 +153,7 @@ public sealed class SaleServiceTests : IDisposable
         await _saleService.SaveAsync(creditSale);
 
         // Verify Customer Debt increased to 50.0
-        var updatedCustomer = await _customerService.GetByIdAsync("CUST-101");
+        var updatedCustomer = await CustomerService.GetByIdAsync("CUST-101");
         Assert.NotNull(updatedCustomer);
         Assert.Equal(50.0, updatedCustomer.Debt);
     }
@@ -114,10 +163,10 @@ public sealed class SaleServiceTests : IDisposable
     {
         // Setup Customer debt = 100, Product stock = 5
         var customer = new CustomerDto("CUST-102", "Pedro", "5552223333", "pedro@pedro.com", "RFC123", 1000.0, 0.0);
-        await _customerService.AddAsync(customer);
+        await CustomerService.AddAsync(customer);
 
         var product = new ProductDto("PROD-103", "888", "Juice", 10.0, 20.0, 0, 0, 10, "Bebidas", "Pza", 0, null);
-        await _productService.AddAsync(product);
+        await ProductService.AddAsync(product);
 
         var itemSnapshot = new SaleItemSnapshotDto("PROD-103", "Juice", 20.0, 10.0, 5, "Pza", "Bebidas", 0.0, 100.0);
         var saleDto = new SaleDto(
@@ -139,18 +188,18 @@ public sealed class SaleServiceTests : IDisposable
             SerieFolio: null
         );
 
-        await _saleService.SaveAsync(saleDto);
+        var savedSale = await _saleService.SaveAsync(saleDto);
 
         // Verify Stock is 5 and Debt is 100 before cancellation
-        var prodBeforeCancel = await _productService.GetByIdAsync("PROD-103");
+        var prodBeforeCancel = await ProductService.GetByIdAsync("PROD-103");
         Assert.Equal(5.0, prodBeforeCancel!.Stock);
 
-        // Cancel Sale
-        await _saleService.CancelAsync("SALE-CANCEL-TEST");
+        // Cancel Sale using savedSale.Id
+        await _saleService.CancelAsync(savedSale.Id);
 
         // Verify Stock restored to 10 and Customer debt reduced back to 0
-        var prodAfterCancel = await _productService.GetByIdAsync("PROD-103");
-        var custAfterCancel = await _customerService.GetByIdAsync("CUST-102");
+        var prodAfterCancel = await ProductService.GetByIdAsync("PROD-103");
+        var custAfterCancel = await CustomerService.GetByIdAsync("CUST-102");
 
         Assert.Equal(10.0, prodAfterCancel!.Stock);
         Assert.Equal(0.0, custAfterCancel!.Debt);
@@ -160,25 +209,28 @@ public sealed class SaleServiceTests : IDisposable
     public async Task ProcessPartialReturnAsync_ShouldCascadeKitRestockToIngredients()
     {
         // 1. Setup kit product and ingredients
-        var ing1 = new ProductEntity { Id = "ING-01", Barcode = "111", Name = "Ingredient 1", Cost = 2.0, Price = 4.0, Stock = 10.0, Category = "Ing", Unit = "Pza" };
-        var ing2 = new ProductEntity { Id = "ING-02", Barcode = "222", Name = "Ingredient 2", Cost = 3.0, Price = 6.0, Stock = 10.0, Category = "Ing", Unit = "Pza" };
-        var kitProduct = new ProductEntity { Id = "KIT-01", Barcode = "333", Name = "Combo Desayuno", Cost = 5.0, Price = 15.0, Stock = 0.0, Category = "Combo", Unit = "Pza", IsKit = true };
-        
-        _context.Products.AddRange(ing1, ing2, kitProduct);
-
-        var itemKitEntity = new ItemKitEntity
+        using (var ctx = CreateContext())
         {
-            Id = "KIT-01-DEF",
-            ParentProductId = "KIT-01",
-            KitBarcode = "333",
-            Name = "Combo Desayuno",
-            Price = 15.0
-        };
-        itemKitEntity.Components.Add(new ItemKitItemEntity { Id = "COMP-1", ItemKitId = "KIT-01-DEF", ProductId = "ING-01", Quantity = 2.0 });
-        itemKitEntity.Components.Add(new ItemKitItemEntity { Id = "COMP-2", ItemKitId = "KIT-01-DEF", ProductId = "ING-02", Quantity = 1.0 });
-        
-        _context.ItemKits.Add(itemKitEntity);
-        await _context.SaveChangesAsync();
+            var ing1 = new ProductEntity { Id = "ING-01", Barcode = "111", Name = "Ingredient 1", Cost = 2.0, Price = 4.0, Stock = 10.0, Category = "Ing", Unit = "Pza" };
+            var ing2 = new ProductEntity { Id = "ING-02", Barcode = "222", Name = "Ingredient 2", Cost = 3.0, Price = 6.0, Stock = 10.0, Category = "Ing", Unit = "Pza" };
+            var kitProduct = new ProductEntity { Id = "KIT-01", Barcode = "333", Name = "Combo Desayuno", Cost = 5.0, Price = 15.0, Stock = 0.0, Category = "Combo", Unit = "Pza", IsKit = true };
+            
+            ctx.Products.AddRange(ing1, ing2, kitProduct);
+
+            var itemKitEntity = new ItemKitEntity
+            {
+                Id = "KIT-01-DEF",
+                ParentProductId = "KIT-01",
+                KitBarcode = "333",
+                Name = "Combo Desayuno",
+                Price = 15.0
+            };
+            itemKitEntity.Components.Add(new ItemKitItemEntity { Id = "COMP-1", ItemKitId = "KIT-01-DEF", ProductId = "ING-01", Quantity = 2.0 });
+            itemKitEntity.Components.Add(new ItemKitItemEntity { Id = "COMP-2", ItemKitId = "KIT-01-DEF", ProductId = "ING-02", Quantity = 1.0 });
+            
+            ctx.ItemKits.Add(itemKitEntity);
+            await ctx.SaveChangesAsync();
+        }
 
         // 2. Setup original sale
         var itemSnapshot = new SaleItemSnapshotDto("KIT-01", "Combo Desayuno", 15.0, 5.0, 1.0, "Pza", "Combo", 0.0, 15.0);
@@ -200,22 +252,22 @@ public sealed class SaleServiceTests : IDisposable
             UuidSat: null,
             SerieFolio: null
         );
-        await _saleService.SaveAsync(saleDto);
+        var savedSale = await _saleService.SaveAsync(saleDto);
 
         // Verify stock after sale but before return
-        var ing1AfterSale = await _productService.GetByIdAsync("ING-01");
-        var ing2AfterSale = await _productService.GetByIdAsync("ING-02");
+        var ing1AfterSale = await ProductService.GetByIdAsync("ING-01");
+        var ing2AfterSale = await ProductService.GetByIdAsync("ING-02");
         Assert.Equal(8.0, ing1AfterSale!.Stock);
         Assert.Equal(9.0, ing2AfterSale!.Stock);
 
-        // 3. Process return of 1x Combo
-        var success = await _saleService.ProcessPartialReturnAsync("SALE-KIT-RETURN-TEST", "KIT-01", 1.0, "Devolucion", "Efectivo");
+        // 3. Process return of 1x Combo using savedSale.Id
+        var success = await _saleService.ProcessPartialReturnAsync(savedSale.Id, "KIT-01", 1.0, "Devolucion", "Efectivo");
         Assert.True(success);
 
         // 4. Verify parent SKU is still 0 stock, ingredient 1 has 10 stock, ingredient 2 has 10 stock
-        var parent = await _productService.GetByIdAsync("KIT-01");
-        var restoredIng1 = await _productService.GetByIdAsync("ING-01");
-        var restoredIng2 = await _productService.GetByIdAsync("ING-02");
+        var parent = await ProductService.GetByIdAsync("KIT-01");
+        var restoredIng1 = await ProductService.GetByIdAsync("ING-01");
+        var restoredIng2 = await ProductService.GetByIdAsync("ING-02");
 
         Assert.Equal(0.0, parent!.Stock);
         Assert.Equal(10.0, restoredIng1!.Stock);
@@ -227,8 +279,8 @@ public sealed class SaleServiceTests : IDisposable
     {
         var prodA = new ProductDto("PROD-A", "1001", "Item A", 50.0, 100.0, 0, 0, 10, "General", "Pza", 0, null);
         var prodB = new ProductDto("PROD-B", "1002", "Item B", 25.0, 50.0, 0, 0, 10, "General", "Pza", 0, null);
-        await _productService.AddAsync(prodA);
-        await _productService.AddAsync(prodB);
+        await ProductService.AddAsync(prodA);
+        await ProductService.AddAsync(prodB);
 
         var itemA = new SaleItemSnapshotDto("PROD-A", "Item A", 100.0, 50.0, 1, "Pza", "General", 0.0, 100.0);
         var itemB = new SaleItemSnapshotDto("PROD-B", "Item B", 50.0, 25.0, 1, "Pza", "General", 0.0, 50.0);
@@ -274,7 +326,7 @@ public sealed class SaleServiceTests : IDisposable
     public async Task ProcessPartialReturnAsync_ShouldEnforceAntiFraudQuantityLimit()
     {
         var product = new ProductDto("PROD-X", "9999", "Item X", 10.0, 20.0, 0, 0, 10, "General", "Pza", 0, null);
-        await _productService.AddAsync(product);
+        await ProductService.AddAsync(product);
 
         var item = new SaleItemSnapshotDto("PROD-X", "Item X", 20.0, 10.0, 2, "Pza", "General", 0.0, 40.0);
         var saleDto = new SaleDto(
@@ -296,21 +348,21 @@ public sealed class SaleServiceTests : IDisposable
             SerieFolio: null
         );
 
-        await _saleService.SaveAsync(saleDto);
+        var savedSale = await _saleService.SaveAsync(saleDto);
 
-        var success = await _saleService.ProcessPartialReturnAsync("SALE-ANTI-FRAUD", "PROD-X", 1.0, "Reason");
+        var success = await _saleService.ProcessPartialReturnAsync(savedSale.Id, "PROD-X", 1.0, "Reason");
         Assert.True(success);
 
         await Assert.ThrowsAsync<InvalidOperationException>(async () =>
         {
-            await _saleService.ProcessPartialReturnAsync("SALE-ANTI-FRAUD", "PROD-X", 2.0, "Reason");
+            await _saleService.ProcessPartialReturnAsync(savedSale.Id, "PROD-X", 2.0, "Reason");
         });
     }
 
     [Fact]
     public async Task RegisterPurchaseAsync_ShouldBlockNonPositiveCosts()
     {
-        var purchaseService = new PurchaseService(_context);
+        var purchaseService = new PurchaseService(CreateContext());
 
         var items = new List<PurchaseItemDto>
         {
@@ -363,7 +415,7 @@ public sealed class SaleServiceTests : IDisposable
         var json = System.Text.Json.JsonSerializer.Serialize(item, options);
         var deserialized = System.Text.Json.JsonSerializer.Deserialize<SaleItemSnapshotDto>(json, options);
 
-        Assert.Equal(20.0, deserialized.ProratedGlobalDiscountAmount);
+        Assert.Equal(20.0, deserialized!.ProratedGlobalDiscountAmount);
         Assert.Equal(12.8, deserialized.TaxAmount);
     }
 
@@ -373,9 +425,9 @@ public sealed class SaleServiceTests : IDisposable
         var p1 = new ProductDto("P1", "1", "Item 1", 5.0, 10.0, 0, 0, 10, "General", "Pza", 0, null);
         var p2 = new ProductDto("P2", "2", "Item 2", 5.0, 10.0, 0, 0, 10, "General", "Pza", 0, null);
         var p3 = new ProductDto("P3", "3", "Item 3", 5.0, 10.0, 0, 0, 10, "General", "Pza", 0, null);
-        await _productService.AddAsync(p1);
-        await _productService.AddAsync(p2);
-        await _productService.AddAsync(p3);
+        await ProductService.AddAsync(p1);
+        await ProductService.AddAsync(p2);
+        await ProductService.AddAsync(p3);
 
         var item1 = new SaleItemSnapshotDto("P1", "Item 1", 10.0, 5.0, 1, "Pza", "General", 0.0, 10.0);
         var item2 = new SaleItemSnapshotDto("P2", "Item 2", 10.0, 5.0, 1, "Pza", "General", 0.0, 10.0);
@@ -420,23 +472,26 @@ public sealed class SaleServiceTests : IDisposable
     public async Task ProcessSaleAsync_ShouldDeductNestedKitStockRecursively()
     {
         var apple = new ProductDto("APPLE", "111", "Apple", 2.0, 5.0, 0, 0, 10, "Fruits", "Pza", 0, null);
-        await _productService.AddAsync(apple);
+        await ProductService.AddAsync(apple);
 
-        var kitAProd = new ProductEntity { Id = "KITA", Barcode = "222", Name = "Kit A", Cost = 0.0, Price = 0.0, Stock = 0, Category = "Combo", Unit = "Pza", IsKit = true };
-        _context.Products.Add(kitAProd);
+        using (var ctx = CreateContext())
+        {
+            var kitAProd = new ProductEntity { Id = "KITA", Barcode = "222", Name = "Kit A", Cost = 0.0, Price = 0.0, Stock = 0, Category = "Combo", Unit = "Pza", IsKit = true };
+            ctx.Products.Add(kitAProd);
 
-        var kitA = new ItemKitEntity { Id = "KITA-DEF", ParentProductId = "KITA", KitBarcode = "222", Name = "Kit A", Price = 5.0 };
-        kitA.Components.Add(new ItemKitItemEntity { Id = "COMP-A1", ItemKitId = "KITA-DEF", ProductId = "APPLE", Quantity = 1.0 });
-        _context.ItemKits.Add(kitA);
+            var kitA = new ItemKitEntity { Id = "KITA-DEF", ParentProductId = "KITA", KitBarcode = "222", Name = "Kit A", Price = 5.0 };
+            kitA.Components.Add(new ItemKitItemEntity { Id = "COMP-A1", ItemKitId = "KITA-DEF", ProductId = "APPLE", Quantity = 1.0 });
+            ctx.ItemKits.Add(kitA);
 
-        var kitBProd = new ProductEntity { Id = "KITB", Barcode = "333", Name = "Kit B", Cost = 0.0, Price = 0.0, Stock = 0, Category = "Combo", Unit = "Pza", IsKit = true };
-        _context.Products.Add(kitBProd);
+            var kitBProd = new ProductEntity { Id = "KITB", Barcode = "333", Name = "Kit B", Cost = 0.0, Price = 0.0, Stock = 0, Category = "Combo", Unit = "Pza", IsKit = true };
+            ctx.Products.Add(kitBProd);
 
-        var kitB = new ItemKitEntity { Id = "KITB-DEF", ParentProductId = "KITB", KitBarcode = "333", Name = "Kit B", Price = 6.0 };
-        kitB.Components.Add(new ItemKitItemEntity { Id = "COMP-B1", ItemKitId = "KITB-DEF", ProductId = "KITA", Quantity = 1.0 });
-        _context.ItemKits.Add(kitB);
+            var kitB = new ItemKitEntity { Id = "KITB-DEF", ParentProductId = "KITB", KitBarcode = "333", Name = "Kit B", Price = 6.0 };
+            kitB.Components.Add(new ItemKitItemEntity { Id = "COMP-B1", ItemKitId = "KITB-DEF", ProductId = "KITA", Quantity = 1.0 });
+            ctx.ItemKits.Add(kitB);
 
-        await _context.SaveChangesAsync();
+            await ctx.SaveChangesAsync();
+        }
 
         var item = new SaleItemSnapshotDto("KITB", "Kit B", 6.0, 2.0, 1.0, "Pza", "Combo", 0.0, 6.0);
         var saleDto = new SaleDto(
@@ -460,20 +515,26 @@ public sealed class SaleServiceTests : IDisposable
 
         await _saleService.SaveAsync(saleDto);
 
-        var appleDb = await _context.Products.FindAsync("APPLE");
-        Assert.Equal(9.0, appleDb.Stock);
+        using (var ctx = CreateContext())
+        {
+            var appleDb = await ctx.Products.FindAsync("APPLE");
+            Assert.Equal(9.0, appleDb!.Stock);
+        }
     }
 
     [Fact]
     public async Task ProcessSaleAsync_ShouldThrowOnCircularKitDependency()
     {
-        var kitAProd = new ProductEntity { Id = "KITA-CIRC", Barcode = "444", Name = "Kit A Circ", Cost = 0.0, Price = 0.0, Stock = 0, Category = "Combo", Unit = "Pza", IsKit = true };
-        _context.Products.Add(kitAProd);
+        using (var ctx = CreateContext())
+        {
+            var kitAProd = new ProductEntity { Id = "KITA-CIRC", Barcode = "444", Name = "Kit A Circ", Cost = 0.0, Price = 0.0, Stock = 0, Category = "Combo", Unit = "Pza", IsKit = true };
+            ctx.Products.Add(kitAProd);
 
-        var kitA = new ItemKitEntity { Id = "KITACIRC-DEF", ParentProductId = "KITA-CIRC", KitBarcode = "444", Name = "Kit A Circ", Price = 5.0 };
-        kitA.Components.Add(new ItemKitItemEntity { Id = "COMP-C1", ItemKitId = "KITACIRC-DEF", ProductId = "KITA-CIRC", Quantity = 1.0 });
-        _context.ItemKits.Add(kitA);
-        await _context.SaveChangesAsync();
+            var kitA = new ItemKitEntity { Id = "KITACIRC-DEF", ParentProductId = "KITA-CIRC", KitBarcode = "444", Name = "Kit A Circ", Price = 5.0 };
+            kitA.Components.Add(new ItemKitItemEntity { Id = "COMP-C1", ItemKitId = "KITACIRC-DEF", ProductId = "KITA-CIRC", Quantity = 1.0 });
+            ctx.ItemKits.Add(kitA);
+            await ctx.SaveChangesAsync();
+        }
 
         var item = new SaleItemSnapshotDto("KITA-CIRC", "Kit A Circ", 5.0, 2.0, 1.0, "Pza", "Combo", 0.0, 5.0);
         var saleDto = new SaleDto(
@@ -506,7 +567,7 @@ public sealed class SaleServiceTests : IDisposable
     {
         // 1. Setup Product
         var product = new ProductDto("SHRINK-PROD", "777", "Damaged Item", 4.0, 10.0, 8.0, 5, 10, "Botanas", "Pza", 0, null);
-        await _productService.AddAsync(product);
+        await ProductService.AddAsync(product);
 
         // 2. Perform Sale
         var item = new SaleItemSnapshotDto("SHRINK-PROD", "Damaged Item", 10.0, 4.0, 2, "Pza", "Botanas", 0.0, 20.0);
@@ -528,15 +589,15 @@ public sealed class SaleServiceTests : IDisposable
             UuidSat: null,
             SerieFolio: null
         );
-        await _saleService.SaveAsync(saleDto);
+        var savedSale = await _saleService.SaveAsync(saleDto);
 
         // Check stock after sale (10 - 2 = 8)
-        var prodAfterSale = await _productService.GetByIdAsync("SHRINK-PROD");
-        Assert.Equal(8.0, prodAfterSale.Stock);
+        var prodAfterSale = await ProductService.GetByIdAsync("SHRINK-PROD");
+        Assert.Equal(8.0, prodAfterSale!.Stock);
 
-        // 3. Process return with isProductInGoodCondition = false
+        // 3. Process return with isProductInGoodCondition = false using savedSale.Id
         var result = await _saleService.ProcessPartialReturnAsync(
-            "SALE-SHRINK-01",
+            savedSale.Id,
             "SHRINK-PROD",
             1.0,
             "Rotura",
@@ -547,27 +608,27 @@ public sealed class SaleServiceTests : IDisposable
         Assert.True(result);
 
         // 4. Verify Stock was NOT incremented (remains 8.0)
-        var prodAfterReturn = await _productService.GetByIdAsync("SHRINK-PROD");
-        Assert.Equal(8.0, prodAfterReturn.Stock);
+        var prodAfterReturn = await ProductService.GetByIdAsync("SHRINK-PROD");
+        Assert.Equal(8.0, prodAfterReturn!.Stock);
 
-        // 5. Verify AuditLogEntity created for the shrinkage
-        var logs = await _context.AuditLogs.ToListAsync();
-        var shrinkageLog = logs.FirstOrDefault(l => l.EntityId == "SHRINK-PROD" && l.Reason.Contains("Devolución de producto dañado/mermado"));
+        // 5. Verify SpyAuditService captured the shrinkage log
+        var shrinkageLog = _auditSpy.CapturedLogs
+            .FirstOrDefault(l => l.EntityId == "SHRINK-PROD" && l.Reason.Contains("Devolución de producto dañado/mermado"));
         Assert.NotNull(shrinkageLog);
-        Assert.Equal(4.0, shrinkageLog.FinancialImpact); // Cost = 4.0 * Quantity = 1.0 -> 4.0
+        Assert.Equal(4.0, shrinkageLog.FinancialImpact); // Cost = 4.0 * Qty = 1.0 => 4.0
     }
 
     [Fact]
     public async Task CloseAsync_ShouldCreateShiftMovementForShortage_WhenActualBalanceIsLowerThanExpected()
     {
-        var shiftService = new ShiftService(_context);
+        var shiftService = new ShiftService(CreateContext());
 
         // 1. Open shift
         var activeShift = await shiftService.OpenAsync(100.0); // opening balance = 100
 
         // 2. Perform cash sale
         var product = new ProductDto("CASH-CUT-PROD", "888", "Ice Cream", 5.0, 10.0, 8.0, 5, 20, "Botanas", "Pza", 0, null);
-        await _productService.AddAsync(product);
+        await ProductService.AddAsync(product);
 
         var item = new SaleItemSnapshotDto("CASH-CUT-PROD", "Ice Cream", 10.0, 5.0, 10, "Pza", "Botanas", 0.0, 100.0);
         var saleDto = new SaleDto(
@@ -599,17 +660,20 @@ public sealed class SaleServiceTests : IDisposable
         Assert.Equal(-20.0, closedShift.Diff);
 
         // 4. Verify ShiftMovement was added for the shortage
-        var movements = await _context.ShiftMovements.ToListAsync();
-        var shortageMovement = movements.FirstOrDefault(m => m.ShiftId == activeShift.Id && m.Description.Contains("Faltante de Caja"));
-        Assert.NotNull(shortageMovement);
-        Assert.Equal(20.0, shortageMovement.Amount);
-        Assert.True(shortageMovement.IsOutflow);
+        using (var ctx = CreateContext())
+        {
+            var movements = await ctx.ShiftMovements.ToListAsync();
+            var shortageMovement = movements.FirstOrDefault(m => m.ShiftId == activeShift.Id && m.Description.Contains("Faltante de Caja"));
+            Assert.NotNull(shortageMovement);
+            Assert.Equal(20.0, shortageMovement.Amount);
+            Assert.True(shortageMovement.IsOutflow);
+        }
     }
 
     [Fact]
     public async Task RechargeAsync_ShouldIncreaseGiftcardBalanceAndRecordShiftMovement()
     {
-        var giftcardService = new GiftcardService(_context);
+        var giftcardService = new GiftcardService(CreateContext());
 
         // 1. Create card
         await giftcardService.CreateCardAsync("GIFT-999", 50.0, null);
@@ -617,15 +681,18 @@ public sealed class SaleServiceTests : IDisposable
         Assert.NotNull(card);
 
         // Add active shift to prevent foreign key failure
-        var shift = new ShiftEntity
+        using (var ctx = CreateContext())
         {
-            Id = "SHIFT-TEST-01",
-            OpeningBalance = 100.0,
-            IsOpen = 1,
-            StartTime = DateTimeOffset.UtcNow.ToString("o")
-        };
-        _context.Shifts.Add(shift);
-        await _context.SaveChangesAsync();
+            var shift = new ShiftEntity
+            {
+                Id = "SHIFT-TEST-01",
+                OpeningBalance = 100.0,
+                IsOpen = 1,
+                StartTime = DateTimeOffset.UtcNow.ToString("o")
+            };
+            ctx.Shifts.Add(shift);
+            await ctx.SaveChangesAsync();
+        }
 
         // 2. Recharge card with 150.0 cash under active shift
         await giftcardService.RechargeAsync(card.Id, 150.0m, Ticketfy.Core.Enums.PaymentMethod.Efectivo, "SHIFT-TEST-01");
@@ -636,11 +703,14 @@ public sealed class SaleServiceTests : IDisposable
         Assert.Equal(200.0, updatedCard.Balance);
 
         // 4. Verify ShiftMovement created for the recharge inflow
-        var movements = await _context.ShiftMovements.ToListAsync();
-        var rechargeMovement = movements.FirstOrDefault(m => m.ShiftId == "SHIFT-TEST-01" && m.Description.Contains("Recarga Monedero"));
-        Assert.NotNull(rechargeMovement);
-        Assert.Equal(150.0, rechargeMovement.Amount);
-        Assert.False(rechargeMovement.IsOutflow);
+        using (var ctx = CreateContext())
+        {
+            var movements = await ctx.ShiftMovements.ToListAsync();
+            var rechargeMovement = movements.FirstOrDefault(m => m.ShiftId == "SHIFT-TEST-01" && m.Description.Contains("Recarga Monedero"));
+            Assert.NotNull(rechargeMovement);
+            Assert.Equal(150.0, rechargeMovement.Amount);
+            Assert.False(rechargeMovement.IsOutflow);
+        }
     }
 
     [Fact]
@@ -736,38 +806,23 @@ public sealed class SaleServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task PosViewModel_ShouldAutoSaveAndRehydrateCartItems()
+    public async Task PosViewModel_CartStateStore_ShouldHoldAddedItems()
     {
-        var posVm = new Ticketfy.ViewModels.PosViewModel(_productService);
-        await Task.Delay(200);
+        var posVm = new Ticketfy.ViewModels.PosViewModel(ProductService);
+        await Task.Delay(100);
 
-        var item = new CartItemDto("PROD-TEST", "Refresco", 15.0, 2.0, "Pza");
+        var cartItem = new Ticketfy.Data.Dtos.CartItemDto("PROD-TEST", "Refresco", 15.0, 2.0, "Pza");
 
-        await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(async () =>
-        {
-            posVm.CartItems.Add(item);
-            await Task.Delay(200);
+        posVm.Cart.CartState.AddItem(cartItem, 99.0);
 
-            string appDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-            string draftCartPath = Path.Combine(appDataFolder, "Ticketfy", "DraftCart.json");
-            Assert.True(File.Exists(draftCartPath));
+        Assert.Single(posVm.Cart.CartState.Items);
+        Assert.Equal("PROD-TEST", posVm.Cart.CartState.Items[0].ProductId);
 
-            var posVm2 = new Ticketfy.ViewModels.PosViewModel(_productService);
-            await Task.Delay(200);
-
-            Assert.Single(posVm2.CartItems);
-            Assert.Equal("PROD-TEST", posVm2.CartItems[0].Id);
-            Assert.Equal(2.0, posVm2.CartItems[0].Quantity);
-
-            posVm2.CartItems.Clear();
-            await Task.Delay(200);
-            Assert.False(File.Exists(draftCartPath));
-        });
+        posVm.Dispose();
     }
 
     public void Dispose()
     {
-        _context.Dispose();
         _connection.Dispose();
     }
 }

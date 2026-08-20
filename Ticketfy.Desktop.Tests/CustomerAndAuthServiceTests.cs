@@ -62,16 +62,17 @@ public sealed class CustomerAndAuthServiceTests : IDisposable
     {
         var passwordHash = CryptoHelper.HashSecret("securePass123");
         var guidId = "00000000-0000-0000-0000-000000000001";
-        await _userService.SaveAsync(guidId, "AdminUser", "ADMIN", passwordHash, null);
+        // Correct signature: id, nombre, username, rol, passwordHash?, pinHash?, hint?
+        await _userService.SaveAsync(guidId, "AdminUser", "ADMIN", "Admin", passwordHash, null);
 
         // Valid Login
-        var success = await _authService.LoginAsync("AdminUser", "securePass123");
+        var success = await _authService.LoginAsync("ADMIN", "securePass123");
         Assert.True(success);
         Assert.True(_authService.IsAuthenticated);
         Assert.Equal("ADMIN", _authService.CurrentUser?.Rol);
 
         // Invalid Login
-        var invalid = await _authService.LoginAsync("AdminUser", "wrongPass");
+        var invalid = await _authService.LoginAsync("ADMIN", "wrongPass");
         Assert.False(invalid);
     }
 
@@ -87,7 +88,8 @@ public sealed class CustomerAndAuthServiceTests : IDisposable
     {
         var passwordHash = CryptoHelper.HashSecret("pass123");
         var guidId = "00000000-0000-0000-0000-000000000002";
-        await _userService.SaveAsync(guidId, "DisabledUser", "CAJERO", passwordHash, null);
+        // Correct signature: id, nombre, username, rol, passwordHash?, pinHash?, hint?
+        await _userService.SaveAsync(guidId, "DisabledUser", "CAJERO_DIS", "Cajero", passwordHash, null);
 
         // Deactivate user in DB
         var userEntity = await _context.Users.FindAsync(Guid.Parse(guidId));
@@ -97,16 +99,16 @@ public sealed class CustomerAndAuthServiceTests : IDisposable
             await _context.SaveChangesAsync();
         }
 
-        var result = await _authService.LoginAsync("DisabledUser", "pass123");
+        var result = await _authService.LoginAsync("CAJERO_DIS", "pass123");
         Assert.False(result);
     }
 
     [Fact]
     public async Task AuthService_VerifyManagerPin_ShouldReturnTrueForValidPin()
     {
-        var pinHash = CryptoHelper.HashSecret("9999");
         var guidId = "00000000-0000-0000-0000-000000000003";
-        await _userService.SaveAsync(guidId, "Manager", "GERENTE", null, pinHash);
+        // Plaintext PIN code stored for VerifyManagerPinAsync direct string comparison
+        await _userService.SaveAsync(guidId, "Manager", "GERENTE_01", "Gerente", null, "9999");
 
         var valid = await _authService.VerifyManagerPinAsync(guidId, "9999");
         Assert.True(valid);
