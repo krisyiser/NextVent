@@ -870,9 +870,12 @@ public partial class MainWindowViewModel : ObservableObject
             },
             "Module.History" => new()
             {
-                new("📅 Tabla de Ventas",
-                    "Consulta el historial de todas las ventas. Puedes filtrar por fecha, cajero o método de pago.",
-                    TargetName: "HistoryDataGridBorder", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Top),
+                new("📊 Área de Ventas y Rendimiento",
+                    "Monitorea las ventas totales acumuladas, el rendimiento individual de cajeros y las horas pico de tráfico.",
+                    TargetName: "HistorySalesAreaSection", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Top),
+                new("📋 Registros",
+                    "Consulta la bitácora completa de transacciones pasadas, reimprime tickets y revisa cortes de caja.",
+                    TargetName: "HistoryRecordsSection", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Top),
             },
             "Module.Suppliers" => new()
             {

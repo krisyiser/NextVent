@@ -60,7 +60,7 @@
                     </StackPanel>
                 </TabItem.Header>
                 <!-- Panel: Ventas y Rendimiento -->
-                <Grid RowDefinitions="Auto,Auto,*" Margin="0,16,0,0">
+                <Grid x:Name="HistorySalesAreaSection" RowDefinitions="Auto,Auto,*" Margin="0,16,0,0">
                     <!-- ═══ 2. HOURLY SALES & PEAK HOUR CARD ═══ -->
                     <history:HistoryHourlyReportView Grid.Row="0" Margin="0,0,0,16" />
 
@@ -68,7 +68,7 @@
                     <history:CashierPerformanceView Grid.Row="1" Margin="0,0,0,16" />
 
                     <!-- ═══ 4. MAIN TRANSACTIONS TABLE ═══ -->
-                    <history:HistorySalesTableView Grid.Row="2" />
+                    <history:HistorySalesTableView x:Name="HistoryRecordsSection" Grid.Row="2" />
                 </Grid>
             </TabItem>
 
