@@ -5,7 +5,7 @@
              x:DataType="vm:ExpensesViewModel">
 
     <!-- Financial Metrics Cards (Ingresos, Egresos, Total en Caja, Reinversion, Utilidad Neta) -->
-    <UniformGrid Columns="5">
+    <UniformGrid x:Name="FinancialBalanceSection" Columns="5">
         
         <!-- 1. INGRESOS (VENTAS) -->
         <Border Margin="0,0,6,0" Padding="12" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">

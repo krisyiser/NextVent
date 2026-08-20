@@ -894,9 +894,15 @@ public partial class MainWindowViewModel : ObservableObject
             },
             "Module.Expenses" => new()
             {
-                new("💸 Registro de Gastos",
-                    "Añade cada gasto operativo. Al registrarlos, el sistema calcula tu utilidad neta real.",
-                    TargetName: "ExpensesDataGridBorder", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Top),
+                new("💸 Ingresar Gastos",
+                    "Ingresa el concepto, monto y categoría del gasto para aplicarlo como egreso de caja.",
+                    TargetName: "ExpenseEntryForm", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Right),
+                new("📜 Historial",
+                    "Consulta la lista completa de egresos registrados, importes y fechas correspondientes.",
+                    TargetName: "ExpenseHistoryContainer", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Left),
+                new("📊 Balance",
+                    "Revisa en tiempo real la utilidad neta real, ingresos, egresos y total disponible en caja.",
+                    TargetName: "FinancialBalanceSection", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
             },
             "Module.Promotions" => new()
             {

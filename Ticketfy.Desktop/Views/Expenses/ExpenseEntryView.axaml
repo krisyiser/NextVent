@@ -9,7 +9,7 @@
     <!-- Main Workspace (Left: Register Expense Form, Right: Expenses Table) -->
     <Grid ColumnDefinitions="360,*">
         <!-- Left: Add Expense Form -->
-        <Border Grid.Column="0" Margin="0,0,16,0" Padding="16"
+        <Border x:Name="ExpenseEntryForm" Grid.Column="0" Margin="0,0,16,0" Padding="16"
                 Background="{DynamicResource BgSecondaryBrush}"
                 BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
             <StackPanel Spacing="12">
@@ -41,7 +41,7 @@
         </Border>
 
         <!-- Right: Expenses History Table -->
-        <Border Grid.Column="1" Padding="16"
+        <Border x:Name="ExpenseHistoryContainer" Grid.Column="1" Padding="16"
                 Background="{DynamicResource BgSecondaryBrush}"
                 BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
             <DockPanel LastChildFill="True">
