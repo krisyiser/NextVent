@@ -819,15 +819,24 @@ public partial class MainWindowViewModel : ObservableObject
         {
             "Module.POS" => new()
             {
-                new("🔍 Búsqueda de Productos",
-                    "Escribe el nombre o código de barras de un producto para añadirlo al carrito al instante.",
-                    TargetName: "PosCatalogSection", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Right),
-                new("🛒 Carrito de Venta",
-                    "Aquí aparecen los productos seleccionados. Puedes modificar cantidades y eliminar artículos.",
+                new("👤 Botón de Usuario",
+                    "Cambia de cajero activo, bloquea la terminal o realiza cortes de turno desde este menú.",
+                    TargetName: "PosUserButton", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
+                new("🔍 Buscador de Productos",
+                    "Ingresa el código de barras, SKU o nombre para agregar productos al carrito al instante.",
+                    TargetName: "PosSearchBorder", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
+                new("🛒 Ticket de Venta",
+                    "Aquí aparecen los productos agregados a la venta actual, sus cantidades, precios y el total a cobrar.",
                     TargetName: "PosCartSection", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Left),
-                new("💳 Cobrar",
-                    "Cuando el carrito esté listo, presiona COBRAR para seleccionar el método de pago y cerrar la venta.",
-                    TargetName: "PosCheckoutBtn", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Top),
+                new("👥 Agregar Clientes",
+                    "Selecciona o agrega un cliente para consultar su saldo a crédito o asignar la venta.",
+                    TargetName: "PosCustomerSelector", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Left),
+                new("⏸️ Pausar Compra",
+                    "Pausa la venta actual para atender a otro cliente y reanúdala cuando desees.",
+                    TargetName: "PosPauseButton", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
+                new("📝 Notas del Turno",
+                    "Registra recordatorios o avisos importantes entre cajeros durante el turno.",
+                    TargetName: "PosNotesButton", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
             },
             "Module.Inventory" => new()
             {

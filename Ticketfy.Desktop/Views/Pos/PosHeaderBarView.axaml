@@ -13,7 +13,7 @@
             
             <!-- Cashier Info Capsule with MenuFlyout & Telemetry LEDs -->
             <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                <Button Background="{DynamicResource AccentPrimaryBrush}" Foreground="White" CornerRadius="20" Padding="12,5" Cursor="Hand">
+                <Button x:Name="PosUserButton" Background="{DynamicResource AccentPrimaryBrush}" Foreground="White" CornerRadius="20" Padding="12,5" Cursor="Hand">
                     <Button.Flyout>
                         <MenuFlyout Placement="BottomEdgeAlignedLeft">
                             <MenuItem Header="Cambiar de Usuario" Command="{Binding SwitchCashierCommand}">
@@ -74,7 +74,7 @@
             <!-- Top Action Buttons (Right) -->
             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                 <!-- EXPLICIT PAUSE ACTION BUTTON (F7) -->
-                <Button Command="{Binding ParkCurrentCartCommand}" 
+                <Button x:Name="PosPauseButton" Command="{Binding ParkCurrentCartCommand}" 
                         Background="#EFF6FF" Foreground="#2563EB" BorderBrush="#2563EB" BorderThickness="1"
                         CornerRadius="6" Padding="10,6" Cursor="Hand"
                         ToolTip.Tip="Pausar y guardar el ticket actual en la lista en espera">
@@ -145,7 +145,7 @@
                 </Button>
 
                 <!-- Gestor de Notas -->
-                <Button Command="{Binding OpenShiftNotesDialogCommand}" 
+                <Button x:Name="PosNotesButton" Command="{Binding OpenShiftNotesDialogCommand}" 
                         BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="6" Padding="10,6" Cursor="Hand"
                         ToolTip.Tip="Gestor de notas y avisos entre cajeros">
                     <StackPanel Orientation="Horizontal" Spacing="6">

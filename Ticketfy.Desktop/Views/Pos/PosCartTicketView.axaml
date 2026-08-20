@@ -7,11 +7,11 @@
              x:DataType="vm:CartViewModel">
 
     <!-- Right Column Panel Container -->
-    <Border Width="{Binding CartWidthPx}" CornerRadius="8" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+    <Border x:Name="PosCartSection" Width="{Binding CartWidthPx}" CornerRadius="8" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
         <Grid RowDefinitions="Auto, *, Auto">
             
             <!-- ROW 0: Customer & Header -->
-            <Border Grid.Row="0" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="12">
+            <Border x:Name="PosCustomerSelector" Grid.Row="0" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" Padding="12">
                 <StackPanel Spacing="6">
                     <Grid ColumnDefinitions="*, Auto">
                         <StackPanel Orientation="Horizontal" Spacing="8">
