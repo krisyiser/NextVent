@@ -909,16 +909,14 @@ public partial class MainWindowViewModel : ObservableObject
             },
             "Module.Promotions" => new()
             {
-                new("🏷️ Descuentos y Kits",
-                    "Crea promociones de porcentaje, monto fijo o kits de productos que se aplican automáticamente en POS.",
-                    TargetName: "PromotionsDataGridBorder", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Top),
+                new("📦 Crear Combo / Paquete",
+                    "Arma paquetes de productos combinados con precio especial de venta.",
+                    TargetName: "CreateKitBtn", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
+                new("🏷️ Nueva Promoción",
+                    "Crea promociones de descuento por porcentaje o monto fijo en tus productos.",
+                    TargetName: "AddPromoBtn", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
             },
-            "Module.Settings" => new()
-            {
-                new("👥 Configuración del Sistema",
-                    "Administra los parámetros globales, impresoras, usuarios y temas del sistema.",
-                    TargetName: "SettingsCard", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
-            },
+            "Module.Settings" => new(),
             _ => new()
         };
     }
