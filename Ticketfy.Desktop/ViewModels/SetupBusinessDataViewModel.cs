@@ -39,10 +39,19 @@ public partial class SetupBusinessDataViewModel : ValidatableViewModelBase
 
         try
         {
+            // Persist to both legacy keys and Empresa module keys for 100% full integration
             await _settingsService.SetAsync("BusinessName", BusinessName);
+            await _settingsService.SetAsync("EmpresaNombreComercial", BusinessName);
+
             await _settingsService.SetAsync("BusinessEmail", Email);
+            await _settingsService.SetAsync("EmpresaEmailContacto", Email);
+
             await _settingsService.SetAsync("BusinessPhone", Phone ?? string.Empty);
+            await _settingsService.SetAsync("EmpresaTelefonoFijo", Phone ?? string.Empty);
+            await _settingsService.SetAsync("EmpresaWhatsappContacto", Phone ?? string.Empty);
+
             await _settingsService.SetAsync("BusinessAddress", Address ?? string.Empty);
+            await _settingsService.SetAsync("EmpresaCalleYNumero", Address ?? string.Empty);
 
             // Enviar telemetría con datos reales
             var registrationService = new Ticketfy.Services.Implementations.DeviceRegistrationService(_settingsService, new Ticketfy.Core.Services.SessionManager());

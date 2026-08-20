@@ -341,11 +341,47 @@ public partial class SettingsViewModel : ObservableObject
             if (dict.TryGetValue("Header1", out var h1)) TicketHeaderLine1 = h1;
             if (dict.TryGetValue("Footer1", out var f1)) TicketFooterLine1 = f1;
 
-            if (dict.TryGetValue("EmpresaNombreComercial", out var nc)) EmpresaNombreComercial = nc;
+            if (dict.TryGetValue("EmpresaNombreComercial", out var nc) && !string.IsNullOrWhiteSpace(nc))
+                EmpresaNombreComercial = nc;
+            else if (dict.TryGetValue("BusinessName", out var bn))
+                EmpresaNombreComercial = bn;
+
+            if (dict.TryGetValue("EmpresaEmailContacto", out var ec) && !string.IsNullOrWhiteSpace(ec))
+                EmpresaEmailContacto = ec;
+            else if (dict.TryGetValue("BusinessEmail", out var be))
+                EmpresaEmailContacto = be;
+
+            if (dict.TryGetValue("EmpresaTelefonoFijo", out var tf) && !string.IsNullOrWhiteSpace(tf))
+                EmpresaTelefonoFijo = tf;
+            else if (dict.TryGetValue("BusinessPhone", out var bp))
+                EmpresaTelefonoFijo = bp;
+
+            if (dict.TryGetValue("EmpresaCalleYNumero", out var cn) && !string.IsNullOrWhiteSpace(cn))
+                EmpresaCalleYNumero = cn;
+            else if (dict.TryGetValue("BusinessAddress", out var ba))
+                EmpresaCalleYNumero = ba;
+
             if (dict.TryGetValue("EmpresaRazonSocial", out var rs)) EmpresaRazonSocial = rs;
             if (dict.TryGetValue("EmpresaGiroComercial", out var gc)) EmpresaGiroComercial = gc;
+            if (dict.TryGetValue("EmpresaEslogan", out var es)) EmpresaEslogan = es;
+            if (dict.TryGetValue("EmpresaMonedaPrincipal", out var mp)) EmpresaMonedaPrincipal = mp;
+            if (dict.TryGetValue("EmpresaZonaHoraria", out var zh)) EmpresaZonaHoraria = zh;
             if (dict.TryGetValue("EmpresaRfc", out var rfc)) EmpresaRfc = rfc;
+            if (dict.TryGetValue("EmpresaRegimenFiscal", out var rf)) EmpresaRegimenFiscal = rf;
+            if (dict.TryGetValue("EmpresaCodigoPostalFiscal", out var cp)) EmpresaCodigoPostalFiscal = cp;
+            if (dict.TryGetValue("EmpresaUsoCfdiPorDefecto", out var uc)) EmpresaUsoCfdiPorDefecto = uc;
+            if (dict.TryGetValue("EmpresaCertificadoCerPath", out var cer)) EmpresaCertificadoCerPath = cer;
+            if (dict.TryGetValue("EmpresaCertificadoKeyPath", out var key)) EmpresaCertificadoKeyPath = key;
+            if (dict.TryGetValue("EmpresaNombreSucursal", out var ns)) EmpresaNombreSucursal = ns;
+            if (dict.TryGetValue("EmpresaColonia", out var col)) EmpresaColonia = col;
+            if (dict.TryGetValue("EmpresaCiudadMunicipio", out var cMuni)) EmpresaCiudadMunicipio = cMuni;
             if (dict.TryGetValue("EmpresaEstado", out var est)) EmpresaEstado = est;
+            if (dict.TryGetValue("EmpresaWhatsappContacto", out var wa)) EmpresaWhatsappContacto = wa;
+            if (dict.TryGetValue("EmpresaSitioWeb", out var web)) EmpresaSitioWeb = web;
+            if (dict.TryGetValue("EmpresaFacebook", out var fb)) EmpresaFacebook = fb;
+            if (dict.TryGetValue("EmpresaInstagram", out var ig)) EmpresaInstagram = ig;
+            if (dict.TryGetValue("EmpresaMensajeBienvenidaTicket", out var mb)) EmpresaMensajeBienvenidaTicket = mb;
+            if (dict.TryGetValue("EmpresaQrRedesUrl", out var qr)) EmpresaQrRedesUrl = qr;
             
             // Clean up old stubborn DB defaults
             if (PrinterPort == "COM1 (9600 8N1)") PrinterPort = string.Empty;
@@ -623,9 +659,35 @@ public partial class SettingsViewModel : ObservableObject
             await _settingsService.SetAsync("DuracionTransicionMs", DuracionTransicionMs.ToString());
 
             await _settingsService.SetAsync("EmpresaNombreComercial", EmpresaNombreComercial);
+            await _settingsService.SetAsync("BusinessName", EmpresaNombreComercial);
+
             await _settingsService.SetAsync("EmpresaRazonSocial", EmpresaRazonSocial);
             await _settingsService.SetAsync("EmpresaGiroComercial", EmpresaGiroComercial);
+            await _settingsService.SetAsync("EmpresaEslogan", EmpresaEslogan);
+            await _settingsService.SetAsync("EmpresaMonedaPrincipal", EmpresaMonedaPrincipal);
+            await _settingsService.SetAsync("EmpresaZonaHoraria", EmpresaZonaHoraria);
             await _settingsService.SetAsync("EmpresaRfc", EmpresaRfc);
+            await _settingsService.SetAsync("EmpresaRegimenFiscal", EmpresaRegimenFiscal);
+            await _settingsService.SetAsync("EmpresaCodigoPostalFiscal", EmpresaCodigoPostalFiscal);
+            await _settingsService.SetAsync("EmpresaUsoCfdiPorDefecto", EmpresaUsoCfdiPorDefecto);
+            await _settingsService.SetAsync("EmpresaCertificadoCerPath", EmpresaCertificadoCerPath);
+            await _settingsService.SetAsync("EmpresaCertificadoKeyPath", EmpresaCertificadoKeyPath);
+            await _settingsService.SetAsync("EmpresaNombreSucursal", EmpresaNombreSucursal);
+            await _settingsService.SetAsync("EmpresaCalleYNumero", EmpresaCalleYNumero);
+            await _settingsService.SetAsync("BusinessAddress", EmpresaCalleYNumero);
+            await _settingsService.SetAsync("EmpresaColonia", EmpresaColonia);
+            await _settingsService.SetAsync("EmpresaCiudadMunicipio", EmpresaCiudadMunicipio);
+            await _settingsService.SetAsync("EmpresaEstado", EmpresaEstado);
+            await _settingsService.SetAsync("EmpresaTelefonoFijo", EmpresaTelefonoFijo);
+            await _settingsService.SetAsync("BusinessPhone", EmpresaTelefonoFijo);
+            await _settingsService.SetAsync("EmpresaWhatsappContacto", EmpresaWhatsappContacto);
+            await _settingsService.SetAsync("EmpresaEmailContacto", EmpresaEmailContacto);
+            await _settingsService.SetAsync("BusinessEmail", EmpresaEmailContacto);
+            await _settingsService.SetAsync("EmpresaSitioWeb", EmpresaSitioWeb);
+            await _settingsService.SetAsync("EmpresaFacebook", EmpresaFacebook);
+            await _settingsService.SetAsync("EmpresaInstagram", EmpresaInstagram);
+            await _settingsService.SetAsync("EmpresaMensajeBienvenidaTicket", EmpresaMensajeBienvenidaTicket);
+            await _settingsService.SetAsync("EmpresaQrRedesUrl", EmpresaQrRedesUrl);
 
             await _settingsService.SetAsync("FacturamaApiUser", FacturamaApiUser);
             await _settingsService.SetAsync("FacturamaApiPassword", FacturamaApiPassword);
@@ -637,7 +699,7 @@ public partial class SettingsViewModel : ObservableObject
         _ = deviceReg.PingServerAsync(new Ticketfy.Services.Implementations.BusinessProfile 
         { 
             BusinessName = EmpresaNombreComercial,
-            Email = "contacto@empresa.com"
+            Email = string.IsNullOrWhiteSpace(EmpresaEmailContacto) ? "contacto@empresa.com" : EmpresaEmailContacto
         });
 
         if (SettingsSaved != null)
