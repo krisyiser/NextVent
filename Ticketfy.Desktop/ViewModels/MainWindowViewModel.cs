@@ -858,11 +858,14 @@ public partial class MainWindowViewModel : ObservableObject
             },
             "Module.Customers" => new()
             {
-                new("👤 Lista de Clientes",
-                    "Aquí ves todos tus clientes registrados junto con su saldo pendiente a crédito.",
+                new("🔍 Buscador de Clientes",
+                    "Busca rápidamente a cualquier cliente por su nombre o número de teléfono.",
+                    TargetName: "CustomersSearchBorder", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
+                new("👥 Directorio de Clientes",
+                    "Consulta saldos pendientes, crédito disponible, abonos y estados de cuenta.",
                     TargetName: "CustomersDataGridBorder", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Top),
-                new("➕ Agregar Cliente",
-                    "Registra un nuevo cliente con nombre, teléfono y límite de crédito.",
+                new("➕ Nuevo Cliente",
+                    "Registra nuevos clientes ingresando su nombre, teléfono y límite de crédito.",
                     TargetName: "AddCustomerBtn", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
             },
             "Module.History" => new()
