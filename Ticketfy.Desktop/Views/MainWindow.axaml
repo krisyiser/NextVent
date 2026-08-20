@@ -136,7 +136,7 @@
                         </Border>
 
                         <!-- Nav: POS (F2) -->
-                        <Button Classes="nav-item"
+                        <Button x:Name="NavPosBtn" Classes="nav-item"
                                 Command="{Binding NavigateToCommand}" CommandParameter="pos"
                                 ToolTip.Tip="Punto de Venta">
                             <StackPanel Spacing="2">
@@ -146,7 +146,7 @@
                         </Button>
 
                         <!-- Nav: Inventory (F3) -->
-                        <Button Classes="nav-item"
+                        <Button x:Name="NavInventoryBtn" Classes="nav-item"
                                 Command="{Binding NavigateToCommand}" CommandParameter="inventory"
                                 ToolTip.Tip="Inventario">
                             <StackPanel Spacing="2">
@@ -156,7 +156,7 @@
                         </Button>
 
                         <!-- Nav: Customers (F4) -->
-                        <Button Classes="nav-item"
+                        <Button x:Name="NavCustomersBtn" Classes="nav-item"
                                 Command="{Binding NavigateToCommand}" CommandParameter="customers"
                                 ToolTip.Tip="Clientes y Crédito">
                             <StackPanel Spacing="2">
@@ -166,7 +166,7 @@
                         </Button>
 
                         <!-- Nav: Suppliers (F5) -->
-                        <Button Classes="nav-item"
+                        <Button x:Name="NavSuppliersBtn" Classes="nav-item"
                                 Command="{Binding NavigateToCommand}" CommandParameter="suppliers"
                                 ToolTip.Tip="Proveedores y Compras">
                             <StackPanel Spacing="2">
@@ -176,7 +176,7 @@
                         </Button>
 
                         <!-- Nav: Expenses (F6) -->
-                        <Button Classes="nav-item"
+                        <Button x:Name="NavExpensesBtn" Classes="nav-item"
                                 Command="{Binding NavigateToCommand}" CommandParameter="expenses"
                                 ToolTip.Tip="Gastos y Utilidad Neta">
                             <StackPanel Spacing="2">
@@ -186,7 +186,7 @@
                         </Button>
 
                         <!-- Nav: History (F7) -->
-                        <Button Classes="nav-item"
+                        <Button x:Name="NavHistoryBtn" Classes="nav-item"
                                 Command="{Binding NavigateToCommand}" CommandParameter="history"
                                 ToolTip.Tip="Historial de Ventas">
                             <StackPanel Spacing="2">
@@ -196,7 +196,7 @@
                         </Button>
 
                         <!-- Nav: Promotions (F8) -->
-                        <Button Classes="nav-item"
+                        <Button x:Name="NavPromotionsBtn" Classes="nav-item"
                                 Command="{Binding NavigateToCommand}" CommandParameter="promotions"
                                 ToolTip.Tip="Promociones">
                             <StackPanel Spacing="2">
@@ -206,7 +206,7 @@
                         </Button>
 
                         <!-- Nav: Fiscal (F9) -->
-                        <Button Classes="nav-item"
+                        <Button x:Name="NavFiscalBtn" Classes="nav-item"
                                 Command="{Binding NavigateToCommand}" CommandParameter="fiscal"
                                 ToolTip.Tip="Facturación SAT"
                                 IsVisible="False">
@@ -217,7 +217,7 @@
                         </Button>
 
                         <!-- Nav: Settings (F10) -->
-                        <Button Classes="nav-item"
+                        <Button x:Name="NavSettingsBtn" Classes="nav-item"
                                 Command="{Binding NavigateToCommand}" CommandParameter="settings"
                                 ToolTip.Tip="Configuración">
                             <StackPanel Spacing="2">

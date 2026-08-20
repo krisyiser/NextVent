@@ -784,33 +784,32 @@ public partial class MainWindowViewModel : ObservableObject
 
     private static List<Ticketfy.Core.Models.TutorialStep> BuildSidebarTourSteps()
     {
-        // AnchorX=0.040 keeps the spotlight over the ~80px wide sidebar for a 1280px window.
-        return new List<Ticketfy.Core.Models.TutorialStep>
+        return new()
         {
             new("📊 Ventas (POS)",
                 "Aquí procesas tus ventas diarias, cobras a clientes y abres o cierras turnos de caja.",
-                0.040, 0.145, 68, 64, Ticketfy.Core.Models.TutorialAnchorSide.Right),
+                TargetName: "NavPosBtn", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Right),
             new("📦 Inventario",
                 "Administra todo tu catálogo: agrega productos, actualiza precios y controla el stock.",
-                0.040, 0.235, 68, 64, Ticketfy.Core.Models.TutorialAnchorSide.Right),
+                TargetName: "NavInventoryBtn", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Right),
             new("👥 Clientes",
                 "Gestiona clientes, consulta deudas a crédito y genera estados de cuenta.",
-                0.040, 0.325, 68, 64, Ticketfy.Core.Models.TutorialAnchorSide.Right),
+                TargetName: "NavCustomersBtn", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Right),
             new("🚚 Proveedores",
                 "Registra tus proveedores y lleva el control de pedidos y compras de mercancía.",
-                0.040, 0.415, 68, 64, Ticketfy.Core.Models.TutorialAnchorSide.Right),
+                TargetName: "NavSuppliersBtn", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Right),
             new("💸 Gastos",
                 "Registra gastos operativos (luz, renta, sueldos) y monitorea tu utilidad neta real.",
-                0.040, 0.505, 68, 64, Ticketfy.Core.Models.TutorialAnchorSide.Right),
+                TargetName: "NavExpensesBtn", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Right),
             new("📋 Historial",
                 "Consulta todas las ventas anteriores, realiza devoluciones y genera cortes de caja X/Z.",
-                0.040, 0.595, 68, 64, Ticketfy.Core.Models.TutorialAnchorSide.Right),
+                TargetName: "NavHistoryBtn", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Right),
             new("🏷️ Promociones",
                 "Crea descuentos automáticos, kits de productos y ofertas por tiempo limitado.",
-                0.040, 0.685, 68, 64, Ticketfy.Core.Models.TutorialAnchorSide.Right),
+                TargetName: "NavPromotionsBtn", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Right),
             new("⚙️ Ajustes",
                 "Configura impresoras, usuarios, tema visual, telemetría y parámetros del sistema.",
-                0.040, 0.775, 68, 64, Ticketfy.Core.Models.TutorialAnchorSide.Right),
+                TargetName: "NavSettingsBtn", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Right),
         };
     }
 
@@ -822,73 +821,64 @@ public partial class MainWindowViewModel : ObservableObject
             {
                 new("🔍 Búsqueda de Productos",
                     "Escribe el nombre o código de barras de un producto para añadirlo al carrito al instante.",
-                    0.30, 0.08, 320, 44, Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
+                    TargetName: "PosCatalogSection", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Right),
                 new("🛒 Carrito de Venta",
                     "Aquí aparecen los productos seleccionados. Puedes modificar cantidades y eliminar artículos.",
-                    0.72, 0.45, 340, 400, Ticketfy.Core.Models.TutorialAnchorSide.Left),
+                    TargetName: "PosCartSection", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Left),
                 new("💳 Cobrar",
                     "Cuando el carrito esté listo, presiona COBRAR para seleccionar el método de pago y cerrar la venta.",
-                    0.72, 0.90, 200, 48, Ticketfy.Core.Models.TutorialAnchorSide.Top),
+                    TargetName: "PosCheckoutBtn", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Top),
             },
             "Module.Inventory" => new()
             {
                 new("🔎 Filtros y Búsqueda",
                     "Usa la barra superior para filtrar por categoría, stock bajo o buscar un producto específico.",
-                    0.50, 0.08, 500, 44, Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
+                    TargetName: "InventorySearchBorder", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
                 new("📋 Lista de Productos",
                     "Cada fila muestra precio, stock y categoría. Haz clic en un producto para editar sus detalles.",
-                    0.50, 0.50, 700, 350, Ticketfy.Core.Models.TutorialAnchorSide.Top),
+                    TargetName: "InventoryDataGridBorder", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Top),
                 new("➕ Agregar Producto",
-                    "Usa el botón '+ Agregar' para registrar un nuevo artículo en tu catálogo.",
-                    0.88, 0.08, 120, 40, Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
+                    "Usa el botón '+ Nuevo Producto' para registrar un nuevo artículo en tu catálogo.",
+                    TargetName: "AddProductBtn", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
             },
             "Module.Customers" => new()
             {
                 new("👤 Lista de Clientes",
                     "Aquí ves todos tus clientes registrados junto con su saldo pendiente a crédito.",
-                    0.50, 0.50, 700, 400, Ticketfy.Core.Models.TutorialAnchorSide.Top),
+                    TargetName: "CustomersDataGridBorder", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Top),
                 new("➕ Agregar Cliente",
                     "Registra un nuevo cliente con nombre, teléfono y límite de crédito.",
-                    0.85, 0.08, 130, 40, Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
+                    TargetName: "AddCustomerBtn", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
             },
             "Module.History" => new()
             {
                 new("📅 Tabla de Ventas",
                     "Consulta el historial de todas las ventas. Puedes filtrar por fecha, cajero o método de pago.",
-                    0.50, 0.50, 700, 400, Ticketfy.Core.Models.TutorialAnchorSide.Top),
-                new("📊 Corte de Caja (Z)",
-                    "Usa el botón de CORTE para generar el resumen del turno e imprimir el ticket de cierre.",
-                    0.88, 0.08, 130, 40, Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
+                    TargetName: "HistoryDataGridBorder", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Top),
             },
             "Module.Suppliers" => new()
             {
                 new("🚚 Proveedores Registrados",
                     "Lista de todos tus proveedores activos. Haz clic para ver su historial de pedidos.",
-                    0.50, 0.50, 700, 400, Ticketfy.Core.Models.TutorialAnchorSide.Top),
-                new("📦 Nueva Orden de Compra",
-                    "Registra una compra de mercancía. El stock se actualizará automáticamente al guardar.",
-                    0.85, 0.08, 140, 40, Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
+                    TargetName: "SuppliersDataGridBorder", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Top),
             },
             "Module.Expenses" => new()
             {
                 new("💸 Registro de Gastos",
                     "Añade cada gasto operativo. Al registrarlos, el sistema calcula tu utilidad neta real.",
-                    0.50, 0.50, 700, 400, Ticketfy.Core.Models.TutorialAnchorSide.Top),
+                    TargetName: "ExpensesDataGridBorder", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Top),
             },
             "Module.Promotions" => new()
             {
                 new("🏷️ Descuentos y Kits",
                     "Crea promociones de porcentaje, monto fijo o kits de productos que se aplican automáticamente en POS.",
-                    0.50, 0.50, 700, 400, Ticketfy.Core.Models.TutorialAnchorSide.Top),
+                    TargetName: "PromotionsDataGridBorder", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Top),
             },
             "Module.Settings" => new()
             {
-                new("👥 Gestión de Usuarios",
-                    "Administra las cuentas del equipo: cambia contraseñas, asigna roles y desactiva usuarios.",
-                    0.50, 0.25, 600, 200, Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
-                new("🖨️ Configuración de Impresora",
-                    "Configura el puerto COM o IP de tu impresora térmica ESC/POS para imprimir tickets.",
-                    0.50, 0.60, 600, 200, Ticketfy.Core.Models.TutorialAnchorSide.Top),
+                new("👥 Configuración del Sistema",
+                    "Administra los parámetros globales, impresoras, usuarios y temas del sistema.",
+                    TargetName: "SettingsCard", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
             },
             _ => new()
         };

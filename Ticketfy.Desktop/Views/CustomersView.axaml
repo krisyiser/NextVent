@@ -25,7 +25,7 @@
 
                 <!-- Action Buttons Header -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                    <Button Command="{Binding OpenAddCustomerDialogCommand}" Classes="primary-action" Padding="16,8">
+                    <Button x:Name="AddCustomerBtn" Command="{Binding OpenAddCustomerDialogCommand}" Classes="primary-action" Padding="16,8">
                         <StackPanel Orientation="Horizontal" Spacing="8">
                             <mi:MaterialIcon Kind="AccountPlus" Width="18" Height="18" />
                             <TextBlock Text="+ NUEVO CLIENTE" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" />
@@ -50,7 +50,7 @@
         </Border>
 
         <!-- Customers DataGrid -->
-        <Border Grid.Row="2" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="1">
+        <Border x:Name="CustomersDataGridBorder" Grid.Row="2" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="1">
             <DataGrid ItemsSource="{Binding Customers}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Nombre del Cliente" Binding="{Binding Name}" Width="2.5*" />

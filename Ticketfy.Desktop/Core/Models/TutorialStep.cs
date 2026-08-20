@@ -13,14 +13,15 @@ public enum TutorialAnchorSide
 
 /// <summary>
 /// Represents a single step in a guided tutorial tour.
-/// AnchorX/AnchorY are 0.0–1.0 fractions of the overlay panel dimensions,
-/// allowing AOT-safe positioning without reflection-based control lookups.
+/// TargetName specifies the x:Name of the target Avalonia control to highlight precisely.
+/// If TargetName is omitted or not found, AnchorX/AnchorY fractions are used as fallback.
 /// </summary>
 public record TutorialStep(
     string Title,
     string Description,
-    double AnchorX,
-    double AnchorY,
+    string? TargetName = null,
+    double AnchorX = 0.5,
+    double AnchorY = 0.5,
     double SpotlightWidth = 80,
     double SpotlightHeight = 80,
     TutorialAnchorSide AnchorSide = TutorialAnchorSide.Right

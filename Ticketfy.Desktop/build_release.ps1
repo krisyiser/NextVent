@@ -49,3 +49,9 @@ git push -u origin main --force
 
 Set-Location -Path ..\..\
 Write-Host "Actualización OTA publicada correctamente y disponible para descarga." -ForegroundColor Green
+
+# 3. Clean up build artifacts (bin and obj)
+Write-Host "Limpiando artefactos de compilación temporales (bin/obj)..." -ForegroundColor Cyan
+Remove-Item -Recurse -Force ".\bin" -ErrorAction SilentlyContinue
+Remove-Item -Recurse -Force ".\obj" -ErrorAction SilentlyContinue
+Write-Host "Limpieza completada." -ForegroundColor Green

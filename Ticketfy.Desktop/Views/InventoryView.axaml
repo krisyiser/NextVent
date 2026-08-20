@@ -74,7 +74,7 @@
                             </StackPanel>
                         </Button>
 
-                        <Button Command="{Binding OpenAddProductDialogCommand}" Classes="primary-action" Cursor="Hand" Padding="12,6">
+                        <Button x:Name="AddProductBtn" Command="{Binding OpenAddProductDialogCommand}" Classes="primary-action" Cursor="Hand" Padding="12,6">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <mi:MaterialIcon Kind="Plus" Width="16" Height="16" Foreground="White" />
                                 <TextBlock Text="NUEVO PRODUCTO" FontWeight="Bold" FontSize="12" Foreground="White" VerticalAlignment="Center" />
@@ -133,7 +133,7 @@
         </Border>
 
         <!-- Search Bar -->
-        <Border Grid.Row="3" Margin="0,0,0,16" Padding="12,8"
+        <Border x:Name="InventorySearchBorder" Grid.Row="3" Margin="0,0,0,16" Padding="12,8"
                 Background="{DynamicResource BgSecondaryBrush}"
                 BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8">
             <Grid ColumnDefinitions="*,Auto">
@@ -153,7 +153,7 @@
         </Border>
 
         <!-- Products DataGrid -->
-        <Border Grid.Row="4" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="1">
+        <Border x:Name="InventoryDataGridBorder" Grid.Row="4" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="1">
             <DataGrid ItemsSource="{Binding FilteredProducts}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" DoubleTapped="OnDataGridDoubleTapped">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Código / SKU" Binding="{Binding Barcode}" Width="1.5*" />
