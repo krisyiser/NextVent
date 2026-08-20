@@ -49,6 +49,12 @@
         <DataTemplate DataType="vm:FirstTimeSetupViewModel">
             <v:FirstTimeSetupView />
         </DataTemplate>
+        <DataTemplate DataType="vm:SetupBusinessDataViewModel">
+            <v:SetupBusinessDataView />
+        </DataTemplate>
+        <DataTemplate DataType="vm:SetupAdditionalUsersViewModel">
+            <v:SetupAdditionalUsersView />
+        </DataTemplate>
         <DataTemplate DataType="vm:LicenseLockedViewModel">
             <v:LicenseLockedView />
         </DataTemplate>
@@ -290,6 +296,11 @@
         <Grid IsVisible="{Binding IsDialogOverlayOpen}" Background="#80000000">
             <ContentControl Content="{Binding ActiveDialogViewModel}" HorizontalAlignment="Center" VerticalAlignment="Center" />
         </Grid>
+
+        <!-- ═══ TUTORIAL OVERLAY (ZIndex 5000, above dialogs) ═══ -->
+        <v:TutorialOverlayView ZIndex="5000"
+                               DataContext="{Binding ActiveTutorialVm}"
+                               IsVisible="{Binding IsVisible}" />
 
         <!-- OVERLAY LOCK SCREEN (Prevents Modal Collision) -->
         <Grid ZIndex="9999" IsVisible="{Binding IsLocked}" Background="#E60F172A">

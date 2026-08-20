@@ -37,7 +37,7 @@
                 </StackPanel>
 
                 <Button Command="{Binding CreateAdminAccountCommand}" Classes="primary-action" Height="44" HorizontalAlignment="Stretch">
-                    <TextBlock Text="CREAR CUENTA ADMINISTRADOR" FontWeight="Bold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    <TextBlock Text="CREAR ADMINISTRADOR Y CONTINUAR" FontWeight="Bold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
                 </Button>
             </StackPanel>
         </Border>

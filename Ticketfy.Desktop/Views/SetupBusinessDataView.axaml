@@ -1,0 +1,36 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ticketfy.ViewModels"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             x:Class="Ticketfy.Views.SetupBusinessDataView"
+             x:DataType="vm:SetupBusinessDataViewModel">
+
+    <Grid Background="{DynamicResource BgPrimaryBrush}">
+        <Border Width="450" Padding="32" CornerRadius="12"
+                Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                HorizontalAlignment="Center" VerticalAlignment="Center">
+            <StackPanel Spacing="20">
+                <StackPanel HorizontalAlignment="Center" Spacing="8">
+                    <Border Width="56" Height="56" CornerRadius="8" Background="{DynamicResource AccentPrimaryBrush}" HorizontalAlignment="Center">
+                        <mi:MaterialIcon Kind="Storefront" Width="32" Height="32" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <TextBlock Text="Datos del Negocio" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" />
+                    <TextBlock Text="Configure la información principal de su comercio" FontSize="13" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" />
+                </StackPanel>
+
+                <StackPanel Spacing="12">
+                    <TextBox Text="{Binding BusinessName, Mode=TwoWay}" Watermark="Nombre del Negocio *" Background="{DynamicResource BgTertiaryBrush}" Padding="12" />
+                    <TextBox Text="{Binding Email, Mode=TwoWay}" Watermark="Correo Electrónico Principal *" Background="{DynamicResource BgTertiaryBrush}" Padding="12" />
+                    <TextBox Text="{Binding Phone, Mode=TwoWay}" Watermark="Teléfono (Opcional)" Background="{DynamicResource BgTertiaryBrush}" Padding="12" />
+                    <TextBox Text="{Binding Address, Mode=TwoWay}" Watermark="Dirección (Opcional)" Background="{DynamicResource BgTertiaryBrush}" Padding="12" />
+                    
+                    <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource AccentDangerBrush}" FontSize="12" HorizontalAlignment="Center" TextWrapping="Wrap" IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                </StackPanel>
+
+                <Button Command="{Binding SaveAndContinueCommand}" Classes="primary-action" Height="44" HorizontalAlignment="Stretch">
+                    <TextBlock Text="GUARDAR Y CONTINUAR" FontWeight="Bold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Button>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

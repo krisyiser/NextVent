@@ -1,0 +1,126 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ticketfy.ViewModels"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             x:Class="Ticketfy.Views.TutorialOverlayView"
+             x:DataType="vm:TutorialOverlayViewModel"
+             IsVisible="{Binding IsVisible}"
+             IsHitTestVisible="{Binding IsVisible}">
+
+    <UserControl.Styles>
+        <!-- Pulsing ring animation on the spotlight border -->
+        <Style Selector="Border.tutorial-ring">
+            <Style.Animations>
+                <Animation Duration="0:0:1.3" IterationCount="Infinite" PlaybackDirection="Alternate" Easing="SineEaseInOut">
+                    <KeyFrame Cue="0%">
+                        <Setter Property="Opacity" Value="0.55"/>
+                    </KeyFrame>
+                    <KeyFrame Cue="100%">
+                        <Setter Property="Opacity" Value="1.0"/>
+                    </KeyFrame>
+                </Animation>
+            </Style.Animations>
+        </Style>
+    </UserControl.Styles>
+
+    <Canvas x:Name="OverlayCanvas" Background="Transparent" SizeChanged="OnCanvasSizeChanged">
+
+        <!-- ── DARK SCRIM ── -->
+        <Rectangle x:Name="Scrim"
+                   Canvas.Left="0" Canvas.Top="0"
+                   Width="{Binding $parent[Canvas].Bounds.Width}"
+                   Height="{Binding $parent[Canvas].Bounds.Height}"
+                   Fill="#C2000000"
+                   IsHitTestVisible="False"/>
+
+        <!-- ── SPOTLIGHT RING ── -->
+        <Border Classes="tutorial-ring"
+                Canvas.Left="{Binding SpotlightLeft}"
+                Canvas.Top="{Binding SpotlightTop}"
+                Width="{Binding SpotlightWidth}"
+                Height="{Binding SpotlightHeight}"
+                CornerRadius="14"
+                BorderBrush="#3B82F6"
+                BorderThickness="3"
+                Background="#1A3B82F6"
+                IsHitTestVisible="False"/>
+
+        <!-- ── ARROW INDICATOR ── -->
+        <Path Canvas.Left="{Binding ArrowLeft}"
+              Canvas.Top="{Binding ArrowTop}"
+              Fill="#3B82F6"
+              IsHitTestVisible="False"
+              Data="M 0 8 L 14 0 L 14 16 Z">
+            <Path.RenderTransform>
+                <RotateTransform Angle="{Binding ArrowRotation}" CenterX="7" CenterY="8"/>
+            </Path.RenderTransform>
+        </Path>
+
+        <!-- ── COACH TOOLTIP CARD ── -->
+        <Border Canvas.Left="{Binding TooltipLeft}"
+                Canvas.Top="{Binding TooltipTop}"
+                Width="300"
+                MinHeight="160"
+                CornerRadius="12"
+                Background="#0D1B2E"
+                BorderBrush="#3B82F6"
+                BorderThickness="1.5"
+                Padding="20,16">
+            <StackPanel Spacing="10">
+
+                <!-- Step badge -->
+                <Border Background="#1E3A8A" CornerRadius="10" Padding="8,3" HorizontalAlignment="Left">
+                    <TextBlock Text="{Binding StepLabel}"
+                               FontSize="11" FontWeight="SemiBold"
+                               Foreground="#38BDF8"/>
+                </Border>
+
+                <!-- Title -->
+                <TextBlock Text="{Binding CurrentTitle}"
+                           FontSize="14" FontWeight="Bold"
+                           Foreground="#F1F5F9"
+                           TextWrapping="Wrap"/>
+
+                <!-- Description -->
+                <TextBlock Text="{Binding CurrentDescription}"
+                           FontSize="12"
+                           Foreground="#94A3B8"
+                           TextWrapping="Wrap"
+                           LineHeight="18"/>
+
+                <!-- Separator -->
+                <Border Height="1" Background="#1E293B" Margin="0,2,0,2"/>
+
+                <!-- Buttons -->
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Button Command="{Binding NextCommand}"
+                            Background="#3B82F6"
+                            Foreground="White"
+                            FontWeight="Bold"
+                            FontSize="12"
+                            Padding="14,7"
+                            CornerRadius="7"
+                            Cursor="Hand">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <TextBlock Text="{Binding NextButtonText}" VerticalAlignment="Center"/>
+                            <mi:MaterialIcon Kind="ArrowRight" Width="14" Height="14" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </Button>
+
+                    <Button Command="{Binding SkipAllCommand}"
+                            Background="Transparent"
+                            BorderBrush="#334155"
+                            BorderThickness="1"
+                            Foreground="#64748B"
+                            FontSize="11"
+                            Padding="10,7"
+                            CornerRadius="7"
+                            Cursor="Hand">
+                        <TextBlock Text="Omitir todo"/>
+                    </Button>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
+    </Canvas>
+</UserControl>

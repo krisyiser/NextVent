@@ -92,6 +92,10 @@ public partial class MainWindowViewModel : ObservableObject
     private readonly IAuditService _auditService;
     private readonly DeviceRegistrationService _deviceRegistrationService;
     private readonly AutoUpdateService _autoUpdateService;
+    private readonly Ticketfy.Services.Interfaces.ITutorialService _tutorialService;
+
+    /// <summary>Currently active tutorial overlay (Sidebar tour or per-Module tour).</summary>
+    [ObservableProperty] private TutorialOverlayViewModel _activeTutorialVm = null!;
 
     public MainWindowViewModel()
     {
@@ -141,6 +145,10 @@ public partial class MainWindowViewModel : ObservableObject
         var expenseService = new ExpenseService(_db, _printerService);
         var userService = new UserService(_db);
         var settingsService = new SettingsService(_db);
+        _tutorialService = new Ticketfy.Services.Implementations.TutorialService(settingsService);
+        var sidebarTutorialVm = new TutorialOverlayViewModel(_tutorialService, "Sidebar");
+        sidebarTutorialVm.TutorialCompleted += () => { };
+        ActiveTutorialVm = sidebarTutorialVm;
         var terminalService = new MercadoPagoTerminalService(new System.Net.Http.HttpClient(), settingsService);
         var shiftNoteService = new ShiftNoteService(_db);
         var kitService = new ItemKitService(_db);
@@ -246,6 +254,9 @@ public partial class MainWindowViewModel : ObservableObject
             _ = _posVm.LoadProductsAsync();
             await ValidateShiftStatusAsync();
             WeakReferenceMessenger.Default.Send(new Ticketfy.Core.Messages.FocusSearchMessage());
+
+            // Launch Sidebar Tour on first login ever
+            _ = ActiveTutorialVm.TryStartAsync(BuildSidebarTourSteps());
         };
 
         // ── Wire Dynamic Sidebar Layout Changes ──
@@ -702,17 +713,187 @@ public partial class MainWindowViewModel : ObservableObject
             _ = _posVm.LoadProductsAsync();
             await ValidateShiftStatusAsync();
             WeakReferenceMessenger.Default.Send(new Ticketfy.Core.Messages.FocusSearchMessage());
+            _ = LaunchModuleTourAsync("Module.POS");
         }
-        else if (ActiveViewModel == _inventoryVm) _ = _inventoryVm.LoadProductsAsync();
-        else if (ActiveViewModel == _customersVm) _ = _customersVm.LoadCustomersAsync();
-        else if (ActiveViewModel == _historyVm) _ = _historyVm.LoadSalesAsync();
-        else if (ActiveViewModel == _promotionsVm) _ = _promotionsVm.LoadPromotionsAsync();
-        else if (ActiveViewModel == _fiscalVm) _ = _fiscalVm.LoadInvoicesCommand.ExecuteAsync(null);
-        else if (ActiveViewModel == _suppliersVm) _ = _suppliersVm.LoadDataAsync();
-        else if (ActiveViewModel == _expensesVm) _ = _expensesVm.LoadExpensesAsync();
-        else if (ActiveViewModel == _settingsVm) _ = _settingsVm.LoadUsersAsync();
-        else if (ActiveViewModel == _cashierPerformanceVm) _ = _cashierPerformanceVm.LoadReportsAsync();
+        else if (ActiveViewModel == _inventoryVm)
+        {
+            _ = _inventoryVm.LoadProductsAsync();
+            _ = LaunchModuleTourAsync("Module.Inventory");
+        }
+        else if (ActiveViewModel == _customersVm)
+        {
+            _ = _customersVm.LoadCustomersAsync();
+            _ = LaunchModuleTourAsync("Module.Customers");
+        }
+        else if (ActiveViewModel == _historyVm)
+        {
+            _ = _historyVm.LoadSalesAsync();
+            _ = LaunchModuleTourAsync("Module.History");
+        }
+        else if (ActiveViewModel == _promotionsVm)
+        {
+            _ = _promotionsVm.LoadPromotionsAsync();
+            _ = LaunchModuleTourAsync("Module.Promotions");
+        }
+        else if (ActiveViewModel == _fiscalVm)
+        {
+            _ = _fiscalVm.LoadInvoicesCommand.ExecuteAsync(null);
+        }
+        else if (ActiveViewModel == _suppliersVm)
+        {
+            _ = _suppliersVm.LoadDataAsync();
+            _ = LaunchModuleTourAsync("Module.Suppliers");
+        }
+        else if (ActiveViewModel == _expensesVm)
+        {
+            _ = _expensesVm.LoadExpensesAsync();
+            _ = LaunchModuleTourAsync("Module.Expenses");
+        }
+        else if (ActiveViewModel == _settingsVm)
+        {
+            _ = _settingsVm.LoadUsersAsync();
+            _ = LaunchModuleTourAsync("Module.Settings");
+        }
+        else if (ActiveViewModel == _cashierPerformanceVm)
+        {
+            _ = _cashierPerformanceVm.LoadReportsAsync();
+        }
     }
+
+    /// <summary>
+    /// Reuses the window-level TutorialVm to display a per-module tour the first time the module is opened.
+    /// </summary>
+    private async Task LaunchModuleTourAsync(string moduleKey)
+    {
+        await Task.Delay(350); // Let the module view settle before showing the overlay
+        var steps = BuildModuleTourSteps(moduleKey);
+        if (steps.Count == 0) return;
+
+        // Re-initialize TutorialVm with the new step key so it checks completion independently
+        var freshVm = new TutorialOverlayViewModel(_tutorialService, moduleKey);
+        freshVm.TutorialCompleted += () => { }; // no-op: no additional action after module tour
+        await freshVm.TryStartAsync(steps);
+
+        if (freshVm.IsVisible)
+        {
+            // Swap TutorialVm on the UI thread so MainWindow.axaml picks it up
+            Dispatcher.UIThread.Post(() => ActiveTutorialVm = freshVm);
+        }
+    }
+
+
+    private static List<Ticketfy.Core.Models.TutorialStep> BuildSidebarTourSteps()
+    {
+        // AnchorX=0.040 keeps the spotlight over the ~80px wide sidebar for a 1280px window.
+        return new List<Ticketfy.Core.Models.TutorialStep>
+        {
+            new("📊 Ventas (POS)",
+                "Aquí procesas tus ventas diarias, cobras a clientes y abres o cierras turnos de caja.",
+                0.040, 0.145, 68, 64, Ticketfy.Core.Models.TutorialAnchorSide.Right),
+            new("📦 Inventario",
+                "Administra todo tu catálogo: agrega productos, actualiza precios y controla el stock.",
+                0.040, 0.235, 68, 64, Ticketfy.Core.Models.TutorialAnchorSide.Right),
+            new("👥 Clientes",
+                "Gestiona clientes, consulta deudas a crédito y genera estados de cuenta.",
+                0.040, 0.325, 68, 64, Ticketfy.Core.Models.TutorialAnchorSide.Right),
+            new("🚚 Proveedores",
+                "Registra tus proveedores y lleva el control de pedidos y compras de mercancía.",
+                0.040, 0.415, 68, 64, Ticketfy.Core.Models.TutorialAnchorSide.Right),
+            new("💸 Gastos",
+                "Registra gastos operativos (luz, renta, sueldos) y monitorea tu utilidad neta real.",
+                0.040, 0.505, 68, 64, Ticketfy.Core.Models.TutorialAnchorSide.Right),
+            new("📋 Historial",
+                "Consulta todas las ventas anteriores, realiza devoluciones y genera cortes de caja X/Z.",
+                0.040, 0.595, 68, 64, Ticketfy.Core.Models.TutorialAnchorSide.Right),
+            new("🏷️ Promociones",
+                "Crea descuentos automáticos, kits de productos y ofertas por tiempo limitado.",
+                0.040, 0.685, 68, 64, Ticketfy.Core.Models.TutorialAnchorSide.Right),
+            new("⚙️ Ajustes",
+                "Configura impresoras, usuarios, tema visual, telemetría y parámetros del sistema.",
+                0.040, 0.775, 68, 64, Ticketfy.Core.Models.TutorialAnchorSide.Right),
+        };
+    }
+
+    private static List<Ticketfy.Core.Models.TutorialStep> BuildModuleTourSteps(string moduleKey)
+    {
+        return moduleKey switch
+        {
+            "Module.POS" => new()
+            {
+                new("🔍 Búsqueda de Productos",
+                    "Escribe el nombre o código de barras de un producto para añadirlo al carrito al instante.",
+                    0.30, 0.08, 320, 44, Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
+                new("🛒 Carrito de Venta",
+                    "Aquí aparecen los productos seleccionados. Puedes modificar cantidades y eliminar artículos.",
+                    0.72, 0.45, 340, 400, Ticketfy.Core.Models.TutorialAnchorSide.Left),
+                new("💳 Cobrar",
+                    "Cuando el carrito esté listo, presiona COBRAR para seleccionar el método de pago y cerrar la venta.",
+                    0.72, 0.90, 200, 48, Ticketfy.Core.Models.TutorialAnchorSide.Top),
+            },
+            "Module.Inventory" => new()
+            {
+                new("🔎 Filtros y Búsqueda",
+                    "Usa la barra superior para filtrar por categoría, stock bajo o buscar un producto específico.",
+                    0.50, 0.08, 500, 44, Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
+                new("📋 Lista de Productos",
+                    "Cada fila muestra precio, stock y categoría. Haz clic en un producto para editar sus detalles.",
+                    0.50, 0.50, 700, 350, Ticketfy.Core.Models.TutorialAnchorSide.Top),
+                new("➕ Agregar Producto",
+                    "Usa el botón '+ Agregar' para registrar un nuevo artículo en tu catálogo.",
+                    0.88, 0.08, 120, 40, Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
+            },
+            "Module.Customers" => new()
+            {
+                new("👤 Lista de Clientes",
+                    "Aquí ves todos tus clientes registrados junto con su saldo pendiente a crédito.",
+                    0.50, 0.50, 700, 400, Ticketfy.Core.Models.TutorialAnchorSide.Top),
+                new("➕ Agregar Cliente",
+                    "Registra un nuevo cliente con nombre, teléfono y límite de crédito.",
+                    0.85, 0.08, 130, 40, Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
+            },
+            "Module.History" => new()
+            {
+                new("📅 Tabla de Ventas",
+                    "Consulta el historial de todas las ventas. Puedes filtrar por fecha, cajero o método de pago.",
+                    0.50, 0.50, 700, 400, Ticketfy.Core.Models.TutorialAnchorSide.Top),
+                new("📊 Corte de Caja (Z)",
+                    "Usa el botón de CORTE para generar el resumen del turno e imprimir el ticket de cierre.",
+                    0.88, 0.08, 130, 40, Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
+            },
+            "Module.Suppliers" => new()
+            {
+                new("🚚 Proveedores Registrados",
+                    "Lista de todos tus proveedores activos. Haz clic para ver su historial de pedidos.",
+                    0.50, 0.50, 700, 400, Ticketfy.Core.Models.TutorialAnchorSide.Top),
+                new("📦 Nueva Orden de Compra",
+                    "Registra una compra de mercancía. El stock se actualizará automáticamente al guardar.",
+                    0.85, 0.08, 140, 40, Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
+            },
+            "Module.Expenses" => new()
+            {
+                new("💸 Registro de Gastos",
+                    "Añade cada gasto operativo. Al registrarlos, el sistema calcula tu utilidad neta real.",
+                    0.50, 0.50, 700, 400, Ticketfy.Core.Models.TutorialAnchorSide.Top),
+            },
+            "Module.Promotions" => new()
+            {
+                new("🏷️ Descuentos y Kits",
+                    "Crea promociones de porcentaje, monto fijo o kits de productos que se aplican automáticamente en POS.",
+                    0.50, 0.50, 700, 400, Ticketfy.Core.Models.TutorialAnchorSide.Top),
+            },
+            "Module.Settings" => new()
+            {
+                new("👥 Gestión de Usuarios",
+                    "Administra las cuentas del equipo: cambia contraseñas, asigna roles y desactiva usuarios.",
+                    0.50, 0.25, 600, 200, Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
+                new("🖨️ Configuración de Impresora",
+                    "Configura el puerto COM o IP de tu impresora térmica ESC/POS para imprimir tickets.",
+                    0.50, 0.60, 600, 200, Ticketfy.Core.Models.TutorialAnchorSide.Top),
+            },
+            _ => new()
+        };
+    }
+
 
     private async Task ValidateShiftStatusAsync()
     {
@@ -790,11 +971,23 @@ public partial class MainWindowViewModel : ObservableObject
 
         if (!hasUsers)
         {
-            // Route to First-Time Setup (OOBE)
-            ActiveViewModel = new FirstTimeSetupViewModel(_userRepository, new DialogService(async (vm) => { return null; }, () => {}), () =>
+            // Route to First-Time Setup (OOBE) Wizard
+            var dialogService = new DialogService(async (vm) => { return null; }, () => {});
+            var settingsService = new Ticketfy.Services.Implementations.SettingsService(_db);
+
+            Action finishSetupAction = () => { ActiveViewModel = _loginVm; };
+            
+            Action navigateToAdditionalUsersAction = () => 
             {
-                ActiveViewModel = _loginVm;
-            });
+                ActiveViewModel = new SetupAdditionalUsersViewModel(_userRepository, finishSetupAction);
+            };
+
+            Action navigateToBusinessDataAction = () => 
+            {
+                ActiveViewModel = new SetupBusinessDataViewModel(settingsService, navigateToAdditionalUsersAction);
+            };
+
+            ActiveViewModel = new FirstTimeSetupViewModel(_userRepository, dialogService, navigateToBusinessDataAction);
         }
         else
         {

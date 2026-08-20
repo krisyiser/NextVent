@@ -16,7 +16,7 @@ public partial class FirstTimeSetupViewModel : ValidatableViewModelBase
 {
     private readonly IUserRepository _userRepository;
     private readonly IDialogService _dialogService;
-    private readonly Action _navigateToLogin;
+    private readonly Action _navigateToNextStep;
 
     [ObservableProperty] private string _adminFullName = string.Empty;
     [ObservableProperty] private string _adminUsername = string.Empty;
@@ -34,11 +34,11 @@ public partial class FirstTimeSetupViewModel : ValidatableViewModelBase
 
     // Removed OnAdminPinChanged as we are using 4 separate text boxes
 
-    public FirstTimeSetupViewModel(IUserRepository userRepository, IDialogService dialogService, Action navigateToLogin)
+    public FirstTimeSetupViewModel(IUserRepository userRepository, IDialogService dialogService, Action navigateToNextStep)
     {
         _userRepository = userRepository;
         _dialogService = dialogService;
-        _navigateToLogin = navigateToLogin;
+        _navigateToNextStep = navigateToNextStep;
     }
 
     [RelayCommand]
@@ -79,15 +79,8 @@ public partial class FirstTimeSetupViewModel : ValidatableViewModelBase
 
             await _userRepository.CreateUserAsync(adminUser);
             
-            // Enviar telemetría al finalizar el Setup
-            var registrationService = new Ticketfy.Services.Implementations.DeviceRegistrationService();
-            await registrationService.RegisterNodeAsync(new Ticketfy.Services.Implementations.BusinessProfile 
-            { 
-                BusinessName = "Ticketfy User", // Could ask user for business name later
-                Email = "admin@ticketfy.com" 
-            });
-
-            _navigateToLogin();
+            // Advance to the next wizard step instead of logging in directly
+            _navigateToNextStep();
         }
         catch (Exception ex)
         {
