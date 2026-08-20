@@ -840,15 +840,21 @@ public partial class MainWindowViewModel : ObservableObject
             },
             "Module.Inventory" => new()
             {
-                new("🔎 Filtros y Búsqueda",
-                    "Usa la barra superior para filtrar por categoría, stock bajo o buscar un producto específico.",
-                    TargetName: "InventorySearchBorder", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
-                new("📋 Lista de Productos",
-                    "Cada fila muestra precio, stock y categoría. Haz clic en un producto para editar sus detalles.",
+                new("📋 Productos",
+                    "Consulta la lista completa de tus artículos, precios, categoría y existencias de stock.",
                     TargetName: "InventoryDataGridBorder", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Top),
-                new("➕ Agregar Producto",
-                    "Usa el botón '+ Nuevo Producto' para registrar un nuevo artículo en tu catálogo.",
+                new("🔍 Buscador",
+                    "Filtra y busca productos rápidamente por nombre, SKU o código de barras.",
+                    TargetName: "InventorySearchBorder", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
+                new("➕ Nuevo Producto",
+                    "Registra nuevos artículos en el catálogo ingresando su precio, costo y stock inicial.",
                     TargetName: "AddProductBtn", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
+                new("💾 Copia de Seguridad",
+                    "Genera un respaldo instantáneo del inventario y existencias actuales.",
+                    TargetName: "InventoryBackupBtn", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
+                new("📜 Historial",
+                    "Revisa el historial de respaldos y movimientos pasados del catálogo.",
+                    TargetName: "InventoryHistoryBtn", AnchorSide: Ticketfy.Core.Models.TutorialAnchorSide.Bottom),
             },
             "Module.Customers" => new()
             {

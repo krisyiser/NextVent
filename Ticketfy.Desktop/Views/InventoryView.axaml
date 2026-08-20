@@ -60,14 +60,14 @@
                             </StackPanel>
                         </Button>
 
-                        <Button Command="{Binding CreateSnapshotCommand}" Padding="10,6" CornerRadius="6" Cursor="Hand" Background="#EFF6FF" BorderBrush="#3B82F6" BorderThickness="1">
+                        <Button x:Name="InventoryBackupBtn" Command="{Binding CreateSnapshotCommand}" Padding="10,6" CornerRadius="6" Cursor="Hand" Background="#EFF6FF" BorderBrush="#3B82F6" BorderThickness="1">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <mi:MaterialIcon Kind="Camera" Width="16" Height="16" Foreground="#2563EB" />
                                 <TextBlock Text="COPIA DE SEGURIDAD" FontWeight="Bold" FontSize="11" Foreground="#2563EB" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
 
-                        <Button Command="{Binding ViewSnapshotsCommand}" Padding="10,6" CornerRadius="6" Cursor="Hand" Background="#EFF6FF" BorderBrush="#3B82F6" BorderThickness="1">
+                        <Button x:Name="InventoryHistoryBtn" Command="{Binding ViewSnapshotsCommand}" Padding="10,6" CornerRadius="6" Cursor="Hand" Background="#EFF6FF" BorderBrush="#3B82F6" BorderThickness="1">
                             <StackPanel Orientation="Horizontal" Spacing="6">
                                 <mi:MaterialIcon Kind="History" Width="16" Height="16" Foreground="#2563EB" />
                                 <TextBlock Text="HISTORIAL" FontWeight="Bold" FontSize="11" Foreground="#2563EB" VerticalAlignment="Center" />
