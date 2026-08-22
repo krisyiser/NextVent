@@ -1,7 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Input;
-using Avalonia.Interactivity;
+using Avalonia.Media;
 using Avalonia.Threading;
 using System;
 
@@ -59,156 +58,86 @@ public partial class PinInputControl : UserControl
         {
             if (SetAndRaise(PinValueProperty, ref _pinValue, value))
             {
-                UpdateBoxesFromPinValue(value);
+                if (MasterInput.Text != value)
+                {
+                    MasterInput.Text = value ?? string.Empty;
+                }
+                UpdateVisualState(value ?? string.Empty);
             }
         }
     }
-
-    private bool _isUpdating;
 
     public PinInputControl()
     {
         InitializeComponent();
 
-        Box1.GotFocus += (s, e) => EnsureSequentialFocus(Box1);
-        Box2.GotFocus += (s, e) => EnsureSequentialFocus(Box2);
-        Box3.GotFocus += (s, e) => EnsureSequentialFocus(Box3);
-        Box4.GotFocus += (s, e) => EnsureSequentialFocus(Box4);
+        GotFocus += (s, e) => Dispatcher.UIThread.Post(() => MasterInput.Focus());
+        PointerPressed += (s, e) => Dispatcher.UIThread.Post(() => MasterInput.Focus());
 
-        AddHandler(KeyDownEvent, OnPreviewKeyDown, RoutingStrategies.Tunnel);
-
-        Box1.PropertyChanged += (s, e) => OnBoxTextChanged();
-        Box2.PropertyChanged += (s, e) => OnBoxTextChanged();
-        Box3.PropertyChanged += (s, e) => OnBoxTextChanged();
-        Box4.PropertyChanged += (s, e) => OnBoxTextChanged();
-    }
-
-    private NumericTextBox GetActiveTargetBox()
-    {
-        if (string.IsNullOrEmpty(Box1.Text)) return Box1;
-        if (string.IsNullOrEmpty(Box2.Text)) return Box2;
-        if (string.IsNullOrEmpty(Box3.Text)) return Box3;
-        return Box4;
-    }
-
-    private void EnsureSequentialFocus(NumericTextBox sourceBox)
-    {
-        if (_isUpdating) return;
-
-        var target = GetActiveTargetBox();
-        if (sourceBox != target)
+        MasterInput.PropertyChanged += (s, e) =>
         {
-            Dispatcher.UIThread.Post(() =>
+            if (e.Property == TextBox.TextProperty)
             {
-                target.Focus();
-                target.SelectAll();
-            });
-        }
+                var text = MasterInput.Text ?? string.Empty;
+                if (text.Length > 4)
+                {
+                    text = text.Substring(0, 4);
+                    MasterInput.Text = text;
+                }
+                PinValue = text;
+            }
+        };
+
+        MasterInput.GotFocus += (s, e) => UpdateVisualState(PinValue);
+        MasterInput.LostFocus += (s, e) => UpdateVisualState(PinValue);
     }
 
-    private void OnPreviewKeyDown(object? sender, KeyEventArgs e)
+    private void UpdateVisualState(string val)
     {
-        if (e.Key == Key.Back)
-        {
-            e.Handled = true;
-            HandleSequentialBackspace();
-            return;
-        }
-
-        // Handle numeric digit input
-        string? digit = null;
-        if (e.Key >= Key.D0 && e.Key <= Key.D9)
-        {
-            digit = ((int)e.Key - (int)Key.D0).ToString();
-        }
-        else if (e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9)
-        {
-            digit = ((int)e.Key - (int)Key.NumPad0).ToString();
-        }
-
-        if (digit != null)
-        {
-            e.Handled = true;
-            HandleSequentialDigitInput(digit);
-        }
-    }
-
-    private void HandleSequentialDigitInput(string digit)
-    {
-        var target = GetActiveTargetBox();
-        target.Text = digit;
-
-        // Advance to next target box
-        var nextTarget = GetActiveTargetBox();
-        Dispatcher.UIThread.Post(() =>
-        {
-            nextTarget.Focus();
-            nextTarget.SelectAll();
-        });
-    }
-
-    private void HandleSequentialBackspace()
-    {
-        if (!string.IsNullOrEmpty(Box4.Text))
-        {
-            Box4.Text = string.Empty;
-            Box4.Focus();
-        }
-        else if (!string.IsNullOrEmpty(Box3.Text))
-        {
-            Box3.Text = string.Empty;
-            Box3.Focus();
-        }
-        else if (!string.IsNullOrEmpty(Box2.Text))
-        {
-            Box2.Text = string.Empty;
-            Box2.Focus();
-        }
-        else if (!string.IsNullOrEmpty(Box1.Text))
-        {
-            Box1.Text = string.Empty;
-            Box1.Focus();
-        }
-    }
-
-    private void OnBoxTextChanged()
-    {
-        if (_isUpdating) return;
-        _isUpdating = true;
-
-        Pin1 = Box1.Text ?? string.Empty;
-        Pin2 = Box2.Text ?? string.Empty;
-        Pin3 = Box3.Text ?? string.Empty;
-        Pin4 = Box4.Text ?? string.Empty;
-
-        _pinValue = $"{Pin1}{Pin2}{Pin3}{Pin4}";
-        RaisePropertyChanged(PinValueProperty, string.Empty, _pinValue);
-
-        _isUpdating = false;
-    }
-
-    private void UpdateBoxesFromPinValue(string val)
-    {
-        if (_isUpdating) return;
-        _isUpdating = true;
-
         val ??= string.Empty;
-        Box1.Text = val.Length > 0 ? val[0].ToString() : string.Empty;
-        Box2.Text = val.Length > 1 ? val[1].ToString() : string.Empty;
-        Box3.Text = val.Length > 2 ? val[2].ToString() : string.Empty;
-        Box4.Text = val.Length > 3 ? val[3].ToString() : string.Empty;
 
-        Pin1 = Box1.Text;
-        Pin2 = Box2.Text;
-        Pin3 = Box3.Text;
-        Pin4 = Box4.Text;
+        Pin1 = val.Length > 0 ? val[0].ToString() : string.Empty;
+        Pin2 = val.Length > 1 ? val[1].ToString() : string.Empty;
+        Pin3 = val.Length > 2 ? val[2].ToString() : string.Empty;
+        Pin4 = val.Length > 3 ? val[3].ToString() : string.Empty;
 
-        _isUpdating = false;
+        Dot1.Text = val.Length > 0 ? "●" : string.Empty;
+        Dot2.Text = val.Length > 1 ? "●" : string.Empty;
+        Dot3.Text = val.Length > 2 ? "●" : string.Empty;
+        Dot4.Text = val.Length > 3 ? "●" : string.Empty;
+
+        bool hasFocus = MasterInput.IsFocused;
+        int activeIndex = Math.Min(val.Length, 3);
+
+        HighlightBox(Box1, hasFocus && activeIndex == 0, val.Length > 0);
+        HighlightBox(Box2, hasFocus && activeIndex == 1, val.Length > 1);
+        HighlightBox(Box3, hasFocus && activeIndex == 2, val.Length > 2);
+        HighlightBox(Box4, hasFocus && (activeIndex == 3 || val.Length == 4), val.Length > 3);
+    }
+
+    private void HighlightBox(Border box, bool isActive, bool hasValue)
+    {
+        if (isActive)
+        {
+            box.BorderBrush = this.FindResource("AccentPrimaryBrush") as IBrush ?? Brushes.DodgerBlue;
+            box.BorderThickness = new Thickness(2);
+        }
+        else if (hasValue)
+        {
+            box.BorderBrush = this.FindResource("BorderBrush") as IBrush ?? Brushes.Gray;
+            box.BorderThickness = new Thickness(1.5);
+        }
+        else
+        {
+            box.BorderBrush = this.FindResource("BorderBrush") as IBrush ?? Brushes.LightGray;
+            box.BorderThickness = new Thickness(1.5);
+        }
     }
 
     public void ClearPin()
     {
         PinValue = string.Empty;
-        Dispatcher.UIThread.Post(() => Box1.Focus());
+        MasterInput.Text = string.Empty;
+        Dispatcher.UIThread.Post(() => MasterInput.Focus());
     }
 }

@@ -1,5 +1,6 @@
 using Avalonia;
-using Avalonia.Media;
+using Avalonia.Controls;
+using System;
 
 namespace Ticketfy.Controls;
 
@@ -9,6 +10,8 @@ namespace Ticketfy.Controls;
 /// </summary>
 public class PhoneTextBox : NumericTextBox
 {
+    protected override Type StyleKeyOverride => typeof(TextBox);
+
     public static readonly StyledProperty<bool> IsValidPhoneProperty =
         AvaloniaProperty.Register<PhoneTextBox, bool>(nameof(IsValidPhone), defaultValue: false);
 

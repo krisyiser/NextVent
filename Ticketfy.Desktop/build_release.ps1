@@ -86,6 +86,14 @@ git push -u origin main --force
 
 Set-Location -Path $CurrentLocation
 
+# 5. Despliegue automático de contenedor web en servidor de producción (100.109.190.105)
+Write-Host "Sincronizando contenedor web de producción valcore.cloud..." -ForegroundColor Cyan
+try {
+    python "..\execute_deploy.py"
+} catch {
+    Write-Host "Aviso: No se pudo ejecutar deploy automático de la web, pero el release OTA ya fue publicado." -ForegroundColor Yellow
+}
+
 Write-Host "¡Construcción y publicación de actualización OTA completadas con éxito!" -ForegroundColor Green
 Write-Host "Instalador 64-bit: $ReleaseDir\Ticketfy-Setup-v$Version-x64.exe" -ForegroundColor Green
 Write-Host "Instalador 32-bit: $ReleaseDir\Ticketfy-Setup-v$Version-x86.exe" -ForegroundColor Green

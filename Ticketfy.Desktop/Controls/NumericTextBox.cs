@@ -4,7 +4,6 @@ using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
 using System;
-using System.Linq;
 using System.Text.RegularExpressions;
 
 namespace Ticketfy.Controls;
@@ -16,6 +15,8 @@ namespace Ticketfy.Controls;
 /// </summary>
 public class NumericTextBox : TextBox
 {
+    protected override Type StyleKeyOverride => typeof(TextBox);
+
     public static readonly StyledProperty<bool> AllowDecimalsProperty =
         AvaloniaProperty.Register<NumericTextBox, bool>(nameof(AllowDecimals), defaultValue: false);
 

@@ -2,12 +2,34 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:controls="using:Ticketfy.Controls"
              x:Class="Ticketfy.Controls.PinInputControl"
-             Focusable="True">
+             Focusable="True"
+             Background="Transparent">
 
-    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
-        <controls:NumericTextBox x:Name="Box1" Width="44" Height="48" MaxDigits="1" AllowDecimals="False" PasswordChar="●" FontSize="20" FontWeight="Bold" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" CornerRadius="8" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1.5" Focusable="True" IsReadOnly="True" />
-        <controls:NumericTextBox x:Name="Box2" Width="44" Height="48" MaxDigits="1" AllowDecimals="False" PasswordChar="●" FontSize="20" FontWeight="Bold" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" CornerRadius="8" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1.5" Focusable="True" IsReadOnly="True" />
-        <controls:NumericTextBox x:Name="Box3" Width="44" Height="48" MaxDigits="1" AllowDecimals="False" PasswordChar="●" FontSize="20" FontWeight="Bold" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" CornerRadius="8" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1.5" Focusable="True" IsReadOnly="True" />
-        <controls:NumericTextBox x:Name="Box4" Width="44" Height="48" MaxDigits="1" AllowDecimals="False" PasswordChar="●" FontSize="20" FontWeight="Bold" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" CornerRadius="8" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1.5" Focusable="True" IsReadOnly="True" />
-    </StackPanel>
+    <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
+        <!-- Master Hidden Numeric Input -->
+        <controls:NumericTextBox x:Name="MasterInput"
+                                 Width="216"
+                                 Height="48"
+                                 MaxDigits="4"
+                                 AllowDecimals="False"
+                                 Opacity="0.001"
+                                 ZIndex="10"
+                                 Cursor="Ibeam" />
+
+        <!-- 4 Visual Sequential Dot Boxes -->
+        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center" IsHitTestVisible="False" ZIndex="1">
+            <Border x:Name="Box1" Width="44" Height="48" CornerRadius="8" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1.5">
+                <TextBlock x:Name="Dot1" Text="" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <Border x:Name="Box2" Width="44" Height="48" CornerRadius="8" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1.5">
+                <TextBlock x:Name="Dot2" Text="" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <Border x:Name="Box3" Width="44" Height="48" CornerRadius="8" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1.5">
+                <TextBlock x:Name="Dot3" Text="" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <Border x:Name="Box4" Width="44" Height="48" CornerRadius="8" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1.5">
+                <TextBlock x:Name="Dot4" Text="" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+        </StackPanel>
+    </Grid>
 </UserControl>
