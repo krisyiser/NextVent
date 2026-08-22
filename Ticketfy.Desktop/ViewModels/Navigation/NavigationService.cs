@@ -86,6 +86,7 @@ public partial class NavigationService : ObservableObject
         // Block navigation during login, dialogs, or locked states
         if (ActiveViewModel == _loginVm ||
             ActiveViewModel is LicenseLockedViewModel ||
+            ActiveViewModel is WelcomeLicenseViewModel ||
             ActiveViewModel is FirstTimeSetupViewModel)
         {
             return;

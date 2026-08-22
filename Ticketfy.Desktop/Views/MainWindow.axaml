@@ -27,6 +27,7 @@
         <DataTemplate DataType="vm:FiscalViewModel"><v:FiscalView /></DataTemplate>
         <DataTemplate DataType="vm:SettingsViewModel"><v:SettingsView /></DataTemplate>
         <DataTemplate DataType="vm:LoginViewModel"><v:LoginView /></DataTemplate>
+        <DataTemplate DataType="vm:WelcomeLicenseViewModel"><v:WelcomeLicenseView /></DataTemplate>
         <DataTemplate DataType="vm:FirstTimeSetupViewModel"><v:FirstTimeSetupView /></DataTemplate>
         <DataTemplate DataType="vm:SetupBusinessDataViewModel"><v:SetupBusinessDataView /></DataTemplate>
         <DataTemplate DataType="vm:SetupAdditionalUsersViewModel"><v:SetupAdditionalUsersView /></DataTemplate>

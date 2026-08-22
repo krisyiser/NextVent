@@ -362,7 +362,11 @@ public partial class MainWindowViewModel : ObservableObject
                     Navigation.GoTo(new SetupAdditionalUsersViewModel(userRepository, finishSetup));
                 Action goToBusinessData = () =>
                     Navigation.GoTo(new SetupBusinessDataViewModel(settingsService, goToAdditionalUsers));
-                Navigation.GoTo(new FirstTimeSetupViewModel(userRepository, dialogService, goToBusinessData));
+                Action goToAdminAccount = () =>
+                    Navigation.GoTo(new FirstTimeSetupViewModel(userRepository, dialogService, goToBusinessData));
+
+                // OOBE Onboarding Step 1: Friendly Welcome & License Activation Screen
+                Navigation.GoTo(new WelcomeLicenseViewModel(licenseService, goToAdminAccount));
             }
             else
             {

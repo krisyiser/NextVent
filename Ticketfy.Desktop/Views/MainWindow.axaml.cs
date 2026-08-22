@@ -70,6 +70,7 @@ public partial class MainWindow : Window
             // Only trigger lock if we are NOT on a login/setup screen and NOT already locked
             bool isSafeToLock = vm.ActiveViewModel is not LoginViewModel 
                              && vm.ActiveViewModel is not FirstTimeSetupViewModel
+                             && vm.ActiveViewModel is not WelcomeLicenseViewModel
                              && !vm.IsLocked;
 
             if (isSafeToLock)
