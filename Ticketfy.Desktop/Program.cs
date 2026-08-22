@@ -25,8 +25,18 @@ internal static class Program
 
         if (!createdNew)
         {
-            // Another instance is already running. Exit silently.
-            return;
+            try
+            {
+                var currentProc = System.Diagnostics.Process.GetCurrentProcess();
+                foreach (var p in System.Diagnostics.Process.GetProcessesByName(currentProc.ProcessName))
+                {
+                    if (p.Id != currentProc.Id)
+                    {
+                        p.Kill();
+                    }
+                }
+            }
+            catch { }
         }
 
         try

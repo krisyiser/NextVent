@@ -63,12 +63,12 @@ if (Test-Path "..\web") {
     Copy-Item -Path "..\web\*" -Destination "$ReleaseDir\" -Force
     if (Test-Path "$ReleaseDir\valcore-download.js") {
         $jsContent = Get-Content "$ReleaseDir\valcore-download.js" -Raw
-        $jsContent = $jsContent -replace "const DEFAULT_VERSION = '[^']+'", "const DEFAULT_VERSION = '$Version'"
+        $jsContent = $jsContent -replace "version: '[^']+'", "version: '$Version'"
         Set-Content -Path "$ReleaseDir\valcore-download.js" -Value $jsContent -Encoding UTF8
     }
 }
 
-Write-Host "Publicando releases en Forgejo (https://git.valcore/yersi/ticketfy-releases.git)..." -ForegroundColor Cyan
+Write-Host "Forzando sincronización pull y push en Forgejo (https://git.valcore/yersi/ticketfy-releases.git)..." -ForegroundColor Cyan
 $CurrentLocation = Get-Location
 Set-Location -Path $ReleaseDir
 if (!(Test-Path ".git")) {
@@ -78,8 +78,10 @@ if (!(Test-Path ".git")) {
 }
 
 git config http.sslVerify false
+git fetch --all
+git reset --mixed origin/main
 git add .
-git commit -m "Release v$Version"
+git commit -m "Force Release Sync v$Version"
 git push -u origin main --force
 
 Set-Location -Path $CurrentLocation

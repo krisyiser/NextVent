@@ -75,6 +75,14 @@ public partial class MainWindowViewModel : ObservableObject
 
     public MainWindowViewModel()
     {
+        // 1. Initialize Dialog Coordinator FIRST to prevent null reference delegates
+        Dialogs = new DialogCoordinator();
+        Dialogs.PropertyChanged += (_, _) =>
+        {
+            OnPropertyChanged(nameof(ActiveDialogViewModel));
+            OnPropertyChanged(nameof(IsDialogOverlayOpen));
+        };
+
         // ── Database setup ───────────────────────────────────────────────────
         string appDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
         string appFolder = Path.Combine(appDataFolder, "ticketfy", "Database");
@@ -146,8 +154,17 @@ public partial class MainWindowViewModel : ObservableObject
             Dialogs.ShowDialog(dialog);
         };
 
-        var facturamaService = Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions
-            .GetRequiredService<IFacturamaService>(App.Current!.Services!);
+        // Safe resolution of FacturamaService
+        IFacturamaService facturamaService;
+        try
+        {
+            facturamaService = (App.Current?.Services?.GetService(typeof(IFacturamaService)) as IFacturamaService)
+                               ?? new FacturamaService(new System.Net.Http.HttpClient());
+        }
+        catch
+        {
+            facturamaService = new FacturamaService(new System.Net.Http.HttpClient());
+        }
 
         // ── Module ViewModels ─────────────────────────────────────────────────
         var posVm = new PosViewModel(productService, db, shiftNoteService, kitService, customerService,
@@ -170,14 +187,7 @@ public partial class MainWindowViewModel : ObservableObject
                 return null;
             }, Dialogs.CloseDialog));
 
-        // ── Sub-VM Construction ───────────────────────────────────────────────
-        Dialogs = new DialogCoordinator();
-        Dialogs.PropertyChanged += (_, _) =>
-        {
-            OnPropertyChanged(nameof(ActiveDialogViewModel));
-            OnPropertyChanged(nameof(IsDialogOverlayOpen));
-        };
-
+        // ── Navigation Service ───────────────────────────────────────────────
         Navigation = new NavigationService(loginVm, posVm, inventoryVm, customersVm, historyVm,
             promotionsVm, fiscalVm, settingsVm, suppliersVm, expensesVm, cashierPerformanceVm);
         Navigation.PropertyChanged += (_, e) =>
@@ -228,7 +238,6 @@ public partial class MainWindowViewModel : ObservableObject
         wirer.WirePromotionsVm(promotionsVm, posVm);
 
         // ── Fix PromotionsVm promotionService dependency ─────────────────────
-        // Re-wire promotion dialog with correct service
         promotionsVm.OpenAddPromotionRequested += () =>
         {
             var dialog = new PromotionDialogViewModel(promotionService);
@@ -375,7 +384,6 @@ public partial class MainWindowViewModel : ObservableObject
 
     public async Task<int> GetIdleTimeoutMinutesAsync()
     {
-        // Re-reads from DB each call so settings changes are respected without restart
         var settingsSvc = new SettingsService(
             new AppDbContext(new DbContextOptionsBuilder<AppDbContext>()
                 .UseSqlite($"Data Source={Path.Combine(

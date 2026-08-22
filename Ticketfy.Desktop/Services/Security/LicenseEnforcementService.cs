@@ -40,8 +40,8 @@ iwIDAQAB
 
         if (!File.Exists(licensePath))
         {
-            // Sin licencia, el sistema queda como un bloque.
-            return true;
+            // En instalación limpia sin archivo license.jwt, permitir modo de prueba/evaluación inicial
+            return false;
         }
 
         var tokenString = File.ReadAllText(licensePath).Trim();
