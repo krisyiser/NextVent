@@ -52,10 +52,13 @@ def deploy_release(version):
         sftp.put(x86_setup, f"{remote_public}/Ticketfy-Setup-v{version}-x86.exe")
         sftp.put(x86_setup, f"{remote_worktree}/Ticketfy-Setup-v{version}-x86.exe")
 
-    # Upload all files recursively
+    # Upload all files recursively (ignoring .git metadata)
     if os.path.exists(releases_dir):
         for root, dirs, files in os.walk(releases_dir):
+            dirs[:] = [d for d in dirs if d != '.git']
             for f in files:
+                if f.startswith('.git'):
+                    continue
                 local_file = os.path.join(root, f)
                 rel_path = os.path.relpath(local_file, releases_dir).replace("\\", "/")
                 remote_pub_file = f"{remote_public}/{rel_path}"
@@ -63,14 +66,26 @@ def deploy_release(version):
 
                 rel_dir = os.path.dirname(rel_path)
                 if rel_dir and rel_dir != ".":
-                    try:
-                        sftp.stat(f"{remote_public}/{rel_dir}")
-                    except IOError:
-                        sftp.mkdir(f"{remote_public}/{rel_dir}")
-                    try:
-                        sftp.stat(f"{remote_worktree}/{rel_dir}")
-                    except IOError:
-                        sftp.mkdir(f"{remote_worktree}/{rel_dir}")
+                    parts = rel_dir.split('/')
+                    curr_pub = remote_public
+                    curr_wt = remote_worktree
+                    for p in parts:
+                        curr_pub += "/" + p
+                        curr_wt += "/" + p
+                        try:
+                            sftp.stat(curr_pub)
+                        except IOError:
+                            try:
+                                sftp.mkdir(curr_pub)
+                            except IOError:
+                                pass
+                        try:
+                            sftp.stat(curr_wt)
+                        except IOError:
+                            try:
+                                sftp.mkdir(curr_wt)
+                            except IOError:
+                                pass
 
                 try:
                     sftp.put(local_file, remote_pub_file)
