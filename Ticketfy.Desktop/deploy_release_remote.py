@@ -2,6 +2,8 @@ import paramiko
 import os
 import sys
 
+sys.stdout.reconfigure(encoding='utf-8')
+
 def deploy_release(version):
     host = "100.109.190.105"
     user = "yersi"
