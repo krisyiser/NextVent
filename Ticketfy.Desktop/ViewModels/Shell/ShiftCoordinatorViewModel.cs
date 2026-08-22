@@ -135,7 +135,11 @@ public partial class ShiftCoordinatorViewModel : ObservableObject
         openShiftVm.RequestClose += (success) =>
         {
             CloseDialogRequested?.Invoke();
-            if (!success)
+            if (success)
+            {
+                ShiftOpened?.Invoke();
+            }
+            else
             {
                 _sessionManager.SwitchCashier(null!);
                 LogoutRequested?.Invoke();

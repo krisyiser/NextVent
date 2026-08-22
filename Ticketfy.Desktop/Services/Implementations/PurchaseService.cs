@@ -76,24 +76,22 @@ public class PurchaseService : IPurchaseService
                 _context.PurchaseItems.Add(itemEntity);
                 itemDtos.Add(new PurchaseItemDto(itemEntity.Id, purchaseId, item.ProductId, item.ProductName, item.UnitPrice, item.Quantity, itemTotal));
 
-                // Restock inventory product & update cost using Weighted Average Costing Formula
+                // Restock inventory product & update cost to Most Recent Purchase Price (Último Costo)
                 var product = await _context.Products.FindAsync(item.ProductId);
                 if (product != null)
                 {
-                    var currentStock = Math.Max(0.0, product.Stock);
                     var purchaseQty = item.Quantity;
                     var purchasePrice = item.UnitPrice;
 
                     if (purchasePrice > 0)
                     {
-                        var totalQuantity = currentStock + purchaseQty;
-                        if (totalQuantity > 0)
-                        {
-                            var weightedCost = ((currentStock * product.Cost) + (purchaseQty * purchasePrice)) / totalQuantity;
-                            product.Cost = Math.Round(weightedCost, 2);
-                        }
+                        product.Cost = Math.Round(purchasePrice, 2);
                     }
                     product.Stock += purchaseQty;
+                    if (!string.IsNullOrEmpty(dto.SupplierId))
+                    {
+                        product.DefaultSupplierId = dto.SupplierId;
+                    }
                 }
             }
 
@@ -109,23 +107,6 @@ public class PurchaseService : IPurchaseService
             };
 
             _context.Purchases.Add(purchaseEntity);
-
-            // Inject Cash Outflow Movement to Active Shift Drawer
-            var activeShift = await _context.Shifts.FirstOrDefaultAsync(s => s.IsOpen == 1);
-            if (activeShift != null)
-            {
-                var outflow = new ShiftMovementEntity
-                {
-                    ShiftId = activeShift.Id,
-                    MovementType = Ticketfy.Core.Enums.MovementType.CompraEfectivo,
-                    Amount = totalCost,
-                    IsOutflow = true,
-                    Description = $"Compra Proveedor: {dto.SupplierName} - Factura: {dto.InvoiceNumber}",
-                    ReferenceId = purchaseId,
-                    Timestamp = DateTime.Now.ToString("s")
-                };
-                _context.ShiftMovements.Add(outflow);
-            }
 
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();

@@ -39,23 +39,53 @@
             <!-- Middle Denominations Matrix -->
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <StackPanel Spacing="14">
-                    <!-- Summary Comparison Banner -->
-                    <Border Background="{DynamicResource BgPrimaryBrush}" Padding="14" CornerRadius="6" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
-                        <Grid ColumnDefinitions="*,*,*">
-                            <StackPanel Grid.Column="0" Spacing="2">
-                                <TextBlock Text="Fondo Inicial:" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
-                                <TextBlock Text="{Binding OpenCashAmount, StringFormat='${0:N2}'}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                    <!-- 1. Top 4 Category Cards (Fondo Inicial, Ingresos, Egresos, Diferencia) -->
+                    <UniformGrid Columns="4">
+                        <!-- 1. FONDO INICIAL -->
+                        <Border Margin="0,0,3,0" Padding="10" Background="{DynamicResource BgPrimaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6">
+                            <StackPanel Spacing="2">
+                                <TextBlock Text="1. Fondo Inicial" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" />
+                                <TextBlock Text="{Binding OpenCashAmount, StringFormat='${0:N2}'}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- 2. INGRESOS -->
+                        <Border Margin="3,0" Padding="10" Background="{DynamicResource BgPrimaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6">
+                            <StackPanel Spacing="2">
+                                <TextBlock Text="2. Ingresos" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" />
+                                <TextBlock Text="{Binding TotalIngresosShift, StringFormat='${0:N2}'}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource AccentSuccessBrush}" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- 3. EGRESOS -->
+                        <Border Margin="3,0" Padding="10" Background="{DynamicResource BgPrimaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="6">
+                            <StackPanel Spacing="2">
+                                <TextBlock Text="3. Egresos (Gastos)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" />
+                                <TextBlock Text="{Binding TotalEgresosShift, StringFormat='${0:N2}'}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource AccentDangerBrush}" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- 4. DIFERENCIA -->
+                        <Border Margin="3,0,0,0" Padding="10" Background="{DynamicResource BgPrimaryBrush}" BorderBrush="{Binding DifferenceAmountColor}" BorderThickness="2" CornerRadius="6" IsVisible="{Binding !IsBlindMode}">
+                            <StackPanel Spacing="2">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="4. Diferencia" FontSize="11" FontWeight="Bold" Foreground="{Binding DifferenceAmountColor}" />
+                                    <TextBlock Grid.Column="1" Text="{Binding DifferenceStatusLabel}" FontSize="10" FontWeight="SemiBold" Foreground="{Binding DifferenceAmountColor}" />
+                                </Grid>
+                                <TextBlock Text="{Binding DifferenceAmount, StringFormat='${0:N2}'}" FontSize="15" FontWeight="Bold" Foreground="{Binding DifferenceAmountColor}" />
+                            </StackPanel>
+                        </Border>
+                    </UniformGrid>
+
+                    <!-- 2. Conteo Físico Total (Ubicar justo debajo de las 4 categorías) -->
+                    <Border Background="{DynamicResource BgTertiaryBrush}" Padding="12" CornerRadius="6" BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="2">
+                        <Grid ColumnDefinitions="*,Auto">
+                            <StackPanel Spacing="2" VerticalAlignment="Center">
+                                <TextBlock Text="CONTEO FÍSICO TOTAL EN CAJÓN" FontSize="11" FontWeight="ExtraBold" Foreground="{DynamicResource AccentPrimaryBrush}" LetterSpacing="0.5" />
+                                <TextBlock Text="Suma calculada en tiempo real según desglose por billetes y monedas" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" />
                             </StackPanel>
 
-                            <StackPanel Grid.Column="1" Spacing="2">
-                                <TextBlock Text="Conteo Físico Total:" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
-                                <TextBlock Text="{Binding TotalPhysicalCash, StringFormat='${0:N2}'}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                            </StackPanel>
-
-                            <StackPanel Grid.Column="2" Spacing="2" IsVisible="{Binding !IsBlindMode}">
-                                <TextBlock Text="Diferencia Arqueo:" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
-                                <TextBlock Text="{Binding DifferenceAmount, StringFormat='${0:N2}'}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource AccentSuccessBrush}" />
-                            </StackPanel>
+                            <TextBlock Grid.Column="1" Text="{Binding TotalPhysicalCash, StringFormat='${0:N2}'}" FontSize="22" FontWeight="ExtraBold" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
                         </Grid>
                     </Border>
 

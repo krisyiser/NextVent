@@ -32,11 +32,11 @@ public partial class ConfirmDialogOverlay : UserControl
     public static readonly StyledProperty<ICommand?> CancelCommandProperty =
         AvaloniaProperty.Register<ConfirmDialogOverlay, ICommand?>(nameof(CancelCommand));
 
-    public static readonly DirectProperty<ConfirmDialogOverlay, IBrush> ConfirmButtonBackgroundProperty =
-        AvaloniaProperty.RegisterDirect<ConfirmDialogOverlay, IBrush>(nameof(ConfirmButtonBackground), o => o.ConfirmButtonBackground);
+    public static readonly DirectProperty<ConfirmDialogOverlay, IBrush?> ConfirmButtonBackgroundProperty =
+        AvaloniaProperty.RegisterDirect<ConfirmDialogOverlay, IBrush?>(nameof(ConfirmButtonBackground), o => o.ConfirmButtonBackground);
 
-    public static readonly DirectProperty<ConfirmDialogOverlay, IBrush> DialogIconForegroundProperty =
-        AvaloniaProperty.RegisterDirect<ConfirmDialogOverlay, IBrush>(nameof(DialogIconForeground), o => o.DialogIconForeground);
+    public static readonly DirectProperty<ConfirmDialogOverlay, IBrush?> DialogIconForegroundProperty =
+        AvaloniaProperty.RegisterDirect<ConfirmDialogOverlay, IBrush?>(nameof(DialogIconForeground), o => o.DialogIconForeground);
 
     public static readonly DirectProperty<ConfirmDialogOverlay, MaterialIconKind> DialogIconKindProperty =
         AvaloniaProperty.RegisterDirect<ConfirmDialogOverlay, MaterialIconKind>(nameof(DialogIconKind), o => o.DialogIconKind);

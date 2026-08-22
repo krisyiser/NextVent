@@ -36,7 +36,7 @@ public class InventorySnapshotService : IInventorySnapshotService
                 snapshot.Items.Add(new InventorySnapshotItemEntity
                 {
                     ProductId = p.Id,
-                    Barcode = p.Barcode,
+                    Barcode = p.Barcode ?? string.Empty,
                     Name = p.Name,
                     Quantity = (decimal)p.Stock,
                     CostPrice = (decimal)p.Cost,

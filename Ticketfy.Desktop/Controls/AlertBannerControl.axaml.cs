@@ -17,14 +17,14 @@ public partial class AlertBannerControl : UserControl
     public static readonly DirectProperty<AlertBannerControl, bool> HasMessageProperty =
         AvaloniaProperty.RegisterDirect<AlertBannerControl, bool>(nameof(HasMessage), o => o.HasMessage);
 
-    public static readonly DirectProperty<AlertBannerControl, IBrush> BannerBackgroundProperty =
-        AvaloniaProperty.RegisterDirect<AlertBannerControl, IBrush>(nameof(BannerBackground), o => o.BannerBackground);
+    public static readonly DirectProperty<AlertBannerControl, IBrush?> BannerBackgroundProperty =
+        AvaloniaProperty.RegisterDirect<AlertBannerControl, IBrush?>(nameof(BannerBackground), o => o.BannerBackground);
 
-    public static readonly DirectProperty<AlertBannerControl, IBrush> BannerBorderBrushProperty =
-        AvaloniaProperty.RegisterDirect<AlertBannerControl, IBrush>(nameof(BannerBorderBrush), o => o.BannerBorderBrush);
+    public static readonly DirectProperty<AlertBannerControl, IBrush?> BannerBorderBrushProperty =
+        AvaloniaProperty.RegisterDirect<AlertBannerControl, IBrush?>(nameof(BannerBorderBrush), o => o.BannerBorderBrush);
 
-    public static readonly DirectProperty<AlertBannerControl, IBrush> BannerForegroundProperty =
-        AvaloniaProperty.RegisterDirect<AlertBannerControl, IBrush>(nameof(BannerForeground), o => o.BannerForeground);
+    public static readonly DirectProperty<AlertBannerControl, IBrush?> BannerForegroundProperty =
+        AvaloniaProperty.RegisterDirect<AlertBannerControl, IBrush?>(nameof(BannerForeground), o => o.BannerForeground);
 
     public static readonly DirectProperty<AlertBannerControl, MaterialIconKind> BannerIconKindProperty =
         AvaloniaProperty.RegisterDirect<AlertBannerControl, MaterialIconKind>(nameof(BannerIconKind), o => o.BannerIconKind);

@@ -19,5 +19,9 @@ public interface ISaleService
     Task<List<SaleDto>> GetSalesByDateRangeAsync(System.DateTime start, System.DateTime end);
     Task UpdateFiscalStatusAsync(string saleId, string status, string? uuid, string? folio);
     Task<bool> ProcessPartialReturnAsync(string saleId, string productId, double returnQty, string reason, string refundMethod = "Efectivo", bool isProductInGoodCondition = true);
-    Task<List<CashierPerformanceDto>> GetCashierPerformanceReportAsync(double defaultCommissionPct = 0.0);
+    /// <summary>
+    /// Computes aggregated cashier sales metrics and earned commissions within an optional date window, preventing un-bounded database memory dumps.
+    /// </summary>
+    Task<List<CashierPerformanceDto>> GetCashierPerformanceReportAsync(System.DateTime? startDate = null, System.DateTime? endDate = null, double defaultCommissionPct = 0.0);
 }
+

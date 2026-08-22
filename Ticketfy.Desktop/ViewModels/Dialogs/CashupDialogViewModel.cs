@@ -25,9 +25,19 @@ public partial class CashupDialogViewModel : ObservableObject
     private readonly Ticketfy.Services.Interfaces.IAttendanceService? _attendanceService;
 
     [ObservableProperty] private double _openCashAmount = 1000.00;
+    [ObservableProperty] private double _totalIngresosShift;
+    [ObservableProperty] private double _totalEgresosShift;
     [ObservableProperty] private double _theoreticalCash = 4250.00;
     [ObservableProperty] private double _totalPhysicalCash;
-    [ObservableProperty] private double _differenceAmount;
+
+    [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(DifferenceAmountColor))]
+    [NotifyPropertyChangedFor(nameof(DifferenceStatusLabel))]
+    private double _differenceAmount;
+
+    public string DifferenceAmountColor => DifferenceAmount == 0 ? "#10B981" : (DifferenceAmount > 0 ? "#3B82F6" : "#EF4444");
+    public string DifferenceStatusLabel => DifferenceAmount == 0 ? "Cuadre Exacto" : (DifferenceAmount > 0 ? "Sobrante" : "Faltante");
+
     [ObservableProperty] private double _grossProfit;
     [ObservableProperty] private double _netProfit;
     [ObservableProperty] private bool _isBlindMode = false;
@@ -216,25 +226,22 @@ public partial class CashupDialogViewModel : ObservableObject
 
                 var customerAbonosCash = await _db.ShiftMovements
                     .AsNoTracking()
-                    .Where(m => m.ShiftId == shift.Id && m.MovementType == Ticketfy.Core.Enums.MovementType.AbonoCliente && m.Description.Contains("Efectivo"))
+                    .Where(m => m.ShiftId == shift.Id && m.MovementType == Ticketfy.Core.Enums.MovementType.AbonoCliente)
                     .SumAsync(m => m.Amount);
 
                 var cashExpenses = await _db.ShiftMovements
                     .AsNoTracking()
-                    .Where(m => m.ShiftId == shift.Id && m.MovementType == Ticketfy.Core.Enums.MovementType.GastoOperativo && m.Description.Contains("Efectivo"))
-                    .SumAsync(m => m.Amount);
-
-                var cashPurchases = await _db.ShiftMovements
-                    .AsNoTracking()
-                    .Where(m => m.ShiftId == shift.Id && m.MovementType == Ticketfy.Core.Enums.MovementType.CompraEfectivo)
+                    .Where(m => m.ShiftId == shift.Id && m.MovementType == Ticketfy.Core.Enums.MovementType.GastoOperativo)
                     .SumAsync(m => m.Amount);
 
                 var cashReturns = await _db.ShiftMovements
                     .AsNoTracking()
-                    .Where(m => m.ShiftId == shift.Id && m.MovementType == Ticketfy.Core.Enums.MovementType.DevolucionCliente && m.Description.Contains("Efectivo"))
+                    .Where(m => m.ShiftId == shift.Id && m.MovementType == Ticketfy.Core.Enums.MovementType.DevolucionCliente)
                     .SumAsync(m => m.Amount);
 
-                TheoreticalCash = shift.OpeningBalance + cashSales + customerAbonosCash - cashExpenses - cashPurchases - cashReturns;
+                TotalIngresosShift = cashSales + customerAbonosCash;
+                TotalEgresosShift = cashExpenses + cashReturns;
+                TheoreticalCash = OpenCashAmount + TotalIngresosShift - TotalEgresosShift;
                 
                 // Calculate Profit (All sales and expenses, regardless of payment method)
                 var allSalesTotal = await _db.Sales

@@ -375,4 +375,9 @@ public sealed class ThemeService
     {
         CartPositionChanged?.Invoke(position);
     }
+
+    public void ApplyBorderWidth(double width)
+    {
+        BorderWidthChanged?.Invoke(width);
+    }
 }

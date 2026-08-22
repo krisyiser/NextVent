@@ -24,13 +24,13 @@ public partial class SettingsViewModel
     public double GlassmorphismBlur
     {
         get => GlassBlurRadius;
-        set => SetProperty(ref _glassBlurRadius, value);
+        set => GlassBlurRadius = value;
     }
 
     public double GlassmorphismOpacity
     {
         get => GlassOpacity;
-        set => SetProperty(ref _glassOpacity, value);
+        set => GlassOpacity = value;
     }
 
     [ObservableProperty] private string _selectedColorPalette = "Azul Corporativo";

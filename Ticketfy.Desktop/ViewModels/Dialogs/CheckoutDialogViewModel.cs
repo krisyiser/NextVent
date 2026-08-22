@@ -1,27 +1,21 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Ticketfy.Data.Dtos;
-using Ticketfy.Data.Entities;
-using Ticketfy.Services.Implementations;
 using Ticketfy.Services.Interfaces;
-using Ticketfy.Services.Security;
-using Ticketfy.Core.Models;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Ticketfy.ViewModels.Dialogs;
 
-public partial class TenderEntryModel : ObservableObject
-{
-    public string MethodName { get; init; } = "Efectivo";
-    public double AmountPaid { get; set; }
-    public string ReferenceOrFolio { get; set; } = string.Empty;
-}
-
+/// <summary>
+/// Core ViewModel for the checkout dialog.
+/// Decomposed into partial classes: CheckoutDialogViewModel (Core), CheckoutDialogViewModel.Payments, CheckoutDialogViewModel.Mixed.
+/// </summary>
 public partial class CheckoutDialogViewModel : ObservableObject
 {
     private readonly ISaleService _saleService;
@@ -74,8 +68,6 @@ public partial class CheckoutDialogViewModel : ObservableObject
             {
                 return (CashAmount + CardAmount + WalletAmount) >= TotalBill && string.IsNullOrEmpty(ErrorMessage);
             }
-            // Credit-to-account payments and giftcard/wallet are always "sufficient" for the input amount gate;
-            // the actual credit-limit guard fires inside ConfirmPaymentAsync.
             return IsFullyPaid || ReceivedAmount >= TotalToPay || PaymentMethod == "Monedero / Tarjeta de Regalo" || IsCreditPayment;
         }
     }
@@ -89,7 +81,6 @@ public partial class CheckoutDialogViewModel : ObservableObject
             return (CashAmount + CardAmount + WalletAmount) >= TotalBill && string.IsNullOrEmpty(ErrorMessage);
         }
 
-        // Block confirm if credit is selected but insufficient or no customer assigned
         if (IsCreditPayment)
         {
             return SelectedCustomer != null && !CreditIsInsufficient;
@@ -125,105 +116,10 @@ public partial class CheckoutDialogViewModel : ObservableObject
     public string ChangeTextColor => IsSufficientAmount ? "#10B981" : "#EF4444";
     public string ChangeBgColor => IsSufficientAmount ? "#ECFDF5" : "#FEF2F2";
 
-    [RelayCommand]
-    private void AddTender(string method)
-    {
-        double amountToAdd = RemainingBalance > 0 ? RemainingBalance : ReceivedAmount;
-        if (amountToAdd <= 0) return;
-
-        AppliedTenders.Add(new TenderEntryModel
-        {
-            MethodName = method,
-            AmountPaid = amountToAdd,
-            ReferenceOrFolio = DateTime.Now.ToString("HH:mm:ss")
-        });
-
-        NotifyTenderChanges();
-    }
-
-    [RelayCommand]
-    private void RemoveTender(TenderEntryModel? tender)
-    {
-        if (tender == null) return;
-        AppliedTenders.Remove(tender);
-        NotifyTenderChanges();
-    }
-
-    [RelayCommand]
-    private void RedeemLoyaltyPoints()
-    {
-        if (SelectedCustomer == null || CustomerPointsBalance <= 0) return;
-        double amountToCover = Math.Min(RemainingBalance, CustomerPointsBalance);
-        if (amountToCover <= 0) return;
-
-        AppliedTenders.Add(new TenderEntryModel
-        {
-            MethodName = "Puntos Fidelidad",
-            AmountPaid = amountToCover,
-            ReferenceOrFolio = $"Canje: {amountToCover:N0} pts"
-        });
-
-        CustomerPointsBalance -= amountToCover;
-        NotifyTenderChanges();
-    }
-
-    private void NotifyTenderChanges()
-    {
-        OnPropertyChanged(nameof(TotalApplied));
-        OnPropertyChanged(nameof(RemainingBalance));
-        OnPropertyChanged(nameof(IsFullyPaid));
-        OnPropertyChanged(nameof(IsSufficientAmount));
-        OnPropertyChanged(nameof(ChangeOrShortageText));
-        OnPropertyChanged(nameof(ChangeTextColor));
-        OnPropertyChanged(nameof(ChangeBgColor));
-        ConfirmPaymentCommand.NotifyCanExecuteChanged();
-    }
-
-    partial void OnReceivedAmountInputChanged(string value)
-    {
-        if (double.TryParse(value, out var parsed))
-        {
-            ReceivedAmount = parsed;
-            PaidAmount = parsed;
-            ChangeAmount = (decimal)Math.Max(0.0, parsed - TotalToPay);
-        }
-        else
-        {
-            ReceivedAmount = 0.0;
-            PaidAmount = 0.0;
-            ChangeAmount = 0m;
-        }
-
-        OnPropertyChanged(nameof(IsSufficientAmount));
-        OnPropertyChanged(nameof(ChangeOrShortageText));
-        OnPropertyChanged(nameof(ChangeTextColor));
-        OnPropertyChanged(nameof(ChangeBgColor));
-        ConfirmPaymentCommand.NotifyCanExecuteChanged();
-    }
-
-    [RelayCommand]
-    private void AddCashDenomination(string amountArg)
-    {
-        if (double.TryParse(amountArg, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double addValue))
-        {
-            ReceivedAmount += addValue;
-            PaidAmount = ReceivedAmount;
-            ReceivedAmountInput = ReceivedAmount.ToString("0.##");
-        }
-    }
-
-    [RelayCommand]
-    private void SetExactCash()
-    {
-        ReceivedAmount = TotalToPay;
-        PaidAmount = ReceivedAmount;
-        ReceivedAmountInput = ReceivedAmount.ToString("0.##");
-    }
-
     // Giftcard / Monedero
     [ObservableProperty] private string _giftcardNumber = string.Empty;
 
-    // Sprint C: Direct CFDI 4.0 Invoicing Fields
+    // Direct CFDI 4.0 Invoicing Fields
     [ObservableProperty] private bool _requiresInvoice = false;
     [ObservableProperty] private string _fiscalRfc = "XAXX010101000";
     [ObservableProperty] private string _fiscalRazonSocial = "PÚBLICO EN GENERAL";
@@ -242,7 +138,6 @@ public partial class CheckoutDialogViewModel : ObservableObject
         "Crédito de Cliente", "Puntos de Fidelidad", "Monedero / Tarjeta de Regalo", "CoDi / QR"
     ];
 
-    /// <summary>True when the selected payment method charges to the customer's running credit account.</summary>
     public bool IsCreditPayment =>
         PaymentMethod == "Crédito de Cliente" ||
         PaymentMethod == "Crédito / Cuenta Corriente" ||
@@ -260,12 +155,10 @@ public partial class CheckoutDialogViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(CreditIsInsufficient))]
     private double _customerCurrentDebt = 0.0;
 
-    /// <summary>Remaining credit headroom for the selected customer.</summary>
     public double AvailableCredit => Math.Max(0.0, CustomerCreditLimit - CustomerCurrentDebt);
 
     public string CreditAvailableDisplay => $"Crédito disponible: ${AvailableCredit:N2}  |  Límite: ${CustomerCreditLimit:N2}  |  Deuda actual: ${CustomerCurrentDebt:N2}";
 
-    /// <summary>True when the ticket total exceeds the customer's available credit balance.</summary>
     public bool CreditIsInsufficient => IsCreditPayment && AvailableCredit < TotalToPay;
 
     public ObservableCollection<string> UsoCfdiOptions { get; } = [
@@ -305,7 +198,6 @@ public partial class CheckoutDialogViewModel : ObservableObject
         PaidAmount = 0.0;
         ReceivedAmountInput = "0";
 
-        // Earn 1 point per $10 spent
         PointsEarnedThisSale = Math.Floor(total / 10.0);
 
         _ = LoadCustomersAsync(preselectedCustomer);
@@ -321,7 +213,6 @@ public partial class CheckoutDialogViewModel : ObservableObject
                 Customers.Clear();
                 foreach (var c in list) Customers.Add(c);
 
-                // Pre-wire the customer that was already selected on the POS ticket.
                 if (preselected != null)
                 {
                     SelectedCustomer = Customers.FirstOrDefault(c => c.Id == preselected.Id) ?? preselected;
@@ -355,315 +246,6 @@ public partial class CheckoutDialogViewModel : ObservableObject
         OnPropertyChanged(nameof(CreditAvailableDisplay));
         OnPropertyChanged(nameof(CreditIsInsufficient));
         OnPropertyChanged(nameof(IsCreditPayment));
-        ConfirmPaymentCommand.NotifyCanExecuteChanged();
-    }
-
-    partial void OnReceivedAmountChanged(double value)
-    {
-        PaidAmount = value;
-        ChangeAmount = (decimal)Math.Max(0.0, value - TotalToPay);
-        OnPropertyChanged(nameof(IsSufficientAmount));
-        OnPropertyChanged(nameof(ChangeOrShortageText));
-        OnPropertyChanged(nameof(ChangeTextColor));
-        OnPropertyChanged(nameof(ChangeBgColor));
-        ConfirmPaymentCommand.NotifyCanExecuteChanged();
-    }
-
-    [RelayCommand]
-    private void Cancel()
-    {
-        RequestClose?.Invoke();
-    }
-
-    [RelayCommand]
-    private async Task ValidateGiftcardAsync()
-    {
-        if (_giftcardService == null) return;
-        if (string.IsNullOrWhiteSpace(GiftcardNumber))
-        {
-            ErrorMessage = "Ingrese el número de tarjeta / monedero.";
-            return;
-        }
-
-        var (isValid, balance, error) = await _giftcardService.ValidateCardAsync(GiftcardNumber.Trim());
-        if (!isValid)
-        {
-            ErrorMessage = error;
-            return;
-        }
-
-        double available = (double)balance;
-        double applied = Math.Min(TotalToPay, available);
-        ReceivedAmount = applied;
-        ErrorMessage = $"Monedero validado. Saldo disponible: ${available:F2} (Aplicado: ${applied:F2})";
-    }
-
-    [RelayCommand(CanExecute = nameof(CanConfirmPayment))]
-    private async Task ConfirmPaymentAsync()
-    {
-        try
-        {
-            IsProcessing = true;
-            bool isCredit = IsCreditPayment;
-            if (isCredit && SelectedCustomer == null)
-            {
-                ErrorMessage = "Debe asignar un cliente registrado para cobrar a crédito.";
-                return;
-            }
-
-            if (isCredit && AvailableCredit < TotalToPay)
-            {
-                ErrorMessage = $"Crédito insuficiente. Disponible: ${AvailableCredit:N2} — Requerido: ${TotalToPay:N2}";
-                return;
-            }
-
-            double finalPaid = PaymentMethod == "Mixto" ? (double)(CashAmount + CardAmount + WalletAmount) : PaidAmount;
-
-            if (PaymentMethod == "Mixto")
-            {
-                if (finalPaid < (double)TotalBill)
-                {
-                    ErrorMessage = "El monto pagado es insuficiente.";
-                    return;
-                }
-            }
-            else if (PaidAmount < TotalToPay && PaymentMethod != "Monedero / Tarjeta de Regalo" && !isCredit)
-            {
-                ErrorMessage = "El monto pagado es insuficiente.";
-                return;
-            }
-
-            if (PaymentMethod == "Monedero / Tarjeta de Regalo" && _giftcardService != null)
-            {
-                if (string.IsNullOrWhiteSpace(GiftcardNumber))
-                {
-                    ErrorMessage = "Ingrese el número de folio de la Tarjeta de Regalo.";
-                    return;
-                }
-
-                try
-                {
-                    await _giftcardService.RedeemBalanceAsync(GiftcardNumber.Trim(), (decimal)Math.Min(TotalToPay, PaidAmount));
-                }
-                catch (Exception ex)
-                {
-                    ErrorMessage = ex.Message;
-                    return;
-                }
-            }
-
-            if (PaymentMethod == "Tarjeta Débito/Crédito" || PaymentMethod == "Tarjeta")
-            {
-                IsWaitingForTerminal = true;
-                TerminalStatusMessage = "Por favor, pase la tarjeta por la terminal...";
-                _paymentCts = new CancellationTokenSource();
-
-                // Fake a reference id for now, actually we should get next folio.
-                // Or just use a random GUID for the terminal reference.
-                string referenceId = Guid.NewGuid().ToString("N");
-
-                var terminalResult = await _terminalService.ProcessPaymentAsync((decimal)TotalToPay, referenceId, _paymentCts.Token);
-                
-                IsWaitingForTerminal = false;
-
-                if (!terminalResult.IsSuccess)
-                {
-                    ErrorMessage = terminalResult.ErrorMessage ?? "Cobro rechazado o cancelado en la terminal.";
-                    return;
-                }
-                
-                // If success, we have the auth code. We can append it to the tickets later, or pass to SaleDto.
-            }
-
-            var snapshots = _cartItems.Select(i => new SaleItemSnapshotDto(
-                ProductId: i.Id,
-                Name: i.Name,
-                UnitPrice: i.UnitPrice,
-                Cost: i.UnitPrice * 0.6,
-                Quantity: i.Quantity,
-                Unit: i.Unit,
-                Category: i.Category ?? "General",
-                Discount: i.AppliedDiscountAmount,
-                TotalPrice: i.TotalPrice,
-                OriginalUnitPrice: i.OriginalUnitPrice > 0 ? i.OriginalUnitPrice : i.UnitPrice,
-                AppliedDiscountAmount: i.AppliedDiscountAmount,
-                AppliedPromotionId: i.AppliedPromotionId,
-                SatProductCode: i.SatProductCode,
-                SatUnitCode: i.SatUnitCode
-            )).ToList();
-
-            var totalCost = snapshots.Sum(s => s.Cost * s.Quantity);
-            var profit = TotalToPay - totalCost;
-
-            var saleDto = new SaleDto(
-                Id: Guid.NewGuid().ToString(),
-                Date: DateTimeOffset.Now.ToString("o"),
-                Items: snapshots,
-                Total: TotalToPay,
-                TotalCost: totalCost,
-                Profit: profit,
-                PaidAmount: finalPaid,
-                ChangeAmount: (double)ChangeAmount,
-                PaymentMethod: PaymentMethod,
-                CustomerId: SelectedCustomer?.Id,
-                IsCredit: isCredit,
-                IsCancelled: false,
-                CancelledAt: null,
-                EstadoFiscal: RequiresInvoice ? "TIMBRADO CFDI 4.0" : "PENDIENTE"
-            );
-
-            if (RequiresInvoice)
-            {
-                var facturamaService = Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<IFacturamaService>(App.Current!.Services!);
-                var (success, invId, invStatus, estFiscal, errMsg) = await Checkout.CheckoutInvoiceHandler.ProcessInvoiceAsync(
-                    facturamaService, FiscalRfc, FiscalRazonSocial, FiscalUsoCfdi, FiscalRegime, FiscalZipCode, snapshots);
-
-                if (!success && errMsg != null && !errMsg.StartsWith("No se pudo timbrar"))
-                {
-                    ErrorMessage = errMsg;
-                    IsProcessing = false;
-                    return;
-                }
-
-                if (errMsg != null) ErrorMessage = errMsg;
-                saleDto = saleDto with { InvoiceId = invId, InvoiceStatus = invStatus, EstadoFiscal = estFiscal ?? "PENDIENTE" };
-            }
-
-            var savedSale = await _saleService.SaveAsync(saleDto);
-            Log.Information("Sale saved successfully with ID: {SaleId}", savedSale.Id);
-
-            // Print routing (Thermal + PDF if applicable)
-            if (ShouldPrintReceipt)
-            {
-                _ = _printDispatcher.DispatchSaleDocumentsAsync(savedSale);
-            }
-
-            if (_onSuccessCallback != null)
-            {
-                await _onSuccessCallback();
-            }
-
-            RequestClose?.Invoke();
-        }
-        catch (Exception ex)
-        {
-            Log.Error(ex, "Error processing payment in CheckoutDialogViewModel");
-            ErrorMessage = ex.Message;
-        }
-        finally
-        {
-            IsProcessing = false;
-            IsWaitingForTerminal = false;
-        }
-    }
-
-    [RelayCommand]
-    private async Task CancelTerminalPaymentAsync()
-    {
-        _paymentCts?.Cancel();
-        // Generamos un dummy referenceId para cancelar, o guardamos el generado.
-        // As the cancel intent API takes the referenceId. We should ideally store the referenceId at class level.
-        // For simplicity we just cancel the token which aborts the polling and makes the timeout handle it.
-        IsWaitingForTerminal = false;
-        ErrorMessage = "Cobro cancelado por el cajero.";
-        await Task.CompletedTask;
-    }
-
-    public async Task<bool> ApplyManualDiscountAsync(double requestedDiscountPercentage, string reason, ISecurityInterceptionService? securityService = null, IAuditService? auditService = null, UserModel? currentUser = null)
-    {
-        double maxAllowed = currentUser?.Role == SystemRole.CAJERO ? 5.0 : 100.0;
-        string? supervisorId = null;
-
-        if (requestedDiscountPercentage > maxAllowed)
-        {
-            if (securityService != null)
-            {
-                var authResult = await securityService.AuthorizeHighRiskActionAsync(
-                    "Autorización de Descuento Especial",
-                    $"El descuento del {requestedDiscountPercentage:N2}% supera el límite permitido para cajeros ({maxAllowed:N2}%).");
-
-                if (!authResult.IsAuthorized) return false;
-                supervisorId = authResult.SupervisorId;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        double subtotalBase = TotalToPay;
-        double discountAmount = Math.Round(subtotalBase * (requestedDiscountPercentage / 100.0), 2);
-        TotalToPay = Math.Max(0.0, subtotalBase - discountAmount);
-
-        if (auditService != null)
-        {
-            await auditService.LogAsync(new AuditLogEntity
-            {
-                UserId = currentUser?.Id.ToString() ?? "cajero_matriz",
-                AuthorizedBySupervisorId = supervisorId,
-                ActionType = Ticketfy.Core.Enums.AuditActionType.ManualDiscountExceeded,
-                RiskLevel = Ticketfy.Core.Enums.RiskLevel.HighRisk,
-                EntityName = "CheckoutTicket",
-                OldValue = "0%",
-                NewValue = $"{requestedDiscountPercentage:N2}%",
-                FinancialImpact = discountAmount,
-                Reason = reason
-            });
-        }
-
-        return true;
-    }
-
-    partial void OnCashAmountChanged(decimal value) => ValidateMixedPaymentMath();
-    partial void OnCardAmountChanged(decimal value) => ValidateMixedPaymentMath();
-    partial void OnWalletAmountChanged(decimal value) => ValidateMixedPaymentMath();
-
-    public decimal TotalReceived => CashAmount + CardAmount + WalletAmount;
-
-    private void ValidateMixedPaymentMath()
-    {
-        OnPropertyChanged(nameof(TotalReceived));
-        OnPropertyChanged(nameof(TotalMixedReceived));
-        OnPropertyChanged(nameof(IsSufficientAmount));
-        OnPropertyChanged(nameof(ChangeOrShortageText));
-
-        var (isValid, chgAmount, error) = Checkout.MixedPaymentCalculator.Calculate(CashAmount, CardAmount, WalletAmount, TotalBill);
-        if (!isValid && error != null)
-        {
-            ErrorMessage = error;
-            ChangeAmount = 0m;
-        }
-        else
-        {
-            ErrorMessage = string.Empty;
-            ChangeAmount = chgAmount;
-        }
-
-        OnPropertyChanged(nameof(ChangeTextColor));
-        OnPropertyChanged(nameof(ChangeBgColor));
-        ConfirmPaymentCommand.NotifyCanExecuteChanged();
-    }
-
-    partial void OnPaymentMethodChanged(string value)
-    {
-        // 1. WIPE GHOST STATE
-        CashAmount = 0m;
-        CardAmount = 0m;
-        WalletAmount = 0m;
-        ChangeAmount = 0m;
-        ErrorMessage = string.Empty;
-
-        // 2. TRIGGER UI UPDATES
-        OnPropertyChanged(nameof(IsMixedPayment));
-        OnPropertyChanged(nameof(IsNotMixedPayment));
-        OnPropertyChanged(nameof(IsCreditPayment));
-        OnPropertyChanged(nameof(CreditIsInsufficient));
-        OnPropertyChanged(nameof(CreditAvailableDisplay));
-        OnPropertyChanged(nameof(TotalReceived));
-        OnPropertyChanged(nameof(IsSufficientAmount));
-        OnPropertyChanged(nameof(ChangeOrShortageText));
-        OnPropertyChanged(nameof(ChangeTextColor));
-        OnPropertyChanged(nameof(ChangeBgColor));
         ConfirmPaymentCommand.NotifyCanExecuteChanged();
     }
 }

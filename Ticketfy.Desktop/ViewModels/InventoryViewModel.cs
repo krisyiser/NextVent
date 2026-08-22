@@ -93,4 +93,7 @@ public partial class InventoryViewModel : ObservableObject
         }
         catch { }
     }
+
+    [RelayCommand] private void OpenConfigureLowStockDialog() => OpenConfigureLowStockRequested?.Invoke();
+    public void OpenProductDialogWithParams(Ticketfy.ViewModels.Dialogs.ProductDialogParameters parameters) => OpenProductDialogWithParamsRequested?.Invoke(parameters);
 }

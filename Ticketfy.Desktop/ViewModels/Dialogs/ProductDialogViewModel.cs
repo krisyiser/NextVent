@@ -100,7 +100,11 @@ public partial class ProductDialogViewModel : ObservableObject
     private readonly IAuditService? _auditService;
     private readonly AppDbContext _db;
 
+    [ObservableProperty]
+    private SupplierDto? _selectedSupplier;
+
     public System.Collections.ObjectModel.ObservableCollection<string> Categories { get; } = [];
+    public System.Collections.ObjectModel.ObservableCollection<SupplierDto> Suppliers { get; } = [];
 
     public event Action? RequestClose;
 
@@ -110,10 +114,10 @@ public partial class ProductDialogViewModel : ObservableObject
         _db = db;
         _sessionManager = sessionManager;
         _auditService = auditService;
-        _ = LoadCategoriesAsync();
+        _ = LoadCategoriesAndSuppliersAsync();
     }
 
-    public async Task LoadCategoriesAsync()
+    public async Task LoadCategoriesAndSuppliersAsync()
     {
         try
         {
@@ -133,10 +137,22 @@ public partial class ProductDialogViewModel : ObservableObject
             {
                 Categories.Add(Category);
             }
+
+            var supplierEntities = await _db.Suppliers
+                .AsNoTracking()
+                .Where(s => s.IsActive == 1)
+                .OrderBy(s => s.Name)
+                .ToListAsync();
+
+            Suppliers.Clear();
+            foreach (var s in supplierEntities)
+            {
+                Suppliers.Add(new SupplierDto(s.Id, s.Name, s.Rfc, s.Phone, s.Email, s.Address, s.ContactPerson));
+            }
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Error loading categories in dialog");
+            Log.Error(ex, "Error loading categories and suppliers in dialog");
         }
     }
 
@@ -162,6 +178,11 @@ public partial class ProductDialogViewModel : ObservableObject
         SatUnitCode = product.SatUnitCode;
         MinStock = product.MinStock;
 
+        if (!string.IsNullOrEmpty(product.DefaultSupplierId))
+        {
+            SelectedSupplier = System.Linq.Enumerable.FirstOrDefault(Suppliers, s => s.Id == product.DefaultSupplierId);
+        }
+
         _originalStockSnapshot = product.Stock;
         _originalMinStockSnapshot = product.MinStock;
     }
@@ -182,10 +203,13 @@ public partial class ProductDialogViewModel : ObservableObject
                 Barcode = parameters.PreFilledData.Barcode ?? string.Empty;
                 Name = parameters.PreFilledData.Name;
                 Category = parameters.PreFilledData.Category;
-                // Cost, retail price remain 0
                 if (!string.IsNullOrEmpty(Category) && !Categories.Contains(Category))
                 {
                     Categories.Add(Category);
+                }
+                if (!string.IsNullOrEmpty(parameters.PreFilledData.DefaultSupplierId))
+                {
+                    SelectedSupplier = System.Linq.Enumerable.FirstOrDefault(Suppliers, s => s.Id == parameters.PreFilledData.DefaultSupplierId);
                 }
             }
             else if (!string.IsNullOrEmpty(parameters.PreFilledBarcode))
@@ -226,7 +250,8 @@ public partial class ProductDialogViewModel : ObservableObject
                 LocationRack: LocationRack,
                 SatProductCode: SatProductCode,
                 SatUnitCode: SatUnitCode,
-                MinStock: MinStock ?? 5.0
+                MinStock: MinStock ?? 5.0,
+                DefaultSupplierId: SelectedSupplier?.Id
             );
 
             if (_editingProductId != null)

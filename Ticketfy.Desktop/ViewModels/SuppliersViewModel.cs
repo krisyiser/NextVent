@@ -32,6 +32,7 @@ public partial class SuppliersViewModel : ObservableObject
     {
         await DirectoryVM.LoadSuppliersAsync();
         await HistoryVM.LoadPurchasesAsync();
+        await OrderVM.LoadCatalogAsync(System.Linq.Enumerable.ToList(DirectoryVM.Suppliers));
     }
 
     public Task LoadDataAsync() => LoadAllDataAsync();

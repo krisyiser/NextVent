@@ -123,4 +123,7 @@ public partial class SalesHistoryViewModel : ObservableObject
 
         TotalDayRevenue = salesList.Sum(s => s.Total);
     }
+
+    [RelayCommand]
+    private void OpenReturn(SaleDto sale) => OpenReturnRequested?.Invoke(sale);
 }

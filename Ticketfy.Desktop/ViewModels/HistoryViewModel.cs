@@ -159,7 +159,13 @@ public partial class HistoryViewModel : ObservableObject
     {
         try
         {
-            var list = await _saleService.GetCashierPerformanceReportAsync(CommissionPercentage);
+            DateTime? queryStart = StartDate?.Date;
+            DateTime? queryEnd = EndDate?.Date.AddDays(1).AddTicks(-1);
+
+            DateTime? utcStart = queryStart.HasValue ? queryStart.Value.ToBusinessUtcTime() : null;
+            DateTime? utcEnd = queryEnd.HasValue ? queryEnd.Value.ToBusinessUtcTime() : null;
+
+            var list = await _saleService.GetCashierPerformanceReportAsync(utcStart, utcEnd, CommissionPercentage);
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 CashierPerformanceReport.Clear();
@@ -270,6 +276,7 @@ public partial class HistoryViewModel : ObservableObject
                 FeedbackMessage = "Error al cancelar la venta";
             }
         });
+        await Task.CompletedTask;
     }
 
     [RelayCommand]
@@ -295,6 +302,24 @@ public partial class HistoryViewModel : ObservableObject
 
     [ObservableProperty] private Ticketfy.Data.Entities.CashupEntity? _selectedCashupForDetail;
     [ObservableProperty] private bool _isCashupDetailDialogOpen = false;
+
+    [ObservableProperty] private SaleDto? _selectedSaleForDetail;
+    [ObservableProperty] private bool _isSaleDetailDialogOpen = false;
+
+    [RelayCommand]
+    private void ViewSaleDetail(SaleDto? sale)
+    {
+        if (sale == null) return;
+        SelectedSaleForDetail = sale;
+        IsSaleDetailDialogOpen = true;
+    }
+
+    [RelayCommand]
+    private void CloseSaleDetail()
+    {
+        IsSaleDetailDialogOpen = false;
+        SelectedSaleForDetail = null;
+    }
 
     [RelayCommand]
     private void ViewCashupDetail(Ticketfy.Data.Entities.CashupEntity? cashup)

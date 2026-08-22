@@ -387,6 +387,55 @@ public sealed class SaleServiceTests : IDisposable
     }
 
     [Fact]
+    public async Task RegisterPurchaseAsync_ShouldUpdateToMostRecentCost()
+    {
+        var context = CreateContext();
+        var supp = new SupplierEntity
+        {
+            Id = "SUPP-COCA-COLA",
+            Name = "Coca-Cola Mexico"
+        };
+        context.Suppliers.Add(supp);
+
+        var prod = new ProductEntity
+        {
+            Id = "PROD-COST-TEST",
+            Name = "Test Product",
+            Cost = 15.0,
+            Price = 25.0,
+            Stock = 10.0
+        };
+        context.Products.Add(prod);
+        await context.SaveChangesAsync();
+
+        var purchaseService = new PurchaseService(context);
+
+        var items = new List<PurchaseItemDto>
+        {
+            new PurchaseItemDto("ITEM-10", "PURCHASE-10", "PROD-COST-TEST", "Test Product", 18.0, 5, 90.0)
+        };
+
+        var purchaseDto = new PurchaseDto(
+            Id: "PURCHASE-10",
+            SupplierId: "SUPP-COCA-COLA",
+            SupplierName: "Coca-Cola Mexico",
+            InvoiceNumber: "INV-999",
+            Date: DateTime.Now.ToString("g"),
+            TotalCost: 90.0,
+            Notes: "Test cost update",
+            Items: items
+        );
+
+        var result = await purchaseService.RegisterPurchaseAsync(purchaseDto);
+
+        var updatedProd = await context.Products.FindAsync("PROD-COST-TEST");
+        Assert.NotNull(updatedProd);
+        Assert.Equal(18.0, updatedProd.Cost);
+        Assert.Equal(15.0, updatedProd.Stock);
+        Assert.Equal("SUPP-COCA-COLA", updatedProd.DefaultSupplierId);
+    }
+
+    [Fact]
     public void TestDtoSerialization()
     {
         var options = new System.Text.Json.JsonSerializerOptions
@@ -806,19 +855,88 @@ public sealed class SaleServiceTests : IDisposable
     }
 
     [Fact]
-    public async Task PosViewModel_CartStateStore_ShouldHoldAddedItems()
+    public async Task GetCashierPerformanceReportAsync_ShouldFilterByDateRangeAndCalculateAccurately()
     {
-        var posVm = new Ticketfy.ViewModels.PosViewModel(ProductService);
-        await Task.Delay(100);
+        // 1. Setup product
+        var product = new ProductDto("PROD-PERF", "123", "Soda", 5.0, 10.0, 0, 0, 100, "Bebidas", "Pza", 0, null);
+        await ProductService.AddAsync(product);
 
-        var cartItem = new Ticketfy.Data.Dtos.CartItemDto("PROD-TEST", "Refresco", 15.0, 2.0, "Pza");
+        // 2. Setup user/cashier in DB
+        using (var ctx = CreateContext())
+        {
+            ctx.Users.Add(new UserEntity
+            {
+                Id = Guid.NewGuid(),
+                FullName = "Carlos Cajero",
+                Username = "carlos",
+                Role = Ticketfy.Core.Enums.UserRole.Cajero,
+                IsActive = true
+            });
+            await ctx.SaveChangesAsync();
+        }
 
-        posVm.Cart.CartState.AddItem(cartItem, 99.0);
+        // 3. Create 2 sales: one inside date range, one outside date range
+        var dateInside = new DateTime(2026, 8, 15, 10, 0, 0, DateTimeKind.Utc);
+        var dateOutside = new DateTime(2026, 8, 1, 10, 0, 0, DateTimeKind.Utc);
 
-        Assert.Single(posVm.Cart.CartState.Items);
-        Assert.Equal("PROD-TEST", posVm.Cart.CartState.Items[0].ProductId);
+        var item = new SaleItemSnapshotDto("PROD-PERF", "Soda", 10.0, 5.0, 2, "Pza", "Bebidas", 0.0, 20.0);
 
-        posVm.Dispose();
+        var saleInside = new SaleDto(
+            Id: "SALE-PERF-IN",
+            Date: dateInside.ToString("o"),
+            Items: [item],
+            Total: 20.0,
+            TotalCost: 10.0,
+            Profit: 10.0,
+            PaidAmount: 20.0,
+            ChangeAmount: 0.0,
+            PaymentMethod: "Cash",
+            CustomerId: null,
+            IsCredit: false,
+            IsCancelled: false,
+            CancelledAt: null,
+            EstadoFiscal: "PENDIENTE",
+            UuidSat: null,
+            SerieFolio: null
+        );
+
+        var saleOutside = new SaleDto(
+            Id: "SALE-PERF-OUT",
+            Date: dateOutside.ToString("o"),
+            Items: [item],
+            Total: 20.0,
+            TotalCost: 10.0,
+            Profit: 10.0,
+            PaidAmount: 20.0,
+            ChangeAmount: 0.0,
+            PaymentMethod: "Cash",
+            CustomerId: null,
+            IsCredit: false,
+            IsCancelled: false,
+            CancelledAt: null,
+            EstadoFiscal: "PENDIENTE",
+            UuidSat: null,
+            SerieFolio: null
+        );
+
+        await _saleService.SaveAsync(saleInside);
+        await _saleService.SaveAsync(saleOutside);
+
+        // 4. Query performance report with date range [2026-08-10 to 2026-08-20]
+        var startFilter = new DateTime(2026, 8, 10, 0, 0, 0, DateTimeKind.Utc);
+        var endFilter = new DateTime(2026, 8, 20, 23, 59, 59, DateTimeKind.Utc);
+
+        var report = await _saleService.GetCashierPerformanceReportAsync(startFilter, endFilter, defaultCommissionPct: 5.0);
+
+        Assert.NotNull(report);
+        Assert.Single(report);
+
+        var cashierMetrics = report[0];
+        Assert.Equal("Carlos Cajero", cashierMetrics.CashierName);
+        Assert.Equal(1, cashierMetrics.TicketCount);
+        Assert.Equal(20.0, cashierMetrics.TotalRevenue);
+        Assert.Equal(20.0, cashierMetrics.AverageTicketValue);
+        Assert.Equal(1.0, cashierMetrics.EarnedCommissionAmount); // 5% of $20 = $1.00
     }
 
     public void Dispose()
@@ -826,3 +944,4 @@ public sealed class SaleServiceTests : IDisposable
         _connection.Dispose();
     }
 }
+

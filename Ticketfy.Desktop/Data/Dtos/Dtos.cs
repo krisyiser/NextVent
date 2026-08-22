@@ -26,7 +26,8 @@ public record ProductDto(
     string LocationRack = "Pasillo 1 - Anaquel A",
     string SatProductCode = "01010101",
     string SatUnitCode = "H87",
-    double MinStock = 5.0
+    double MinStock = 5.0,
+    string? DefaultSupplierId = null
 )
 {
     public double CostPrice => Cost;
@@ -241,7 +242,9 @@ public record SaleDto(
     string? SerieFolio = null,
     SaleStatus Status = SaleStatus.Completed,
     string? InvoiceId = null,
-    string? InvoiceStatus = null
+    string? InvoiceStatus = null,
+    string? CashierUserId = null,
+    string? CashierName = null
 )
 {
     public string LocalDateDisplay

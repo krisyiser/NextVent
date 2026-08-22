@@ -273,7 +273,8 @@ public sealed class ProductService : IProductService
         e.Id, e.Barcode, e.Name, e.Cost, e.Price,
         e.WholesalePrice, e.WholesaleThreshold,
         e.Stock, e.Category, e.Unit, e.ExpiresSoon, e.CreatedAt,
-        e.PointsRewarded, e.ReorderQuantity, e.LocationRack, e.SatProductCode, e.SatUnitCode, e.MinStock);
+        e.PointsRewarded, e.ReorderQuantity, e.LocationRack, e.SatProductCode, e.SatUnitCode, e.MinStock,
+        e.DefaultSupplierId);
 
     private static ProductEntity MapToEntity(ProductDto d) => new()
     {
@@ -294,6 +295,7 @@ public sealed class ProductService : IProductService
         ReorderQuantity = d.ReorderQuantity,
         LocationRack = d.LocationRack,
         SatProductCode = d.SatProductCode,
-        SatUnitCode = d.SatUnitCode
+        SatUnitCode = d.SatUnitCode,
+        DefaultSupplierId = d.DefaultSupplierId
     };
 }

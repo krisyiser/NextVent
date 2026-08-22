@@ -16,7 +16,6 @@ using Ticketfy.ViewModels.Navigation;
 using Ticketfy.ViewModels.Shell;
 using Ticketfy.Core.Models;
 using Ticketfy.Core.Repositories;
-using Ticketfy.Core.Services;
 using Serilog;
 using System;
 using System.IO;
@@ -180,11 +179,11 @@ public partial class MainWindowViewModel : ObservableObject
         var suppliersVm = new SuppliersViewModel(supplierService, purchaseService, productService, printerService);
         var expensesVm = new ExpensesViewModel(expenseService, shiftService);
         var loginVm = new LoginViewModel(authService, sessionManager,
-            new DialogService(async (vmObj) =>
+            new DialogService((vmObj) =>
             {
-                if (vmObj is string str && str == "LOCK_SCREEN") { sessionManager.LockTerminal(); return null; }
+                if (vmObj is string str && str == "LOCK_SCREEN") { sessionManager.LockTerminal(); return Task.FromResult<object?>(null); }
                 Dialogs.ShowDialog((vmObj as ObservableObject)!);
-                return null;
+                return Task.FromResult<object?>(null);
             }, Dialogs.CloseDialog));
 
         // ── Navigation Service ───────────────────────────────────────────────
@@ -356,7 +355,7 @@ public partial class MainWindowViewModel : ObservableObject
             bool hasUsers = await userRepository.HasAnyUsersAsync();
             if (!hasUsers)
             {
-                var dialogService = new DialogService(async (vm) => null, () => { });
+                var dialogService = new DialogService((vm) => Task.FromResult<object?>(null), () => { });
                 Action finishSetup = () => Navigation.GoToLogin();
                 Action goToAdditionalUsers = () =>
                     Navigation.GoTo(new SetupAdditionalUsersViewModel(userRepository, finishSetup));

@@ -9,7 +9,7 @@ namespace Ticketfy.Desktop.Core.Helpers
         public class DOCINFOA
         {
             [MarshalAs(UnmanagedType.LPStr)] public string pDocName = "TICKETFY! Document";
-            [MarshalAs(UnmanagedType.LPStr)] public string pOutputFile = null;
+            [MarshalAs(UnmanagedType.LPStr)] public string? pOutputFile = null;
             [MarshalAs(UnmanagedType.LPStr)] public string pDataType = "RAW";
         }
 

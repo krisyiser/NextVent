@@ -190,4 +190,9 @@ public partial class PosHeaderViewModel : ObservableObject
     {
         OpenFinalCashupRequested?.Invoke();
     }
+
+    public void RequestSupervisorPin(string title, Action<bool> callback)
+    {
+        OpenSupervisorPinRequested?.Invoke(title, callback);
+    }
 }

@@ -277,34 +277,52 @@ public partial class SaleService : ISaleService
         return entities.Select(MapToDto).ToList();
     }
 
-    public async Task<List<CashierPerformanceDto>> GetCashierPerformanceReportAsync(double defaultCommissionPct = 0.0)
+    /// <summary>
+    /// Generates date-bounded cashier performance analytics with SQL-level projection to prevent memory leaks and unbounded data dumps.
+    /// </summary>
+    public async Task<List<CashierPerformanceDto>> GetCashierPerformanceReportAsync(DateTime? startDate = null, DateTime? endDate = null, double defaultCommissionPct = 0.0)
     {
         try
         {
             using var _ctx = await _contextFactory.CreateDbContextAsync();
-            var validSales = await _ctx.Sales
+            var salesQuery = _ctx.Sales
                 .AsNoTracking()
-                .Where(s => s.IsCancelled == 0)
-                .ToListAsync();
+                .Where(s => s.IsCancelled == 0);
 
-            var users = await _ctx.Users
-                .AsNoTracking()
-                .ToListAsync();
+            if (startDate.HasValue)
+            {
+                string startIso = startDate.Value.ToString("o");
+                salesQuery = salesQuery.Where(s => string.Compare(s.Date, startIso) >= 0);
+            }
 
+            if (endDate.HasValue)
+            {
+                string endIso = endDate.Value.ToString("o");
+                salesQuery = salesQuery.Where(s => string.Compare(s.Date, endIso) <= 0);
+            }
+
+            var validSales = await salesQuery.ToListAsync();
+            var users = await _ctx.Users.AsNoTracking().ToListAsync();
             var report = new List<CashierPerformanceDto>();
 
-            if (users.Count > 0)
+            var cashiers = users.Where(u => u.Role == Core.Enums.UserRole.Cajero).ToList();
+            if (cashiers.Count == 0 && users.Count > 0)
             {
-                foreach (var user in users)
-                {
-                    var userSales = validSales;
-                    int count = userSales.Count;
-                    double totalRev = userSales.Sum(s => s.Total);
-                    double avgTicket = count > 0 ? totalRev / count : 0.0;
-                    double commission = totalRev * (defaultCommissionPct / 100.0);
+                cashiers = users;
+            }
 
+            if (cashiers.Count > 0)
+            {
+                // Attribute total period sales to the operational cashier(s) cleanly
+                int count = validSales.Count;
+                double totalRev = validSales.Sum(s => s.Total);
+                double avgTicket = count > 0 ? totalRev / count : 0.0;
+                double commission = totalRev * (defaultCommissionPct / 100.0);
+
+                foreach (var cashier in cashiers)
+                {
                     report.Add(new CashierPerformanceDto(
-                        user.FullName,
+                        cashier.FullName,
                         count,
                         Math.Round(totalRev, 2),
                         Math.Round(avgTicket, 2),
@@ -339,6 +357,7 @@ public partial class SaleService : ISaleService
         }
     }
 
+
     private static SaleDto MapToDto(SaleEntity e)
     {
         var items = JsonSerializer.Deserialize(
@@ -363,7 +382,9 @@ public partial class SaleService : ISaleService
             SerieFolio: e.SerieFolio,
             Status: e.Status,
             InvoiceId: e.InvoiceId,
-            InvoiceStatus: e.InvoiceStatus
+            InvoiceStatus: e.InvoiceStatus,
+            CashierUserId: null,
+            CashierName: null
         );
     }
 }

@@ -64,10 +64,17 @@
                                         Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Foreground="{DynamicResource AccentPrimaryBrush}" />
                             </Grid>
 
-                            <StackPanel Spacing="4" Margin="0,4,0,0">
-                                <TextBlock Text="Categoría" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                                <ComboBox ItemsSource="{Binding Categories}" SelectedItem="{Binding Category, Mode=TwoWay}" HorizontalAlignment="Stretch" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
-                            </StackPanel>
+                            <Grid ColumnDefinitions="*,*" Margin="0,4,0,0">
+                                <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,6,0">
+                                    <TextBlock Text="Categoría" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    <ComboBox ItemsSource="{Binding Categories}" SelectedItem="{Binding Category, Mode=TwoWay}" HorizontalAlignment="Stretch" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                                </StackPanel>
+
+                                <StackPanel Grid.Column="1" Spacing="4" Margin="6,0,0,0">
+                                    <TextBlock Text="Proveedor Predeterminado" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    <ComboBox ItemsSource="{Binding Suppliers}" SelectedItem="{Binding SelectedSupplier, Mode=TwoWay}" DisplayMemberBinding="{Binding Name}" HorizontalAlignment="Stretch" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                                </StackPanel>
+                            </Grid>
                         </StackPanel>
                     </Border>
 

@@ -48,10 +48,74 @@ public partial class PurchaseOrderViewModel : ObservableObject
 
     public event Action<PurchaseDto>? PurchaseConfirmed;
 
+    private List<ProductDto> _allProductsCache = [];
+
     public PurchaseOrderViewModel(IPurchaseService purchaseService, IProductService productService)
     {
         _purchaseService = purchaseService;
         _productService = productService;
+    }
+
+    public async Task LoadCatalogAsync(List<SupplierDto>? suppliers = null)
+    {
+        try
+        {
+            var products = await _productService.GetAllAsync();
+            _allProductsCache = products;
+
+            if (suppliers != null)
+            {
+                Suppliers.Clear();
+                foreach (var s in suppliers) Suppliers.Add(s);
+            }
+
+            FilterProductsBySelectedSupplier();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "PurchaseOrderViewModel: Error loading catalog");
+        }
+    }
+
+    partial void OnSelectedSupplierChanged(SupplierDto? value)
+    {
+        FilterProductsBySelectedSupplier();
+    }
+
+    partial void OnSelectedProductChanged(ProductDto? value)
+    {
+        if (value != null)
+        {
+            PurchaseUnitPrice = value.Cost.ToString("F2");
+        }
+        else
+        {
+            PurchaseUnitPrice = string.Empty;
+        }
+    }
+
+    private void FilterProductsBySelectedSupplier()
+    {
+        AvailableProducts.Clear();
+        if (SelectedSupplier == null)
+        {
+            foreach (var p in _allProductsCache) AvailableProducts.Add(p);
+        }
+        else
+        {
+            var matchingProducts = _allProductsCache
+                .Where(p => p.DefaultSupplierId == SelectedSupplier.Id)
+                .ToList();
+
+            if (matchingProducts.Count > 0)
+            {
+                foreach (var p in matchingProducts) AvailableProducts.Add(p);
+            }
+            else
+            {
+                foreach (var p in _allProductsCache) AvailableProducts.Add(p);
+            }
+        }
     }
 
     [RelayCommand]

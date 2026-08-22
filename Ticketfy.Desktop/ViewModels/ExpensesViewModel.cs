@@ -33,6 +33,7 @@ public partial class ExpensesViewModel : ObservableObject
     [ObservableProperty] private double _netProfit;
 
     // Cash-Flow Metrics (Decimal representation)
+    [ObservableProperty] private decimal _fondoInicial;
     [ObservableProperty] private decimal _ingresos;
     [ObservableProperty] private decimal _egresos;
     [ObservableProperty] private decimal _totalEnCaja;
@@ -73,9 +74,10 @@ public partial class ExpensesViewModel : ObservableObject
                 TotalExpenses = summary.TotalExpenses;
                 NetProfit = summary.NetProfit;
 
+                FondoInicial = openingBalance;
                 Ingresos = (decimal)summary.TotalRevenue;
                 Egresos = (decimal)summary.TotalExpenses;
-                TotalEnCaja = openingBalance + Ingresos - Egresos;
+                TotalEnCaja = FondoInicial + Ingresos - Egresos;
                 Reinversion = (decimal)summary.TotalCostOfGoodsSold;
                 UtilidadNeta = Ingresos - Egresos - Reinversion;
             });

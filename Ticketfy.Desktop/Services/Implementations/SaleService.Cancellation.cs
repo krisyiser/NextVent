@@ -67,6 +67,22 @@ public partial class SaleService
             sale.CancellationReason = reason;
             sale.CancellationDate = DateTimeOffset.Now.ToString("o");
 
+            // Inject Physical Cash Outflow to Active Shift Drawer if Cancelled Sale was paid in Cash
+            var activeShift = await _ctx.Shifts.FirstOrDefaultAsync(s => s.IsOpen == 1);
+            if (activeShift != null && (sale.PaymentMethod.Equals("Efectivo", StringComparison.OrdinalIgnoreCase) || sale.PaymentMethod.Equals("Cash", StringComparison.OrdinalIgnoreCase)))
+            {
+                _ctx.ShiftMovements.Add(new ShiftMovementEntity
+                {
+                    ShiftId = activeShift.Id,
+                    MovementType = Ticketfy.Core.Enums.MovementType.DevolucionCliente,
+                    Amount = sale.Total,
+                    IsOutflow = true,
+                    Description = $"Cancelación Venta Ticket #{sale.Id} - {reason}",
+                    ReferenceId = sale.Id,
+                    Timestamp = DateTime.Now.ToString("s")
+                });
+            }
+
             await DbResilienceHelper.ExecuteWithRetryAsync(async () =>
             {
                 await _ctx.SaveChangesAsync();
