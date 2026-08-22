@@ -89,7 +89,10 @@ Set-Location -Path $CurrentLocation
 # 5. Despliegue automático de contenedor web en servidor de producción (100.109.190.105)
 Write-Host "Sincronizando contenedor web de producción valcore.cloud..." -ForegroundColor Cyan
 try {
-    python "..\execute_deploy.py"
+    $deployScript = Join-Path $PSScriptRoot "..\..\execute_deploy.py"
+    if (Test-Path $deployScript) {
+        python $deployScript
+    }
 } catch {
     Write-Host "Aviso: No se pudo ejecutar deploy automático de la web, pero el release OTA ya fue publicado." -ForegroundColor Yellow
 }

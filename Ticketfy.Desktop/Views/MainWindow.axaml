@@ -57,15 +57,15 @@
             <!-- ═══ SIDEBAR NAVIGATION ═══ -->
             <controls:SidebarNavigationControl />
 
-            <!-- ═══ MAIN CONTENT AREA ═══ -->
-            <DockPanel LastChildFill="True">
-                <!-- UPDATE BANNERS -->
-                <controls:UpdateBannerControl />
-
-                <!-- Active Module Content -->
-                <ContentControl Content="{Binding ActiveViewModel}" IsEnabled="{Binding !IsLocked}" />
-            </DockPanel>
+            <!-- ═══ MAIN CONTENT AREA (UNTOUCHED STABLE LAYOUT) ═══ -->
+            <ContentControl Content="{Binding ActiveViewModel}" IsEnabled="{Binding !IsLocked}" />
         </DockPanel>
+
+        <!-- ═══ FLOATING UPDATE NOTIFICATION OVERLAY (ZERO LAYOUT SHIFT) ═══ -->
+        <controls:UpdateBannerControl ZIndex="4000"
+                                     HorizontalAlignment="Left"
+                                     VerticalAlignment="Top"
+                                     Margin="90,36,0,0" />
 
         <!-- ═══ MODAL DIALOG OVERLAY ═══ -->
         <Grid IsVisible="{Binding IsDialogOverlayOpen}" Background="#80000000">

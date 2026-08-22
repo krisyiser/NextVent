@@ -5,17 +5,17 @@
              x:Class="Ticketfy.Controls.UpdateBannerControl"
              x:DataType="vm:MainWindowViewModel">
 
-    <StackPanel DockPanel.Dock="Top">
-        <!-- UPDATE BANNERS -->
-        <Border Background="#3B82F6" Padding="16,10" IsVisible="{Binding IsUpdateAvailable}">
+    <StackPanel IsHitTestVisible="True" MaxWidth="500">
+        <!-- UPDATE BANNERS (Floating Non-Blocking Toasts) -->
+        <Border Background="#3B82F6" Padding="16,10" CornerRadius="8" Margin="0,0,0,8" BoxShadow="0 4 12 0 #40000000" IsVisible="{Binding IsUpdateAvailable}">
             <Grid ColumnDefinitions="Auto, *, Auto">
                 <mi:MaterialIcon Kind="CloudDownload" Width="24" Height="24" Foreground="White" VerticalAlignment="Center" Margin="0,0,12,0"/>
                 <TextBlock Grid.Column="1" Text="Descargando nueva actualización en segundo plano..." FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
-                <ProgressBar Grid.Column="2" Width="150" Height="8" Minimum="0" Maximum="100" Value="{Binding UpdateProgress}" VerticalAlignment="Center" Foreground="White" Background="#1D4ED8"/>
+                <ProgressBar Grid.Column="2" Width="120" Height="8" Minimum="0" Maximum="100" Value="{Binding UpdateProgress}" VerticalAlignment="Center" Foreground="White" Background="#1D4ED8"/>
             </Grid>
         </Border>
         
-        <Border Background="#10B981" Padding="16,10" IsVisible="{Binding IsUpdateReady}">
+        <Border Background="#10B981" Padding="16,10" CornerRadius="8" Margin="0,0,0,8" BoxShadow="0 4 12 0 #40000000" IsVisible="{Binding IsUpdateReady}">
             <Grid ColumnDefinitions="Auto, *, Auto">
                 <mi:MaterialIcon Kind="CheckCircleOutline" Width="24" Height="24" Foreground="White" VerticalAlignment="Center" Margin="0,0,12,0"/>
                 <TextBlock Grid.Column="1" Text="Actualización lista para instalarse. Reinicia el sistema." FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
@@ -24,14 +24,14 @@
         </Border>
 
         <!-- FEEDBACK BANNERS (Up To Date & Error) -->
-        <Border Background="#10B981" Padding="16,10" IsVisible="{Binding IsUpdateUpToDate}">
+        <Border Background="#10B981" Padding="16,10" CornerRadius="8" Margin="0,0,0,8" BoxShadow="0 4 12 0 #40000000" IsVisible="{Binding IsUpdateUpToDate}">
             <Grid ColumnDefinitions="Auto, *">
                 <mi:MaterialIcon Kind="CheckAll" Width="24" Height="24" Foreground="White" VerticalAlignment="Center" Margin="0,0,12,0"/>
                 <TextBlock Grid.Column="1" Text="El sistema ya está en la versión más reciente." FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
             </Grid>
         </Border>
 
-        <Border Background="#EF4444" Padding="16,10" IsVisible="{Binding IsUpdateFailed}">
+        <Border Background="#EF4444" Padding="16,10" CornerRadius="8" Margin="0,0,0,8" BoxShadow="0 4 12 0 #40000000" IsVisible="{Binding IsUpdateFailed}">
             <Grid ColumnDefinitions="Auto, *">
                 <mi:MaterialIcon Kind="AlertCircleOutline" Width="24" Height="24" Foreground="White" VerticalAlignment="Center" Margin="0,0,12,0"/>
                 <TextBlock Grid.Column="1" Text="{Binding UpdateErrorMessage}" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" TextWrapping="Wrap"/>

@@ -71,8 +71,8 @@ public partial class PinInputControl : UserControl
     {
         InitializeComponent();
 
-        GotFocus += (s, e) => Dispatcher.UIThread.Post(() => MasterInput.Focus());
-        PointerPressed += (s, e) => Dispatcher.UIThread.Post(() => MasterInput.Focus());
+        GotFocus += (s, e) => FocusMasterInput();
+        PointerPressed += (s, e) => FocusMasterInput();
 
         MasterInput.PropertyChanged += (s, e) =>
         {
@@ -92,6 +92,18 @@ public partial class PinInputControl : UserControl
         MasterInput.LostFocus += (s, e) => UpdateVisualState(PinValue);
     }
 
+    private void FocusMasterInput()
+    {
+        Dispatcher.UIThread.Post(() =>
+        {
+            MasterInput.Focus();
+            if (MasterInput.Text != null)
+            {
+                MasterInput.CaretIndex = MasterInput.Text.Length;
+            }
+        });
+    }
+
     private void UpdateVisualState(string val)
     {
         val ??= string.Empty;
@@ -107,12 +119,19 @@ public partial class PinInputControl : UserControl
         Dot4.Text = val.Length > 3 ? "●" : string.Empty;
 
         bool hasFocus = MasterInput.IsFocused;
-        int activeIndex = Math.Min(val.Length, 3);
+        
+        // Rules for active highlight box:
+        // 0 chars (empty) => Box 1 (index 0)
+        // 1 char  => Box 1 (index 0)
+        // 2 chars => Box 2 (index 1)
+        // 3 chars => Box 3 (index 2)
+        // 4 chars => Box 4 (index 3)
+        int activeIndex = val.Length == 0 ? 0 : val.Length - 1;
 
         HighlightBox(Box1, hasFocus && activeIndex == 0, val.Length > 0);
         HighlightBox(Box2, hasFocus && activeIndex == 1, val.Length > 1);
         HighlightBox(Box3, hasFocus && activeIndex == 2, val.Length > 2);
-        HighlightBox(Box4, hasFocus && (activeIndex == 3 || val.Length == 4), val.Length > 3);
+        HighlightBox(Box4, hasFocus && activeIndex == 3, val.Length > 3);
     }
 
     private void HighlightBox(Border box, bool isActive, bool hasValue)
@@ -138,6 +157,6 @@ public partial class PinInputControl : UserControl
     {
         PinValue = string.Empty;
         MasterInput.Text = string.Empty;
-        Dispatcher.UIThread.Post(() => MasterInput.Focus());
+        FocusMasterInput();
     }
 }
