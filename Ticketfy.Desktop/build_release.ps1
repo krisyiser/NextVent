@@ -37,6 +37,7 @@ vpk pack -u Ticketfy.Desktop -v $Version -p $PublishDir86 -o "$ReleaseDir\x86" -
 
 if (Test-Path "$ReleaseDir\x64\Ticketfy.Desktop-win-Setup.exe") {
     Copy-Item -Path "$ReleaseDir\x64\Ticketfy.Desktop-win-Setup.exe" -Destination "$ReleaseDir\Ticketfy-Setup-v$Version-x64.exe" -Force
+    Copy-Item -Path "$ReleaseDir\x64\Ticketfy.Desktop-win-Setup.exe" -Destination "$ReleaseDir\Ticketfy-Setup-v$Version.exe" -Force
 }
 if (Test-Path "$ReleaseDir\x86\Ticketfy.Desktop-win-Setup.exe") {
     Copy-Item -Path "$ReleaseDir\x86\Ticketfy.Desktop-win-Setup.exe" -Destination "$ReleaseDir\Ticketfy-Setup-v$Version-x86.exe" -Force
@@ -50,18 +51,40 @@ $ReleasesJson = @"
   "updated_at": "$(Get-Date -Format 'yyyy-MM-ddTHH:mm:ssZ')",
   "downloads": {
     "x64": "Ticketfy-Setup-v$Version-x64.exe",
-    "x86": "Ticketfy-Setup-v$Version-x86.exe"
+    "x86": "Ticketfy-Setup-v$Version-x86.exe",
+    "default": "Ticketfy-Setup-v$Version.exe"
   }
 }
 "@
 Set-Content -Path "$ReleaseDir\releases.json" -Value $ReleasesJson -Encoding UTF8
 
-# Copiar scripts detectores web si existen
+# Copiar y actualizar scripts detectores web
 if (Test-Path "..\web") {
     Copy-Item -Path "..\web\*" -Destination "$ReleaseDir\" -Force
+    if (Test-Path "$ReleaseDir\valcore-download.js") {
+        $jsContent = Get-Content "$ReleaseDir\valcore-download.js" -Raw
+        $jsContent = $jsContent -replace "const DEFAULT_VERSION = '[^']+'", "const DEFAULT_VERSION = '$Version'"
+        Set-Content -Path "$ReleaseDir\valcore-download.js" -Value $jsContent -Encoding UTF8
+    }
 }
 
-Write-Host "¡Construcción multi-arquitectura completada con éxito!" -ForegroundColor Green
+Write-Host "Publicando releases en Forgejo (https://git.valcore/yersi/ticketfy-releases.git)..." -ForegroundColor Cyan
+$CurrentLocation = Get-Location
+Set-Location -Path $ReleaseDir
+if (!(Test-Path ".git")) {
+    git init
+    git branch -M main
+    git remote add origin https://yersi:valcore1712-@git.valcore/yersi/ticketfy-releases.git
+}
+
+git config http.sslVerify false
+git add .
+git commit -m "Release v$Version"
+git push -u origin main --force
+
+Set-Location -Path $CurrentLocation
+
+Write-Host "¡Construcción y publicación de actualización OTA completadas con éxito!" -ForegroundColor Green
 Write-Host "Instalador 64-bit: $ReleaseDir\Ticketfy-Setup-v$Version-x64.exe" -ForegroundColor Green
 Write-Host "Instalador 32-bit: $ReleaseDir\Ticketfy-Setup-v$Version-x86.exe" -ForegroundColor Green
 Write-Host "Manifiesto Web:    $ReleaseDir\releases.json" -ForegroundColor Green
