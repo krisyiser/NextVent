@@ -1,0 +1,40 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ticketfy.ViewModels.Settings"
+             x:Class="Ticketfy.Views.Settings.Empresa.EmpresaRedesTab"
+             x:DataType="vm:EmpresaSettingsViewModel">
+
+    <StackPanel Spacing="16">
+        <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,*">
+            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,12" Spacing="6">
+                <TextBlock Text="Email Contacto" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <TextBox Text="{Binding EmpresaEmailContacto, Mode=TwoWay}" Padding="10,8" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,12" Spacing="6">
+                <TextBlock Text="Sitio Web" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <TextBox Text="{Binding EmpresaSitioWeb, Mode=TwoWay}" Padding="10,8" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,12" Spacing="6">
+                <TextBlock Text="Facebook" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <TextBox Text="{Binding EmpresaFacebook, Mode=TwoWay}" Padding="10,8" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,12" Spacing="6">
+                <TextBlock Text="Instagram" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <TextBox Text="{Binding EmpresaInstagram, Mode=TwoWay}" Padding="10,8" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,8,0" Spacing="6">
+                <TextBlock Text="Mensaje Pie Ticket" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <TextBox Text="{Binding EmpresaMensajeBienvenidaTicket, Mode=TwoWay}" Padding="10,8" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="2" Grid.Column="1" Margin="8,0,0,0" Spacing="6">
+                <TextBlock Text="URL QR Redes" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <TextBox Text="{Binding EmpresaQrRedesUrl, Mode=TwoWay}" Padding="10,8" />
+            </StackPanel>
+        </Grid>
+    </StackPanel>
+</UserControl>

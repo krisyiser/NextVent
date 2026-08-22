@@ -7,15 +7,20 @@ using Ticketfy.Data.Entities;
 using Ticketfy.Services.Interfaces;
 using Ticketfy.Core.Models;
 using Ticketfy.Core.Enums;
+using Serilog;
 using System.Text.Json;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Ticketfy.Services.Implementations;
 
 /// <summary>
 /// Sale transaction service with atomic stock deduction and debt management.
-/// Critical transactional rules migrated from storage.ts saveSale/cancelSale.
+/// Decomposed into partial classes: SaleService (Core), SaleService.Cancellation, SaleService.Inventory.
 /// </summary>
-public sealed class SaleService : ISaleService
+public partial class SaleService : ISaleService
 {
     private readonly IDbContextFactory<AppDbContext> _contextFactory;
     private readonly CoOccurrenceQueue _coOccurrenceQueue;
@@ -30,72 +35,6 @@ public sealed class SaleService : ISaleService
         _contextFactory = contextFactory;
         _coOccurrenceQueue = coOccurrenceQueue;
         _auditService = auditService;
-    }
-
-    /// <summary>
-    /// Atomic sale save: INSERT sale + UPDATE stock + UPDATE debt (if credit) + UPDATE co-occurrences.
-    /// Uses EF Core transaction to guarantee all-or-nothing.
-    /// </summary>
-    private async Task<string> GenerateNextSaleFolioAsync(AppDbContext _ctx)
-    {
-        string datePrefix = DateTime.Now.ToString("ddMMyy");
-        
-        var query = @"
-            INSERT INTO FolioSequences (DatePrefix, LastSequence) 
-            VALUES (@p0, 1) 
-            ON CONFLICT(DatePrefix) 
-            DO UPDATE SET LastSequence = LastSequence + 1 
-            RETURNING LastSequence;";
-
-        var connection = _ctx.Database.GetDbConnection();
-        if (connection.State != System.Data.ConnectionState.Open)
-            await connection.OpenAsync();
-        
-        using var command = connection.CreateCommand();
-        if (_ctx.Database.CurrentTransaction != null)
-            command.Transaction = _ctx.Database.CurrentTransaction.GetDbTransaction();
-        command.CommandText = query;
-        
-        var param = command.CreateParameter();
-        param.ParameterName = "@p0";
-        param.Value = datePrefix;
-        command.Parameters.Add(param);
-
-        var result = await command.ExecuteScalarAsync();
-        int sequence = Convert.ToInt32(result);
-
-        return $"{datePrefix}-{sequence:D4}";
-    }
-
-    private async Task<string> GenerateNextReturnFolioAsync(AppDbContext _ctx)
-    {
-        string datePrefix = $"DEV-{DateTime.Now.ToString("ddMMyy")}";
-        
-        var query = @"
-            INSERT INTO FolioSequences (DatePrefix, LastSequence) 
-            VALUES (@p0, 1) 
-            ON CONFLICT(DatePrefix) 
-            DO UPDATE SET LastSequence = LastSequence + 1 
-            RETURNING LastSequence;";
-
-        var connection = _ctx.Database.GetDbConnection();
-        if (connection.State != System.Data.ConnectionState.Open)
-            await connection.OpenAsync();
-        
-        using var command = connection.CreateCommand();
-        if (_ctx.Database.CurrentTransaction != null)
-            command.Transaction = _ctx.Database.CurrentTransaction.GetDbTransaction();
-        command.CommandText = query;
-        
-        var param = command.CreateParameter();
-        param.ParameterName = "@p0";
-        param.Value = datePrefix;
-        command.Parameters.Add(param);
-
-        var result = await command.ExecuteScalarAsync();
-        int sequence = Convert.ToInt32(result);
-
-        return $"{datePrefix}-{sequence:D4}";
     }
 
     public async Task<SaleDto> SaveAsync(SaleDto sale)
@@ -162,7 +101,7 @@ public sealed class SaleService : ISaleService
             double totalTicketCogs = 0.0;
             foreach (var item in processedItems)
             {
-                double unitCogs = await DeductInventoryRecursiveAsync(_ctx, item.ProductId, item.Quantity, new System.Collections.Generic.HashSet<string>());
+                double unitCogs = await DeductInventoryRecursiveAsync(_ctx, item.ProductId, item.Quantity, new HashSet<string>());
                 totalTicketCogs += unitCogs * item.Quantity;
             }
 
@@ -197,12 +136,10 @@ public sealed class SaleService : ISaleService
 
                     if (sale.PaymentMethod == "Puntos de Fidelidad")
                     {
-                        // Deduct points used for payment (1 pt = $1.00 MXN)
                         customer.PuntosSaldo = Math.Max(0.0, customer.PuntosSaldo - total);
                     }
                     else
                     {
-                        // Accrue 1 point per $10 spent
                         double earnedPoints = Math.Floor(total / 10.0);
                         customer.PuntosSaldo += earnedPoints;
                     }
@@ -310,7 +247,6 @@ public sealed class SaleService : ISaleService
             .FirstOrDefaultAsync(s => s.Id == saleId);
 
         if (entity == null) return null;
-        
         return MapToDto(entity);
     }
 
@@ -341,215 +277,6 @@ public sealed class SaleService : ISaleService
         return entities.Select(MapToDto).ToList();
     }
 
-    /// <summary>
-    /// Atomic cancellation: restore stock + reduce debt + mark cancelled.
-    /// </summary>
-    public async Task CancelAsync(string saleId)
-    {
-        await CancelSaleAsync(saleId, "Cancelación Administrativa");
-    }
-
-    public async Task<bool> CancelSaleAsync(string saleId, string reason)
-    {
-        using var _ctx = await _contextFactory.CreateDbContextAsync();
-        await using var transaction = await _ctx.Database.BeginTransactionAsync();
-        try
-        {
-            var sale = await _ctx.Sales.FindAsync(saleId);
-            if (sale is null || sale.IsCancelled == 1 || sale.Status == SaleStatus.Canceled) 
-                return false;
-
-            var items = JsonSerializer.Deserialize(
-                sale.ItemsJson,
-                Ticketfy.Desktop.Core.Helpers.TicketfyJsonContext.Default.ListSaleItemSnapshotDto) ?? [];
-
-            // Restore stock
-            foreach (var item in items)
-            {
-                var product = await _ctx.Products.FindAsync(item.Id);
-                if (product is not null)
-                {
-                    double remaining = Math.Max(0.0, item.Quantity - item.ReturnedQuantity);
-                    product.Stock = Math.Round(product.Stock + remaining, 3);
-                }
-            }
-
-            // If was credit, reduce customer debt
-            if (sale.IsCredit == 1 && !string.IsNullOrEmpty(sale.CustomerId))
-            {
-                var customer = await _ctx.Customers.FindAsync(sale.CustomerId);
-                if (customer is not null)
-                {
-                    customer.Debt = Math.Max(0.0, Math.Round(customer.Debt - sale.Total, 2));
-                }
-            }
-
-            sale.IsCancelled = 1;
-            sale.CancelledAt = DateTimeOffset.Now.ToString("o");
-            sale.Status = SaleStatus.Canceled;
-            sale.CancellationReason = reason;
-            sale.CancellationDate = DateTimeOffset.Now.ToString("o");
-
-            await DbResilienceHelper.ExecuteWithRetryAsync(async () =>
-            {
-                await _ctx.SaveChangesAsync();
-                await transaction.CommitAsync();
-            });
-            return true;
-        }
-        catch
-        {
-            await transaction.RollbackAsync();
-            throw;
-        }
-    }
-
-    public async Task UpdateFiscalStatusAsync(string saleId, string status, string? uuid, string? folio)
-    {
-        using var _ctx = await _contextFactory.CreateDbContextAsync();
-        var sale = await _ctx.Sales.FindAsync(saleId);
-        if (sale is null) return;
-
-        sale.EstadoFiscal = status;
-        sale.UuidSat = uuid;
-        sale.SerieFolio = folio;
-        await DbResilienceHelper.ExecuteWithRetryAsync(async () => await _ctx.SaveChangesAsync());
-    }
-
-    public async Task<bool> ProcessPartialReturnAsync(string saleId, string productId, double returnQty, string reason, string refundMethod = "Efectivo", bool isProductInGoodCondition = true)
-    {
-        if (returnQty <= 0) return false;
-        using var _ctx = await _contextFactory.CreateDbContextAsync();
-        await using var transaction = await _ctx.Database.BeginTransactionAsync();
-        try
-        {
-            var sale = await _ctx.Sales.FindAsync(saleId);
-            if (sale is null || sale.IsCancelled == 1) return false;
-
-            var items = JsonSerializer.Deserialize(
-                sale.ItemsJson,
-                Ticketfy.Desktop.Core.Helpers.TicketfyJsonContext.Default.ListSaleItemSnapshotDto) ?? [];
-            var targetItem = items.FirstOrDefault(i => i.ProductId == productId || i.Id == productId);
-
-            if (targetItem is null) return false;
-
-            // ANTI-FRAUD CHECK: Prevent returning more than available quantity
-            if (returnQty > targetItem.AvailableForReturn)
-            {
-                throw new InvalidOperationException($"Fraude Detectado: Intento de devolver más unidades de las disponibles para el ítem {targetItem.ProductId}");
-            }
-
-            // 1. Restock product stock recursively in database (only if product is in good condition)
-            if (isProductInGoodCondition)
-            {
-                await RestockInventoryRecursiveAsync(_ctx, targetItem.ProductId, returnQty, new System.Collections.Generic.HashSet<string>());
-            }
-            else
-            {
-                // DO NOT restock. Write to AuditLog as Merma (Shrinkage).
-                var product = await _ctx.Products.FindAsync(targetItem.ProductId);
-                if (product != null)
-                {
-                    await _auditService.LogAsync(new Ticketfy.Data.Entities.AuditLogEntity
-                    {
-                        ActionType = Ticketfy.Core.Enums.AuditActionType.InventoryStockAdjustment,
-                        RiskLevel = Ticketfy.Core.Enums.RiskLevel.Warning,
-                        UserId = "SYSTEM",
-                        EntityName = "products",
-                        EntityId = targetItem.ProductId,
-                        FinancialImpact = product.Cost * returnQty,
-                        Reason = $"Devolución de producto dañado/mermado: {reason}"
-                    });
-                }
-            }
-
-            // 2. Adjust item quantity and sale totals
-            double refundedAmount = Math.Round(targetItem.UnitPrice * returnQty, 2);
-            double refundedCost = Math.Round(targetItem.Cost * returnQty, 2);
-
-            sale.Total = Math.Max(0.0, Math.Round(sale.Total - refundedAmount, 2));
-            sale.TotalCost = Math.Max(0.0, Math.Round(sale.TotalCost - refundedCost, 2));
-            sale.Profit = Math.Max(0.0, Math.Round(sale.Profit - (refundedAmount - refundedCost), 2));
-
-            var updatedItems = new List<SaleItemSnapshotDto>();
-            foreach (var item in items)
-            {
-                if (item.ProductId == productId || item.Id == productId)
-                {
-                    double newReturnedQty = item.ReturnedQuantity + returnQty;
-                    updatedItems.Add(item with { ReturnedQuantity = newReturnedQty });
-                }
-                else
-                {
-                    updatedItems.Add(item);
-                }
-            }
-
-            // Check if all items on the ticket are fully returned
-            bool allReturned = updatedItems.All(i => i.ReturnedQuantity >= i.Quantity);
-            if (allReturned)
-            {
-                sale.IsCancelled = 1;
-                sale.CancelledAt = DateTimeOffset.Now.ToString("o");
-                sale.Status = SaleStatus.Refunded;
-            }
-            else
-            {
-                sale.Status = SaleStatus.Refunded;
-            }
-
-            sale.ItemsJson = JsonSerializer.Serialize(
-                updatedItems,
-                Ticketfy.Desktop.Core.Helpers.TicketfyJsonContext.Default.ListSaleItemSnapshotDto);
-
-            // Record Return Audit Entity
-            var returnEntity = new ReturnEntity
-            {
-                Id = await GenerateNextReturnFolioAsync(_ctx),
-                OriginalSaleId = sale.Id,
-                CashierUserId = null,
-                TotalRefunded = refundedAmount,
-                CogsReversed = refundedCost,
-                RefundMethod = refundMethod,
-                Reason = reason,
-                CreatedAt = DateTimeOffset.Now.ToString("o")
-            };
-            _ctx.Returns.Add(returnEntity);
-
-            // Inject Physical Cash Outflow to Active Shift Drawer if Refunded in Cash
-            var activeShift = await _ctx.Shifts.FirstOrDefaultAsync(s => s.IsOpen == 1);
-            if (activeShift != null && (refundMethod.Equals("Efectivo", StringComparison.OrdinalIgnoreCase) || refundMethod.Equals("Cash", StringComparison.OrdinalIgnoreCase)))
-            {
-                _ctx.ShiftMovements.Add(new ShiftMovementEntity
-                {
-                    ShiftId = activeShift.Id,
-                    MovementType = Ticketfy.Core.Enums.MovementType.DevolucionCliente,
-                    Amount = refundedAmount,
-                    IsOutflow = true,
-                    Description = $"Devolución Ticket #{sale.Id} - {reason}",
-                    ReferenceId = returnEntity.Id,
-                    Timestamp = DateTime.Now.ToString("s")
-                });
-            }
-
-            await DbResilienceHelper.ExecuteWithRetryAsync(async () =>
-            {
-                await _ctx.SaveChangesAsync();
-                await transaction.CommitAsync();
-            });
-
-            Serilog.Log.Information("Processed Partial Return for Sale {SaleId}, Product {ProductId}, Qty {Qty}, Refund {Amount}",
-                saleId, productId, returnQty, refundedAmount);
-            return true;
-        }
-        catch (Exception ex)
-        {
-            await transaction.RollbackAsync();
-            Serilog.Log.Error(ex, "Error processing partial return for sale {SaleId}", saleId);
-            throw;
-        }
-    }
-
     public async Task<List<CashierPerformanceDto>> GetCashierPerformanceReportAsync(double defaultCommissionPct = 0.0)
     {
         try
@@ -564,14 +291,13 @@ public sealed class SaleService : ISaleService
                 .AsNoTracking()
                 .ToListAsync();
 
-            // Group sales by user or cashier name
             var report = new List<CashierPerformanceDto>();
 
             if (users.Count > 0)
             {
                 foreach (var user in users)
                 {
-                    var userSales = validSales; // Currently system active sales
+                    var userSales = validSales;
                     int count = userSales.Count;
                     double totalRev = userSales.Sum(s => s.Total);
                     double avgTicket = count > 0 ? totalRev / count : 0.0;
@@ -608,98 +334,8 @@ public sealed class SaleService : ISaleService
         }
         catch (Exception ex)
         {
-            Serilog.Log.Error(ex, "Error generating cashier performance report");
+            Log.Error(ex, "Error generating cashier performance report");
             return [];
-        }
-    }
-
-    private async Task CheckAndFlagLowStockAsync(AppDbContext _ctx, ProductEntity product)
-    {
-        if (product.Stock <= product.MinStock)
-        {
-            bool alertExists = await _ctx.SystemAlerts
-                .AnyAsync(a => a.ProductId == product.Id && !a.IsResolved);
-
-            if (!alertExists)
-            {
-                var alert = new SystemAlertEntity
-                {
-                    Id = Guid.NewGuid().ToString(),
-                    ProductId = product.Id,
-                    SupplierId = product.DefaultSupplierId,
-                    Title = $"Stock Crítico: {product.Name}",
-                    Message = $"Stock actual ({product.Stock}) por debajo del mínimo permitido ({product.MinStock}).",
-                    CreatedAt = DateTime.Now.ToString("s"),
-                    IsResolved = false
-                };
-                _ctx.SystemAlerts.Add(alert);
-            }
-        }
-    }
-
-    private async Task<double> DeductInventoryRecursiveAsync(AppDbContext _ctx, string productId, double quantityMultiplier, System.Collections.Generic.HashSet<string> executionStack)
-    {
-        var product = await _ctx.Products.FindAsync(productId)
-            ?? throw new InvalidOperationException($"Producto o ingrediente no encontrado: {productId}");
-
-        if (product.IsKit)
-        {
-            if (!executionStack.Add(productId))
-                throw new InvalidOperationException($"Error crítico: Referencia circular detectada en el Combo/Kit: {product.Name}");
-
-            var kit = await _ctx.ItemKits
-                .Include(k => k.Components)
-                .FirstOrDefaultAsync(k => k.ParentProductId == product.Id || k.Id == product.Id)
-                ?? throw new InvalidOperationException($"Estructura de Combo no encontrada para: {product.Name}");
-
-            double totalKitUnitCost = 0.0;
-
-            foreach (var component in kit.Components)
-            {
-                double totalRequired = quantityMultiplier * component.Quantity;
-                double compUnitCost = await DeductInventoryRecursiveAsync(_ctx, component.ProductId, totalRequired, executionStack);
-                totalKitUnitCost += component.Quantity * compUnitCost;
-            }
-
-            executionStack.Remove(productId);
-            return totalKitUnitCost;
-        }
-        else
-        {
-            product.Stock = Math.Max(0.0, Math.Round(product.Stock - quantityMultiplier, 3));
-            _ctx.Products.Update(product);
-            await CheckAndFlagLowStockAsync(_ctx, product);
-            return product.Cost;
-        }
-    }
-
-    private async Task RestockInventoryRecursiveAsync(AppDbContext _ctx, string productId, double quantityMultiplier, System.Collections.Generic.HashSet<string> executionStack)
-    {
-        var product = await _ctx.Products.FindAsync(productId)
-            ?? throw new InvalidOperationException($"Producto o ingrediente no encontrado: {productId}");
-
-        if (product.IsKit)
-        {
-            if (!executionStack.Add(productId))
-                throw new InvalidOperationException($"Error crítico: Referencia circular detectada en el Combo/Kit: {product.Name}");
-
-            var kit = await _ctx.ItemKits
-                .Include(k => k.Components)
-                .FirstOrDefaultAsync(k => k.ParentProductId == product.Id || k.Id == product.Id)
-                ?? throw new InvalidOperationException($"Estructura de Combo no encontrada para: {product.Name}");
-
-            foreach (var component in kit.Components)
-            {
-                double totalRequired = quantityMultiplier * component.Quantity;
-                await RestockInventoryRecursiveAsync(_ctx, component.ProductId, totalRequired, executionStack);
-            }
-
-            executionStack.Remove(productId);
-        }
-        else
-        {
-            product.Stock = Math.Round(product.Stock + quantityMultiplier, 3);
-            _ctx.Products.Update(product);
         }
     }
 
@@ -729,48 +365,5 @@ public sealed class SaleService : ISaleService
             InvoiceId: e.InvoiceId,
             InvoiceStatus: e.InvoiceStatus
         );
-    }
-
-    private List<SaleItemSnapshotDto> ApplyProratedGlobalDiscountAndTaxes(List<SaleItemSnapshotDto> items, double globalDiscountAmount)
-    {
-        decimal totalCartSubtotal = (decimal)items.Sum(i => (i.Quantity * (i.OriginalUnitPrice > 0 ? i.OriginalUnitPrice : i.UnitPrice)) - i.AppliedDiscountAmount);
-        decimal globalDiscountDec = (decimal)globalDiscountAmount;
-        decimal accumulatedProratedDiscount = 0m;
-        var result = new List<SaleItemSnapshotDto>();
-
-        for (int i = 0; i < items.Count; i++)
-        {
-            var item = items[i];
-            double itemUnitPrice = item.OriginalUnitPrice > 0 ? item.OriginalUnitPrice : item.UnitPrice;
-            decimal lineSubtotal = (decimal)((item.Quantity * itemUnitPrice) - item.AppliedDiscountAmount);
-            decimal proratedGlobalDiscount = 0m;
-
-            if (totalCartSubtotal > 0 && globalDiscountDec > 0)
-            {
-                if (i == items.Count - 1)
-                {
-                    proratedGlobalDiscount = globalDiscountDec - accumulatedProratedDiscount;
-                }
-                else
-                {
-                    decimal weight = lineSubtotal / totalCartSubtotal;
-                    proratedGlobalDiscount = Math.Round(globalDiscountDec * weight, 2);
-                    accumulatedProratedDiscount += proratedGlobalDiscount;
-                }
-            }
-
-            // TAX CALCULATION (16% IVA) MUST OCCUR AFTER ALL DISCOUNTS
-            decimal finalTaxableBase = lineSubtotal - proratedGlobalDiscount;
-            decimal taxAmount = Math.Round(finalTaxableBase * (decimal)Ticketfy.Core.Constants.AppConstants.DefaultIvaRate, 2);
-            decimal totalLineAmount = Math.Round(finalTaxableBase + taxAmount, 2);
-
-            result.Add(item with
-            {
-                ProratedGlobalDiscountAmount = (double)proratedGlobalDiscount,
-                TaxAmount = (double)taxAmount,
-                TotalPrice = (double)totalLineAmount
-            });
-        }
-        return result;
     }
 }

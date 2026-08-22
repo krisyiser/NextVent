@@ -1,0 +1,119 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ticketfy.ViewModels"
+             x:Class="Ticketfy.Views.Settings.Interfaz.ColoresSettingsTab"
+             x:DataType="vm:SettingsViewModel">
+
+    <StackPanel Spacing="16">
+        <TextBlock Text="Paletas de Colores &amp; Identidad Visual (Sin códigos Hexadecimales)" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+        
+        <!-- Logo Scale Slider Card -->
+        <Border Padding="14,12" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+            <StackPanel Spacing="10">
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Text="Escala de Logo Corporativo en Barra" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,12,0" />
+                    <Border Grid.Column="1" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="6,2">
+                        <TextBlock Text="{Binding EscalaLogoTopbar, StringFormat='{}{0:F0} px'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                    </Border>
+                </Grid>
+                <Slider Minimum="20" Maximum="56" Value="{Binding EscalaLogoTopbar, Mode=TwoWay}" Margin="0,4,0,0" />
+            </StackPanel>
+        </Border>
+
+        <!-- 1. COLOR BOTÓN COBRAR (ÉXITO) -->
+        <StackPanel Spacing="6">
+            <TextBlock Text="Color Botón Cobrar (Éxito en Ventas)" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+            <ItemsControl ItemsSource="{Binding SuccessColors}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="4" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ColorPaletteItem">
+                        <Button Command="{Binding $parent[UserControl].((vm:SettingsViewModel)DataContext).SelectSuccessColorCommand}"
+                                CommandParameter="{Binding HexColor}"
+                                Margin="2" Padding="6" Height="36" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgSecondaryBrush}">
+                            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                                <Border Width="14" Height="14" CornerRadius="7" Background="{Binding HexColor}" />
+                                <TextBlock Text="{Binding Name}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+
+        <!-- 2. COLOR ANULAR / CANCELAR -->
+        <StackPanel Spacing="6">
+            <TextBlock Text="Color Botón Anular / Cancelar (Alertas)" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+            <ItemsControl ItemsSource="{Binding DangerColors}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="4" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ColorPaletteItem">
+                        <Button Command="{Binding $parent[UserControl].((vm:SettingsViewModel)DataContext).SelectDangerColorCommand}"
+                                CommandParameter="{Binding HexColor}"
+                                Margin="2" Padding="6" Height="36" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgSecondaryBrush}">
+                            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                                <Border Width="14" Height="14" CornerRadius="7" Background="{Binding HexColor}" />
+                                <TextBlock Text="{Binding Name}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+
+        <!-- 3. COLOR ACENTO PRINCIPAL -->
+        <StackPanel Spacing="6">
+            <TextBlock Text="Color Acento Principal (Foco del Sistema)" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+            <ItemsControl ItemsSource="{Binding AccentColors}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="4" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ColorPaletteItem">
+                        <Button Command="{Binding $parent[UserControl].((vm:SettingsViewModel)DataContext).SelectAccentCommand}"
+                                CommandParameter="{Binding HexColor}"
+                                Margin="2" Padding="6" Height="36" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgSecondaryBrush}">
+                            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                                <Border Width="14" Height="14" CornerRadius="7" Background="{Binding HexColor}" />
+                                <TextBlock Text="{Binding Name}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+
+        <!-- 4. COLOR DE BARRA LATERAL -->
+        <StackPanel Spacing="6">
+            <TextBlock Text="Color de Fondo de Barra Lateral de Navegación" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+            <ItemsControl ItemsSource="{Binding SidebarColors}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="4" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="vm:ColorPaletteItem">
+                        <Button Command="{Binding $parent[UserControl].((vm:SettingsViewModel)DataContext).SelectSidebarColorCommand}"
+                                CommandParameter="{Binding HexColor}"
+                                Margin="2" Padding="6" Height="36" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgSecondaryBrush}">
+                            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                                <Border Width="14" Height="14" CornerRadius="7" Background="{Binding HexColor}" />
+                                <TextBlock Text="{Binding Name}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </StackPanel>
+</UserControl>

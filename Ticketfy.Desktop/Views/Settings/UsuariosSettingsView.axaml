@@ -3,11 +3,14 @@
              xmlns:vm="using:Ticketfy.ViewModels"
              xmlns:dto="using:Ticketfy.Data.Dtos"
              xmlns:mi="using:Material.Icons.Avalonia"
+             xmlns:controls="using:Ticketfy.Controls"
              x:Class="Ticketfy.Views.Settings.UsuariosSettingsView"
              x:DataType="vm:SettingsViewModel">
 
     <StackPanel Spacing="18">
         <TextBlock Text="Administración de Usuarios &amp; Cajeros" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+
+        <controls:AlertBannerControl Message="{Binding FeedbackMessage}" />
 
         <!-- Register New User Form -->
         <Border Padding="16" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
@@ -37,17 +40,12 @@
 
                     <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,8,0" Spacing="4">
                         <TextBlock Text="Rol de Sistema" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                        <ComboBox ItemsSource="{Binding RolesOptions}" SelectedItem="{Binding NewRole, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="8,6" />
+                        <ComboBox ItemsSource="{Binding RoleOptions}" SelectedItem="{Binding NewRole, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="8,6" />
                     </StackPanel>
 
                     <StackPanel Grid.Row="2" Grid.Column="1" Margin="8,0,0,0" Spacing="4">
                         <TextBlock Text="PIN rápido de 4 Dígitos" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBox x:Name="Pin1" Text="{Binding NewPin1, Mode=TwoWay}" MaxLength="1" PasswordChar="*" Padding="12,6" Width="40" TextAlignment="Center" KeyUp="OnPinKeyUp"/>
-                            <TextBox x:Name="Pin2" Text="{Binding NewPin2, Mode=TwoWay}" MaxLength="1" PasswordChar="*" Padding="12,6" Width="40" TextAlignment="Center" KeyUp="OnPinKeyUp"/>
-                            <TextBox x:Name="Pin3" Text="{Binding NewPin3, Mode=TwoWay}" MaxLength="1" PasswordChar="*" Padding="12,6" Width="40" TextAlignment="Center" KeyUp="OnPinKeyUp"/>
-                            <TextBox x:Name="Pin4" Text="{Binding NewPin4, Mode=TwoWay}" MaxLength="1" PasswordChar="*" Padding="12,6" Width="40" TextAlignment="Center" KeyUp="OnPinKeyUp"/>
-                        </StackPanel>
+                        <controls:PinInputControl Pin1="{Binding NewPin1, Mode=TwoWay}" Pin2="{Binding NewPin2, Mode=TwoWay}" Pin3="{Binding NewPin3, Mode=TwoWay}" Pin4="{Binding NewPin4, Mode=TwoWay}" HorizontalAlignment="Left" />
                     </StackPanel>
                 </Grid>
 

@@ -515,83 +515,18 @@ public partial class CheckoutDialogViewModel : ObservableObject
             if (RequiresInvoice)
             {
                 var facturamaService = Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<IFacturamaService>(App.Current!.Services!);
-                var cfdiRequest = new Ticketfy.Core.Models.FacturamaCfdiRequest
-                {
-                    Receiver = new Ticketfy.Core.Models.CfdiReceiver
-                    {
-                        Rfc = FiscalRfc.Trim(),
-                        Name = FiscalRazonSocial.Trim(),
-                        CfdiUse = FiscalUsoCfdi.Split('-')[0].Trim(),
-                        FiscalRegime = FiscalRegime.Split('-')[0].Trim(),
-                        TaxZipCode = FiscalZipCode.Trim()
-                    },
-                    PaymentForm = "01", // Should ideally map from PaymentMethod
-                    PaymentMethod = "PUE",
-                    ExpeditionPlace = "00000" // Configure your local Zip Code
-                };
+                var (success, invId, invStatus, estFiscal, errMsg) = await Checkout.CheckoutInvoiceHandler.ProcessInvoiceAsync(
+                    facturamaService, FiscalRfc, FiscalRazonSocial, FiscalUsoCfdi, FiscalRegime, FiscalZipCode, snapshots);
 
-                if (!System.Text.RegularExpressions.Regex.IsMatch(cfdiRequest.Receiver.Rfc, @"^[A-Z&Ñ]{3,4}[0-9]{6}[A-Z0-9]{3}$", System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+                if (!success && errMsg != null && !errMsg.StartsWith("No se pudo timbrar"))
                 {
-                    ErrorMessage = "El RFC ingresado no tiene un formato válido.";
+                    ErrorMessage = errMsg;
                     IsProcessing = false;
                     return;
                 }
 
-                foreach (var item in snapshots)
-                {
-                    decimal priceWithIva = (decimal)item.UnitPrice;
-                    decimal basePrice = Math.Round(priceWithIva / 1.16m, 6);
-                    decimal totalTax = Math.Round(basePrice * 0.16m, 6);
-                    decimal subtotal = Math.Round(basePrice * (decimal)item.Quantity, 2);
-
-                    cfdiRequest.Items.Add(new Ticketfy.Core.Models.CfdiItem
-                    {
-                        ProductCode = item.SatProductCode,
-                        IdentificationNumber = item.ProductId,
-                        Description = item.Name,
-                        Unit = item.Unit,
-                        UnitCode = item.SatUnitCode,
-                        UnitPrice = Math.Round(basePrice, 2),
-                        Quantity = (decimal)item.Quantity,
-                        Subtotal = subtotal,
-                        Taxes = new List<Ticketfy.Core.Models.CfdiTax>
-                        {
-                            new Ticketfy.Core.Models.CfdiTax
-                            {
-                                Name = "IVA",
-                                IsRetention = false,
-                                Rate = 0.16m,
-                                Total = Math.Round(totalTax * (decimal)item.Quantity, 2),
-                                Base = subtotal
-                            }
-                        }
-                    });
-                }
-
-                try
-                {
-                    // Use standard sandbox credentials for testing
-                    var response = await facturamaService.CreateInvoiceAsync(cfdiRequest);
-                    if (response != null)
-                    {
-                        saleDto = saleDto with { InvoiceId = response.Id, InvoiceStatus = response.Status, EstadoFiscal = "TIMBRADO CFDI 4.0" };
-                    }
-                }
-                catch (Exception ex)
-                {
-                    Log.Error(ex, "Error al timbrar factura");
-                    
-                    if (ex.Message.Contains("Código Postal", StringComparison.OrdinalIgnoreCase) || 
-                        ex.Message.Contains("RFC", StringComparison.OrdinalIgnoreCase) ||
-                        ex.Message.Contains("zip", StringComparison.OrdinalIgnoreCase))
-                    {
-                        ErrorMessage = "Código Postal o RFC incorrecto según SAT. Por favor verifica los datos.";
-                        return; // Keep cart intact
-                    }
-                    
-                    ErrorMessage = "No se pudo timbrar. Guardando venta localmente.";
-                    saleDto = saleDto with { InvoiceStatus = "Failed", EstadoFiscal = "ERROR AL TIMBRAR" };
-                }
+                if (errMsg != null) ErrorMessage = errMsg;
+                saleDto = saleDto with { InvoiceId = invId, InvoiceStatus = invStatus, EstadoFiscal = estFiscal ?? "PENDIENTE" };
             }
 
             var savedSale = await _saleService.SaveAsync(saleDto);
@@ -692,34 +627,18 @@ public partial class CheckoutDialogViewModel : ObservableObject
         OnPropertyChanged(nameof(IsSufficientAmount));
         OnPropertyChanged(nameof(ChangeOrShortageText));
 
-        // 1. STRICT DIGITAL LIMIT: Card + Wallet cannot exceed the Total Bill
-        decimal digitalPayments = CardAmount + WalletAmount;
-        if (digitalPayments > TotalBill)
+        var (isValid, chgAmount, error) = Checkout.MixedPaymentCalculator.Calculate(CashAmount, CardAmount, WalletAmount, TotalBill);
+        if (!isValid && error != null)
         {
-            ErrorMessage = "El cobro en Tarjeta y Monedero no puede superar el Total del Ticket.";
+            ErrorMessage = error;
             ChangeAmount = 0m;
-            OnPropertyChanged(nameof(ChangeTextColor));
-            OnPropertyChanged(nameof(ChangeBgColor));
-            ConfirmPaymentCommand.NotifyCanExecuteChanged();
-            return;
         }
         else
         {
             ErrorMessage = string.Empty;
+            ChangeAmount = chgAmount;
         }
 
-        // 2. EXACT CHANGE: Change is only produced by Cash overpaying the remaining balance
-        decimal remainingBalanceToPayByCash = TotalBill - digitalPayments;
-        
-        if (CashAmount >= remainingBalanceToPayByCash)
-        {
-            ChangeAmount = CashAmount - remainingBalanceToPayByCash;
-        }
-        else
-        {
-            ChangeAmount = 0m; // Not enough money yet
-        }
-        
         OnPropertyChanged(nameof(ChangeTextColor));
         OnPropertyChanged(nameof(ChangeBgColor));
         ConfirmPaymentCommand.NotifyCanExecuteChanged();

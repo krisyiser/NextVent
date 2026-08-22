@@ -1,0 +1,13 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:controls="using:Ticketfy.Controls"
+             x:Class="Ticketfy.Controls.PinInputControl"
+             Focusable="True">
+
+    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+        <controls:NumericTextBox x:Name="Box1" Width="44" Height="48" MaxDigits="1" AllowDecimals="False" PasswordChar="●" FontSize="20" FontWeight="Bold" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" CornerRadius="8" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1.5" Focusable="True" IsReadOnly="True" />
+        <controls:NumericTextBox x:Name="Box2" Width="44" Height="48" MaxDigits="1" AllowDecimals="False" PasswordChar="●" FontSize="20" FontWeight="Bold" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" CornerRadius="8" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1.5" Focusable="True" IsReadOnly="True" />
+        <controls:NumericTextBox x:Name="Box3" Width="44" Height="48" MaxDigits="1" AllowDecimals="False" PasswordChar="●" FontSize="20" FontWeight="Bold" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" CornerRadius="8" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1.5" Focusable="True" IsReadOnly="True" />
+        <controls:NumericTextBox x:Name="Box4" Width="44" Height="48" MaxDigits="1" AllowDecimals="False" PasswordChar="●" FontSize="20" FontWeight="Bold" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" CornerRadius="8" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1.5" Focusable="True" IsReadOnly="True" />
+    </StackPanel>
+</UserControl>

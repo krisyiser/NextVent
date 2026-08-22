@@ -1,10 +1,10 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vm="using:Ticketfy.ViewModels"
+             xmlns:vm="using:Ticketfy.ViewModels.Suppliers"
              xmlns:dto="using:Ticketfy.Data.Dtos"
              xmlns:mi="using:Material.Icons.Avalonia"
              x:Class="Ticketfy.Views.Suppliers.PurchaseOrderView"
-             x:DataType="vm:SuppliersViewModel">
+             x:DataType="vm:PurchaseOrderViewModel">
 
     <!-- Right Panel: Register Purchase Order (Entrada de Mercancía) -->
     <Border x:Name="PurchaseOrderForm" Padding="16"
@@ -83,7 +83,7 @@
                                     <TextBlock Grid.Column="0" Text="{Binding ProductName}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
                                     <TextBlock Grid.Column="1" Text="{Binding Quantity, StringFormat='{}{0} Pza'}" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="8,0" />
                                     <TextBlock Grid.Column="2" Text="{Binding TotalPrice, StringFormat='${0:N2}'}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" Margin="8,0" />
-                                    <Button Grid.Column="3" Command="{Binding $parent[UserControl].((vm:SuppliersViewModel)DataContext).RemoveItemFromPurchaseDraftCommand}" CommandParameter="{Binding}" Background="Transparent" BorderThickness="0" Padding="2">
+                                    <Button Grid.Column="3" Command="{Binding $parent[UserControl].((vm:PurchaseOrderViewModel)DataContext).RemoveItemFromPurchaseDraftCommand}" CommandParameter="{Binding}" Background="Transparent" BorderThickness="0" Padding="2">
                                         <mi:MaterialIcon Kind="Close" Width="14" Height="14" Foreground="{DynamicResource AccentDangerBrush}" />
                                     </Button>
                                 </Grid>

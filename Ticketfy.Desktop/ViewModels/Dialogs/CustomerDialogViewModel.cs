@@ -72,6 +72,12 @@ public partial class CustomerDialogViewModel : ObservableObject
                 return;
             }
 
+            if (!string.IsNullOrWhiteSpace(Phone) && Phone.Trim().Length != 10)
+            {
+                ErrorMessage = "El teléfono debe tener 10 dígitos.";
+                return;
+            }
+
             var dto = new CustomerDto(
                 Id: _editingCustomerId ?? Guid.NewGuid().ToString(),
                 Nombre: Name.Trim(),

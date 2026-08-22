@@ -61,6 +61,9 @@ public class CashupEntity
     [Column("notes")]
     public string Notes { get; set; } = string.Empty;
 
+    [Column("type")]
+    public string Type { get; set; } = "Final";
+
     [Column("timestamp")]
     public string Timestamp { get; set; } = string.Empty;
 

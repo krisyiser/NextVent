@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Descargar Ticketfy! Enterprise Desktop — valcore.cloud</title>
+  <style>
+    :root {
+      --bg-primary: #0F172A;
+      --bg-card: #1E293B;
+      --bg-tertiary: #334155;
+      --border-color: #475569;
+      --text-primary: #F8FAFC;
+      --text-secondary: #94A3B8;
+      --accent-brand: #2563EB;
+      --accent-hover: #1D4ED8;
+      --accent-success: #10B981;
+      --accent-warning: #F59E0B;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: var(--bg-primary);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .download-container {
+      width: 100%;
+      max-width: 580px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 32px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    .brand-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .brand-icon {
+      width: 44px;
+      height: 44px;
+      background: var(--accent-brand);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 22px;
+      color: #FFF;
+    }
+
+    .brand-title h1 {
+      font-size: 22px;
+      font-weight: 800;
+      color: var(--text-primary);
+    }
+
+    .brand-title p {
+      font-size: 13px;
+      color: var(--text-secondary);
+    }
+
+    .arch-badge {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 24px;
+      width: 100%;
+      text-align: center;
+    }
+
+    .badge-x64 {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34D399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-x86 {
+      background: rgba(245, 158, 11, 0.15);
+      color: #FBBF24;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-main {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      width: 100%;
+      padding: 16px 24px;
+      background: var(--accent-brand);
+      color: #FFFFFF;
+      font-size: 16px;
+      font-weight: 700;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: background-color 0.2s ease;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .btn-main:hover {
+      background: var(--accent-hover);
+    }
+
+    .manual-options {
+      margin-top: 24px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border-color);
+      text-align: center;
+    }
+
+    .manual-options p {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-bottom: 10px;
+    }
+
+    .manual-links {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .manual-links a {
+      font-size: 12px;
+      color: #60A5FA;
+      text-decoration: none;
+      font-weight: 600;
+    }
+
+    .manual-links a:hover {
+      text-decoration: underline;
+    }
+
+    .footer-note {
+      margin-top: 24px;
+      font-size: 11px;
+      color: var(--text-secondary);
+      text-align: center;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="download-container">
+    <div class="brand-header">
+      <div class="brand-icon">T</div>
+      <div class="brand-title">
+        <h1>Ticketfy! Enterprise Desktop</h1>
+        <p>Sistema POS / ERP Industrial • Protocolo Valcore v4.0</p>
+      </div>
+    </div>
+
+    <!-- Indicador Dinámico de Detección -->
+    <div id="valcore-arch-badge" class="arch-badge badge-x64">
+      Detectando arquitectura de sistema...
+    </div>
+
+    <!-- Botón Principal Inteligente de 1-Clic -->
+    <a id="valcore-main-download-btn" href="#" class="btn-main">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="7 10 12 15 17 10"></polyline>
+        <line x1="12" y1="15" x2="12" y2="3"></line>
+      </svg>
+      DESCARGAR INSTALADOR DE TICKETFY!
+    </a>
+
+    <!-- Enlaces Secundarios de Descarga Manual -->
+    <div class="manual-options">
+      <p>¿Prefieres seleccionar manualmente la versión para tu equipo?</p>
+      <div class="manual-links">
+        <a id="valcore-link-x64" href="#">Descargar para Windows 64-bit (x64)</a>
+        <a id="valcore-link-x86" href="#">Descargar para Windows 32-bit (x86)</a>
+      </div>
+    </div>
+
+    <div class="footer-note">
+      Compatible con Windows 7, 8.1, 10 y 11.<br>
+      Ejecutable autosuficiente sin requerir instalación previa de .NET Framework.
+    </div>
+  </div>
+
+  <script src="valcore-download.js"></script>
+</body>
+</html>

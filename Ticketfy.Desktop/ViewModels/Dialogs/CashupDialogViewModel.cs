@@ -32,6 +32,7 @@ public partial class CashupDialogViewModel : ObservableObject
     [ObservableProperty] private double _netProfit;
     [ObservableProperty] private bool _isBlindMode = false;
     [ObservableProperty] private bool _isFinalZCut = false;
+    [ObservableProperty] private bool _isFeedbackError = false;
     private Ticketfy.Data.Dtos.ShiftDto? _activeShift;
 
     // Denomination Counts
@@ -153,25 +154,29 @@ public partial class CashupDialogViewModel : ObservableObject
                 TheoreticalCash = TheoreticalCash,
                 Difference = DifferenceAmount,
                 Notes = Notes,
+                Type = IsFinalZCut ? "Final" : "Parcial",
                 Timestamp = DateTime.Now.ToBusinessLocalTime().ToString("g")
             };
 
             _db.Cashups.Add(entity);
             await _db.SaveChangesAsync();
 
-            if (_activeShift != null && IsFinalZCut && _shiftService != null)
+            if (_activeShift != null && _shiftService != null)
             {
                 await _shiftService.CloseAsync(_activeShift.Id, TotalPhysicalCash);
 
-                if (_backupService != null)
+                if (IsFinalZCut)
                 {
-                    string refId = _activeShift.Id.Length >= 8 ? _activeShift.Id.Substring(0, 8) : _activeShift.Id;
-                    await _backupService.CreateZCutBackupAsync(refId);
-                }
+                    if (_backupService != null)
+                    {
+                        string refId = _activeShift.Id.Length >= 8 ? _activeShift.Id.Substring(0, 8) : _activeShift.Id;
+                        await _backupService.CreateZCutBackupAsync(refId);
+                    }
 
-                if (_sessionManager?.CurrentCashier != null && _attendanceService != null)
-                {
-                    await _attendanceService.ClockOutAsync(_sessionManager.CurrentCashier.Id.ToString());
+                    if (_sessionManager?.CurrentCashier != null && _attendanceService != null)
+                    {
+                        await _attendanceService.ClockOutAsync(_sessionManager.CurrentCashier.Id.ToString());
+                    }
                 }
 
                 _sessionManager?.ClearSession();

@@ -4,6 +4,7 @@
         xmlns:vmDialogs="using:Ticketfy.ViewModels.Dialogs"
         xmlns:v="using:Ticketfy.Views"
         xmlns:vDialogs="using:Ticketfy.Views.Dialogs"
+        xmlns:controls="using:Ticketfy.Controls"
         xmlns:mi="using:Material.Icons.Avalonia"
         x:Class="Ticketfy.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
@@ -16,276 +17,50 @@
 
     <Window.DataTemplates>
         <!-- Module View Templates -->
-        <DataTemplate DataType="vm:PosViewModel">
-            <v:PosView />
-        </DataTemplate>
-        <DataTemplate DataType="vm:InventoryViewModel">
-            <v:InventoryView />
-        </DataTemplate>
-        <DataTemplate DataType="vm:CustomersViewModel">
-            <v:CustomersView />
-        </DataTemplate>
-        <DataTemplate DataType="vm:SuppliersViewModel">
-            <v:SuppliersView />
-        </DataTemplate>
-        <DataTemplate DataType="vm:ExpensesViewModel">
-            <v:ExpensesView />
-        </DataTemplate>
-        <DataTemplate DataType="vm:HistoryViewModel">
-            <v:HistoryView />
-        </DataTemplate>
-        <DataTemplate DataType="vm:PromotionsViewModel">
-            <v:PromotionsView />
-        </DataTemplate>
-        <DataTemplate DataType="vm:FiscalViewModel">
-            <v:FiscalView />
-        </DataTemplate>
-        <DataTemplate DataType="vm:SettingsViewModel">
-            <v:SettingsView />
-        </DataTemplate>
-        <DataTemplate DataType="vm:LoginViewModel">
-            <v:LoginView />
-        </DataTemplate>
-        <DataTemplate DataType="vm:FirstTimeSetupViewModel">
-            <v:FirstTimeSetupView />
-        </DataTemplate>
-        <DataTemplate DataType="vm:SetupBusinessDataViewModel">
-            <v:SetupBusinessDataView />
-        </DataTemplate>
-        <DataTemplate DataType="vm:SetupAdditionalUsersViewModel">
-            <v:SetupAdditionalUsersView />
-        </DataTemplate>
-        <DataTemplate DataType="vm:LicenseLockedViewModel">
-            <v:LicenseLockedView />
-        </DataTemplate>
+        <DataTemplate DataType="vm:PosViewModel"><v:PosView /></DataTemplate>
+        <DataTemplate DataType="vm:InventoryViewModel"><v:InventoryView /></DataTemplate>
+        <DataTemplate DataType="vm:CustomersViewModel"><v:CustomersView /></DataTemplate>
+        <DataTemplate DataType="vm:SuppliersViewModel"><v:SuppliersView /></DataTemplate>
+        <DataTemplate DataType="vm:ExpensesViewModel"><v:ExpensesView /></DataTemplate>
+        <DataTemplate DataType="vm:HistoryViewModel"><v:HistoryView /></DataTemplate>
+        <DataTemplate DataType="vm:PromotionsViewModel"><v:PromotionsView /></DataTemplate>
+        <DataTemplate DataType="vm:FiscalViewModel"><v:FiscalView /></DataTemplate>
+        <DataTemplate DataType="vm:SettingsViewModel"><v:SettingsView /></DataTemplate>
+        <DataTemplate DataType="vm:LoginViewModel"><v:LoginView /></DataTemplate>
+        <DataTemplate DataType="vm:FirstTimeSetupViewModel"><v:FirstTimeSetupView /></DataTemplate>
+        <DataTemplate DataType="vm:SetupBusinessDataViewModel"><v:SetupBusinessDataView /></DataTemplate>
+        <DataTemplate DataType="vm:SetupAdditionalUsersViewModel"><v:SetupAdditionalUsersView /></DataTemplate>
+        <DataTemplate DataType="vm:LicenseLockedViewModel"><v:LicenseLockedView /></DataTemplate>
 
         <!-- Modal Dialog Templates -->
-        <DataTemplate DataType="vmDialogs:CheckoutDialogViewModel">
-            <vDialogs:CheckoutDialog />
-        </DataTemplate>
-        <DataTemplate DataType="vmDialogs:ProductDialogViewModel">
-            <vDialogs:ProductDialog />
-        </DataTemplate>
-        <DataTemplate DataType="vmDialogs:CustomerDialogViewModel">
-            <vDialogs:CustomerDialog />
-        </DataTemplate>
-        <DataTemplate DataType="vmDialogs:PromotionDialogViewModel">
-            <vDialogs:PromotionDialog />
-        </DataTemplate>
-        <DataTemplate DataType="vmDialogs:PaymentDialogViewModel">
-            <vDialogs:PaymentDialog />
-        </DataTemplate>
-        <DataTemplate DataType="vmDialogs:CashupDialogViewModel">
-            <vDialogs:CashupDialog />
-        </DataTemplate>
-        <DataTemplate DataType="vmDialogs:CustomerStatementDialogViewModel">
-            <vDialogs:CustomerStatementDialog />
-        </DataTemplate>
-        <DataTemplate DataType="vmDialogs:ItemKitDialogViewModel">
-            <vDialogs:ItemKitDialog />
-        </DataTemplate>
-        <DataTemplate DataType="vmDialogs:ReturnDialogViewModel">
-            <vDialogs:ReturnDialog />
-        </DataTemplate>
-        <DataTemplate DataType="vmDialogs:ShiftNotesDialogViewModel">
-            <vDialogs:ShiftNotesDialog />
-        </DataTemplate>
-        <DataTemplate DataType="vmDialogs:SwitchUserPinDialogViewModel">
-            <vDialogs:SwitchUserPinDialog />
-        </DataTemplate>
-        <DataTemplate DataType="vmDialogs:LockScreenDialogViewModel">
-            <vDialogs:LockScreenDialog />
-        </DataTemplate>
-        <DataTemplate DataType="vmDialogs:SupervisorPinDialogViewModel">
-            <vDialogs:SupervisorPinDialog />
-        </DataTemplate>
-        <DataTemplate DataType="vmDialogs:ConfirmDialogViewModel">
-            <vDialogs:ConfirmDialog />
-        </DataTemplate>
-        <DataTemplate DataType="vmDialogs:ConfigureMinStockDialogViewModel">
-            <vDialogs:ConfigureMinStockDialog />
-        </DataTemplate>
-        <DataTemplate DataType="vmDialogs:ManageCategoriesDialogViewModel">
-            <vDialogs:ManageCategoriesDialog />
-        </DataTemplate>
-        <DataTemplate DataType="vmDialogs:OpenShiftDialogViewModel">
-            <vDialogs:OpenShiftDialog />
-        </DataTemplate>
+        <DataTemplate DataType="vmDialogs:CheckoutDialogViewModel"><vDialogs:CheckoutDialog /></DataTemplate>
+        <DataTemplate DataType="vmDialogs:ProductDialogViewModel"><vDialogs:ProductDialog /></DataTemplate>
+        <DataTemplate DataType="vmDialogs:CustomerDialogViewModel"><vDialogs:CustomerDialog /></DataTemplate>
+        <DataTemplate DataType="vmDialogs:PromotionDialogViewModel"><vDialogs:PromotionDialog /></DataTemplate>
+        <DataTemplate DataType="vmDialogs:PaymentDialogViewModel"><vDialogs:PaymentDialog /></DataTemplate>
+        <DataTemplate DataType="vmDialogs:CashupDialogViewModel"><vDialogs:CashupDialog /></DataTemplate>
+        <DataTemplate DataType="vmDialogs:CustomerStatementDialogViewModel"><vDialogs:CustomerStatementDialog /></DataTemplate>
+        <DataTemplate DataType="vmDialogs:ItemKitDialogViewModel"><vDialogs:ItemKitDialog /></DataTemplate>
+        <DataTemplate DataType="vmDialogs:ReturnDialogViewModel"><vDialogs:ReturnDialog /></DataTemplate>
+        <DataTemplate DataType="vmDialogs:ShiftNotesDialogViewModel"><vDialogs:ShiftNotesDialog /></DataTemplate>
+        <DataTemplate DataType="vmDialogs:SwitchUserPinDialogViewModel"><vDialogs:SwitchUserPinDialog /></DataTemplate>
+        <DataTemplate DataType="vmDialogs:LockScreenDialogViewModel"><vDialogs:LockScreenDialog /></DataTemplate>
+        <DataTemplate DataType="vmDialogs:SupervisorPinDialogViewModel"><vDialogs:SupervisorPinDialog /></DataTemplate>
+        <DataTemplate DataType="vmDialogs:ConfirmDialogViewModel"><vDialogs:ConfirmDialog /></DataTemplate>
+        <DataTemplate DataType="vmDialogs:ConfigureMinStockDialogViewModel"><vDialogs:ConfigureMinStockDialog /></DataTemplate>
+        <DataTemplate DataType="vmDialogs:ManageCategoriesDialogViewModel"><vDialogs:ManageCategoriesDialog /></DataTemplate>
+        <DataTemplate DataType="vmDialogs:OpenShiftDialogViewModel"><vDialogs:OpenShiftDialog /></DataTemplate>
     </Window.DataTemplates>
 
     <Panel>
-        <DockPanel LastChildFill="True" Margin="0,30,0,0"> <!-- Margin for extended TitleBar -->
-
+        <DockPanel LastChildFill="True" Margin="0,30,0,0">
             <!-- ═══ SIDEBAR NAVIGATION ═══ -->
-            <Border DockPanel.Dock="{Binding SidebarDockPosition}"
-                    Width="{Binding SidebarWidth}"
-                    Height="{Binding SidebarHeight}"
-                    Background="{DynamicResource SidebarBgBrush}"
-                    Padding="0,0,0,0">
-                <DockPanel LastChildFill="False">
-                    <StackPanel DockPanel.Dock="Top" Orientation="{Binding SidebarOrientation}" Spacing="10" Margin="8,8,8,8"
-                                HorizontalAlignment="Center" VerticalAlignment="Center">
-
-                        <!-- Dynamic Logo Badge -->
-                        <Border Width="{DynamicResource AppLogoHeight}" Height="{DynamicResource AppLogoHeight}" CornerRadius="{DynamicResource AppCornerRadius}"
-                                Background="{DynamicResource AccentPrimaryBrush}" Margin="4"
-                                HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <TextBlock Text="TF!" FontSize="16" FontWeight="Bold"
-                                       Foreground="White"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        </Border>
-
-                        <!-- Nav: POS (F2) -->
-                        <Button x:Name="NavPosBtn" Classes="nav-item"
-                                Command="{Binding NavigateToCommand}" CommandParameter="pos"
-                                ToolTip.Tip="Punto de Venta">
-                            <StackPanel Spacing="2">
-                                <mi:MaterialIcon Kind="PointOfSale" Width="22" Height="22" HorizontalAlignment="Center" />
-                                <TextBlock Text="Ventas" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" />
-                            </StackPanel>
-                        </Button>
-
-                        <!-- Nav: Inventory (F3) -->
-                        <Button x:Name="NavInventoryBtn" Classes="nav-item"
-                                Command="{Binding NavigateToCommand}" CommandParameter="inventory"
-                                ToolTip.Tip="Inventario">
-                            <StackPanel Spacing="2">
-                                <mi:MaterialIcon Kind="PackageVariantClosed" Width="22" Height="22" HorizontalAlignment="Center" />
-                                <TextBlock Text="Inventario" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" />
-                            </StackPanel>
-                        </Button>
-
-                        <!-- Nav: Customers (F4) -->
-                        <Button x:Name="NavCustomersBtn" Classes="nav-item"
-                                Command="{Binding NavigateToCommand}" CommandParameter="customers"
-                                ToolTip.Tip="Clientes y Crédito">
-                            <StackPanel Spacing="2">
-                                <mi:MaterialIcon Kind="AccountGroup" Width="22" Height="22" HorizontalAlignment="Center" />
-                                <TextBlock Text="Clientes" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" />
-                            </StackPanel>
-                        </Button>
-
-                        <!-- Nav: Suppliers (F5) -->
-                        <Button x:Name="NavSuppliersBtn" Classes="nav-item"
-                                Command="{Binding NavigateToCommand}" CommandParameter="suppliers"
-                                ToolTip.Tip="Proveedores y Compras">
-                            <StackPanel Spacing="2">
-                                <mi:MaterialIcon Kind="TruckDelivery" Width="22" Height="22" HorizontalAlignment="Center" />
-                                <TextBlock Text="Proveedores" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" />
-                            </StackPanel>
-                        </Button>
-
-                        <!-- Nav: Expenses (F6) -->
-                        <Button x:Name="NavExpensesBtn" Classes="nav-item"
-                                Command="{Binding NavigateToCommand}" CommandParameter="expenses"
-                                ToolTip.Tip="Gastos y Utilidad Neta">
-                            <StackPanel Spacing="2">
-                                <mi:MaterialIcon Kind="CashMinus" Width="22" Height="22" HorizontalAlignment="Center" />
-                                <TextBlock Text="Gastos" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" />
-                            </StackPanel>
-                        </Button>
-
-                        <!-- Nav: History (F7) -->
-                        <Button x:Name="NavHistoryBtn" Classes="nav-item"
-                                Command="{Binding NavigateToCommand}" CommandParameter="history"
-                                ToolTip.Tip="Historial de Ventas">
-                            <StackPanel Spacing="2">
-                                <mi:MaterialIcon Kind="History" Width="22" Height="22" HorizontalAlignment="Center" />
-                                <TextBlock Text="Historial" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" />
-                            </StackPanel>
-                        </Button>
-
-                        <!-- Nav: Promotions (F8) -->
-                        <Button x:Name="NavPromotionsBtn" Classes="nav-item"
-                                Command="{Binding NavigateToCommand}" CommandParameter="promotions"
-                                ToolTip.Tip="Promociones">
-                            <StackPanel Spacing="2">
-                                <mi:MaterialIcon Kind="TagMultiple" Width="22" Height="22" HorizontalAlignment="Center" />
-                                <TextBlock Text="Promos" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" />
-                            </StackPanel>
-                        </Button>
-
-                        <!-- Nav: Fiscal (F9) -->
-                        <Button x:Name="NavFiscalBtn" Classes="nav-item"
-                                Command="{Binding NavigateToCommand}" CommandParameter="fiscal"
-                                ToolTip.Tip="Facturación SAT"
-                                IsVisible="False">
-                            <StackPanel Spacing="2">
-                                <mi:MaterialIcon Kind="ReceiptTextOutline" Width="22" Height="22" HorizontalAlignment="Center" />
-                                <TextBlock Text="Factura" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" />
-                            </StackPanel>
-                        </Button>
-
-                        <!-- Nav: Settings (F10) -->
-                        <Button x:Name="NavSettingsBtn" Classes="nav-item"
-                                Command="{Binding NavigateToCommand}" CommandParameter="settings"
-                                ToolTip.Tip="Configuración">
-                            <StackPanel Spacing="2">
-                                <mi:MaterialIcon Kind="CogOutline" Width="22" Height="22" HorizontalAlignment="Center" />
-                                <TextBlock Text="Ajustes" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" />
-                            </StackPanel>
-                        </Button>
-
-                    </StackPanel>
-
-                    <!-- Nav: System / Update Button & Version Badge at Bottom -->
-                    <StackPanel DockPanel.Dock="Bottom" Margin="4,8,4,14" Spacing="6" HorizontalAlignment="Center">
-                        <!-- Prominent High-Visibility Update Button -->
-                        <Button Command="{Binding CheckForUpdatesCommand}"
-                                ToolTip.Tip="Buscar e instalar actualizaciones OTA del sistema"
-                                Padding="6,6" Width="68" Height="50"
-                                CornerRadius="{DynamicResource AppCornerRadius}"
-                                Background="#1E3A8A"
-                                BorderBrush="#38BDF8"
-                                BorderThickness="1.5"
-                                Cursor="Hand">
-                            <StackPanel Spacing="2" HorizontalAlignment="Center" VerticalAlignment="Center">
-                                <mi:MaterialIcon Kind="Update" Width="20" Height="20" HorizontalAlignment="Center" Foreground="#38BDF8" />
-                                <TextBlock Text="Actualizar" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" Foreground="#F8FAFC" />
-                            </StackPanel>
-                        </Button>
-
-                        <!-- Dynamic Version Badge always visible under Actualizar button -->
-                        <Border Background="#0F172A" Padding="6,2" CornerRadius="8" BorderBrush="#334155" BorderThickness="1" HorizontalAlignment="Center" ToolTip.Tip="Versión actual del sistema">
-                            <TextBlock Text="{Binding CurrentAppVersion}" FontSize="10" FontWeight="Bold" Foreground="#94A3B8" HorizontalAlignment="Center" />
-                        </Border>
-                    </StackPanel>
-                </DockPanel>
-            </Border>
+            <controls:SidebarNavigationControl />
 
             <!-- ═══ MAIN CONTENT AREA ═══ -->
             <DockPanel LastChildFill="True">
                 <!-- UPDATE BANNERS -->
-                <Border DockPanel.Dock="Top" Background="#3B82F6" Padding="16,10" IsVisible="{Binding IsUpdateAvailable}">
-                    <Grid ColumnDefinitions="Auto, *, Auto">
-                        <mi:MaterialIcon Kind="CloudDownload" Width="24" Height="24" Foreground="White" VerticalAlignment="Center" Margin="0,0,12,0"/>
-                        <TextBlock Grid.Column="1" Text="Descargando nueva actualización en segundo plano..." FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
-                        <ProgressBar Grid.Column="2" Width="150" Height="8" Minimum="0" Maximum="100" Value="{Binding UpdateProgress}" VerticalAlignment="Center" Foreground="White" Background="#1D4ED8"/>
-                    </Grid>
-                </Border>
-                
-                <Border DockPanel.Dock="Top" Background="#10B981" Padding="16,10" IsVisible="{Binding IsUpdateReady}">
-                    <Grid ColumnDefinitions="Auto, *, Auto">
-                        <mi:MaterialIcon Kind="CheckCircleOutline" Width="24" Height="24" Foreground="White" VerticalAlignment="Center" Margin="0,0,12,0"/>
-                        <TextBlock Grid.Column="1" Text="Actualización lista para instalarse. Reinicia el sistema." FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
-                        <Button Grid.Column="2" Content="REINICIAR AHORA" Command="{Binding ApplyUpdateAndRestartCommand}" Background="White" Foreground="#10B981" FontWeight="Bold" CornerRadius="4" Padding="12,6"/>
-                    </Grid>
-                </Border>
-
-                <!-- FEEDBACK BANNERS (Up To Date & Error) -->
-                <Border DockPanel.Dock="Top" Background="#10B981" Padding="16,10" IsVisible="{Binding IsUpdateUpToDate}">
-                    <Grid ColumnDefinitions="Auto, *">
-                        <mi:MaterialIcon Kind="CheckAll" Width="24" Height="24" Foreground="White" VerticalAlignment="Center" Margin="0,0,12,0"/>
-                        <TextBlock Grid.Column="1" Text="El sistema ya está en la versión más reciente." FontWeight="Bold" Foreground="White" VerticalAlignment="Center"/>
-                    </Grid>
-                </Border>
-
-                <Border DockPanel.Dock="Top" Background="#EF4444" Padding="16,10" IsVisible="{Binding IsUpdateFailed}">
-                    <Grid ColumnDefinitions="Auto, *">
-                        <mi:MaterialIcon Kind="AlertCircleOutline" Width="24" Height="24" Foreground="White" VerticalAlignment="Center" Margin="0,0,12,0"/>
-                        <TextBlock Grid.Column="1" Text="{Binding UpdateErrorMessage}" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" TextWrapping="Wrap"/>
-                    </Grid>
-                </Border>
+                <controls:UpdateBannerControl />
 
                 <!-- Active Module Content -->
                 <ContentControl Content="{Binding ActiveViewModel}" IsEnabled="{Binding !IsLocked}" />
@@ -297,64 +72,13 @@
             <ContentControl Content="{Binding ActiveDialogViewModel}" HorizontalAlignment="Center" VerticalAlignment="Center" />
         </Grid>
 
-        <!-- ═══ TUTORIAL OVERLAY (ZIndex 5000, above dialogs) ═══ -->
-        <v:TutorialOverlayView ZIndex="5000"
-                               DataContext="{Binding ActiveTutorialVm}"
-                               IsVisible="{Binding IsVisible}" />
+        <!-- ═══ TUTORIAL OVERLAY ═══ -->
+        <v:TutorialOverlayView ZIndex="5000" DataContext="{Binding ActiveTutorialVm}" IsVisible="{Binding IsVisible}" />
 
-        <!-- OVERLAY LOCK SCREEN (Prevents Modal Collision) -->
-        <Grid ZIndex="9999" IsVisible="{Binding IsLocked}" Background="#E60F172A">
-            <Border Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}" Padding="30" Width="380" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <StackPanel Spacing="16" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
-                        <mi:MaterialIcon Kind="LockAlert" Width="26" Height="26" Foreground="{DynamicResource AccentDangerBrush}" />
-                        <TextBlock Text="TERMINAL BLOQUEADA" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
-                    </StackPanel>
-                    
-                    <TextBlock Text="Ingrese su PIN para desbloquear la sesión" FontSize="12" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" />
-                    
-                    <TextBox Text="{Binding UnlockPin, Mode=TwoWay}" PasswordChar="•" Width="220" Padding="12" FontSize="16" HorizontalAlignment="Center" HorizontalContentAlignment="Center" />
-                    
-                    <TextBlock Text="{Binding UnlockErrorMessage}" Foreground="{DynamicResource AccentDangerBrush}" FontSize="12" HorizontalAlignment="Center" IsVisible="{Binding UnlockErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
-                    
-                    <Button Command="{Binding UnlockTerminalCommand}" Classes="danger-action" Width="220" Height="40" HorizontalAlignment="Center" CornerRadius="{DynamicResource AppCornerRadius}">
-                        <TextBlock Text="DESBLOQUEAR" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                    </Button>
-                </StackPanel>
-            </Border>
-        </Grid>
+        <!-- ═══ OVERLAY LOCK SCREEN ═══ -->
+        <controls:LockScreenOverlay />
+
         <!-- ═══ SPLASH SCREEN OVERLAY ═══ -->
-        <Grid ZIndex="10000" IsVisible="{Binding IsSplashScreenVisible}" Background="{DynamicResource BgPrimaryBrush}">
-            <Grid.Styles>
-                <Style Selector="Svg.pulse">
-                    <Style.Animations>
-                        <Animation Duration="0:0:1.5" IterationCount="Infinite" PlaybackDirection="Alternate">
-                            <KeyFrame Cue="0%">
-                                <Setter Property="ScaleTransform.ScaleX" Value="0.9"/>
-                                <Setter Property="ScaleTransform.ScaleY" Value="0.9"/>
-                            </KeyFrame>
-                            <KeyFrame Cue="100%">
-                                <Setter Property="ScaleTransform.ScaleX" Value="1.1"/>
-                                <Setter Property="ScaleTransform.ScaleY" Value="1.1"/>
-                            </KeyFrame>
-                        </Animation>
-                    </Style.Animations>
-                </Style>
-            </Grid.Styles>
-            
-            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="24">
-                <!-- LOGO SVG -->
-                <Svg Classes="pulse" Path="/Assets/logo.svg" Width="180" Height="180" HorizontalAlignment="Center"/>
-                
-                <TextBlock Text="INICIANDO TICKETFY!" FontSize="24" FontWeight="Black" 
-                           Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" LetterSpacing="2"/>
-                
-                <TextBlock Text="Por favor espere, cargando módulos..." FontSize="14" 
-                           Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
-                           
-                <ProgressBar IsIndeterminate="True" Width="200" Height="4" Margin="0,16,0,0" Foreground="{DynamicResource AccentBrandBrush}" Background="#1E293B"/>
-            </StackPanel>
-        </Grid>
+        <controls:SplashOverlay />
     </Panel>
 </Window>
-

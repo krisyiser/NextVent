@@ -1,0 +1,136 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using Ticketfy.Data.Dtos;
+using Ticketfy.Services.Interfaces;
+using Serilog;
+using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace Ticketfy.ViewModels.Suppliers;
+
+/// <summary>
+/// Handles purchase order drafting, items accumulation, and inventory replenishment confirmation.
+/// Extracted from SuppliersViewModel.
+/// </summary>
+public partial class PurchaseOrderViewModel : ObservableObject
+{
+    private readonly IPurchaseService _purchaseService;
+    private readonly IProductService _productService;
+
+    public ObservableCollection<PurchaseItemDto> DraftPurchaseItems { get; } = [];
+    public ObservableCollection<ProductDto> AvailableProducts { get; } = [];
+    public ObservableCollection<SupplierDto> Suppliers { get; } = [];
+
+    [ObservableProperty] private SupplierDto? _selectedSupplier;
+    public SupplierDto? SelectedSupplierForPurchase
+    {
+        get => SelectedSupplier;
+        set => SelectedSupplier = value;
+    }
+
+    [ObservableProperty] private string _invoiceNumber = string.Empty;
+    [ObservableProperty] private ProductDto? _selectedProduct;
+    public ProductDto? SelectedProductForPurchase
+    {
+        get => SelectedProduct;
+        set => SelectedProduct = value;
+    }
+
+    [ObservableProperty] private string _purchaseUnitPrice = string.Empty;
+    [ObservableProperty] private string _purchaseQuantity = "1";
+    [ObservableProperty] private double _totalPurchaseCost;
+    [ObservableProperty] private string _feedbackMessage = string.Empty;
+    [ObservableProperty] private bool _isSubmitting = false;
+
+    public string SubmitButtonText => IsSubmitting ? "GUARDANDO..." : "CONFIRMAR Y REGISTRAR COMPRA";
+
+    public event Action<PurchaseDto>? PurchaseConfirmed;
+
+    public PurchaseOrderViewModel(IPurchaseService purchaseService, IProductService productService)
+    {
+        _purchaseService = purchaseService;
+        _productService = productService;
+    }
+
+    [RelayCommand]
+    private void AddItemToDraft()
+    {
+        if (SelectedProduct == null) return;
+        if (!double.TryParse(PurchaseQuantity, out double qty) || qty <= 0) return;
+        if (!double.TryParse(PurchaseUnitPrice, out double price) || price < 0) return;
+
+        var total = price * qty;
+        DraftPurchaseItems.Add(new PurchaseItemDto(
+            Guid.NewGuid().ToString(),
+            string.Empty,
+            SelectedProduct.Id,
+            SelectedProduct.Name,
+            price,
+            qty,
+            total
+        ));
+
+        TotalPurchaseCost = DraftPurchaseItems.Sum(i => i.TotalPrice);
+    }
+
+    [RelayCommand] private void AddItemToPurchaseDraft() => AddItemToDraft();
+
+    [RelayCommand]
+    private void RemoveItemFromDraft(PurchaseItemDto item)
+    {
+        DraftPurchaseItems.Remove(item);
+        TotalPurchaseCost = DraftPurchaseItems.Sum(i => i.TotalPrice);
+    }
+
+    [RelayCommand] private void RemoveItemFromPurchaseDraft(PurchaseItemDto item) => RemoveItemFromDraft(item);
+
+    [RelayCommand]
+    private async Task ConfirmPurchaseAsync()
+    {
+        if (SelectedSupplier == null)
+        {
+            FeedbackMessage = "Seleccione un proveedor";
+            return;
+        }
+
+        if (DraftPurchaseItems.Count == 0)
+        {
+            FeedbackMessage = "Agregue al menos un producto a la compra";
+            return;
+        }
+
+        try
+        {
+            IsSubmitting = true;
+            var purchaseDto = new PurchaseDto(
+                Guid.NewGuid().ToString(),
+                SelectedSupplier.Id,
+                SelectedSupplier.Name,
+                string.IsNullOrWhiteSpace(InvoiceNumber) ? $"FAC-{DateTime.Now:fff}" : InvoiceNumber,
+                DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"),
+                TotalPurchaseCost,
+                "Entrada directa de inventario",
+                DraftPurchaseItems.ToList()
+            );
+
+            var registered = await _purchaseService.RegisterPurchaseAsync(purchaseDto);
+            DraftPurchaseItems.Clear();
+            TotalPurchaseCost = 0;
+            InvoiceNumber = string.Empty;
+
+            FeedbackMessage = "¡Compra y reabastecimiento registrados correctamente!";
+            PurchaseConfirmed?.Invoke(registered);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "PurchaseOrderViewModel: error registering purchase order");
+            FeedbackMessage = "Error al procesar la entrada de mercancía";
+        }
+        finally
+        {
+            IsSubmitting = false;
+        }
+    }
+}

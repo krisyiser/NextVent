@@ -157,7 +157,6 @@
                             <settings:DatosSettingsView IsVisible="{Binding IsDatosTab}" />
                             <settings:AlertasSettingsView IsVisible="{Binding IsAlertasTab}" />
                             <settings:UsuariosSettingsView IsVisible="{Binding IsUsuariosTab}" />
-
                             <settings:AcercaDeSettingsView IsVisible="{Binding IsAcercaDeTab}" />
                         </Grid>
                     </ScrollViewer>

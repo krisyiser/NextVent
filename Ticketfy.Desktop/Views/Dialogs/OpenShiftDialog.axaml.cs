@@ -8,4 +8,14 @@ public partial class OpenShiftDialog : UserControl
     {
         InitializeComponent();
     }
+
+    protected override void OnAttachedToVisualTree(Avalonia.VisualTreeAttachmentEventArgs e)
+    {
+        base.OnAttachedToVisualTree(e);
+        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+        {
+            var input = this.FindControl<Ticketfy.Controls.NumericTextBox>("FloatInput");
+            input?.Focus();
+        });
+    }
 }

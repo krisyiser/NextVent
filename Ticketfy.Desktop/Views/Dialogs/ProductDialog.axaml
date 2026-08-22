@@ -2,8 +2,14 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Ticketfy.ViewModels.Dialogs"
              xmlns:mi="using:Material.Icons.Avalonia"
+             xmlns:controls="using:Ticketfy.Controls"
+             xmlns:converters="using:Ticketfy.Converters"
              x:Class="Ticketfy.Views.Dialogs.ProductDialog"
              x:DataType="vm:ProductDialogViewModel">
+
+    <UserControl.Resources>
+        <converters:StringToDoubleConverter x:Key="StringToDoubleConverter"/>
+    </UserControl.Resources>
 
     <Border Width="540" Padding="24" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8">
         <DockPanel LastChildFill="True">
@@ -13,7 +19,7 @@
             </StackPanel>
 
             <StackPanel DockPanel.Dock="Bottom" Margin="0,20,0,0" Spacing="12">
-                <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource AccentDangerBrush}" FontSize="13" TextWrapping="Wrap" HorizontalAlignment="Center" />
+                <controls:AlertBannerControl Message="{Binding ErrorMessage}" IsError="True" />
 
                 <Grid ColumnDefinitions="*,*">
                     <Button Grid.Column="0" Command="{Binding CancelCommand}" Content="Cancelar" Margin="0,0,6,0" Padding="12"
@@ -73,12 +79,12 @@
                             <Grid ColumnDefinitions="*,*">
                                 <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,6,0">
                                     <TextBlock Text="Costo ($) *" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                                    <NumericUpDown Value="{Binding CostPrice}" ShowButtonSpinner="False" FormatString="0.00" Minimum="0" Watermark="0.00" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                                    <controls:NumericTextBox AllowDecimals="True" Text="{Binding CostPrice, Mode=TwoWay, Converter={StaticResource StringToDoubleConverter}}" Watermark="0.00" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="1" Spacing="4" Margin="6,0,0,0">
                                     <TextBlock Text="Precio Venta ($) *" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                                    <NumericUpDown Value="{Binding RetailPrice}" ShowButtonSpinner="False" FormatString="0.00" Minimum="0" Watermark="0.00" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                                    <controls:NumericTextBox AllowDecimals="True" Text="{Binding RetailPrice, Mode=TwoWay, Converter={StaticResource StringToDoubleConverter}}" Watermark="0.00" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
                                 </StackPanel>
                             </Grid>
 
@@ -95,24 +101,24 @@
                             <Grid ColumnDefinitions="*,*">
                                 <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,6,0">
                                     <TextBlock Text="Stock Actual *" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                                    <NumericUpDown Value="{Binding Stock}" ShowButtonSpinner="False" FormatString="0" Watermark="0" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                                    <controls:NumericTextBox AllowDecimals="False" Text="{Binding Stock, Mode=TwoWay, Converter={StaticResource StringToDoubleConverter}}" Watermark="0" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="1" Spacing="4" Margin="6,0,0,0">
                                     <TextBlock Text="Stock Mínimo (Alerta) *" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                                    <NumericUpDown Value="{Binding MinStock}" ShowButtonSpinner="False" FormatString="0" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                                    <controls:NumericTextBox AllowDecimals="False" Text="{Binding MinStock, Mode=TwoWay, Converter={StaticResource StringToDoubleConverter}}" Watermark="0" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
                                 </StackPanel>
                             </Grid>
 
                             <Grid ColumnDefinitions="*,*,*" Margin="0,4,0,0">
                                 <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,4,0">
                                     <TextBlock Text="Puntos Regalo" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                                    <NumericUpDown Value="{Binding PointsRewarded}" ShowButtonSpinner="False" FormatString="0.0" Minimum="0" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                                    <controls:NumericTextBox AllowDecimals="True" Text="{Binding PointsRewarded, Mode=TwoWay, Converter={StaticResource StringToDoubleConverter}}" Watermark="0.0" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="1" Spacing="4" Margin="2,0,2,0">
                                     <TextBlock Text="Cant. Reorden" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource AccentWarningBrush}" />
-                                    <NumericUpDown Value="{Binding ReorderQuantity}" ShowButtonSpinner="False" FormatString="0.0" Minimum="0" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                                    <controls:NumericTextBox AllowDecimals="True" Text="{Binding ReorderQuantity, Mode=TwoWay, Converter={StaticResource StringToDoubleConverter}}" Watermark="0.0" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="2" Spacing="4" Margin="4,0,0,0">

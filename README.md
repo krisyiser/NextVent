@@ -30,5 +30,18 @@ Use the automated PowerShell script to produce an optimized, single-file native 
 ./Ticketfy.Desktop/build_release.ps1
 ```
 
+## Installation & Windows Compatibility Troubleshooting
+
+If you encounter the Windows error:
+> **"No se puede ejecutar esta aplicación en el equipo"** / *"This app can't run on your PC"*
+
+Follow these steps:
+1. **Automatic Detection via valcore.cloud**:
+   - The official download portal at [valcore.cloud](file:///C:/Users/YERSI/.gemini/antigravity-ide/scratch/NextVent/web/download.html) uses `web/valcore-download.js` to automatically detect if your PC runs 64-bit or 32-bit Windows and serves the matching installer (`Ticketfy-Setup-v3.0.18-x64.exe` vs `Ticketfy-Setup-v3.0.18-x86.exe`).
+2. **Unblock Downloaded File (Mark of the Web)**:
+   - Right-click the downloaded `.exe` installer > select **Properties**.
+   - At the bottom of the *General* tab, check the **Unblock** (*Desbloquear*) checkbox.
+   - Click **Apply** > **OK** and launch the installer again.
+
 ## Licensing & Security
 This software utilizes `Ticketfy.Keygen` for ECDSA-based cryptographic offline license verification. Hardcoded secrets are explicitly prohibited.

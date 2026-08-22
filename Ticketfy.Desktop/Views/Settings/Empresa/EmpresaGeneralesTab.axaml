@@ -1,0 +1,40 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ticketfy.ViewModels.Settings"
+             x:Class="Ticketfy.Views.Settings.Empresa.EmpresaGeneralesTab"
+             x:DataType="vm:EmpresaSettingsViewModel">
+
+    <StackPanel Spacing="16">
+        <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,*">
+            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,12" Spacing="6">
+                <TextBlock Text="Nombre Comercial (Requerido)" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <TextBox Text="{Binding EmpresaNombreComercial, Mode=TwoWay}" Padding="10,8" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,12" Spacing="6">
+                <TextBlock Text="Razón Social (Opcional)" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <TextBox Text="{Binding EmpresaRazonSocial, Mode=TwoWay}" Padding="10,8" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,12" Spacing="6">
+                <TextBlock Text="Giro Comercial" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <ComboBox ItemsSource="{Binding EmpresaGiroOptions}" SelectedItem="{Binding EmpresaGiroComercial, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="10,8" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,12" Spacing="6">
+                <TextBlock Text="Eslogan de Marca" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <TextBox Text="{Binding EmpresaEslogan, Mode=TwoWay}" Padding="10,8" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,8,0" Spacing="6">
+                <TextBlock Text="Moneda Principal" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <ComboBox ItemsSource="{Binding MonedaOptions}" SelectedItem="{Binding EmpresaMonedaPrincipal, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="10,8" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="2" Grid.Column="1" Margin="8,0,0,0" Spacing="6">
+                <TextBlock Text="Zona Horaria" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <ComboBox ItemsSource="{Binding ZonaHorariaOptions}" SelectedItem="{Binding EmpresaZonaHoraria, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="10,8" />
+            </StackPanel>
+        </Grid>
+    </StackPanel>
+</UserControl>

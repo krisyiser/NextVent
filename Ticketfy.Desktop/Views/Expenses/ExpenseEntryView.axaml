@@ -3,6 +3,7 @@
              xmlns:vm="using:Ticketfy.ViewModels"
              xmlns:dto="using:Ticketfy.Data.Dtos"
              xmlns:mi="using:Material.Icons.Avalonia"
+             xmlns:controls="using:Ticketfy.Controls"
              x:Class="Ticketfy.Views.Expenses.ExpenseEntryView"
              x:DataType="vm:ExpensesViewModel">
 
@@ -23,7 +24,7 @@
 
                 <StackPanel Spacing="4">
                     <TextBlock Text="Monto ($ MXN) *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                    <TextBox Text="{Binding ExpenseAmount, Mode=TwoWay}" Watermark="0.00" Padding="10,8" FontSize="15" FontWeight="Bold" />
+                    <controls:NumericTextBox AllowDecimals="True" Text="{Binding ExpenseAmount, Mode=TwoWay}" Watermark="0.00" Padding="10,8" FontSize="15" FontWeight="Bold" />
                 </StackPanel>
 
                 <StackPanel Spacing="4">

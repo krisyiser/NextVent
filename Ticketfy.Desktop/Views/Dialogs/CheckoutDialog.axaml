@@ -3,6 +3,7 @@
              xmlns:vm="using:Ticketfy.ViewModels.Dialogs"
              xmlns:dto="using:Ticketfy.Data.Dtos"
              xmlns:mi="using:Material.Icons.Avalonia"
+             xmlns:controls="using:Ticketfy.Controls"
              x:Class="Ticketfy.Views.Dialogs.CheckoutDialog"
              x:DataType="vm:CheckoutDialogViewModel">
 
@@ -25,7 +26,7 @@
 
             <!-- Bottom Action Buttons -->
             <StackPanel DockPanel.Dock="Bottom" Margin="0,16,0,0" Spacing="10">
-                <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource AccentDangerBrush}" FontSize="12" FontWeight="Bold" TextWrapping="Wrap" HorizontalAlignment="Center" />
+                <controls:AlertBannerControl Message="{Binding ErrorMessage}" IsError="True" />
 
                 <Grid ColumnDefinitions="*,Auto,Auto">
                     <Button Grid.Column="0" Command="{Binding CancelCommand}" Content="CANCELAR" Margin="0,0,16,0" Padding="16,12"
@@ -86,8 +87,8 @@
                         <Grid ColumnDefinitions="*,*" IsVisible="{Binding IsNotMixedPayment}">
                             <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,6,0">
                                 <TextBlock Text="Monto Recibido ($):" FontSize="12" FontWeight="SemiBold" Foreground="#334155"/>
-                                <TextBox x:Name="ReceivedAmountTextBox" Text="{Binding ReceivedAmountInput, Mode=TwoWay}" FontSize="20" FontWeight="Bold" 
-                                         FontFamily="Consolas, monospace" HorizontalContentAlignment="Right" Padding="8"/>
+                                <controls:NumericTextBox x:Name="ReceivedAmountTextBox" AllowDecimals="True" Text="{Binding ReceivedAmountInput, Mode=TwoWay}" FontSize="20" FontWeight="Bold" 
+                                                         FontFamily="Consolas, monospace" HorizontalContentAlignment="Right" Padding="8"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="1" Spacing="4" Margin="6,0,0,0">
@@ -106,18 +107,18 @@
                             <Grid ColumnDefinitions="*,*,*">
                                 <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,4,0">
                                     <TextBlock Text="Efectivo ($):" FontSize="11" FontWeight="SemiBold" Foreground="#334155"/>
-                                    <NumericUpDown Value="{Binding CashAmount}" ShowButtonSpinner="False" FormatString="0.00" Minimum="0" FontSize="14" FontWeight="Bold" 
-                                             Background="{DynamicResource BgTertiaryBrush}" Padding="8" Watermark="0.00" />
+                                    <controls:NumericTextBox AllowDecimals="True" Text="{Binding CashAmount, Mode=TwoWay}" FontSize="14" FontWeight="Bold" 
+                                                             Background="{DynamicResource BgTertiaryBrush}" Padding="8" Watermark="0.00" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Spacing="4" Margin="4,0,4,0">
                                     <TextBlock Text="Tarjeta ($):" FontSize="11" FontWeight="SemiBold" Foreground="#334155"/>
-                                    <NumericUpDown Value="{Binding CardAmount}" ShowButtonSpinner="False" FormatString="0.00" Minimum="0" FontSize="14" FontWeight="Bold" 
-                                             Background="{DynamicResource BgTertiaryBrush}" Padding="8" Watermark="0.00" />
+                                    <controls:NumericTextBox AllowDecimals="True" Text="{Binding CardAmount, Mode=TwoWay}" FontSize="14" FontWeight="Bold" 
+                                                             Background="{DynamicResource BgTertiaryBrush}" Padding="8" Watermark="0.00" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="2" Spacing="4" Margin="4,0,0,0">
                                     <TextBlock Text="Monedero ($):" FontSize="11" FontWeight="SemiBold" Foreground="#334155"/>
-                                    <NumericUpDown Value="{Binding WalletAmount}" ShowButtonSpinner="False" FormatString="0.00" Minimum="0" FontSize="14" FontWeight="Bold" 
-                                             Background="{DynamicResource BgTertiaryBrush}" Padding="8" Watermark="0.00" />
+                                    <controls:NumericTextBox AllowDecimals="True" Text="{Binding WalletAmount, Mode=TwoWay}" FontSize="14" FontWeight="Bold" 
+                                                             Background="{DynamicResource BgTertiaryBrush}" Padding="8" Watermark="0.00" />
                                 </StackPanel>
                             </Grid>
                             

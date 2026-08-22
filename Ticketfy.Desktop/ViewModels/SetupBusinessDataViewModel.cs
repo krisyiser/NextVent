@@ -31,9 +31,15 @@ public partial class SetupBusinessDataViewModel : ValidatableViewModelBase
     {
         ErrorMessage = string.Empty;
         
-        if (string.IsNullOrWhiteSpace(BusinessName) || string.IsNullOrWhiteSpace(Email))
+        if (string.IsNullOrWhiteSpace(BusinessName) || string.IsNullOrWhiteSpace(Phone))
         {
-            ErrorMessage = "El Nombre del Negocio y Correo Electrónico son obligatorios.";
+            ErrorMessage = "El Nombre del Negocio y el Teléfono son obligatorios.";
+            return;
+        }
+
+        if (Phone.Trim().Length != 10)
+        {
+            ErrorMessage = "El Teléfono debe contener exactamente 10 dígitos.";
             return;
         }
 

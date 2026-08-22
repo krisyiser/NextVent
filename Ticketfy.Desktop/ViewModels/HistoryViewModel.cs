@@ -110,12 +110,22 @@ public partial class HistoryViewModel : ObservableObject
 
             var salesList = await _saleService.GetSalesByDateRangeAsync(utcStart, utcEnd);
 
-            var cashupsQuery = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync(
-                System.Linq.Queryable.OrderByDescending(
-                    System.Linq.Queryable.Where(_db.Cashups, c => string.Compare(c.Timestamp, queryStart.ToString("g")) >= 0 && string.Compare(c.Timestamp, queryEnd.ToString("g")) <= 0),
-                    c => c.Timestamp
-                )
-            );
+            var allCashups = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync(_db.Cashups);
+            var cashupsQuery = allCashups
+                .Where(c => 
+                {
+                    if (DateTime.TryParse(c.Timestamp, out var dt))
+                    {
+                        return dt >= queryStart && dt <= queryEnd;
+                    }
+                    return false;
+                })
+                .OrderByDescending(c => 
+                {
+                    DateTime.TryParse(c.Timestamp, out var dt);
+                    return dt;
+                })
+                .ToList();
 
             await Dispatcher.UIThread.InvokeAsync(() =>
             {

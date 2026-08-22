@@ -18,7 +18,7 @@ public partial class OpenShiftDialogViewModel : ValidatableViewModelBase
     private readonly ISessionManager _sessionManager;
 
     [ObservableProperty]
-    private double _initialFloatAmount;
+    private string _initialFloatAmount = "0";
 
     [ObservableProperty]
     private bool _isProcessing;
@@ -38,9 +38,21 @@ public partial class OpenShiftDialogViewModel : ValidatableViewModelBase
     [RelayCommand]
     private async Task OpenShiftAsync()
     {
-        if (InitialFloatAmount < 0)
+        if (double.TryParse(InitialFloatAmount, out double parsedAmount))
         {
-            ErrorMessage = "El monto inicial no puede ser negativo.";
+            if (parsedAmount < 0)
+            {
+                ErrorMessage = "El monto inicial no puede ser negativo.";
+                return;
+            }
+        }
+        else if (string.IsNullOrWhiteSpace(InitialFloatAmount))
+        {
+            parsedAmount = 0;
+        }
+        else
+        {
+            ErrorMessage = "Monto inválido.";
             return;
         }
 
@@ -49,7 +61,7 @@ public partial class OpenShiftDialogViewModel : ValidatableViewModelBase
             IsProcessing = true;
             ErrorMessage = string.Empty;
 
-            var result = await _shiftService.OpenAsync(InitialFloatAmount);
+            var result = await _shiftService.OpenAsync(parsedAmount);
             if (result != null)
             {
                 if (_sessionManager?.CurrentCashier != null)

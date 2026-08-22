@@ -1,10 +1,10 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vm="using:Ticketfy.ViewModels"
+             xmlns:vm="using:Ticketfy.ViewModels.Suppliers"
              xmlns:dto="using:Ticketfy.Data.Dtos"
              xmlns:mi="using:Material.Icons.Avalonia"
              x:Class="Ticketfy.Views.Suppliers.PurchaseHistoryView"
-             x:DataType="vm:SuppliersViewModel">
+             x:DataType="vm:PurchaseHistoryViewModel">
     
     <Grid>
         <Border x:Name="PurchaseHistoryContainer" Padding="16"
@@ -27,7 +27,7 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="dto:PurchaseDto">
                                     <StackPanel Orientation="Horizontal" Spacing="6">
-                                        <Button Command="{Binding $parent[DataGrid].((vm:SuppliersViewModel)DataContext).ViewPurchaseDetailCommand}"
+                                        <Button Command="{Binding $parent[DataGrid].((vm:PurchaseHistoryViewModel)DataContext).ViewPurchaseDetailCommand}"
                                                 CommandParameter="{Binding}"
                                                 Padding="8,4" CornerRadius="4"
                                                 ToolTip.Tip="Ver desglose detallado de artículos de esta compra"
@@ -39,7 +39,7 @@
                                             </StackPanel>
                                         </Button>
 
-                                        <Button Command="{Binding $parent[DataGrid].((vm:SuppliersViewModel)DataContext).PrintPurchaseTicketCommand}"
+                                        <Button Command="{Binding $parent[DataGrid].((vm:PurchaseHistoryViewModel)DataContext).PrintPurchaseTicketCommand}"
                                                 CommandParameter="{Binding}"
                                                 Padding="8,4" CornerRadius="4"
                                                 ToolTip.Tip="Imprimir ticket de esta compra"
@@ -72,7 +72,7 @@
                                 <TextBlock Text="Detalle de Remisión de Compra" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
                             </StackPanel>
 
-                            <Button Grid.Column="1" Command="{Binding $parent[UserControl].((vm:SuppliersViewModel)DataContext).ClosePurchaseDetailCommand}" Background="Transparent" BorderThickness="0" Padding="4">
+                            <Button Grid.Column="1" Command="{Binding $parent[UserControl].((vm:PurchaseHistoryViewModel)DataContext).ClosePurchaseDetailCommand}" Background="Transparent" BorderThickness="0" Padding="4">
                                 <mi:MaterialIcon Kind="Close" Width="20" Height="20" Foreground="{DynamicResource TextMutedBrush}" />
                             </Button>
                         </Grid>
@@ -80,7 +80,7 @@
 
                     <!-- Bottom Close Button -->
                     <StackPanel DockPanel.Dock="Bottom" Margin="0,16,0,0" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
-                        <Button Command="{Binding $parent[UserControl].((vm:SuppliersViewModel)DataContext).PrintPurchaseTicketCommand}"
+                        <Button Command="{Binding $parent[UserControl].((vm:PurchaseHistoryViewModel)DataContext).PrintPurchaseTicketCommand}"
                                 CommandParameter="{Binding}" Padding="14,8" CornerRadius="6"
                                 Background="{DynamicResource BgPrimaryBrush}" BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="1">
                             <StackPanel Orientation="Horizontal" Spacing="6">
@@ -89,7 +89,7 @@
                             </StackPanel>
                         </Button>
 
-                        <Button Command="{Binding $parent[UserControl].((vm:SuppliersViewModel)DataContext).ClosePurchaseDetailCommand}"
+                        <Button Command="{Binding $parent[UserControl].((vm:PurchaseHistoryViewModel)DataContext).ClosePurchaseDetailCommand}"
                                 Content="CERRAR" Padding="16,8" CornerRadius="6" Classes="primary-action" FontWeight="Bold" />
                     </StackPanel>
 

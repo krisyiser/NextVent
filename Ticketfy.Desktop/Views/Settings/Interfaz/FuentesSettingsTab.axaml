@@ -1,0 +1,33 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ticketfy.ViewModels"
+             x:Class="Ticketfy.Views.Settings.Interfaz.FuentesSettingsTab"
+             x:DataType="vm:SettingsViewModel">
+
+    <StackPanel Spacing="14">
+        <TextBlock Text="Tipografía Inspector &amp; Escalamiento" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+
+        <StackPanel Spacing="6">
+            <TextBlock Text="Familia Tipográfica" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+            <ComboBox ItemsSource="{Binding AvailableFontOptions}" SelectedItem="{Binding AppFont, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="8,6" />
+        </StackPanel>
+
+        <StackPanel Spacing="10" Margin="0,6,0,0">
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="Tamaño Base de Interfaz" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <Border Grid.Column="1" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="6,2">
+                    <TextBlock Text="{Binding TamanoFuenteBasePx, StringFormat='{}{0:F0} px'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                </Border>
+            </Grid>
+            <Slider Minimum="12" Maximum="18" Value="{Binding TamanoFuenteBasePx, Mode=TwoWay}" />
+
+            <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="Tamaño de Precios POS" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <Border Grid.Column="1" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="6,2">
+                    <TextBlock Text="{Binding TamanoPreciosPosPx, StringFormat='{}{0:F0} px'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                </Border>
+            </Grid>
+            <Slider Minimum="18" Maximum="36" Value="{Binding TamanoPreciosPosPx, Mode=TwoWay}" />
+        </StackPanel>
+    </StackPanel>
+</UserControl>

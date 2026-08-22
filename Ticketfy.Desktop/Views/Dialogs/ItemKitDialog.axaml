@@ -3,6 +3,7 @@
              xmlns:vm="using:Ticketfy.ViewModels.Dialogs"
              xmlns:dto="using:Ticketfy.Data.Dtos"
              xmlns:mi="using:Material.Icons.Avalonia"
+             xmlns:controls="using:Ticketfy.Controls"
              x:Class="Ticketfy.Views.Dialogs.ItemKitDialog"
              x:DataType="vm:ItemKitDialogViewModel">
 
@@ -37,7 +38,7 @@
 
                     <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,4,0" Spacing="4">
                         <TextBlock Text="Precio Combo ($ MXN) *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                        <NumericUpDown Value="{Binding KitPrice}" ShowButtonSpinner="False" FormatString="0.00" Minimum="0" Watermark="0.00" Padding="8" FontSize="14" FontWeight="Bold" />
+                        <controls:NumericTextBox AllowDecimals="True" Text="{Binding KitPrice, Mode=TwoWay}" Watermark="0.00" Padding="8" FontSize="14" FontWeight="Bold" />
                     </StackPanel>
 
                     <StackPanel Grid.Row="1" Grid.Column="1" Margin="4,0,0,0" Spacing="4">
@@ -55,7 +56,7 @@
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
-                    <TextBox Grid.Column="1" Text="{Binding ItemQuantity, Mode=TwoWay}" Watermark="Cant." Margin="4,0" Padding="8" />
+                    <controls:NumericTextBox Grid.Column="1" AllowDecimals="True" Text="{Binding ItemQuantity, Mode=TwoWay}" Watermark="Cant." Margin="4,0" Padding="8" />
                     <Button Grid.Column="2" Command="{Binding AddItemToDraftCommand}" Content="+ AGREGAR" Padding="10,8" CornerRadius="{DynamicResource AppCornerRadius}" Classes="primary-action" FontWeight="Bold" />
                 </Grid>
 
@@ -78,7 +79,7 @@
                     </ItemsControl>
                 </ScrollViewer>
 
-                <TextBlock Text="{Binding FeedbackMessage}" FontSize="12" Foreground="{DynamicResource AccentDangerBrush}" HorizontalAlignment="Center" />
+                <controls:AlertBannerControl Message="{Binding FeedbackMessage}" IsError="True" />
 
                 <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right" Margin="0,6,0,0">
                     <Button Command="{Binding CancelCommand}" Content="Cancelar" Padding="16,8" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" />

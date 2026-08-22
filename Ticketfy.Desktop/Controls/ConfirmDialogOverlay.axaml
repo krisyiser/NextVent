@@ -1,0 +1,52 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             x:Class="Ticketfy.Controls.ConfirmDialogOverlay"
+             x:Name="RootConfirmDialog"
+             IsVisible="{Binding #RootConfirmDialog.IsOpen}">
+
+    <Grid Background="#B0000000">
+        <Border HorizontalAlignment="Center" VerticalAlignment="Center"
+                Width="420" Padding="24" CornerRadius="12"
+                Background="{DynamicResource BgSecondaryBrush}"
+                BorderBrush="{DynamicResource BorderBrush}"
+                BorderThickness="1">
+            <StackPanel Spacing="16">
+                <!-- Header Icon & Title -->
+                <StackPanel Orientation="Horizontal" Spacing="12">
+                    <mi:MaterialIcon Kind="{Binding #RootConfirmDialog.DialogIconKind}"
+                                    Width="28" Height="28"
+                                    Foreground="{Binding #RootConfirmDialog.DialogIconForeground}" />
+                    <TextBlock Text="{Binding #RootConfirmDialog.Title}"
+                               FontSize="18" FontWeight="Bold"
+                               Foreground="{DynamicResource TextPrimaryBrush}"
+                               VerticalAlignment="Center" />
+                </StackPanel>
+
+                <!-- Message -->
+                <TextBlock Text="{Binding #RootConfirmDialog.Message}"
+                           FontSize="13" TextWrapping="Wrap"
+                           Foreground="{DynamicResource TextSecondaryBrush}" />
+
+                <!-- Action Buttons -->
+                <Grid ColumnDefinitions="*,12,*" Margin="0,8,0,0">
+                    <Button Grid.Column="0"
+                            Content="{Binding #RootConfirmDialog.CancelButtonText}"
+                            Command="{Binding #RootConfirmDialog.CancelCommand}"
+                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                            Padding="12,10" CornerRadius="8"
+                            Background="{DynamicResource BgTertiaryBrush}"
+                            Foreground="{DynamicResource TextPrimaryBrush}" />
+
+                    <Button Grid.Column="2"
+                            Content="{Binding #RootConfirmDialog.ConfirmButtonText}"
+                            Command="{Binding #RootConfirmDialog.ConfirmCommand}"
+                            HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                            Padding="12,10" CornerRadius="8"
+                            Background="{Binding #RootConfirmDialog.ConfirmButtonBackground}"
+                            Foreground="White" FontWeight="Bold" />
+                </Grid>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

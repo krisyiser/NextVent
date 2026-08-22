@@ -1,0 +1,30 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ticketfy.ViewModels.Settings"
+             x:Class="Ticketfy.Views.Settings.Empresa.EmpresaIdentidadTab"
+             x:DataType="vm:EmpresaSettingsViewModel">
+
+    <StackPanel Spacing="16">
+        <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,*">
+            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,12" Spacing="6">
+                <TextBlock Text="URL / Ruta Logo Principal" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <TextBox Text="{Binding EmpresaLogoPrincipalUrl, Mode=TwoWay}" Padding="10,8" Watermark="C:\Logos\empresa_full.png" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,12" Spacing="6">
+                <TextBlock Text="URL / Ruta Isotipo" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <TextBox Text="{Binding EmpresaLogoIsotipoUrl, Mode=TwoWay}" Padding="10,8" Watermark="C:\Logos\icon.png" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,0" Spacing="6">
+                <TextBlock Text="Logo Térmico (Monocromático Ticket)" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <TextBox Text="{Binding EmpresaLogoTermicoUrl, Mode=TwoWay}" Padding="10,8" Watermark="C:\Logos\ticket_bw.bmp" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,0" Spacing="6">
+                <TextBlock Text="Umbral Dither Logo Térmico" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <Slider Minimum="0" Maximum="255" Value="{Binding EmpresaThermalLogoThreshold, Mode=TwoWay}" />
+            </StackPanel>
+        </Grid>
+    </StackPanel>
+</UserControl>

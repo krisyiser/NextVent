@@ -27,12 +27,12 @@
                                 </MenuItem.Icon>
                             </MenuItem>
                             <Separator/>
-                            <MenuItem Header="Corte Parcial de Caja" Command="{Binding GenerateXReportCommand}">
+                            <MenuItem Header="Corte parcial" Command="{Binding GenerateXReportCommand}">
                                 <MenuItem.Icon>
-                                    <mi:MaterialIcon Kind="FileChartOutline" Width="16" Height="16"/>
+                                    <mi:MaterialIcon Kind="ChartBoxOutline" Width="16" Height="16"/>
                                 </MenuItem.Icon>
                             </MenuItem>
-                            <MenuItem Header="Corte Final de Turno" Command="{Binding GenerateZReportCommand}" Foreground="#EF4444">
+                            <MenuItem Header="Corte final" Command="{Binding GenerateZReportCommand}" Foreground="#EF4444">
                                 <MenuItem.Icon>
                                     <mi:MaterialIcon Kind="CashRegister" Width="16" Height="16" Foreground="#EF4444"/>
                                 </MenuItem.Icon>

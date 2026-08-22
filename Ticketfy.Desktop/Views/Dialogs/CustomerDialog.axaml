@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Ticketfy.ViewModels.Dialogs"
+             xmlns:controls="using:Ticketfy.Controls"
              x:Class="Ticketfy.Views.Dialogs.CustomerDialog"
              x:DataType="vm:CustomerDialogViewModel">
 
@@ -12,7 +13,7 @@
             </StackPanel>
 
             <StackPanel DockPanel.Dock="Bottom" Margin="0,20,0,0" Spacing="12">
-                <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource AccentDangerBrush}" FontSize="13" TextWrapping="Wrap" HorizontalAlignment="Center" />
+                <controls:AlertBannerControl Message="{Binding ErrorMessage}" IsError="True" />
 
                 <Grid ColumnDefinitions="*,*">
                     <Button Grid.Column="0" Command="{Binding CancelCommand}" Content="Cancelar" Margin="0,0,6,0" Padding="12"
@@ -38,8 +39,8 @@
 
                     <Grid ColumnDefinitions="*,*">
                         <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,6,0">
-                            <TextBlock Text="Teléfono" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                            <TextBox Text="{Binding Phone, Mode=TwoWay}" Watermark="55-0000-0000" Background="{DynamicResource BgTertiaryBrush}" Padding="10" />
+                            <TextBlock Text="Teléfono (10 dígitos) *" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <controls:PhoneTextBox Text="{Binding Phone, Mode=TwoWay}" Background="{DynamicResource BgTertiaryBrush}" Padding="10" />
                         </StackPanel>
 
                         <StackPanel Grid.Column="1" Spacing="4" Margin="6,0,0,0">

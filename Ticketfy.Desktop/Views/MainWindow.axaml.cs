@@ -68,14 +68,15 @@ public partial class MainWindow : Window
         if (DataContext is MainWindowViewModel vm)
         {
             // Only trigger lock if we are NOT on a login/setup screen and NOT already locked
-            bool isSafeToLock = vm.CurrentView is not LoginViewModel 
-                             && vm.CurrentView is not FirstTimeSetupViewModel
+            bool isSafeToLock = vm.ActiveViewModel is not LoginViewModel 
+                             && vm.ActiveViewModel is not FirstTimeSetupViewModel
                              && !vm.IsLocked;
 
             if (isSafeToLock)
             {
-                await vm.TriggerAutoLockAsync();
+                vm.TriggerAutoLock();
             }
+            await Task.CompletedTask;
         }
         
         // Restart timer only if we didn't just lock the screen

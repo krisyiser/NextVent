@@ -1,0 +1,41 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ticketfy.ViewModels.Settings"
+             xmlns:controls="using:Ticketfy.Controls"
+             x:Class="Ticketfy.Views.Settings.Empresa.EmpresaSucursalTab"
+             x:DataType="vm:EmpresaSettingsViewModel">
+
+    <StackPanel Spacing="16">
+        <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,*">
+            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,12" Spacing="6">
+                <TextBlock Text="Nombre Sucursal" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <TextBox Text="{Binding EmpresaNombreSucursal, Mode=TwoWay}" Padding="10,8" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,12" Spacing="6">
+                <TextBlock Text="Calle y Número" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <TextBox Text="{Binding EmpresaCalleYNumero, Mode=TwoWay}" Padding="10,8" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,12" Spacing="6">
+                <TextBlock Text="Colonia" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <TextBox Text="{Binding EmpresaColonia, Mode=TwoWay}" Padding="10,8" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="1" Grid.Column="1" Margin="8,0,0,12" Spacing="6">
+                <TextBlock Text="Estado" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <ComboBox ItemsSource="{Binding MexicanStates}" SelectedItem="{Binding EmpresaEstado, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="10,8" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,8,0" Spacing="6">
+                <TextBlock Text="Teléfono Fijo (10 dígitos)" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <controls:PhoneTextBox Text="{Binding EmpresaTelefonoFijo, Mode=TwoWay}" Padding="10,8" />
+            </StackPanel>
+
+            <StackPanel Grid.Row="2" Grid.Column="1" Margin="8,0,0,0" Spacing="6">
+                <TextBlock Text="WhatsApp Contacto (10 dígitos)" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                <controls:PhoneTextBox Text="{Binding EmpresaWhatsappContacto, Mode=TwoWay}" Padding="10,8" />
+            </StackPanel>
+        </Grid>
+    </StackPanel>
+</UserControl>

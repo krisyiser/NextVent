@@ -14,6 +14,7 @@
                 <DataGrid Grid.Row="1" ItemsSource="{Binding Cashups}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" HeadersVisibility="Column" SelectionMode="Single">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Fecha / Hora" Binding="{Binding Timestamp}" Width="1.5*" />
+                        <DataGridTextColumn Header="Tipo" Binding="{Binding Type}" Width="1*" />
                         <DataGridTextColumn Header="Fondo Inicial" Binding="{Binding OpenCashAmount, StringFormat='${0:N2}'}" Width="1.2*" />
                         <DataGridTextColumn Header="Fondo Final" Binding="{Binding ClosedCashAmount, StringFormat='${0:N2}'}" Width="1.2*" />
                         <DataGridTextColumn Header="Total Final" Binding="{Binding TheoreticalCash, StringFormat='${0:N2}'}" Width="1.2*" />
@@ -82,7 +83,12 @@
                                 <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,*,*">
                                     <StackPanel Grid.Row="0" Grid.Column="0" Spacing="2">
                                         <TextBlock Text="Fecha y Hora:" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" />
-                                        <TextBlock Text="{Binding Timestamp}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <TextBlock Text="{Binding Timestamp}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                            <Border Background="{DynamicResource AccentPrimaryBrush}" CornerRadius="4" Padding="4,2">
+                                                <TextBlock Text="{Binding Type, TargetNullValue='Final'}" FontSize="10" FontWeight="Bold" Foreground="White" />
+                                            </Border>
+                                        </StackPanel>
                                     </StackPanel>
 
                                     <StackPanel Grid.Row="0" Grid.Column="1" Spacing="2">

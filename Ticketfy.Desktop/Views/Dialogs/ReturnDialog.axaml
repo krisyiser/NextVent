@@ -3,6 +3,7 @@
              xmlns:vm="using:Ticketfy.ViewModels.Dialogs"
              xmlns:dto="using:Ticketfy.Data.Dtos"
              xmlns:mi="using:Material.Icons.Avalonia"
+             xmlns:controls="using:Ticketfy.Controls"
              x:Class="Ticketfy.Views.Dialogs.ReturnDialog"
              x:DataType="vm:ReturnDialogViewModel">
 
@@ -51,7 +52,7 @@
                 <Grid RowDefinitions="Auto" ColumnDefinitions="*,*">
                     <StackPanel Grid.Column="0" Margin="0,0,4,0" Spacing="4">
                         <TextBlock Text="Cantidad a Devolver *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                        <NumericUpDown Value="{Binding ReturnQuantity}" ShowButtonSpinner="False" FormatString="0.00" Minimum="0" Watermark="1.0" Padding="8" FontSize="14" FontWeight="Bold" />
+                        <controls:NumericTextBox AllowDecimals="True" Text="{Binding ReturnQuantity, Mode=TwoWay}" Watermark="1.0" Padding="8" FontSize="14" FontWeight="Bold" />
                     </StackPanel>
 
                     <StackPanel Grid.Column="1" Margin="4,0,0,0" Spacing="4">
@@ -69,7 +70,7 @@
                     <TextBlock Text="Producto en buen estado (Reingresar a inventario)" FontSize="12" Foreground="{DynamicResource TextPrimaryBrush}" />
                 </CheckBox>
 
-                <TextBlock Text="{Binding FeedbackMessage}" FontSize="12" Foreground="{DynamicResource AccentDangerBrush}" HorizontalAlignment="Center" />
+                <controls:AlertBannerControl Message="{Binding FeedbackMessage}" IsError="True" />
 
                 <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right" Margin="0,8,0,0">
                     <Button Command="{Binding CancelCommand}" Content="Cancelar" Padding="16,8" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" />

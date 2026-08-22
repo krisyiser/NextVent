@@ -69,8 +69,8 @@ public class DeviceRegistrationService
     private readonly ISettingsService? _settingsService;
     private readonly ISessionManager? _sessionManager;
     private const string TICKETFY_API_KEY = "nv_sk_valcore_5f8a9"; 
-    private const string API_HOST = "api.valcore";
-    private const string API_URL = "https://100.109.190.105/api/v1/nodes/provision";
+    private const string API_HOST = "api.valcore.cloud";
+    private const string API_URL = "https://api.valcore.cloud/api/v1/nodes/provision";
 
     public DeviceRegistrationService(ISettingsService? settingsService = null, ISessionManager? sessionManager = null)
     {
@@ -85,6 +85,7 @@ public class DeviceRegistrationService
 
         _httpClient = new HttpClient(handler);
         _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", TICKETFY_API_KEY);
+        _httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("TicketfyDesktopClient/3.0.38 (Windows; ValcoreEngine)");
     }
 
     public async Task RegisterNodeAsync(BusinessProfile profile)

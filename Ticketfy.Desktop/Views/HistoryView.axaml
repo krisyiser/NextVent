@@ -52,7 +52,7 @@
 
         <!-- ═══ 2. TABS CONTENT ═══ -->
         <TabControl Grid.Row="1" Grid.RowSpan="2" Margin="0,0,0,0">
-            <TabItem>
+            <TabItem x:Name="NavHistoryTab1">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" Spacing="8" Margin="4,2">
                         <mi:MaterialIcon Kind="ChartLine" Width="18" Height="18" />
@@ -72,7 +72,7 @@
                 </Grid>
             </TabItem>
 
-            <TabItem>
+            <TabItem x:Name="NavHistoryTab2">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" Spacing="8" Margin="4,2">
                         <mi:MaterialIcon Kind="CashRegister" Width="18" Height="18" />

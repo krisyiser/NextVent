@@ -1,8 +1,14 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Ticketfy.ViewModels.Dialogs"
+             xmlns:controls="using:Ticketfy.Controls"
+             xmlns:converters="using:Ticketfy.Converters"
              x:Class="Ticketfy.Views.Dialogs.PaymentDialog"
              x:DataType="vm:PaymentDialogViewModel">
+
+    <UserControl.Resources>
+        <converters:StringToDoubleConverter x:Key="StringToDoubleConverter"/>
+    </UserControl.Resources>
 
     <Border Width="440" Padding="24" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8">
         <DockPanel LastChildFill="True">
@@ -34,7 +40,7 @@
 
                 <StackPanel Spacing="6">
                     <TextBlock Text="Monto a Abonar ($) *" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                    <NumericUpDown Value="{Binding Amount}" ShowButtonSpinner="False" FormatString="0.00" Minimum="0" Watermark="0.00" Background="{DynamicResource BgTertiaryBrush}" FontSize="18" FontWeight="Bold" Padding="10" />
+                    <controls:NumericTextBox AllowDecimals="True" Text="{Binding Amount, Mode=TwoWay, Converter={StaticResource StringToDoubleConverter}}" Watermark="0.00" Background="{DynamicResource BgTertiaryBrush}" FontSize="18" FontWeight="Bold" Padding="10" />
                 </StackPanel>
             </StackPanel>
         </DockPanel>

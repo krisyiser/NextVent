@@ -1,9 +1,10 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vm="using:Ticketfy.ViewModels"
+             xmlns:vm="using:Ticketfy.ViewModels.Suppliers"
              xmlns:dto="using:Ticketfy.Data.Dtos"
+             xmlns:controls="using:Ticketfy.Controls"
              x:Class="Ticketfy.Views.Suppliers.SuppliersDirectoryView"
-             x:DataType="vm:SuppliersViewModel">
+             x:DataType="vm:SupplierDirectoryViewModel">
 
     <!-- Left Panel: Supplier Registry & Directory List -->
     <Border x:Name="SuppliersDirectoryContainer" Padding="16"
@@ -15,7 +16,7 @@
                 <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,*">
                     <TextBox Grid.Row="0" Grid.Column="0" Text="{Binding SupplierName, Mode=TwoWay}" Watermark="Nombre Comercial *" Margin="0,0,4,8" Padding="10,8" />
                     <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding SupplierRfc, Mode=TwoWay}" Watermark="RFC Proveedor" Margin="4,0,0,8" Padding="10,8" />
-                    <TextBox Grid.Row="1" Grid.Column="0" Text="{Binding SupplierPhone, Mode=TwoWay}" Watermark="Teléfono de Contacto" Margin="0,0,4,8" Padding="10,8" />
+                    <controls:PhoneTextBox Grid.Row="1" Grid.Column="0" Text="{Binding SupplierPhone, Mode=TwoWay}" Margin="0,0,4,8" Padding="10,8" />
                     <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding SupplierEmail, Mode=TwoWay}" Watermark="Correo Electrónico" Margin="4,0,0,8" Padding="10,8" />
                     <TextBox Grid.Row="2" Grid.ColumnSpan="2" Text="{Binding SupplierContact, Mode=TwoWay}" Watermark="Persona de Contacto / Vendedor" Margin="0,0,0,8" Padding="10,8" />
                 </Grid>

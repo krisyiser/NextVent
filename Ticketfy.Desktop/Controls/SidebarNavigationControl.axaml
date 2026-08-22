@@ -1,0 +1,143 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ticketfy.ViewModels"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             x:Class="Ticketfy.Controls.SidebarNavigationControl"
+             x:DataType="vm:MainWindowViewModel">
+
+    <Border DockPanel.Dock="{Binding SidebarDockPosition}"
+            Width="{Binding SidebarWidth}"
+            Height="{Binding SidebarHeight}"
+            Background="{DynamicResource SidebarBgBrush}"
+            Padding="0,0,0,0">
+        <DockPanel LastChildFill="False">
+            <StackPanel DockPanel.Dock="Top" Orientation="{Binding SidebarOrientation}" Spacing="10" Margin="8,8,8,8"
+                        HorizontalAlignment="Center" VerticalAlignment="Center">
+
+                <!-- Dynamic Logo Badge -->
+                <Border Width="{DynamicResource AppLogoHeight}" Height="{DynamicResource AppLogoHeight}" CornerRadius="{DynamicResource AppCornerRadius}"
+                        Background="{DynamicResource AccentPrimaryBrush}" Margin="4"
+                        HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <TextBlock Text="TF!" FontSize="16" FontWeight="Bold"
+                               Foreground="White"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+
+                <!-- Nav: POS (F2) -->
+                <Button x:Name="NavPosBtn" Classes="nav-item"
+                        Command="{Binding NavigateToCommand}" CommandParameter="pos"
+                        ToolTip.Tip="Punto de Venta">
+                    <StackPanel Spacing="2">
+                        <mi:MaterialIcon Kind="PointOfSale" Width="22" Height="22" HorizontalAlignment="Center" />
+                        <TextBlock Text="Ventas" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <!-- Nav: Inventory (F3) -->
+                <Button x:Name="NavInventoryBtn" Classes="nav-item"
+                        Command="{Binding NavigateToCommand}" CommandParameter="inventory"
+                        ToolTip.Tip="Inventario">
+                    <StackPanel Spacing="2">
+                        <mi:MaterialIcon Kind="PackageVariantClosed" Width="22" Height="22" HorizontalAlignment="Center" />
+                        <TextBlock Text="Inventario" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <!-- Nav: Customers (F4) -->
+                <Button x:Name="NavCustomersBtn" Classes="nav-item"
+                        Command="{Binding NavigateToCommand}" CommandParameter="customers"
+                        ToolTip.Tip="Clientes y Crédito">
+                    <StackPanel Spacing="2">
+                        <mi:MaterialIcon Kind="AccountGroup" Width="22" Height="22" HorizontalAlignment="Center" />
+                        <TextBlock Text="Clientes" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <!-- Nav: Suppliers (F5) -->
+                <Button x:Name="NavSuppliersBtn" Classes="nav-item"
+                        Command="{Binding NavigateToCommand}" CommandParameter="suppliers"
+                        ToolTip.Tip="Proveedores y Compras">
+                    <StackPanel Spacing="2">
+                        <mi:MaterialIcon Kind="TruckDelivery" Width="22" Height="22" HorizontalAlignment="Center" />
+                        <TextBlock Text="Proveedores" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <!-- Nav: Expenses (F6) -->
+                <Button x:Name="NavExpensesBtn" Classes="nav-item"
+                        Command="{Binding NavigateToCommand}" CommandParameter="expenses"
+                        ToolTip.Tip="Gastos y Utilidad Neta">
+                    <StackPanel Spacing="2">
+                        <mi:MaterialIcon Kind="CashMinus" Width="22" Height="22" HorizontalAlignment="Center" />
+                        <TextBlock Text="Gastos" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <!-- Nav: History (F7) -->
+                <Button x:Name="NavHistoryBtn" Classes="nav-item"
+                        Command="{Binding NavigateToCommand}" CommandParameter="history"
+                        ToolTip.Tip="Historial de Ventas">
+                    <StackPanel Spacing="2">
+                        <mi:MaterialIcon Kind="History" Width="22" Height="22" HorizontalAlignment="Center" />
+                        <TextBlock Text="Historial" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <!-- Nav: Promotions (F8) -->
+                <Button x:Name="NavPromotionsBtn" Classes="nav-item"
+                        Command="{Binding NavigateToCommand}" CommandParameter="promotions"
+                        ToolTip.Tip="Promociones">
+                    <StackPanel Spacing="2">
+                        <mi:MaterialIcon Kind="TagMultiple" Width="22" Height="22" HorizontalAlignment="Center" />
+                        <TextBlock Text="Promos" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <!-- Nav: Fiscal (F9) -->
+                <Button x:Name="NavFiscalBtn" Classes="nav-item"
+                        Command="{Binding NavigateToCommand}" CommandParameter="fiscal"
+                        ToolTip.Tip="Facturación SAT"
+                        IsVisible="False">
+                    <StackPanel Spacing="2">
+                        <mi:MaterialIcon Kind="ReceiptTextOutline" Width="22" Height="22" HorizontalAlignment="Center" />
+                        <TextBlock Text="Factura" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <!-- Nav: Settings (F10) -->
+                <Button x:Name="NavSettingsBtn" Classes="nav-item"
+                        Command="{Binding NavigateToCommand}" CommandParameter="settings"
+                        ToolTip.Tip="Configuración">
+                    <StackPanel Spacing="2">
+                        <mi:MaterialIcon Kind="CogOutline" Width="22" Height="22" HorizontalAlignment="Center" />
+                        <TextBlock Text="Ajustes" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+            </StackPanel>
+
+            <!-- Nav: System / Update Button & Version Badge at Bottom -->
+            <StackPanel DockPanel.Dock="Bottom" Margin="4,8,4,14" Spacing="6" HorizontalAlignment="Center">
+                <!-- Prominent High-Visibility Update Button -->
+                <Button Command="{Binding CheckForUpdatesCommand}"
+                        ToolTip.Tip="Buscar e instalar actualizaciones OTA del sistema"
+                        Padding="6,6" Width="68" Height="50"
+                        CornerRadius="{DynamicResource AppCornerRadius}"
+                        Background="#1E3A8A"
+                        BorderBrush="#38BDF8"
+                        BorderThickness="1.5"
+                        Cursor="Hand">
+                    <StackPanel Spacing="2" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <mi:MaterialIcon Kind="Update" Width="20" Height="20" HorizontalAlignment="Center" Foreground="#38BDF8" />
+                        <TextBlock Text="Actualizar" FontSize="10" FontWeight="Bold" HorizontalAlignment="Center" Foreground="#F8FAFC" />
+                    </StackPanel>
+                </Button>
+
+                <!-- Dynamic Version Badge always visible under Actualizar button -->
+                <Border Background="#0F172A" Padding="6,2" CornerRadius="8" BorderBrush="#334155" BorderThickness="1" HorizontalAlignment="Center" ToolTip.Tip="Versión actual del sistema">
+                    <TextBlock Text="{Binding CurrentAppVersion}" FontSize="10" FontWeight="Bold" Foreground="#94A3B8" HorizontalAlignment="Center" />
+                </Border>
+            </StackPanel>
+        </DockPanel>
+    </Border>
+</UserControl>

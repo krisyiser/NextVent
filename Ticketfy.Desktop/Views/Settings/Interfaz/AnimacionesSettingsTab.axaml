@@ -1,0 +1,23 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ticketfy.ViewModels"
+             x:Class="Ticketfy.Views.Settings.Interfaz.AnimacionesSettingsTab"
+             x:DataType="vm:SettingsViewModel">
+
+    <StackPanel Spacing="14">
+        <TextBlock Text="Motor Cinemático &amp; Transiciones" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+
+        <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Text="Duración de Transición" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+            <Border Grid.Column="1" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="6,2">
+                <TextBlock Text="{Binding DuracionTransicionMs, StringFormat='{}{0:F0} ms'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+            </Border>
+        </Grid>
+        <Slider Minimum="0" Maximum="400" Value="{Binding DuracionTransicionMs, Mode=TwoWay}" />
+
+        <Grid ColumnDefinitions="*,*">
+            <ToggleSwitch Grid.Column="0" IsChecked="{Binding EnableAnimations, Mode=TwoWay}" OffContent="Transiciones" OnContent="Transiciones" />
+            <ToggleSwitch Grid.Column="1" IsChecked="{Binding EnableHoverEffects, Mode=TwoWay}" OffContent="Efecto Hover" OnContent="Efecto Hover" />
+        </Grid>
+    </StackPanel>
+</UserControl>
