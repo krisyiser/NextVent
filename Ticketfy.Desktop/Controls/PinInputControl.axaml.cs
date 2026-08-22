@@ -159,4 +159,18 @@ public partial class PinInputControl : UserControl
         MasterInput.Text = string.Empty;
         FocusMasterInput();
     }
+
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+        if (change.Property == Pin1Property || change.Property == Pin2Property || change.Property == Pin3Property || change.Property == Pin4Property)
+        {
+            string combined = $"{Pin1}{Pin2}{Pin3}{Pin4}";
+            if (PinValue != combined)
+            {
+                PinValue = combined;
+            }
+        }
+    }
 }
+

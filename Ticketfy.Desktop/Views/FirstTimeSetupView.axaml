@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Ticketfy.ViewModels"
              xmlns:mi="using:Material.Icons.Avalonia"
+             xmlns:controls="using:Ticketfy.Controls"
              x:Class="Ticketfy.Views.FirstTimeSetupView"
              x:DataType="vm:FirstTimeSetupViewModel">
 
@@ -25,12 +26,7 @@
                     <TextBox Text="{Binding PasswordHint, Mode=TwoWay}" Watermark="Pista de Contraseña (ej. Mascota de la infancia)" Background="{DynamicResource BgTertiaryBrush}" Padding="12" />
                     <StackPanel Spacing="4">
                         <TextBlock Text="PIN rápido de 4 Dígitos" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBox x:Name="Pin1" Text="{Binding AdminPin1, Mode=TwoWay}" MaxLength="1" PasswordChar="•" Padding="12,6" Width="40" TextAlignment="Center" KeyUp="OnPinKeyUp" />
-                            <TextBox x:Name="Pin2" Text="{Binding AdminPin2, Mode=TwoWay}" MaxLength="1" PasswordChar="•" Padding="12,6" Width="40" TextAlignment="Center" KeyUp="OnPinKeyUp" />
-                            <TextBox x:Name="Pin3" Text="{Binding AdminPin3, Mode=TwoWay}" MaxLength="1" PasswordChar="•" Padding="12,6" Width="40" TextAlignment="Center" KeyUp="OnPinKeyUp" />
-                            <TextBox x:Name="Pin4" Text="{Binding AdminPin4, Mode=TwoWay}" MaxLength="1" PasswordChar="•" Padding="12,6" Width="40" TextAlignment="Center" KeyUp="OnPinKeyUp" />
-                        </StackPanel>
+                        <controls:PinInputControl Pin1="{Binding AdminPin1, Mode=TwoWay}" Pin2="{Binding AdminPin2, Mode=TwoWay}" Pin3="{Binding AdminPin3, Mode=TwoWay}" Pin4="{Binding AdminPin4, Mode=TwoWay}" HorizontalAlignment="Left" />
                     </StackPanel>
                     
                     <TextBlock Text="{Binding ErrorMessage}" Foreground="{DynamicResource AccentDangerBrush}" FontSize="12" HorizontalAlignment="Center" TextWrapping="Wrap" IsVisible="{Binding ErrorMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
