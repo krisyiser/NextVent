@@ -3,8 +3,8 @@ param (
 )
 
 $ErrorActionPreference = "Stop"
-$ProjectPath = ".\Ticketfy.Desktop.csproj"
-$ReleaseDir = ".\Output\Releases"
+$ProjectPath = Join-Path $PSScriptRoot "Ticketfy.Desktop.csproj"
+$ReleaseDir = Join-Path $PSScriptRoot "Output\Releases"
 
 Write-Host "==========================================================" -ForegroundColor Cyan
 Write-Host "Compilando Ticketfy v$Version Multi-Arquitectura (x64 / x86)..." -ForegroundColor Cyan
@@ -12,7 +12,7 @@ Write-Host "==========================================================" -Foregro
 
 # 1. Publicar versión 64-bit (win-x64)
 Write-Host "[1/2] Publicando versión 64-bit (win-x64)..." -ForegroundColor Yellow
-$PublishDir64 = ".\bin\Release\net9.0\win-x64\publish"
+$PublishDir64 = Join-Path $PSScriptRoot "bin\Release\net9.0\win-x64\publish"
 dotnet publish $ProjectPath -c Release -r win-x64 --self-contained -p:Version=$Version -p:AssemblyVersion=$Version.0 -p:FileVersion=$Version.0 /p:EnableSourceLink=false /p:EnableSourceControlManagerQueries=false /p:PublishRepositoryUrl=false
 
 if ($LASTEXITCODE -ne 0) {
@@ -22,7 +22,7 @@ if ($LASTEXITCODE -ne 0) {
 
 # 2. Publicar versión 32-bit (win-x86)
 Write-Host "[2/2] Publicando versión 32-bit (win-x86)..." -ForegroundColor Yellow
-$PublishDir86 = ".\bin\Release\net9.0\win-x86\publish"
+$PublishDir86 = Join-Path $PSScriptRoot "bin\Release\net9.0\win-x86\publish"
 dotnet publish $ProjectPath -c Release -r win-x86 --self-contained -p:Version=$Version -p:AssemblyVersion=$Version.0 -p:FileVersion=$Version.0 /p:EnableSourceLink=false /p:EnableSourceControlManagerQueries=false /p:PublishRepositoryUrl=false
 
 if ($LASTEXITCODE -ne 0) {
