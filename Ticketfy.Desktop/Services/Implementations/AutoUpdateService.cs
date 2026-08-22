@@ -12,7 +12,7 @@ public class AutoUpdateService
 {
     // Configure the remote URL where your releases (Setup.exe, .nupkg) will be hosted.
     // For Forgejo/Gitea public repositories, you can use the raw file endpoint:
-    private const string UpdateUrl = "https://git.valcore/yersi/ticketfy-releases/raw/branch/main"; 
+    private const string UpdateUrl = "https://valcore.cloud/downloads"; 
 
     public bool IsUpdateReadyToInstall { get; private set; }
     public string NewVersion { get; private set; } = string.Empty;

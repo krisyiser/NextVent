@@ -17,28 +17,39 @@ def deploy_release(version):
 
     base_dir = os.path.dirname(os.path.abspath(__file__))
     releases_dir = os.path.join(base_dir, "Output", "Releases")
-    remote_worktree = "/opt/valcore/ticketfy-releases-worktree"
+    if not os.path.exists(releases_dir):
+        releases_dir = os.path.join(base_dir, "..", "Releases")
 
-    print("[AUTO-DEPLOY] Uploading release binaries via SFTP...")
+    remote_worktree = "/opt/valcore/ticketfy-releases-worktree"
+    remote_public = "/opt/valcore/valcore-site/public/downloads"
+
+    print("[AUTO-DEPLOY] Uploading all release binaries and Velopack manifests via SFTP...")
+
+    if os.path.exists(releases_dir):
+        for f in os.listdir(releases_dir):
+            local_file = os.path.join(releases_dir, f)
+            if os.path.isfile(local_file):
+                remote_wt_file = f"{remote_worktree}/{f}"
+                remote_pub_file = f"{remote_public}/{f}"
+                try:
+                    sftp.put(local_file, remote_wt_file)
+                    sftp.put(local_file, remote_pub_file)
+                    print(f"  -> Uploaded {f}")
+                except Exception as ex:
+                    print(f"  -> Warning uploading {f}: {ex}")
 
     setup_x64 = os.path.join(releases_dir, f"Ticketfy-Setup-v{version}-x64.exe")
-    setup_default = os.path.join(releases_dir, f"Ticketfy-Setup-v{version}.exe")
-    setup_x86 = os.path.join(releases_dir, f"Ticketfy-Setup-v{version}-x86.exe")
-
-    if os.path.exists(setup_x64):
-        sftp.put(setup_x64, f"{remote_worktree}/Ticketfy-Setup-v{version}-x64.exe")
-    elif os.path.exists(setup_default):
-        sftp.put(setup_default, f"{remote_worktree}/Ticketfy-Setup-v{version}-x64.exe")
-
-    if os.path.exists(setup_x86):
-        sftp.put(setup_x86, f"{remote_worktree}/Ticketfy-Setup-v{version}-x86.exe")
+    setup_default = os.path.join(releases_dir, "Ticketfy.Desktop-win-Setup.exe")
+    if not os.path.exists(setup_default):
+        setup_default = os.path.join(releases_dir, f"Ticketfy-Setup-v{version}.exe")
 
     if os.path.exists(setup_default):
+        sftp.put(setup_default, f"{remote_public}/Ticketfy-Setup-v{version}-x64.exe")
+        sftp.put(setup_default, f"{remote_public}/Ticketfy-Setup-v{version}.exe")
+        sftp.put(setup_default, f"{remote_public}/Ticketfy-Setup-Latest.exe")
+        sftp.put(setup_default, f"{remote_worktree}/Ticketfy-Setup-v{version}-x64.exe")
         sftp.put(setup_default, f"{remote_worktree}/Ticketfy-Setup-v{version}.exe")
-
-    releases_json = os.path.join(releases_dir, "releases.json")
-    if os.path.exists(releases_json):
-        sftp.put(releases_json, f"{remote_worktree}/releases.json")
+        sftp.put(setup_default, f"{remote_worktree}/Ticketfy-Setup-Latest.exe")
 
     sftp.close()
 
