@@ -51,7 +51,7 @@
                 <ItemsControl ItemsSource="{Binding CartState.Items}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="dto:CartItemDto">
-                            <Border Background="#EFF6FF" BorderBrush="#2563EB" BorderThickness="3,0,0,1" Padding="10,8">
+                            <Border Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="3,0,0,1" Padding="10,8">
                                 <Grid ColumnDefinitions="*, Auto, Auto, Auto">
                                     <!-- Item Info -->
                                     <StackPanel Grid.Column="0" Spacing="2">

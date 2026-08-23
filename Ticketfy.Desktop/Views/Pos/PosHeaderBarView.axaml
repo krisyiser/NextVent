@@ -62,7 +62,7 @@
                 <Button BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="6" Padding="10,6" Cursor="Hand">
                     <Button.Flyout>
                         <Flyout Placement="BottomEdgeAlignedRight">
-                            <Border Width="360" Background="White" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="14">
+                            <Border Width="360" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="14">
                                 <StackPanel Spacing="10">
                                     <Grid ColumnDefinitions="*, Auto">
                                         <TextBlock Text="Cuentas en Espera (Pausadas)" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource TextPrimaryBrush}"/>

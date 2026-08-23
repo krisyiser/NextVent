@@ -9,47 +9,47 @@
         <ResourceDictionary>
             <FontFamily x:Key="AppFontFamily">Inter, Segoe UI, sans-serif</FontFamily>
 
-            <!-- ═══ LEVEL 1: GLOBAL DESIGN SYSTEM TOKENS ═══ -->
+            <!-- ═══ LEVEL 1: GLOBAL DESIGN SYSTEM TOKENS (VALCORE INDUSTRIAL SLATE) ═══ -->
             <!-- Base Surfaces -->
-            <Color x:Key="SurfaceAppBackground">#F8FAFC</Color>
-            <Color x:Key="SurfaceCardBackground">#FFFFFF</Color>
-            <Color x:Key="SurfacePanelSubtle">#F1F5F9</Color>
+            <Color x:Key="SurfaceAppBackground">#090D16</Color>
+            <Color x:Key="SurfaceCardBackground">#1E293B</Color>
+            <Color x:Key="SurfacePanelSubtle">#0F172A</Color>
 
             <!-- Borders & Dividers -->
-            <Color x:Key="BorderNeutralSubtle">#E2E8F0</Color>
-            <Color x:Key="BorderNeutralStrong">#CBD5E1</Color>
+            <Color x:Key="BorderNeutralSubtle">#334155</Color>
+            <Color x:Key="BorderNeutralStrong">#475569</Color>
 
             <!-- Typography & Content -->
-            <Color x:Key="TextPrimary">#0F172A</Color>
-            <Color x:Key="TextSecondary">#64748B</Color>
+            <Color x:Key="TextPrimary">#F8FAFC</Color>
+            <Color x:Key="TextSecondary">#CBD5E1</Color>
             <Color x:Key="TextMuted">#94A3B8</Color>
 
             <!-- Accent & Status Colors -->
-            <Color x:Key="AccentBrandPrimary">#2563EB</Color>
-            <Color x:Key="AccentBrandSubtle">#EFF6FF</Color>
+            <Color x:Key="AccentBrandPrimary">#3B82F6</Color>
+            <Color x:Key="AccentBrandSubtle">#1E3A8A</Color>
             <Color x:Key="StatusSuccess">#10B981</Color>
-            <Color x:Key="StatusSuccessSubtle">#ECFDF5</Color>
+            <Color x:Key="StatusSuccessSubtle">#064E3B</Color>
             <Color x:Key="StatusDanger">#EF4444</Color>
-            <Color x:Key="StatusDangerSubtle">#FEF2F2</Color>
+            <Color x:Key="StatusDangerSubtle">#7F1D1D</Color>
             <Color x:Key="StatusWarning">#F59E0B</Color>
 
             <!-- SolidColorBrushes -->
-            <SolidColorBrush x:Key="BgPrimaryBrush" Color="#F8FAFC" />
-            <SolidColorBrush x:Key="BgSecondaryBrush" Color="#FFFFFF" />
-            <SolidColorBrush x:Key="BgTertiaryBrush" Color="#F1F5F9" />
-            <SolidColorBrush x:Key="BorderBrush" Color="#CBD5E1" />
-            <SolidColorBrush x:Key="TextPrimaryBrush" Color="#0F172A" />
-            <SolidColorBrush x:Key="TextSecondaryBrush" Color="#64748B" />
+            <SolidColorBrush x:Key="BgPrimaryBrush" Color="#090D16" />
+            <SolidColorBrush x:Key="BgSecondaryBrush" Color="#1E293B" />
+            <SolidColorBrush x:Key="BgTertiaryBrush" Color="#0F172A" />
+            <SolidColorBrush x:Key="BorderBrush" Color="#334155" />
+            <SolidColorBrush x:Key="TextPrimaryBrush" Color="#F8FAFC" />
+            <SolidColorBrush x:Key="TextSecondaryBrush" Color="#CBD5E1" />
             <SolidColorBrush x:Key="TextMutedBrush" Color="#94A3B8" />
-            <SolidColorBrush x:Key="AccentPrimaryBrush" Color="#2563EB" />
-            <SolidColorBrush x:Key="AccentBrandSubtleBrush" Color="#EFF6FF" />
+            <SolidColorBrush x:Key="AccentPrimaryBrush" Color="#3B82F6" />
+            <SolidColorBrush x:Key="AccentBrandSubtleBrush" Color="#1E3A8A" />
             <SolidColorBrush x:Key="AccentSuccessBrush" Color="#10B981" />
             <SolidColorBrush x:Key="AccentDangerBrush" Color="#EF4444" />
             <SolidColorBrush x:Key="AccentWarningBrush" Color="#F59E0B" />
-            <SolidColorBrush x:Key="SidebarBgBrush" Color="#1E3A8A" />
-            <SolidColorBrush x:Key="SidebarNavIconBrush" Color="#93C5FD" />
+            <SolidColorBrush x:Key="SidebarBgBrush" Color="#0F172A" />
+            <SolidColorBrush x:Key="SidebarNavIconBrush" Color="#94A3B8" />
 
-            <CornerRadius x:Key="AppCornerRadius">6</CornerRadius>
+            <CornerRadius x:Key="AppCornerRadius">8</CornerRadius>
             <x:Double x:Key="AppBaseFontSize">14</x:Double>
             <x:Double x:Key="PosPriceFontSize">24</x:Double>
             <x:Double x:Key="PosCartWidth">380</x:Double>

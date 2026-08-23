@@ -52,11 +52,11 @@
             <ScrollViewer VerticalScrollBarVisibility="Visible" Padding="0,0,12,0" Margin="0,0,-12,0">
                 <StackPanel Spacing="16">
                     <!-- Total Display Box -->
-                    <Border Background="#EFF6FF" BorderBrush="#BFDBFE" BorderThickness="1" CornerRadius="8" Padding="16">
+                    <Border Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="16">
                         <Grid ColumnDefinitions="*, Auto">
-                            <TextBlock Text="Total a Cobrar:" FontSize="16" FontWeight="SemiBold" Foreground="#1E40AF" VerticalAlignment="Center"/>
+                            <TextBlock Text="Total a Cobrar:" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
                             <TextBlock Grid.Column="1" Text="{Binding TotalToPay, StringFormat='${0:N2}'}" 
-                                       FontSize="32" FontWeight="ExtraBold" Foreground="#2563EB" FontFamily="Consolas, monospace"/>
+                                       FontSize="32" FontWeight="ExtraBold" Foreground="{DynamicResource AccentPrimaryBrush}" FontFamily="Consolas, monospace"/>
                         </Grid>
                     </Border>
 
@@ -202,20 +202,20 @@
                             </StackPanel>
 
                             <!-- Tabla de saldos del crédito -->
-                            <Border Background="White" CornerRadius="6" Padding="12,8"
+                            <Border Background="{DynamicResource BgSecondaryBrush}" CornerRadius="6" Padding="12,8"
                                     BorderBrush="#A7F3D0" BorderThickness="1">
                                 <Grid ColumnDefinitions="*,*,*" RowDefinitions="Auto,Auto">
                                     <!-- Headers -->
                                     <TextBlock Grid.Row="0" Grid.Column="0" Text="LÍMITE" FontSize="10"
-                                               FontWeight="Bold" Foreground="#6B7280"/>
+                                               FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}"/>
                                     <TextBlock Grid.Row="0" Grid.Column="1" Text="DEUDA ACTUAL" FontSize="10"
-                                               FontWeight="Bold" Foreground="#6B7280" HorizontalAlignment="Center"/>
+                                               FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center"/>
                                     <TextBlock Grid.Row="0" Grid.Column="2" Text="DISPONIBLE" FontSize="10"
-                                               FontWeight="Bold" Foreground="#6B7280" HorizontalAlignment="Right"/>
+                                               FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Right"/>
                                     <!-- Values -->
                                     <TextBlock Grid.Row="1" Grid.Column="0"
                                                Text="{Binding CustomerCreditLimit, StringFormat='${0:N2}'}"
-                                               FontSize="15" FontWeight="ExtraBold" Foreground="#1E293B"
+                                               FontSize="15" FontWeight="ExtraBold" Foreground="{DynamicResource TextPrimaryBrush}"
                                                FontFamily="Consolas, monospace"/>
                                     <TextBlock Grid.Row="1" Grid.Column="1"
                                                Text="{Binding CustomerCurrentDebt, StringFormat='${0:N2}'}"

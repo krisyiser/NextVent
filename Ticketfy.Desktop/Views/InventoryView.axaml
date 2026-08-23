@@ -29,48 +29,48 @@
                     <!-- Fila 1: Herramientas del Sistema y Catálogo -->
                     <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
 
-                        <Button Command="{Binding ToggleLowStockFilterCommand}" Padding="10,6" CornerRadius="6" Cursor="Hand" Background="#FEF2F2" BorderBrush="#EF4444" BorderThickness="1">
+                        <Button Command="{Binding ToggleLowStockFilterCommand}" Padding="10,6" CornerRadius="6" Cursor="Hand" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource AccentDangerBrush}" BorderThickness="1">
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <mi:MaterialIcon Kind="AlertCircleOutline" Width="16" Height="16" Foreground="#DC2626" />
-                                <TextBlock Text="STOCK MÍNIMO" FontWeight="Bold" FontSize="11" Foreground="#DC2626" VerticalAlignment="Center" />
+                                <mi:MaterialIcon Kind="AlertCircleOutline" Width="16" Height="16" Foreground="{DynamicResource AccentDangerBrush}" />
+                                <TextBlock Text="STOCK MÍNIMO" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentDangerBrush}" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
 
-                        <Button Command="{Binding OpenManageCategoriesDialogCommand}" Padding="10,6" CornerRadius="6" Cursor="Hand" Background="#EFF6FF" BorderBrush="#3B82F6" BorderThickness="1">
+                        <Button Command="{Binding OpenManageCategoriesDialogCommand}" Padding="10,6" CornerRadius="6" Cursor="Hand" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <mi:MaterialIcon Kind="FolderMultipleOutline" Width="16" Height="16" Foreground="#2563EB" />
-                                <TextBlock Text="CATEGORÍAS" FontWeight="Bold" FontSize="11" Foreground="#2563EB" VerticalAlignment="Center" />
+                                <mi:MaterialIcon Kind="FolderMultipleOutline" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                <TextBlock Text="CATEGORÍAS" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
 
-                        <Button Command="{Binding ImportCsvCatalogCommand}" Padding="10,6" CornerRadius="6" Cursor="Hand" Background="#EFF6FF" BorderBrush="#3B82F6" BorderThickness="1">
+                        <Button Command="{Binding ImportCsvCatalogCommand}" Padding="10,6" CornerRadius="6" Cursor="Hand" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <mi:MaterialIcon Kind="FileImport" Width="16" Height="16" Foreground="#2563EB" />
-                                <TextBlock Text="IMPORTAR CSV" FontWeight="Bold" FontSize="11" Foreground="#2563EB" VerticalAlignment="Center" />
+                                <mi:MaterialIcon Kind="FileImport" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                <TextBlock Text="IMPORTAR CSV" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
                     </StackPanel>
 
                     <!-- Fila 2: Reportes, Auditoría y Altas -->
                     <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right">
-                        <Button Command="{Binding PrintChecklistCommand}" Padding="10,6" CornerRadius="6" Cursor="Hand" Background="#EFF6FF" BorderBrush="#3B82F6" BorderThickness="1">
+                        <Button Command="{Binding PrintChecklistCommand}" Padding="10,6" CornerRadius="6" Cursor="Hand" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <mi:MaterialIcon Kind="Printer" Width="16" Height="16" Foreground="#2563EB" />
-                                <TextBlock Text="IMPRIMIR CHECKLIST" FontWeight="Bold" FontSize="11" Foreground="#2563EB" VerticalAlignment="Center" />
+                                <mi:MaterialIcon Kind="Printer" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                <TextBlock Text="IMPRIMIR CHECKLIST" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
 
-                        <Button x:Name="InventoryBackupBtn" Command="{Binding CreateSnapshotCommand}" Padding="10,6" CornerRadius="6" Cursor="Hand" Background="#EFF6FF" BorderBrush="#3B82F6" BorderThickness="1">
+                        <Button x:Name="InventoryBackupBtn" Command="{Binding CreateSnapshotCommand}" Padding="10,6" CornerRadius="6" Cursor="Hand" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <mi:MaterialIcon Kind="Camera" Width="16" Height="16" Foreground="#2563EB" />
-                                <TextBlock Text="COPIA DE SEGURIDAD" FontWeight="Bold" FontSize="11" Foreground="#2563EB" VerticalAlignment="Center" />
+                                <mi:MaterialIcon Kind="Camera" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                <TextBlock Text="COPIA DE SEGURIDAD" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
 
-                        <Button x:Name="InventoryHistoryBtn" Command="{Binding ViewSnapshotsCommand}" Padding="10,6" CornerRadius="6" Cursor="Hand" Background="#EFF6FF" BorderBrush="#3B82F6" BorderThickness="1">
+                        <Button x:Name="InventoryHistoryBtn" Command="{Binding ViewSnapshotsCommand}" Padding="10,6" CornerRadius="6" Cursor="Hand" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                             <StackPanel Orientation="Horizontal" Spacing="6">
-                                <mi:MaterialIcon Kind="History" Width="16" Height="16" Foreground="#2563EB" />
-                                <TextBlock Text="HISTORIAL" FontWeight="Bold" FontSize="11" Foreground="#2563EB" VerticalAlignment="Center" />
+                                <mi:MaterialIcon Kind="History" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                <TextBlock Text="HISTORIAL" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
 
