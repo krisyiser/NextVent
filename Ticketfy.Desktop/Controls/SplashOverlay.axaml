@@ -4,36 +4,68 @@
              x:Class="Ticketfy.Controls.SplashOverlay"
              x:DataType="vm:MainWindowViewModel">
 
-    <!-- ═══ SPLASH SCREEN OVERLAY ═══ -->
-    <Grid ZIndex="10000" IsVisible="{Binding IsSplashScreenVisible}" Background="{DynamicResource BgPrimaryBrush}">
+    <!-- ═══ SPLASH SCREEN OVERLAY (INDUSTRIAL HIGH-DENSITY DARK AURA) ═══ -->
+    <Grid ZIndex="10000" IsVisible="{Binding IsSplashScreenVisible}">
+        <!-- Dark Deep Background Canvas -->
+        <Grid.Background>
+            <RadialGradientBrush Center="50%,45%" GradientOrigin="50%,45%" RadiusX="60%" RadiusY="60%">
+                <GradientStop Color="#1E293B" Offset="0"/>
+                <GradientStop Color="#090D16" Offset="1"/>
+            </RadialGradientBrush>
+        </Grid.Background>
+
         <Grid.Styles>
             <Style Selector="Svg.pulse">
                 <Style.Animations>
-                    <Animation Duration="0:0:1.5" IterationCount="Infinite" PlaybackDirection="Alternate">
+                    <Animation Duration="0:0:2.0" IterationCount="Infinite" PlaybackDirection="Alternate">
                         <KeyFrame Cue="0%">
-                            <Setter Property="ScaleTransform.ScaleX" Value="0.9"/>
-                            <Setter Property="ScaleTransform.ScaleY" Value="0.9"/>
+                            <Setter Property="ScaleTransform.ScaleX" Value="0.96"/>
+                            <Setter Property="ScaleTransform.ScaleY" Value="0.96"/>
                         </KeyFrame>
                         <KeyFrame Cue="100%">
-                            <Setter Property="ScaleTransform.ScaleX" Value="1.1"/>
-                            <Setter Property="ScaleTransform.ScaleY" Value="1.1"/>
+                            <Setter Property="ScaleTransform.ScaleX" Value="1.04"/>
+                            <Setter Property="ScaleTransform.ScaleY" Value="1.04"/>
                         </KeyFrame>
                     </Animation>
                 </Style.Animations>
             </Style>
         </Grid.Styles>
-        
-        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="24">
-            <!-- LOGO SVG -->
-            <Svg Classes="pulse" Path="/Assets/logo.svg" Width="180" Height="180" HorizontalAlignment="Center"/>
-            
-            <TextBlock Text="INICIANDO TICKETFY!" FontSize="24" FontWeight="Black" 
-                       Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" LetterSpacing="2"/>
-            
-            <TextBlock Text="Por favor espere, cargando módulos..." FontSize="14" 
-                       Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center"/>
-                       
-            <ProgressBar IsIndeterminate="True" Width="200" Height="4" Margin="0,16,0,0" Foreground="{DynamicResource AccentBrandBrush}" Background="#1E293B"/>
+
+        <!-- CENTRAL FLOATING GLASS CARD -->
+        <Border HorizontalAlignment="Center" VerticalAlignment="Center"
+                Background="#1E293B" BorderBrush="#334155" BorderThickness="1"
+                CornerRadius="20" Padding="48,40" MinWidth="480"
+                BoxShadow="0 24 64 0 #90000000">
+            <StackPanel HorizontalAlignment="Center" Spacing="0">
+                <!-- LOGO BADGE -->
+                <Border Background="White" Padding="24,14" CornerRadius="14" HorizontalAlignment="Center" Margin="0,0,0,24" BoxShadow="0 6 16 0 #20000000">
+                    <Svg Classes="pulse" Path="/Assets/logo.svg" Width="190" Height="55" HorizontalAlignment="Center"/>
+                </Border>
+
+                <!-- BRAND TITLES -->
+                <TextBlock Text="INICIANDO TICKETFY!" FontSize="22" FontWeight="Black" 
+                           Foreground="White" HorizontalAlignment="Center" LetterSpacing="2.5" Margin="0,0,0,4"/>
+                           
+                <TextBlock Text="SISTEMA DE PUNTO DE VENTA &amp; GESTIÓN EMPRESARIAL" FontSize="10" FontWeight="Bold" 
+                           Foreground="#94A3B8" HorizontalAlignment="Center" LetterSpacing="1.5" Margin="0,0,0,28"/>
+
+                <!-- STATUS MESSAGE & PROGRESS BAR -->
+                <TextBlock Text="Por favor espere, cargando módulos y base de datos..." FontSize="12" FontWeight="SemiBold"
+                           Foreground="#CBD5E1" HorizontalAlignment="Center" Margin="0,0,0,14"/>
+
+                <ProgressBar IsIndeterminate="True" Width="280" Height="6" CornerRadius="3" 
+                             Foreground="#3B82F6" Background="#0F172A" HorizontalAlignment="Center"/>
+            </StackPanel>
+        </Border>
+
+        <!-- FOOTER BADGE -->
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,0,32">
+            <Border Background="#1E293B" BorderBrush="#334155" BorderThickness="1" CornerRadius="12" Padding="14,7" BoxShadow="0 4 12 0 #40000000">
+                <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                    <Ellipse Width="8" Height="8" Fill="#10B981"/>
+                    <TextBlock Text="{Binding CurrentAppVersion, StringFormat='{}TICKETFY {0} • VALCORE DESKTOP ENGINE'}" FontSize="11" FontWeight="Bold" Foreground="#94A3B8"/>
+                </StackPanel>
+            </Border>
         </StackPanel>
     </Grid>
 </UserControl>
