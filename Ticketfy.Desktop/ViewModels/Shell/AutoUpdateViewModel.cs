@@ -17,6 +17,7 @@ public partial class AutoUpdateViewModel : ObservableObject
     [ObservableProperty] private bool _isUpdateAvailable = false;
     [ObservableProperty] private bool _isUpdateReady = false;
     [ObservableProperty] private double _updateProgress = 0;
+    [ObservableProperty] private string _updateProgressText = string.Empty;
     [ObservableProperty] private bool _isUpdateUpToDate = false;
     [ObservableProperty] private bool _isUpdateFailed = false;
     [ObservableProperty] private string _updateErrorMessage = string.Empty;
@@ -29,7 +30,11 @@ public partial class AutoUpdateViewModel : ObservableObject
             Dispatcher.UIThread.Post(() => IsUpdateAvailable = true);
 
         _autoUpdateService.DownloadProgressChangedEvent += (progress) =>
-            Dispatcher.UIThread.Post(() => UpdateProgress = progress);
+            Dispatcher.UIThread.Post(() =>
+            {
+                UpdateProgress = progress;
+                UpdateProgressText = progress > 0 ? $"{Math.Round(progress)}%" : string.Empty;
+            });
 
         _autoUpdateService.UpdateReadyToInstallEvent += () =>
             Dispatcher.UIThread.Post(() =>

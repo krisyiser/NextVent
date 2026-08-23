@@ -51,6 +51,7 @@ public partial class MainWindowViewModel : ObservableObject
     public bool IsUpdateAvailable => Update.IsUpdateAvailable;
     public bool IsUpdateReady => Update.IsUpdateReady;
     public double UpdateProgress => Update.UpdateProgress;
+    public string UpdateProgressText => Update.UpdateProgressText;
     public bool IsUpdateUpToDate => Update.IsUpdateUpToDate;
     public bool IsUpdateFailed => Update.IsUpdateFailed;
     public string UpdateErrorMessage => Update.UpdateErrorMessage;
@@ -201,6 +202,7 @@ public partial class MainWindowViewModel : ObservableObject
             OnPropertyChanged(nameof(IsUpdateAvailable));
             OnPropertyChanged(nameof(IsUpdateReady));
             OnPropertyChanged(nameof(UpdateProgress));
+            OnPropertyChanged(nameof(UpdateProgressText));
             OnPropertyChanged(nameof(IsUpdateUpToDate));
             OnPropertyChanged(nameof(IsUpdateFailed));
             OnPropertyChanged(nameof(UpdateErrorMessage));

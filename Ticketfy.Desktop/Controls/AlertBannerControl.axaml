@@ -22,7 +22,8 @@
                        Text="{Binding #RootBanner.Message}"
                        FontSize="13" FontWeight="SemiBold"
                        Foreground="{Binding #RootBanner.BannerForeground}"
-                       TextWrapping="Wrap" VerticalAlignment="Center" />
+                       TextWrapping="Wrap" VerticalAlignment="Center"
+                       Margin="0,0,10,0" />
 
             <!-- Close Button -->
             <Button Grid.Column="2"
