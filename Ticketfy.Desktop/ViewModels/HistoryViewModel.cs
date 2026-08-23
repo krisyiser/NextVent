@@ -105,10 +105,7 @@ public partial class HistoryViewModel : ObservableObject
             DateTime queryStart = StartDate.Value.Date;
             DateTime queryEnd = EndDate.Value.Date.AddDays(1).AddTicks(-1);
 
-            DateTime utcStart = queryStart.ToBusinessUtcTime();
-            DateTime utcEnd = queryEnd.ToBusinessUtcTime();
-
-            var salesList = await _saleService.GetSalesByDateRangeAsync(utcStart, utcEnd);
+            var salesList = await _saleService.GetSalesByDateRangeAsync(queryStart, queryEnd);
 
             var allCashups = await Microsoft.EntityFrameworkCore.EntityFrameworkQueryableExtensions.ToListAsync(_db.Cashups);
             var cashupsQuery = allCashups
@@ -162,10 +159,7 @@ public partial class HistoryViewModel : ObservableObject
             DateTime? queryStart = StartDate?.Date;
             DateTime? queryEnd = EndDate?.Date.AddDays(1).AddTicks(-1);
 
-            DateTime? utcStart = queryStart.HasValue ? queryStart.Value.ToBusinessUtcTime() : null;
-            DateTime? utcEnd = queryEnd.HasValue ? queryEnd.Value.ToBusinessUtcTime() : null;
-
-            var list = await _saleService.GetCashierPerformanceReportAsync(utcStart, utcEnd, CommissionPercentage);
+            var list = await _saleService.GetCashierPerformanceReportAsync(queryStart, queryEnd, CommissionPercentage);
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 CashierPerformanceReport.Clear();
@@ -187,10 +181,13 @@ public partial class HistoryViewModel : ObservableObject
         var groups = validSales
             .GroupBy(s =>
             {
+                if (DateTimeOffset.TryParse(s.Date, out var dto))
+                {
+                    return dto.LocalDateTime.Hour;
+                }
                 if (DateTime.TryParse(s.Date, out var dt))
                 {
-                    var utcDt = DateTime.SpecifyKind(dt, DateTimeKind.Utc);
-                    return utcDt.ToBusinessLocalTime().Hour;
+                    return dt.ToLocalTime().Hour;
                 }
                 return 0;
             })

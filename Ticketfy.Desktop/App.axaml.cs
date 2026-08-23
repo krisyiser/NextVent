@@ -18,6 +18,7 @@ public partial class App : Application
 {
     public new static App? Current => Application.Current as App;
     public IServiceProvider? Services { get; private set; }
+
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -74,40 +75,68 @@ public partial class App : Application
         {
             Log.Information("TICKETFY! {Version} — Avalonia Native Desktop starting", Ticketfy.Core.Helpers.AppVersionHelper.DisplayVersion);
 
-            this.Services = await Ticketfy.Core.Startup.AppBootstrapper.BootstrapServicesAsync();
-            var (businessName, contactEmail) = await Ticketfy.Core.Startup.AppBootstrapper.GetBusinessProfileAsync();
+            // Show splash window immediately so user gets instant visual response
+            var splash = new SplashWindow();
+            desktop.MainWindow = splash;
+            splash.Show();
 
-            var licenseService = new Ticketfy.Services.Security.LicenseEnforcementService();
-            if (licenseService.IsSystemLocked())
+            try
             {
-                Log.Warning("System locked: Kill Switch activated due to invalid or missing license.jwt.");
-                desktop.MainWindow = new Avalonia.Controls.Window
+                this.Services = await Ticketfy.Core.Startup.AppBootstrapper.BootstrapServicesAsync();
+                var (businessName, contactEmail) = await Ticketfy.Core.Startup.AppBootstrapper.GetBusinessProfileAsync();
+
+                var licenseService = new Ticketfy.Services.Security.LicenseEnforcementService();
+                if (licenseService.IsSystemLocked())
                 {
-                    Content = new Ticketfy.Views.LicenseLockedView { DataContext = new Ticketfy.ViewModels.LicenseLockedViewModel() },
-                    SystemDecorations = Avalonia.Controls.SystemDecorations.None,
-                    WindowState = Avalonia.Controls.WindowState.Maximized,
-                    Topmost = true
-                };
+                    Log.Warning("System locked: Kill Switch activated due to invalid or missing license.jwt.");
+                    var lockWindow = new Avalonia.Controls.Window
+                    {
+                        Content = new Ticketfy.Views.LicenseLockedView { DataContext = new Ticketfy.ViewModels.LicenseLockedViewModel() },
+                        SystemDecorations = Avalonia.Controls.SystemDecorations.None,
+                        WindowState = Avalonia.Controls.WindowState.Maximized,
+                        Topmost = true
+                    };
+                    desktop.MainWindow = lockWindow;
+                    lockWindow.Show();
+                    splash.Close();
+                }
+                else
+                {
+                    Log.Information("License validated successfully. Starting normal operation...");
+                    var deviceReg = new Ticketfy.Services.Implementations.DeviceRegistrationService();
+                    _ = deviceReg.PingServerAsync(new Ticketfy.Services.Implementations.BusinessProfile { BusinessName = businessName, Email = contactEmail });
+
+                    var mainWin = new MainWindow
+                    {
+                        DataContext = new MainWindowViewModel()
+                    };
+
+                    desktop.MainWindow = mainWin;
+                    mainWin.Show();
+                    splash.Close();
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Log.Information("License validated successfully. Starting normal operation...");
-                var deviceReg = new Ticketfy.Services.Implementations.DeviceRegistrationService();
-                _ = deviceReg.PingServerAsync(new Ticketfy.Services.Implementations.BusinessProfile { BusinessName = businessName, Email = contactEmail });
+                Log.Fatal(ex, "Failed to initialize application services during boot");
+                LogFatalError(ex, "AppBootstrapper Failed");
 
-                var splash = new SplashWindow();
-                desktop.MainWindow = splash;
-                splash.Show();
-
-                await System.Threading.Tasks.Task.Delay(3000);
-
-                var mainWin = new MainWindow
+                var errorWindow = new Avalonia.Controls.Window
                 {
-                    DataContext = new MainWindowViewModel()
+                    Title = "TICKETFY! — Error de Inicio",
+                    Width = 550,
+                    Height = 320,
+                    WindowStartupLocation = Avalonia.Controls.WindowStartupLocation.CenterScreen,
+                    Content = new Avalonia.Controls.TextBlock
+                    {
+                        Text = $"Error crítico al inicializar la base de datos o servicios de TICKETFY!:\n\n{ex.Message}\n\nDetalles registrados en %LocalAppData%\\ticketfy\\Logs\\crash_log.txt",
+                        Margin = new Avalonia.Thickness(25),
+                        TextWrapping = Avalonia.Media.TextWrapping.Wrap,
+                        FontSize = 14
+                    }
                 };
-
-                desktop.MainWindow = mainWin;
-                mainWin.Show();
+                desktop.MainWindow = errorWindow;
+                errorWindow.Show();
                 splash.Close();
             }
         }

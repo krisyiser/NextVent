@@ -45,19 +45,24 @@ public sealed class ShiftService : IShiftService
         var entity = await _ctx.Shifts.FindAsync(shiftId)
             ?? throw new InvalidOperationException($"Shift {shiftId} not found");
 
-        var cashSales = await _ctx.Sales
-            .AsNoTracking()
-            .Where(s => s.PaymentMethod == "Cash"
-                     && s.IsCancelled == 0
-                     && string.Compare(s.Date, entity.StartTime) >= 0)
-            .SumAsync(s => s.Total);
+        DateTime? shiftStart = DateTime.TryParse(entity.StartTime, out var parsedStart) ? parsedStart : null;
 
-        var creditSales = await _ctx.Sales
+        var allSales = await _ctx.Sales
             .AsNoTracking()
-            .Where(s => s.PaymentMethod == "Credit"
-                     && s.IsCancelled == 0
-                     && string.Compare(s.Date, entity.StartTime) >= 0)
-            .SumAsync(s => s.Total);
+            .Where(s => s.IsCancelled == 0)
+            .ToListAsync();
+
+        var validSales = allSales
+            .Where(s => s.Date.IsInDateRange(shiftStart, null))
+            .ToList();
+
+        var cashSales = validSales
+            .Where(s => s.PaymentMethod != null && (s.PaymentMethod.Equals("Cash", StringComparison.OrdinalIgnoreCase) || s.PaymentMethod.Equals("Efectivo", StringComparison.OrdinalIgnoreCase)))
+            .Sum(s => s.Total);
+
+        var creditSales = validSales
+            .Where(s => s.IsCredit == 1 || (s.PaymentMethod != null && (s.PaymentMethod.Equals("Credit", StringComparison.OrdinalIgnoreCase) || s.PaymentMethod.Equals("Credito", StringComparison.OrdinalIgnoreCase) || s.PaymentMethod.Equals("Crédito", StringComparison.OrdinalIgnoreCase))))
+            .Sum(s => s.Total);
 
         var customerAbonosCash = await _ctx.ShiftMovements
             .AsNoTracking()

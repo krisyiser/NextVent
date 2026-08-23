@@ -264,17 +264,17 @@ public partial class SaleService : ISaleService
 
     public async Task<List<SaleDto>> GetSalesByDateRangeAsync(DateTime start, DateTime end)
     {
-        string startStr = start.ToString("o");
-        string endStr = end.ToString("o");
-
         using var _ctx = await _contextFactory.CreateDbContextAsync();
-        var entities = await _ctx.Sales
+        var allEntities = await _ctx.Sales
             .AsNoTracking()
-            .Where(s => string.Compare(s.Date, startStr) >= 0 && string.Compare(s.Date, endStr) <= 0)
             .OrderByDescending(s => s.Date)
             .ToListAsync();
 
-        return entities.Select(MapToDto).ToList();
+        var filtered = allEntities
+            .Where(s => s.Date.IsInDateRange(start, end))
+            .ToList();
+
+        return filtered.Select(MapToDto).ToList();
     }
 
     /// <summary>
@@ -285,23 +285,14 @@ public partial class SaleService : ISaleService
         try
         {
             using var _ctx = await _contextFactory.CreateDbContextAsync();
-            var salesQuery = _ctx.Sales
+            var allSales = await _ctx.Sales
                 .AsNoTracking()
-                .Where(s => s.IsCancelled == 0);
+                .Where(s => s.IsCancelled == 0)
+                .ToListAsync();
 
-            if (startDate.HasValue)
-            {
-                string startIso = startDate.Value.ToString("o");
-                salesQuery = salesQuery.Where(s => string.Compare(s.Date, startIso) >= 0);
-            }
-
-            if (endDate.HasValue)
-            {
-                string endIso = endDate.Value.ToString("o");
-                salesQuery = salesQuery.Where(s => string.Compare(s.Date, endIso) <= 0);
-            }
-
-            var validSales = await salesQuery.ToListAsync();
+            var validSales = allSales
+                .Where(s => s.Date.IsInDateRange(startDate, endDate))
+                .ToList();
             var users = await _ctx.Users.AsNoTracking().ToListAsync();
             var report = new List<CashierPerformanceDto>();
 

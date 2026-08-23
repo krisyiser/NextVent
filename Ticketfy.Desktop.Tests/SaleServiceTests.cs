@@ -314,12 +314,12 @@ public sealed class SaleServiceTests : IDisposable
         var savedB = savedItems.First(i => i.ProductId == "PROD-B");
 
         Assert.Equal(20.0, savedA.ProratedGlobalDiscountAmount);
-        Assert.Equal(12.80, savedA.TaxAmount);
-        Assert.Equal(92.80, savedA.TotalPrice);
+        Assert.Equal(11.03, savedA.TaxAmount);
+        Assert.Equal(80.0, savedA.TotalPrice);
 
         Assert.Equal(10.0, savedB.ProratedGlobalDiscountAmount);
-        Assert.Equal(6.40, savedB.TaxAmount);
-        Assert.Equal(46.40, savedB.TotalPrice);
+        Assert.Equal(5.52, savedB.TaxAmount);
+        Assert.Equal(40.0, savedB.TotalPrice);
     }
 
     [Fact]

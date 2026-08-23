@@ -11,6 +11,6 @@ public interface IExpenseService
     Task<List<ExpenseDto>> GetAllAsync();
     Task<ExpenseDto> CreateAsync(ExpenseDto dto);
     Task<bool> DeleteAsync(string id);
-    Task<FinancialSummaryDto> GetFinancialSummaryAsync();
+    Task<FinancialSummaryDto> GetFinancialSummaryAsync(DateTime? startDate = null, DateTime? endDate = null);
     Task<NetProfitReportModel> CalculateTrueNetProfitAsync(DateTime startDate, DateTime endDate);
 }

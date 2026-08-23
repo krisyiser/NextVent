@@ -35,6 +35,8 @@ public partial class ExpensesViewModel : ObservableObject
     // Cash-Flow Metrics (Decimal representation)
     [ObservableProperty] private decimal _fondoInicial;
     [ObservableProperty] private decimal _ingresos;
+    [ObservableProperty] private decimal _pagosConTarjeta;
+    [ObservableProperty] private decimal _costoDeVentas;
     [ObservableProperty] private decimal _egresos;
     [ObservableProperty] private decimal _totalEnCaja;
     [ObservableProperty] private decimal _reinversion;
@@ -59,8 +61,18 @@ public partial class ExpensesViewModel : ObservableObject
         try
         {
             var list = await _expenseService.GetAllAsync();
-            var summary = await _expenseService.GetFinancialSummaryAsync();
             var activeShift = await _shiftService.GetActiveAsync();
+
+            DateTime? shiftStart = null;
+            if (activeShift != null && !string.IsNullOrWhiteSpace(activeShift.StartTime))
+            {
+                if (DateTime.TryParse(activeShift.StartTime, out var parsedStart))
+                {
+                    shiftStart = parsedStart;
+                }
+            }
+
+            var summary = await _expenseService.GetFinancialSummaryAsync(shiftStart, DateTime.Now);
             decimal openingBalance = activeShift != null ? (decimal)activeShift.OpeningBalance : 0m;
 
             await Dispatcher.UIThread.InvokeAsync(() =>
@@ -76,10 +88,18 @@ public partial class ExpensesViewModel : ObservableObject
 
                 FondoInicial = openingBalance;
                 Ingresos = (decimal)summary.TotalRevenue;
+                PagosConTarjeta = (decimal)summary.CardRevenue;
+                CostoDeVentas = (decimal)summary.TotalCostOfGoodsSold;
                 Egresos = (decimal)summary.TotalExpenses;
-                TotalEnCaja = FondoInicial + Ingresos - Egresos;
-                Reinversion = (decimal)summary.TotalCostOfGoodsSold;
-                UtilidadNeta = Ingresos - Egresos - Reinversion;
+                
+                // Total en Caja (Fondo Inicial + Ventas en Efectivo - Gastos en Efectivo)
+                decimal cashRev = (decimal)summary.CashRevenue;
+                decimal cashExp = (decimal)summary.CashExpenses;
+                TotalEnCaja = FondoInicial + cashRev - cashExp;
+
+                Reinversion = CostoDeVentas;
+                // Utilidad Neta Real = Ventas - Costo de Ventas (COGS) - Gastos Operativos
+                UtilidadNeta = Ingresos - CostoDeVentas - Egresos;
             });
         }
         catch (Exception ex)

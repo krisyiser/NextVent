@@ -1,7 +1,9 @@
 using Avalonia;
 using Serilog;
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Threading;
 using Velopack;
 
@@ -9,8 +11,28 @@ namespace Ticketfy;
 
 internal static class Program
 {
-    private const string MutexName = "Global\\Ticketfy_POS_SecureMutex_V1";
-    private static Mutex? _mutex;
+    [DllImport("user32.dll")]
+    private static extern bool SetForegroundWindow(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    private static extern bool ShowWindow(IntPtr hWnd, int nCmdShow);
+
+    [DllImport("ntdll.dll")]
+    private static extern int NtQueryInformationProcess(
+        IntPtr processHandle, int processInformationClass, ref PROCESS_BASIC_INFORMATION processInformation, int processInformationLength, out int returnLength);
+
+    [StructLayout(LayoutKind.Sequential)]
+    private struct PROCESS_BASIC_INFORMATION
+    {
+        public IntPtr ExitStatus;
+        public IntPtr PebBaseAddress;
+        public IntPtr AffinityMask;
+        public IntPtr BasePriority;
+        public IntPtr UniqueProcessId;
+        public IntPtr InheritedFromUniqueProcessId;
+    }
+
+    private const int SW_RESTORE = 9;
 
     [STAThread]
     public static void Main(string[] args)
@@ -21,69 +43,142 @@ internal static class Program
         // 1. Initialize Velopack (crucial for shortcuts, uninstalls, and OTA background updates)
         VelopackApp.Build().Run();
 
-        _mutex = new Mutex(true, MutexName, out bool createdNew);
-
-        if (!createdNew)
+        // 2. Ensure single responsive instance: kill ghost/hung processes (0 UI window) or bring active UI window to front
+        if (!EnsureSingleResponsiveInstance())
         {
-            try
-            {
-                var currentProc = System.Diagnostics.Process.GetCurrentProcess();
-                foreach (var p in System.Diagnostics.Process.GetProcessesByName(currentProc.ProcessName))
-                {
-                    if (p.Id != currentProc.Id)
-                    {
-                        p.Kill();
-                    }
-                }
-            }
-            catch { }
+            return;
         }
 
         try
         {
+            var logDir = Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "ticketfy", "Logs");
+            Directory.CreateDirectory(logDir);
+
+            Log.Logger = new LoggerConfiguration()
+                .MinimumLevel.Information()
+                .WriteTo.File(
+                    Path.Combine(logDir, "ticketfy_.log"),
+                    rollingInterval: RollingInterval.Day,
+                    retainedFileCountLimit: 30,
+                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
+                .CreateLogger();
+
             var dsn = Environment.GetEnvironmentVariable("TICKETFY_SENTRY_DSN");
-            
-            using (SentrySdk.Init(o =>
+            if (!string.IsNullOrWhiteSpace(dsn))
             {
-                o.Dsn = !string.IsNullOrWhiteSpace(dsn) ? dsn : "https://example@sentry.io/example";
-                o.TracesSampleRate = 1.0;
-                o.AutoSessionTracking = true;
-            }))
-            {
-                var logDir = Path.Combine(
-                    Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                    "ticketfy", "Logs");
-                Directory.CreateDirectory(logDir);
-
-                Log.Logger = new LoggerConfiguration()
-                    .MinimumLevel.Information()
-                    .WriteTo.File(
-                        Path.Combine(logDir, "ticketfy_.log"),
-                        rollingInterval: RollingInterval.Day,
-                        retainedFileCountLimit: 30,
-                        outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff} [{Level:u3}] {Message:lj}{NewLine}{Exception}")
-                    .CreateLogger();
-
-                try
+                using (SentrySdk.Init(o =>
                 {
-                    BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
-                }
-                catch (Exception ex)
+                    o.Dsn = dsn;
+                    o.TracesSampleRate = 1.0;
+                    o.AutoSessionTracking = true;
+                }))
                 {
-                    if (ex.GetType().Name != "TaskCanceledException")
-                        Log.Fatal(ex, "TICKETFY! crashed fatally");
-                    throw;
-                }
-                finally
-                {
-                    Log.CloseAndFlush();
+                    RunAvaloniaApp(args);
                 }
             }
+            else
+            {
+                RunAvaloniaApp(args);
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Fatal(ex, "TICKETFY! crashed fatally during initialization");
         }
         finally
         {
-            _mutex.ReleaseMutex();
-            _mutex.Dispose();
+            Log.CloseAndFlush();
+        }
+    }
+
+    private static int GetParentProcessId(IntPtr handle)
+    {
+        try
+        {
+            var pbi = new PROCESS_BASIC_INFORMATION();
+            int status = NtQueryInformationProcess(handle, 0, ref pbi, Marshal.SizeOf(pbi), out _);
+            if (status == 0)
+            {
+                return pbi.InheritedFromUniqueProcessId.ToInt32();
+            }
+        }
+        catch { }
+        return -1;
+    }
+
+    private static bool EnsureSingleResponsiveInstance()
+    {
+        try
+        {
+            var currentProc = Process.GetCurrentProcess();
+
+            // NEVER enforce process killing if running from Setup, Velopack, or installer executables
+            if (currentProc.ProcessName.Contains("Setup", StringComparison.OrdinalIgnoreCase) ||
+                currentProc.ProcessName.Contains("vpk", StringComparison.OrdinalIgnoreCase) ||
+                currentProc.ProcessName.Contains("Update", StringComparison.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            int parentPid = GetParentProcessId(currentProc.Handle);
+
+            // ONLY target processes named strictly "Ticketfy.Desktop"
+            var existingProcesses = Process.GetProcessesByName("Ticketfy.Desktop");
+
+            foreach (var p in existingProcesses)
+            {
+                // Skip self and parent process
+                if (p.Id == currentProc.Id || (parentPid > 0 && p.Id == parentPid)) continue;
+
+                try
+                {
+                    string pName = p.ProcessName;
+                    if (pName.Contains("Setup", StringComparison.OrdinalIgnoreCase) ||
+                        pName.Contains("Update", StringComparison.OrdinalIgnoreCase) ||
+                        pName.Contains("vpk", StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    // Check if existing process has an active UI main window
+                    if (p.MainWindowHandle != IntPtr.Zero)
+                    {
+                        ShowWindow(p.MainWindowHandle, SW_RESTORE);
+                        SetForegroundWindow(p.MainWindowHandle);
+                        return false; // Exit current duplicate instance cleanly
+                    }
+                    else
+                    {
+                        // Ghost process without UI window -> kill it so new instance can run
+                        p.Kill();
+                    }
+                }
+                catch
+                {
+                    // Ignore permission / already exited exceptions
+                }
+            }
+        }
+        catch
+        {
+            // Fallback: continue startup
+        }
+        return true;
+    }
+
+    private static void RunAvaloniaApp(string[] args)
+    {
+        try
+        {
+            BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+        }
+        catch (Exception ex)
+        {
+            if (ex.GetType().Name != "TaskCanceledException")
+                Log.Fatal(ex, "TICKETFY! Avalonia runtime crashed");
+            throw;
         }
     }
 

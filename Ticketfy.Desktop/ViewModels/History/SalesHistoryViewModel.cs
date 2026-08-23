@@ -50,10 +50,7 @@ public partial class SalesHistoryViewModel : ObservableObject
             DateTime queryStart = StartDate.Value.Date;
             DateTime queryEnd = EndDate.Value.Date.AddDays(1).AddTicks(-1);
 
-            DateTime utcStart = queryStart.ToBusinessUtcTime();
-            DateTime utcEnd = queryEnd.ToBusinessUtcTime();
-
-            var salesList = await _saleService.GetSalesByDateRangeAsync(utcStart, utcEnd);
+            var salesList = await _saleService.GetSalesByDateRangeAsync(queryStart, queryEnd);
 
             await Dispatcher.UIThread.InvokeAsync(() =>
             {

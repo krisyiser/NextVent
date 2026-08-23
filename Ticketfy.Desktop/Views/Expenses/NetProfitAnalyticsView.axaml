@@ -4,46 +4,62 @@
              x:Class="Ticketfy.Views.Expenses.NetProfitAnalyticsView"
              x:DataType="vm:ExpensesViewModel">
 
-    <!-- Financial Metrics Cards (Fondo Inicial, Ingresos, Egresos, Total en Caja, Utilidad Neta) -->
-    <UniformGrid x:Name="FinancialBalanceSection" Columns="5">
+    <!-- Financial Metrics Cards (Fondo Inicial, Ingresos, Pagos con Tarjeta, Egresos, Total en Caja, Costo de Ventas, Utilidad Neta) -->
+    <UniformGrid x:Name="FinancialBalanceSection" Columns="7">
         
         <!-- 1. FONDO INICIAL (APERTURA) -->
-        <Border Margin="0,0,3,0" Padding="12" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
+        <Border Margin="0,0,2,0" Padding="10" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
             <StackPanel Spacing="4">
-                <TextBlock Text="Fondo Inicial (Apertura)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" />
-                <TextBlock Text="{Binding FondoInicial, StringFormat='${0:N2}'}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                <TextBlock Text="Fondo Inicial (Apertura)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" ToolTip.Tip="Monto con el que se abrió la caja en el turno activo" />
+                <TextBlock Text="{Binding FondoInicial, StringFormat='${0:N2}'}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
             </StackPanel>
         </Border>
 
         <!-- 2. INGRESOS (VENTAS) -->
-        <Border Margin="3,0" Padding="12" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
+        <Border Margin="2,0" Padding="10" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
             <StackPanel Spacing="4">
-                <TextBlock Text="Ingresos (Ventas)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" />
-                <TextBlock Text="{Binding Ingresos, StringFormat='${0:N2}'}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource AccentSuccessBrush}" />
+                <TextBlock Text="Ingresos (Ventas)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" ToolTip.Tip="Total bruto de ventas del turno activo (Efectivo + Tarjetas)" />
+                <TextBlock Text="{Binding Ingresos, StringFormat='${0:N2}'}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource AccentSuccessBrush}" />
             </StackPanel>
         </Border>
 
-        <!-- 3. EGRESOS (GASTOS) -->
-        <Border Margin="3,0" Padding="12" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
+        <!-- 3. PAGOS CON TARJETA / TRANSF. (NUEVO CAMPO ESPECIAL) -->
+        <Border Margin="2,0" Padding="10" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
             <StackPanel Spacing="4">
-                <TextBlock Text="Egresos (Gastos)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" />
-                <TextBlock Text="{Binding Egresos, StringFormat='${0:N2}'}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource AccentDangerBrush}" />
+                <TextBlock Text="Pagos con Tarjeta / Transf." FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" ToolTip.Tip="Ventas cobradas con Tarjeta, Débito, Crédito o Transferencias" />
+                <TextBlock Text="{Binding PagosConTarjeta, StringFormat='${0:N2}'}" FontSize="15" FontWeight="Bold" Foreground="#3B82F6" />
             </StackPanel>
         </Border>
 
-        <!-- 4. TOTAL EN CAJA FÍSICO -->
-        <Border Margin="3,0" Padding="12" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="2" CornerRadius="{DynamicResource AppCornerRadius}">
+        <!-- 4. EGRESOS (GASTOS) -->
+        <Border Margin="2,0" Padding="10" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
             <StackPanel Spacing="4">
-                <TextBlock Text="Total en Caja Físico" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                <TextBlock Text="{Binding TotalEnCaja, StringFormat='${0:N2}'}" FontSize="16" FontWeight="ExtraBold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                <TextBlock Text="Egresos (Gastos)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" ToolTip.Tip="Gastos operativos registrados en el turno" />
+                <TextBlock Text="{Binding Egresos, StringFormat='${0:N2}'}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource AccentDangerBrush}" />
             </StackPanel>
         </Border>
 
-        <!-- 5. UTILIDAD NETA (GANANCIA) -->
-        <Border Margin="3,0,0,0" Padding="12" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{Binding UtilidadNetaColor}" BorderThickness="2" CornerRadius="{DynamicResource AppCornerRadius}">
+        <!-- 5. TOTAL EN CAJA FÍSICO -->
+        <Border Margin="2,0" Padding="10" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="2" CornerRadius="{DynamicResource AppCornerRadius}">
             <StackPanel Spacing="4">
-                <TextBlock Text="Utilidad Neta (Ganancia)" FontSize="11" FontWeight="Bold" Foreground="{Binding UtilidadNetaColor}" />
-                <TextBlock Text="{Binding UtilidadNeta, StringFormat='${0:N2}'}" FontSize="16" FontWeight="Bold" Foreground="{Binding UtilidadNetaColor}" />
+                <TextBlock Text="Total en Caja Físico" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" ToolTip.Tip="Fondo Inicial + Ventas Efectivo - Gastos Efectivo" />
+                <TextBlock Text="{Binding TotalEnCaja, StringFormat='${0:N2}'}" FontSize="15" FontWeight="ExtraBold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+            </StackPanel>
+        </Border>
+
+        <!-- 6. COSTO DE VENTAS (MERCANCÍA) -->
+        <Border Margin="2,0" Padding="10" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
+            <StackPanel Spacing="4">
+                <TextBlock Text="Costo de Ventas" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" ToolTip.Tip="Costo de inversión/compra de los productos vendidos (COGS)" />
+                <TextBlock Text="{Binding CostoDeVentas, StringFormat='${0:N2}'}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" />
+            </StackPanel>
+        </Border>
+
+        <!-- 7. UTILIDAD NETA (GANANCIA) -->
+        <Border Margin="2,0,0,0" Padding="10" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{Binding UtilidadNetaColor}" BorderThickness="2" CornerRadius="{DynamicResource AppCornerRadius}">
+            <StackPanel Spacing="4">
+                <TextBlock Text="Utilidad Neta (Ganancia)" FontSize="11" FontWeight="Bold" Foreground="{Binding UtilidadNetaColor}" ToolTip.Tip="Ventas - Costo de Productos - Gastos Operativos" />
+                <TextBlock Text="{Binding UtilidadNeta, StringFormat='${0:N2}'}" FontSize="15" FontWeight="Bold" Foreground="{Binding UtilidadNetaColor}" />
             </StackPanel>
         </Border>
     </UniformGrid>

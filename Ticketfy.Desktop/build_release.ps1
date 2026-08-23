@@ -30,18 +30,110 @@ if ($LASTEXITCODE -ne 0) {
     exit $LASTEXITCODE
 }
 
-# 3. Empaquetado Velopack
-Write-Host "Empaquetando con Velopack (x64 y x86)..." -ForegroundColor Cyan
-vpk pack -u Ticketfy.Desktop -v $Version -p $PublishDir64 -o "$ReleaseDir\x64" -e Ticketfy.Desktop.exe --packTitle "Ticketfy! (64-bit)"
-vpk pack -u Ticketfy.Desktop -v $Version -p $PublishDir86 -o "$ReleaseDir\x86" -e Ticketfy.Desktop.exe --packTitle "Ticketfy! (32-bit)"
+# 3. Purga estricta de instaladores antiguos para garantizar congruencia absoluta de versión
+Write-Host "Deteniendo procesos que puedan bloquear los archivos de release..." -ForegroundColor Cyan
+Get-Process -Name "Ticketfy.Desktop", "vpk" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
+Start-Sleep -Milliseconds 500
 
-if (Test-Path "$ReleaseDir\x64\Ticketfy.Desktop-win-Setup.exe") {
-    Copy-Item -Path "$ReleaseDir\x64\Ticketfy.Desktop-win-Setup.exe" -Destination "$ReleaseDir\Ticketfy-Setup-v$Version-x64.exe" -Force
-    Copy-Item -Path "$ReleaseDir\x64\Ticketfy.Desktop-win-Setup.exe" -Destination "$ReleaseDir\Ticketfy-Setup-v$Version.exe" -Force
+Write-Host "Limpiando ejecutables e instaladores previos en Output\Releases..." -ForegroundColor Cyan
+Remove-Item -Path "$ReleaseDir\*.exe" -Force -ErrorAction SilentlyContinue
+Remove-Item -Path "$ReleaseDir\x64\*.exe" -Force -ErrorAction SilentlyContinue
+Remove-Item -Path "$ReleaseDir\x86\*.exe" -Force -ErrorAction SilentlyContinue
+
+# Validar versión del binario compilado
+$BuiltVersion = (Get-Item "$PublishDir64\Ticketfy.Desktop.exe").VersionInfo.FileVersion
+Write-Host "Verificando versión de ensamblado compilado: $BuiltVersion (Esperado: $Version.0)" -ForegroundColor Cyan
+
+# 4. Empaquetado Velopack en directorios temporales aislados
+Write-Host "Empaquetando con Velopack en entorno aislado (x64 y x86)..." -ForegroundColor Cyan
+$TempPack64 = Join-Path $ReleaseDir "temp_x64_$Version"
+$TempPack86 = Join-Path $ReleaseDir "temp_x86_$Version"
+
+Remove-Item -Recurse -Force $TempPack64 -ErrorAction SilentlyContinue
+Remove-Item -Recurse -Force $TempPack86 -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Path $TempPack64 -Force | Out-Null
+New-Item -ItemType Directory -Path $TempPack86 -Force | Out-Null
+
+vpk pack -u Ticketfy.Desktop -v $Version -p $PublishDir64 -o $TempPack64 -e Ticketfy.Desktop.exe --packTitle "Ticketfy! (64-bit)"
+if ($LASTEXITCODE -ne 0 -or !(Test-Path "$TempPack64\Ticketfy.Desktop-win-Setup.exe")) {
+    Write-Host "ERROR CRÍTICO: Velopack pack x64 falló en el entorno aislado. Abortando." -ForegroundColor Red
+    exit 1
 }
-if (Test-Path "$ReleaseDir\x86\Ticketfy.Desktop-win-Setup.exe") {
-    Copy-Item -Path "$ReleaseDir\x86\Ticketfy.Desktop-win-Setup.exe" -Destination "$ReleaseDir\Ticketfy-Setup-v$Version-x86.exe" -Force
+
+vpk pack -u Ticketfy.Desktop -v $Version -p $PublishDir86 -o $TempPack86 -e Ticketfy.Desktop.exe --packTitle "Ticketfy! (32-bit)"
+if ($LASTEXITCODE -ne 0 -or !(Test-Path "$TempPack86\Ticketfy.Desktop-win-Setup.exe")) {
+    Write-Host "ERROR CRÍTICO: Velopack pack x86 falló en el entorno aislado. Abortando." -ForegroundColor Red
+    exit 1
 }
+
+# Copiar artefactos verificados a los directorios finales de release
+New-Item -ItemType Directory -Path "$ReleaseDir\x64" -Force | Out-Null
+New-Item -ItemType Directory -Path "$ReleaseDir\x86" -Force | Out-Null
+
+Copy-Item -Path "$TempPack64\*" -Destination "$ReleaseDir\x64\" -Recurse -Force
+Copy-Item -Path "$TempPack86\*" -Destination "$ReleaseDir\x86\" -Recurse -Force
+
+Write-Host "Compilando instalador nativo industrial de alta compatibilidad con Inno Setup (ISCC.exe)..." -ForegroundColor Cyan
+$IsccPaths = @(
+    "C:\Users\YERSI\AppData\Local\Programs\Inno Setup 6\ISCC.exe",
+    "C:\Program Files (x86)\Inno Setup 6\ISCC.exe",
+    "C:\Program Files\Inno Setup 6\ISCC.exe"
+)
+
+$IsccExe = $null
+foreach ($p in $IsccPaths) {
+    if (Test-Path $p) {
+        $IsccExe = $p
+        break
+    }
+}
+
+if ($IsccExe) {
+    $issFile = Join-Path $PSScriptRoot "ticketfy_setup.iss"
+    if (Test-Path $issFile) {
+        $issContent = Get-Content $issFile -Raw
+        $issContent = $issContent -replace '#define MyAppVersion "[^"]+"', "#define MyAppVersion `"$Version`""
+        $issContent = $issContent -replace 'OutputBaseFilename=Ticketfy-Setup-v[^\r\n]+', "OutputBaseFilename=Ticketfy-Setup-v$Version-x64"
+        Set-Content -Path $issFile -Value $issContent -Encoding UTF8
+
+        & $IsccExe $issFile
+        if ($LASTEXITCODE -eq 0 -and (Test-Path "$ReleaseDir\Ticketfy-Setup-v$Version-x64.exe")) {
+            Copy-Item -Path "$ReleaseDir\Ticketfy-Setup-v$Version-x64.exe" -Destination "$ReleaseDir\Ticketfy-Setup-v$Version.exe" -Force
+            
+            # Firma Digital Authenticode con Certificado Studio Kuali / Jóvenes Creadores MX
+            $SignTool = "C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\signtool.exe"
+            $PfxPath = Join-Path $PSScriptRoot "TicketfyCodeSigning.pfx"
+            if ((Test-Path $SignTool) -and (Test-Path $PfxPath)) {
+                Write-Host "Firmando digitalmente el instalador con certificado Authenticode (VALCORE)..." -ForegroundColor Cyan
+                & $SignTool sign /f $PfxPath /p "Valcore2026!" /tr "http://timestamp.digicert.com" /td sha256 /fd sha256 "$ReleaseDir\Ticketfy-Setup-v$Version-x64.exe" | Out-Null
+                & $SignTool sign /f $PfxPath /p "Valcore2026!" /tr "http://timestamp.digicert.com" /td sha256 /fd sha256 "$ReleaseDir\Ticketfy-Setup-v$Version.exe" | Out-Null
+                Write-Host "¡Instalador firmado digitalmente con éxito!" -ForegroundColor Green
+            }
+
+            # Crear paquete ZIP de alta reputación anti-bloqueo Chrome Safe Browsing
+            $ZipSetupPath = "$ReleaseDir\Ticketfy-Instalador-v$Version-x64.zip"
+            if (Test-Path $ZipSetupPath) { Remove-Item $ZipSetupPath -Force }
+            Compress-Archive -Path "$ReleaseDir\Ticketfy-Setup-v$Version-x64.exe" -DestinationPath $ZipSetupPath -Force
+            Write-Host "¡Paquete ZIP de instalación anti-bloqueo Chrome generado exitosamente!" -ForegroundColor Green
+
+            Write-Host "¡Instalador Inno Setup v$Version compilado y verificado exitosamente!" -ForegroundColor Green
+        }
+    }
+} else {
+    Write-Host "Inno Setup no encontrado, usando fallback Velopack." -ForegroundColor Yellow
+    Copy-Item -Path "$TempPack64\Ticketfy.Desktop-win-Setup.exe" -Destination "$ReleaseDir\Ticketfy-Setup-v$Version-x64.exe" -Force
+    Copy-Item -Path "$TempPack64\Ticketfy.Desktop-win-Setup.exe" -Destination "$ReleaseDir\Ticketfy-Setup-v$Version.exe" -Force
+}
+
+if (Test-Path "$TempPack86\Ticketfy.Desktop-win-Setup.exe") {
+    Copy-Item -Path "$TempPack86\Ticketfy.Desktop-win-Setup.exe" -Destination "$ReleaseDir\Ticketfy-Setup-v$Version-x86.exe" -Force
+}
+if (Test-Path "$TempPack64\Ticketfy.Desktop-win-Portable.zip") {
+    Copy-Item -Path "$TempPack64\Ticketfy.Desktop-win-Portable.zip" -Destination "$ReleaseDir\Ticketfy-Portable-v$Version-x64.zip" -Force
+}
+
+Remove-Item -Recurse -Force $TempPack64 -ErrorAction SilentlyContinue
+Remove-Item -Recurse -Force $TempPack86 -ErrorAction SilentlyContinue
 
 # 4. Generar Manifiesto de Descargas para valcore.cloud
 Write-Host "Generando manifiesto web de descargas releases.json para valcore.cloud..." -ForegroundColor Cyan
@@ -52,11 +144,12 @@ $ReleasesJson = @"
   "downloads": {
     "x64": "Ticketfy-Setup-v$Version-x64.exe",
     "x86": "Ticketfy-Setup-v$Version-x86.exe",
-    "default": "Ticketfy-Setup-v$Version.exe"
+    "default": "Ticketfy-Setup-v$Version-x64.exe",
+    "portable": "Ticketfy-Portable-v$Version-x64.zip"
   }
 }
 "@
-Set-Content -Path "$ReleaseDir\releases.json" -Value $ReleasesJson -Encoding UTF8
+[System.IO.File]::WriteAllText("$ReleaseDir\releases.json", $ReleasesJson, (New-Object System.Text.UTF8Encoding($false)))
 
 # Copiar y actualizar scripts detectores web
 if (Test-Path "..\web") {
@@ -67,24 +160,6 @@ if (Test-Path "..\web") {
         Set-Content -Path "$ReleaseDir\valcore-download.js" -Value $jsContent -Encoding UTF8
     }
 }
-
-Write-Host "Forzando sincronización pull y push en Forgejo (https://git.valcore/yersi/ticketfy-releases.git)..." -ForegroundColor Cyan
-$CurrentLocation = Get-Location
-Set-Location -Path $ReleaseDir
-if (!(Test-Path ".git")) {
-    git init
-    git branch -M main
-    git remote add origin https://yersi:valcore1712-@git.valcore/yersi/ticketfy-releases.git
-}
-
-git config http.sslVerify false
-git fetch --all
-git reset --mixed origin/main
-git add .
-git commit -m "Force Release Sync v$Version"
-git push -u origin main --force
-
-Set-Location -Path $CurrentLocation
 
 # 5. Despliegue automático de contenedor web en servidor de producción (100.109.190.105)
 Write-Host "Sincronizando contenedor web de producción valcore.cloud..." -ForegroundColor Cyan

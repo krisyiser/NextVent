@@ -36,4 +36,5 @@ restore.py
 tmp/
 *.pem
 *.jwt
+*.pfx
 task.md

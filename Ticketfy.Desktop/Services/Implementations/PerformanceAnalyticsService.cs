@@ -38,12 +38,10 @@ public class PerformanceAnalyticsService : IPerformanceAnalyticsService
                 double totalHoursWorked = attendances.Sum(a => a.TotalWorkedHours);
 
                 // 2. COMPUTE GROSS SALES & TRANSACTION COUNT
-                var startIso = startDate.ToBusinessUtcTime().ToString("o");
-                var endIso = endDate.ToBusinessUtcTime().ToString("o");
-
-                var userSales = await _dbContext.Sales.AsNoTracking()
-                    .Where(s => string.Compare(s.Date, startIso) >= 0 && string.Compare(s.Date, endIso) <= 0)
-                    .ToListAsync();
+                var allSales = await _dbContext.Sales.AsNoTracking().ToListAsync();
+                var userSales = allSales
+                    .Where(s => s.Date.IsInDateRange(startDate, endDate))
+                    .ToList();
 
                 double totalSalesAmount = userSales.Sum(s => s.Total);
                 int totalTickets = userSales.Count;

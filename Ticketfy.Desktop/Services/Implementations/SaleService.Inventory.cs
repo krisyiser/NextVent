@@ -196,10 +196,10 @@ public partial class SaleService
                 }
             }
 
-            // TAX CALCULATION (16% IVA) MUST OCCUR AFTER ALL DISCOUNTS
-            decimal finalTaxableBase = lineSubtotal - proratedGlobalDiscount;
-            decimal taxAmount = Math.Round(finalTaxableBase * (decimal)Ticketfy.Core.Constants.AppConstants.DefaultIvaRate, 2);
-            decimal totalLineAmount = Math.Round(finalTaxableBase + taxAmount, 2);
+            decimal totalLineAmount = Math.Round(lineSubtotal - proratedGlobalDiscount, 2);
+            // TAX BREAKDOWN (16% IVA INCLUDED IN RETAIL PRICE)
+            decimal taxableBase = Math.Round(totalLineAmount / (1m + (decimal)Ticketfy.Core.Constants.AppConstants.DefaultIvaRate), 2);
+            decimal taxAmount = Math.Round(totalLineAmount - taxableBase, 2);
 
             result.Add(item with
             {

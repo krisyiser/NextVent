@@ -1,8 +1,19 @@
 import paramiko
 import os
 import sys
+import datetime
 
 sys.stdout.reconfigure(encoding='utf-8')
+
+def safe_put(sftp, local_path, remote_path):
+    try:
+        try:
+            sftp.remove(remote_path)
+        except IOError:
+            pass
+        sftp.put(local_path, remote_path)
+    except Exception as ex:
+        print(f"  -> Warning uploading {remote_path}: {ex}")
 
 def deploy_release(version):
     host = "100.109.190.105"
@@ -20,58 +31,48 @@ def deploy_release(version):
     if not os.path.exists(releases_dir):
         releases_dir = os.path.join(base_dir, "..", "Releases")
 
-    remote_worktree = "/opt/valcore/ticketfy-releases-worktree"
     remote_public = "/opt/valcore/valcore-site/public/downloads"
 
     print("[AUTO-DEPLOY] Uploading all Velopack release binaries and manifests via SFTP...")
 
     # Explicit x64 & x86 setups
-    x64_setup = os.path.join(releases_dir, "x64", "Ticketfy.Desktop-win-Setup.exe")
-    x86_setup = os.path.join(releases_dir, "x86", "Ticketfy.Desktop-win-Setup.exe")
-    root_setup = os.path.join(releases_dir, "Ticketfy.Desktop-win-Setup.exe")
+    x64_setup = os.path.join(releases_dir, f"Ticketfy-Setup-v{version}-x64.exe")
+    if not os.path.exists(x64_setup):
+        x64_setup = os.path.join(releases_dir, "x64", "Ticketfy.Desktop-win-Setup.exe")
+    if not os.path.exists(x64_setup):
+        x64_setup = os.path.join(releases_dir, "Ticketfy.Desktop-win-Setup.exe")
+
+    x86_setup = os.path.join(releases_dir, f"Ticketfy-Setup-v{version}-x86.exe")
+    if not os.path.exists(x86_setup):
+        x86_setup = os.path.join(releases_dir, "x86", "Ticketfy.Desktop-win-Setup.exe")
 
     if os.path.exists(x64_setup):
-        print(f"  -> Uploading x64 setup for v{version}...")
-        sftp.put(x64_setup, f"{remote_public}/Ticketfy-Setup-v{version}-x64.exe")
-        sftp.put(x64_setup, f"{remote_public}/Ticketfy-Setup-v{version}.exe")
-        sftp.put(x64_setup, f"{remote_public}/Ticketfy-Setup-Latest.exe")
-        sftp.put(x64_setup, f"{remote_worktree}/Ticketfy-Setup-v{version}-x64.exe")
-        sftp.put(x64_setup, f"{remote_worktree}/Ticketfy-Setup-v{version}.exe")
-        sftp.put(x64_setup, f"{remote_worktree}/Ticketfy-Setup-Latest.exe")
-    elif os.path.exists(root_setup):
-        print(f"  -> Uploading root setup for v{version}...")
-        sftp.put(root_setup, f"{remote_public}/Ticketfy-Setup-v{version}-x64.exe")
-        sftp.put(root_setup, f"{remote_public}/Ticketfy-Setup-v{version}.exe")
-        sftp.put(root_setup, f"{remote_public}/Ticketfy-Setup-Latest.exe")
-        sftp.put(root_setup, f"{remote_worktree}/Ticketfy-Setup-v{version}-x64.exe")
-        sftp.put(root_setup, f"{remote_worktree}/Ticketfy-Setup-v{version}.exe")
-        sftp.put(root_setup, f"{remote_worktree}/Ticketfy-Setup-Latest.exe")
+        print(f"  -> Uploading x64 setup for v{version} ({x64_setup})...")
+        safe_put(sftp, x64_setup, f"{remote_public}/Ticketfy-Setup-v{version}-x64.exe")
+        safe_put(sftp, x64_setup, f"{remote_public}/Ticketfy-Setup-v{version}.exe")
+        safe_put(sftp, x64_setup, f"{remote_public}/Ticketfy-Setup-Latest.exe")
 
     if os.path.exists(x86_setup):
-        print(f"  -> Uploading x86 setup for v{version}...")
-        sftp.put(x86_setup, f"{remote_public}/Ticketfy-Setup-v{version}-x86.exe")
-        sftp.put(x86_setup, f"{remote_worktree}/Ticketfy-Setup-v{version}-x86.exe")
+        print(f"  -> Uploading x86 setup for v{version} ({x86_setup})...")
+        safe_put(sftp, x86_setup, f"{remote_public}/Ticketfy-Setup-v{version}-x86.exe")
 
     # Upload all files recursively (ignoring .git metadata)
     if os.path.exists(releases_dir):
         for root, dirs, files in os.walk(releases_dir):
             dirs[:] = [d for d in dirs if d != '.git']
             for f in files:
-                if f.startswith('.git'):
+                if f.startswith('.git') or f == 'releases.json':
                     continue
                 local_file = os.path.join(root, f)
                 rel_path = os.path.relpath(local_file, releases_dir).replace("\\", "/")
                 remote_pub_file = f"{remote_public}/{rel_path}"
-                remote_wt_file = f"{remote_worktree}/{rel_path}"
 
                 rel_dir = os.path.dirname(rel_path)
                 if rel_dir and rel_dir != ".":
                     parts = rel_dir.split('/')
                     curr_pub = remote_public
-                    curr_wt = remote_worktree
                     for p in parts:
                         curr_pub += "/" + p
-                        curr_wt += "/" + p
                         try:
                             sftp.stat(curr_pub)
                         except IOError:
@@ -79,31 +80,29 @@ def deploy_release(version):
                                 sftp.mkdir(curr_pub)
                             except IOError:
                                 pass
-                        try:
-                            sftp.stat(curr_wt)
-                        except IOError:
-                            try:
-                                sftp.mkdir(curr_wt)
-                            except IOError:
-                                pass
 
-                try:
-                    sftp.put(local_file, remote_pub_file)
-                    sftp.put(local_file, remote_wt_file)
-                    print(f"  -> Uploaded {rel_path}")
+                safe_put(sftp, local_file, remote_pub_file)
+                print(f"  -> Uploaded {rel_path}")
 
-                    if f in ["RELEASES", "releases.json", "releases.win.json", "assets.win.json"] or f.endswith(".nupkg"):
-                        sftp.put(local_file, f"{remote_public}/{f}")
-                        sftp.put(local_file, f"{remote_worktree}/{f}")
-                except Exception as ex:
-                    print(f"  -> Warning uploading {rel_path}: {ex}")
+    # Ensure root downloads directory has the primary x64 Velopack manifests and nupkg packages
+    x64_releases_dir = os.path.join(releases_dir, "x64")
+    if os.path.exists(x64_releases_dir):
+        for f in os.listdir(x64_releases_dir):
+            if f in ["RELEASES", "releases.win.json", "assets.win.json"] or f.endswith(".nupkg"):
+                local_f = os.path.join(x64_releases_dir, f)
+                if os.path.exists(local_f):
+                    safe_put(sftp, local_f, f"{remote_public}/{f}")
+                    print(f"  -> Uploaded primary x64 file {f} to root downloads")
 
-    # Write releases.json
-    releases_json = f'{{\n  "version": "{version}",\n  "updated_at": "{os.popen("date /t").read().strip()}",\n  "downloads": {{\n    "x64": "/downloads/Ticketfy-Setup-v{version}-x64.exe",\n    "x86": "/downloads/Ticketfy-Setup-v{version}-x86.exe",\n    "default": "/downloads/Ticketfy-Setup-v{version}.exe"\n  }}\n}}'
-    with sftp.file(f"{remote_public}/releases.json", "w") as f:
+    # Write releases.json with current target version
+    releases_json = f'{{\n  "version": "{version}",\n  "updated_at": "{now_utc}",\n  "downloads": {{\n    "x64": "/downloads/Ticketfy-Instalador-v{version}-x64.zip?v={version}",\n    "exe": "/downloads/Ticketfy-Setup-v{version}-x64.exe?v={version}",\n    "x86": "/downloads/Ticketfy-Setup-v{version}-x86.exe?v={version}",\n    "default": "/downloads/Ticketfy-Instalador-v{version}-x64.zip?v={version}"\n  }}\n}}'
+    
+    local_releases_json_path = os.path.join(releases_dir, "releases.json")
+    with open(local_releases_json_path, "w", encoding="utf-8") as f:
         f.write(releases_json)
-    with sftp.file(f"{remote_worktree}/releases.json", "w") as f:
-        f.write(releases_json)
+
+    safe_put(sftp, local_releases_json_path, f"{remote_public}/releases.json")
+    print(f"  -> Successfully updated {remote_public}/releases.json to version {version}")
 
     sftp.close()
 

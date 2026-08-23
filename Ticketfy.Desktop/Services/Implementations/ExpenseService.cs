@@ -104,18 +104,60 @@ public class ExpenseService : IExpenseService
         return false;
     }
 
-    public async Task<FinancialSummaryDto> GetFinancialSummaryAsync()
+    public async Task<FinancialSummaryDto> GetFinancialSummaryAsync(DateTime? startDate = null, DateTime? endDate = null)
     {
-        var sales = await _context.Sales.Where(s => s.IsCancelled == 0).ToListAsync();
-        var expenses = await _context.Expenses.ToListAsync();
+        var salesList = await _context.Sales.AsNoTracking().Where(s => s.IsCancelled == 0).ToListAsync();
+        var expensesList = await _context.Expenses.AsNoTracking().ToListAsync();
 
-        double totalRevenue = sales.Sum(s => s.Total);
-        double totalCostOfGoodsSold = sales.Sum(s => s.TotalCost);
+        if (startDate.HasValue)
+        {
+            salesList = salesList.Where(s => {
+                if (DateTime.TryParse(s.Date, out var dt))
+                    return dt >= startDate.Value;
+                return string.Compare(s.Date, startDate.Value.ToString("o")) >= 0;
+            }).ToList();
+
+            expensesList = expensesList.Where(e => {
+                if (DateTime.TryParse(e.Date, out var dt))
+                    return dt >= startDate.Value;
+                return string.Compare(e.Date, startDate.Value.ToString("o")) >= 0;
+            }).ToList();
+        }
+
+        if (endDate.HasValue)
+        {
+            salesList = salesList.Where(s => {
+                if (DateTime.TryParse(s.Date, out var dt))
+                    return dt <= endDate.Value;
+                return string.Compare(s.Date, endDate.Value.ToString("o")) <= 0;
+            }).ToList();
+
+            expensesList = expensesList.Where(e => {
+                if (DateTime.TryParse(e.Date, out var dt))
+                    return dt <= endDate.Value;
+                return string.Compare(e.Date, endDate.Value.ToString("o")) <= 0;
+            }).ToList();
+        }
+
+        double totalRevenue = salesList.Sum(s => s.Total);
+        double totalCostOfGoodsSold = salesList.Sum(s => s.TotalCost);
         double grossProfit = totalRevenue - totalCostOfGoodsSold;
-        double totalExpenses = expenses.Sum(e => e.Amount);
+        double totalExpenses = expensesList.Sum(e => e.Amount);
         double netProfit = grossProfit - totalExpenses;
 
-        return new FinancialSummaryDto(totalRevenue, totalCostOfGoodsSold, grossProfit, totalExpenses, netProfit);
+        double cashRevenue = salesList
+            .Where(s => s.PaymentMethod == "Cash" || s.PaymentMethod == "Efectivo")
+            .Sum(s => s.Total);
+
+        double cardRevenue = salesList
+            .Where(s => s.PaymentMethod != "Cash" && s.PaymentMethod != "Efectivo")
+            .Sum(s => s.Total);
+
+        double cashExpenses = expensesList
+            .Where(e => e.PaymentMethod == "Cash" || e.PaymentMethod == "Efectivo")
+            .Sum(e => e.Amount);
+
+        return new FinancialSummaryDto(totalRevenue, totalCostOfGoodsSold, grossProfit, totalExpenses, netProfit, cashRevenue, cashExpenses, cardRevenue);
     }
 
     public async Task<Ticketfy.Core.Models.NetProfitReportModel> CalculateTrueNetProfitAsync(DateTime startDate, DateTime endDate)

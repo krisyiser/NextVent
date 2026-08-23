@@ -247,18 +247,7 @@ public record SaleDto(
     string? CashierName = null
 )
 {
-    public string LocalDateDisplay
-    {
-        get
-        {
-            if (DateTime.TryParse(Date, out var dt))
-            {
-                var utcDt = DateTime.SpecifyKind(dt, DateTimeKind.Utc);
-                return utcDt.ToBusinessLocalTime().ToString("g");
-            }
-            return Date;
-        }
-    }
+    public string LocalDateDisplay => DateTimeExtensions.ToLocalDisplayString(Date);
 
     public string PaymentStatusDisplay
     {
@@ -332,7 +321,10 @@ public record FinancialSummaryDto(
     double TotalCostOfGoodsSold,
     double GrossProfit,
     double TotalExpenses,
-    double NetProfit
+    double NetProfit,
+    double CashRevenue = 0,
+    double CashExpenses = 0,
+    double CardRevenue = 0
 );
 
 public record ItemKitItemDto(

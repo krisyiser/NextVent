@@ -9,14 +9,18 @@
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <ImplicitUsings>enable</ImplicitUsings>
     <InterceptorsNamespaces>$(InterceptorsNamespaces);Dapper.AOT</InterceptorsNamespaces>
+    <Version>3.0.81</Version>
+    <AssemblyVersion>3.0.81.0</AssemblyVersion>
+    <FileVersion>3.0.81.0</FileVersion>
+    <InformationalVersion>3.0.81</InformationalVersion>
   </PropertyGroup>
 
   <!-- DEPLOYMENT PROFILE FOR WINDOWS X64 -->
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <OutputType>WinExe</OutputType>
     
-    <!-- Self Contained Single File Execution -->
-    <PublishSingleFile>true</PublishSingleFile>
+    <!-- Self Contained Multi-File Execution (Velopack Native Packaging Compatible) -->
+    <PublishSingleFile>false</PublishSingleFile>
     <SelfContained>true</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     
@@ -24,10 +28,6 @@
     <PublishTrimmed>false</PublishTrimmed>
     <TrimMode>partial</TrimMode>
     <PublishReadyToRun>false</PublishReadyToRun>
-    
-    <!-- Include Native Libraries (Crucial for SQLite & Cryptography) -->
-    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
-    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     
     <!-- Hide Console Window on Windows -->
     <PublishWin32Manifest>app.manifest</PublishWin32Manifest>

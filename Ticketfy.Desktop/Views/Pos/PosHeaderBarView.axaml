@@ -27,14 +27,9 @@
                                 </MenuItem.Icon>
                             </MenuItem>
                             <Separator/>
-                            <MenuItem Header="Corte parcial" Command="{Binding GenerateXReportCommand}">
+                            <MenuItem Header="Corte de caja" Command="{Binding GenerateXReportCommand}">
                                 <MenuItem.Icon>
-                                    <mi:MaterialIcon Kind="ChartBoxOutline" Width="16" Height="16"/>
-                                </MenuItem.Icon>
-                            </MenuItem>
-                            <MenuItem Header="Corte final" Command="{Binding GenerateZReportCommand}" Foreground="#EF4444">
-                                <MenuItem.Icon>
-                                    <mi:MaterialIcon Kind="CashRegister" Width="16" Height="16" Foreground="#EF4444"/>
+                                    <mi:MaterialIcon Kind="CashRegister" Width="16" Height="16"/>
                                 </MenuItem.Icon>
                             </MenuItem>
                         </MenuFlyout>
@@ -46,27 +41,6 @@
                         <mi:MaterialIcon Kind="ChevronDown" Width="16" Height="16"/>
                     </StackPanel>
                 </Button>
-
-                <!-- Hardware Status LEDs -->
-                <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
-                    <!-- Printer Status -->
-                    <StackPanel Orientation="Horizontal" Spacing="4" ToolTip.Tip="Impresora Térmica Conectada">
-                        <mi:MaterialIcon Kind="Printer" Width="16" Height="16" Foreground="{DynamicResource AccentSuccessBrush}"/>
-                        <TextBlock Text="Impresora" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center"/>
-                    </StackPanel>
-
-                    <!-- Scanner Status -->
-                    <StackPanel Orientation="Horizontal" Spacing="4" ToolTip.Tip="Lector de Código de Barras Conectado">
-                        <mi:MaterialIcon Kind="BarcodeScanner" Width="16" Height="16" Foreground="{DynamicResource AccentSuccessBrush}"/>
-                        <TextBlock Text="Lector" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center"/>
-                    </StackPanel>
-
-                    <!-- Database Security Status -->
-                    <StackPanel Orientation="Horizontal" Spacing="4" ToolTip.Tip="Cifrado SQLCipher 256-bit FTS5 Activo">
-                        <mi:MaterialIcon Kind="ShieldLock" Width="16" Height="16" Foreground="#10B981"/>
-                        <TextBlock Text="SQLCipher" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center"/>
-                    </StackPanel>
-                </StackPanel>
             </StackPanel>
 
             <TextBlock Grid.Column="1" Text="{Binding FeedbackMessage}" FontSize="11" FontWeight="Bold" Foreground="{Binding FeedbackColor}" VerticalAlignment="Center" HorizontalAlignment="Center" Margin="8,0" />

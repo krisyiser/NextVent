@@ -1,22 +1,24 @@
 using Serilog;
 using System;
+using System.Diagnostics;
+using System.IO;
+using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
-using Velopack;
-using Velopack.Locators;
 using Avalonia.Threading;
-using System.Threading;
+using Ticketfy.Core.Constants;
 
 namespace Ticketfy.Services.Implementations;
 
 public class AutoUpdateService
 {
-    // Configure the remote URL where your releases (Setup.exe, .nupkg) will be hosted.
-    // For Forgejo/Gitea public repositories, you can use the raw file endpoint:
-    private const string UpdateUrl = "https://valcore.cloud/downloads"; 
+    private const string ApiUrl = "https://valcore.cloud/api/latest-release";
+    private const string BaseUrl = "https://valcore.cloud";
 
     public bool IsUpdateReadyToInstall { get; private set; }
     public string NewVersion { get; private set; } = string.Empty;
     public double DownloadProgress { get; private set; }
+    private string? _downloadedInstallerPath;
 
     public event Action? UpdateAvailableEvent;
     public event Action<double>? DownloadProgressChangedEvent;
@@ -29,85 +31,164 @@ public class AutoUpdateService
     }
 
     /// <summary>
-    /// Checks for updates silently in the background. If a new version is found,
-    /// it downloads it silently and notifies the UI when it's ready to restart.
+    /// Checks for updates via valcore.cloud API/manifest.
+    /// Downloads the update installer asynchronously with real-time percentage progress.
     /// </summary>
     public async Task CheckAndDownloadUpdatesAsync()
     {
         try
         {
-            Log.Information("Velopack: Checking for OTA updates at {Url}", UpdateUrl);
-            var source = new Velopack.Sources.SimpleWebSource(UpdateUrl, new InsecureFileDownloader());
-            var mgr = new UpdateManager(source);
-            
-            if (!mgr.IsInstalled)
+            Log.Information("AutoUpdateService: Checking for updates at {Url}", ApiUrl);
+
+            using var httpClient = new HttpClient();
+            httpClient.Timeout = TimeSpan.FromSeconds(15);
+            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("TicketfyDesktopApp/3.0");
+
+            string jsonString;
+            try
             {
-                Log.Warning("Velopack: Application is not installed via Velopack setup. OTA updates disabled in development mode.");
-                return;
+                jsonString = await httpClient.GetStringAsync($"{ApiUrl}?cb={DateTime.UtcNow.Ticks}");
+            }
+            catch
+            {
+                // Fallback to releases.json
+                jsonString = await httpClient.GetStringAsync($"{BaseUrl}/downloads/releases.json?cb={DateTime.UtcNow.Ticks}");
             }
 
-            var newVersionInfo = await mgr.CheckForUpdatesAsync();
-            if (newVersionInfo == null)
+            using var doc = JsonDocument.Parse(jsonString);
+            var root = doc.RootElement;
+
+            string latestVersionStr = root.GetProperty("version").GetString() ?? string.Empty;
+            Log.Information("AutoUpdateService: Server latest version is '{ServerVersion}', current local is '{CurrentVersion}'",
+                latestVersionStr, AppConstants.AppVersion);
+
+            if (string.IsNullOrWhiteSpace(latestVersionStr))
             {
-                Log.Information("Velopack: No updates found. System is up to date.");
                 Dispatcher.UIThread.Post(() => UpdateUpToDateEvent?.Invoke());
                 return;
             }
 
-            NewVersion = newVersionInfo.TargetFullRelease.Version.ToString();
-            Log.Information("Velopack: New version found: v{Version}. Starting background download...", NewVersion);
-            
-            Dispatcher.UIThread.Post(() => UpdateAvailableEvent?.Invoke());
+            var serverVersionClean = latestVersionStr.Trim().TrimStart('v', 'V');
+            var localVersionClean = AppConstants.AppVersion.Trim().TrimStart('v', 'V');
 
-            // Download the update in the background
-            await mgr.DownloadUpdatesAsync(newVersionInfo, progress => 
+            if (Version.TryParse(serverVersionClean, out var sVer) && Version.TryParse(localVersionClean, out var lVer))
             {
-                DownloadProgress = progress;
-                Dispatcher.UIThread.Post(() => DownloadProgressChangedEvent?.Invoke(progress));
+                if (sVer <= lVer)
+                {
+                    Log.Information("AutoUpdateService: Local version {Local} is up to date with server {Server}.", lVer, sVer);
+                    Dispatcher.UIThread.Post(() => UpdateUpToDateEvent?.Invoke());
+                    return;
+                }
+            }
+            else
+            {
+                if (string.Equals(serverVersionClean, localVersionClean, StringComparison.OrdinalIgnoreCase))
+                {
+                    Dispatcher.UIThread.Post(() => UpdateUpToDateEvent?.Invoke());
+                    return;
+                }
+            }
+
+            NewVersion = $"v{serverVersionClean}";
+            Log.Information("AutoUpdateService: New version available: {NewVersion}. Preparing download...", NewVersion);
+
+            Dispatcher.UIThread.Post(() =>
+            {
+                DownloadProgress = 0;
+                UpdateAvailableEvent?.Invoke();
             });
 
-            Log.Information("Velopack: Update downloaded successfully. Ready to apply on restart.");
+            // Resolve download path
+            string relativeDlPath = $"/downloads/Ticketfy-Setup-v{serverVersionClean}-x64.exe?v={serverVersionClean}";
+            if (root.TryGetProperty("downloads", out var downloadsEl))
+            {
+                if (downloadsEl.TryGetProperty("exe", out var exeEl) && !string.IsNullOrEmpty(exeEl.GetString()))
+                {
+                    relativeDlPath = exeEl.GetString()!;
+                }
+                else if (downloadsEl.TryGetProperty("x64", out var x64El) && !string.IsNullOrEmpty(x64El.GetString()))
+                {
+                    relativeDlPath = x64El.GetString()!;
+                }
+            }
+
+            string fullDownloadUrl = relativeDlPath.StartsWith("http", StringComparison.OrdinalIgnoreCase)
+                ? relativeDlPath
+                : $"{BaseUrl}{(relativeDlPath.StartsWith("/") ? "" : "/")}{relativeDlPath}";
+
+            string tempDir = Path.Combine(Path.GetTempPath(), "TicketfyUpdates");
+            if (!Directory.Exists(tempDir)) Directory.CreateDirectory(tempDir);
+            string tempInstallerPath = Path.Combine(tempDir, $"Ticketfy-Setup-v{serverVersionClean}-x64.exe");
+
+            Log.Information("AutoUpdateService: Downloading installer from {Url} to {Dest}", fullDownloadUrl, tempInstallerPath);
+
+            using var response = await httpClient.GetAsync(fullDownloadUrl, HttpCompletionOption.ResponseHeadersRead);
+            response.EnsureSuccessStatusCode();
+
+            var totalBytes = response.Content.Headers.ContentLength ?? -1L;
+            await using var contentStream = await response.Content.ReadAsStreamAsync();
+            await using var fileStream = new FileStream(tempInstallerPath, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true);
+
+            var buffer = new byte[8192];
+            long totalRead = 0;
+            int read;
+
+            while ((read = await contentStream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+            {
+                await fileStream.WriteAsync(buffer, 0, read);
+                totalRead += read;
+                if (totalBytes > 0)
+                {
+                    double progress = Math.Round((double)totalRead / totalBytes * 100.0, 1);
+                    DownloadProgress = progress;
+                    Dispatcher.UIThread.Post(() => DownloadProgressChangedEvent?.Invoke(progress));
+                }
+            }
+
+            _downloadedInstallerPath = tempInstallerPath;
             IsUpdateReadyToInstall = true;
+            Log.Information("AutoUpdateService: Update installer downloaded successfully to {Path}", tempInstallerPath);
+
             Dispatcher.UIThread.Post(() => UpdateReadyToInstallEvent?.Invoke());
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Velopack: Failed to check or download updates.");
+            Log.Error(ex, "AutoUpdateService: Failed during update check or download.");
             Dispatcher.UIThread.Post(() => UpdateFailedEvent?.Invoke(ex.Message));
         }
     }
 
     /// <summary>
-    /// Applies the downloaded update and restarts the application immediately.
+    /// Applies the downloaded update installer silently and terminates current process.
     /// </summary>
     public void ApplyUpdatesAndRestart()
     {
         try
         {
-            if (!IsUpdateReadyToInstall) return;
+            if (string.IsNullOrEmpty(_downloadedInstallerPath) || !File.Exists(_downloadedInstallerPath))
+            {
+                Log.Warning("AutoUpdateService: Downloaded installer path is invalid or file missing.");
+                return;
+            }
 
-            Log.Information("Velopack: Applying OTA update and restarting...");
-            var source = new Velopack.Sources.SimpleWebSource(UpdateUrl, new InsecureFileDownloader());
-            var mgr = new UpdateManager(source);
-            var pendingAsset = mgr.UpdatePendingRestart;
-            if (pendingAsset != null)
+            Log.Information("AutoUpdateService: Executing silent update installer '{Path}' and terminating current process...", _downloadedInstallerPath);
+
+            var psi = new ProcessStartInfo
             {
-                mgr.ApplyUpdatesAndRestart(pendingAsset);
-            }
-            else
-            {
-                Log.Warning("Velopack: Could not find any pending updates to apply.");
-            }
+                FileName = _downloadedInstallerPath,
+                Arguments = "/SILENT /NORESTART",
+                UseShellExecute = true
+            };
+
+            Process.Start(psi);
+            Environment.Exit(0);
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Velopack: Failed to apply updates and restart.");
+            Log.Error(ex, "AutoUpdateService: Failed to launch update installer.");
         }
     }
 
-    /// <summary>
-    /// Starts a background timer that checks for updates periodically (e.g. every 6 hours).
-    /// </summary>
     public void StartPeriodicChecks(TimeSpan interval)
     {
         _ = Task.Run(async () =>
@@ -118,16 +199,6 @@ public class AutoUpdateService
                 await Task.Delay(interval);
             }
         });
-    }
-}
-
-public class InsecureFileDownloader : Velopack.Sources.HttpClientFileDownloader
-{
-    protected override System.Net.Http.HttpClientHandler CreateHttpClientHandler()
-    {
-        var handler = base.CreateHttpClientHandler();
-        handler.ServerCertificateCustomValidationCallback = (message, cert, chain, errors) => true;
-        return handler;
     }
 }
 
