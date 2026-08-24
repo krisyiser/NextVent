@@ -61,69 +61,8 @@ public sealed class ThemeEngine
             // 1. RADICAL BRAND PRESETS WITH VALCORE HOVER & MANDATORY BORDER CONTRAST PROTOCOL
             switch (vis.ThemeName)
             {
-                case "Modo Claro":
-                case "Light":
-                    SetResource("BgPrimaryBrush", Color.Parse("#F8FAFC"));
-                    SetResource("BgSecondaryBrush", Color.Parse("#FFFFFF"));
-                    SetResource("BgTertiaryBrush", Color.Parse("#F1F5F9"));
-                    SetResource("HoverBgBrush", Color.Parse("#E2E8F0"));
-                    SetResource("BorderBrush", Color.Parse("#94A3B8")); // High-contrast slate border stroke (NEVER disappears into white!)
-                    SetResource("TextPrimaryBrush", Color.Parse("#0F172A"));
-                    SetResource("TextSecondaryBrush", Color.Parse("#334155"));
-                    SetResource("TextMutedBrush", Color.Parse("#64748B"));
-                    SetResource("SidebarBgBrush", Color.Parse(string.IsNullOrWhiteSpace(vis.SidebarBgColor) ? "#F1F5F9" : vis.SidebarBgColor));
-                    break;
-
-                case "Alto Contraste":
-                    SetResource("BgPrimaryBrush", Color.Parse("#000000"));
-                    SetResource("BgSecondaryBrush", Color.Parse("#000000"));
-                    SetResource("BgTertiaryBrush", Color.Parse("#141414"));
-                    SetResource("HoverBgBrush", Color.Parse("#262626"));
-                    SetResource("BorderBrush", Color.Parse("#FACC15"));
-                    SetResource("TextPrimaryBrush", Color.Parse("#FFFFFF"));
-                    SetResource("TextSecondaryBrush", Color.Parse("#FACC15"));
-                    SetResource("TextMutedBrush", Color.Parse("#E5E7EB"));
-                    SetResource("SidebarBgBrush", Color.Parse(string.IsNullOrWhiteSpace(vis.SidebarBgColor) ? "#000000" : vis.SidebarBgColor));
-                    break;
-
-                case "Cyberpunk Dark":
-                    SetResource("BgPrimaryBrush", Color.Parse("#07050E"));
-                    SetResource("BgSecondaryBrush", Color.Parse("#130E26"));
-                    SetResource("BgTertiaryBrush", Color.Parse("#1F163D"));
-                    SetResource("HoverBgBrush", Color.Parse("#2D1C54"));
-                    SetResource("BorderBrush", Color.Parse("#8B5CF6"));
-                    SetResource("TextPrimaryBrush", Color.Parse("#F5F3FF"));
-                    SetResource("TextSecondaryBrush", Color.Parse("#C084FC"));
-                    SetResource("TextMutedBrush", Color.Parse("#A78BFA"));
-                    SetResource("SidebarBgBrush", Color.Parse(string.IsNullOrWhiteSpace(vis.SidebarBgColor) ? "#0B0719" : vis.SidebarBgColor));
-                    break;
-
-                case "Emerald Glass":
-                    SetResource("BgPrimaryBrush", Color.Parse("#021F17"));
-                    SetResource("BgSecondaryBrush", Color.Parse("#053729"));
-                    SetResource("BgTertiaryBrush", Color.Parse("#0A4D3A"));
-                    SetResource("HoverBgBrush", Color.Parse("#0F624C"));
-                    SetResource("BorderBrush", Color.Parse("#10B981"));
-                    SetResource("TextPrimaryBrush", Color.Parse("#ECFDF5"));
-                    SetResource("TextSecondaryBrush", Color.Parse("#A7F3D0"));
-                    SetResource("TextMutedBrush", Color.Parse("#6EE7B7"));
-                    SetResource("SidebarBgBrush", Color.Parse(string.IsNullOrWhiteSpace(vis.SidebarBgColor) ? "#011711" : vis.SidebarBgColor));
-                    break;
-
-                case "Nordic Slate":
-                    SetResource("BgPrimaryBrush", Color.Parse("#1E293B"));
-                    SetResource("BgSecondaryBrush", Color.Parse("#27354A"));
-                    SetResource("BgTertiaryBrush", Color.Parse("#334155"));
-                    SetResource("HoverBgBrush", Color.Parse("#475569"));
-                    SetResource("BorderBrush", Color.Parse("#64748B"));
-                    SetResource("TextPrimaryBrush", Color.Parse("#F1F5F9"));
-                    SetResource("TextSecondaryBrush", Color.Parse("#CBD5E1"));
-                    SetResource("TextMutedBrush", Color.Parse("#94A3B8"));
-                    SetResource("SidebarBgBrush", Color.Parse(string.IsNullOrWhiteSpace(vis.SidebarBgColor) ? "#0F172A" : vis.SidebarBgColor));
-                    break;
-
                 case "Modo Oscuro":
-                default:
+                case "Dark":
                     SetResource("BgPrimaryBrush", Color.Parse("#090D16"));
                     SetResource("BgSecondaryBrush", Color.Parse("#151D2A"));
                     SetResource("BgTertiaryBrush", Color.Parse("#1E293B"));
@@ -133,6 +72,20 @@ public sealed class ThemeEngine
                     SetResource("TextSecondaryBrush", Color.Parse("#94A3B8"));
                     SetResource("TextMutedBrush", Color.Parse("#64748B"));
                     SetResource("SidebarBgBrush", Color.Parse(string.IsNullOrWhiteSpace(vis.SidebarBgColor) ? "#0B111E" : vis.SidebarBgColor));
+                    break;
+
+                case "Modo Claro":
+                case "Light":
+                default:
+                    SetResource("BgPrimaryBrush", Color.Parse("#F8FAFC"));
+                    SetResource("BgSecondaryBrush", Color.Parse("#FFFFFF"));
+                    SetResource("BgTertiaryBrush", Color.Parse("#F1F5F9"));
+                    SetResource("HoverBgBrush", Color.Parse("#E2E8F0"));
+                    SetResource("BorderBrush", Color.Parse("#94A3B8")); // High-contrast slate border stroke (NEVER disappears into white!)
+                    SetResource("TextPrimaryBrush", Color.Parse("#0F172A"));
+                    SetResource("TextSecondaryBrush", Color.Parse("#334155"));
+                    SetResource("TextMutedBrush", Color.Parse("#64748B"));
+                    SetResource("SidebarBgBrush", Color.Parse(string.IsNullOrWhiteSpace(vis.SidebarBgColor) ? "#F1F5F9" : vis.SidebarBgColor));
                     break;
             }
 

@@ -346,6 +346,8 @@ public partial class MainWindowViewModel : ObservableObject
         try
         {
             _ = DismissSplashScreenAsync();
+            var appSettings = await settingsService.GetAppSettingsAsync();
+            Ticketfy.Services.Settings.ThemeEngine.Instance.Apply(appSettings);
 
             var licenseService = new LicenseEnforcementService();
             if (licenseService.IsSystemLocked())

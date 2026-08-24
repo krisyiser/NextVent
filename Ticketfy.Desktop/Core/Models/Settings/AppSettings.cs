@@ -49,13 +49,13 @@ public sealed class AppSettings
 /// </summary>
 public partial class VisualCustomizationConfig : ObservableObject
 {
-    [ObservableProperty] private ThemeMode _mode = ThemeMode.Dark;
-    [ObservableProperty] private string _themeName = "Modo Oscuro";
+    [ObservableProperty] private ThemeMode _mode = ThemeMode.Light;
+    [ObservableProperty] private string _themeName = "Modo Claro";
     [ObservableProperty] private string _primaryColor = "#3B82F6";
     [ObservableProperty] private string _accentColor = "#38BDF8";
     [ObservableProperty] private string _successColor = "#10B981";
     [ObservableProperty] private string _dangerColor = "#EF4444";
-    [ObservableProperty] private string _sidebarBgColor = "#0B111E";
+    [ObservableProperty] private string _sidebarBgColor = "#F1F5F9";
     [ObservableProperty] private double _cornerRadius = 8.0;
     [ObservableProperty] private double _fontSizeScale = 14.0;
     [ObservableProperty] private double _posPriceFontSize = 24.0;

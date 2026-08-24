@@ -29,7 +29,7 @@ public partial class InterfazSettingsViewModel : ObservableObject
     [ObservableProperty] private bool _isSubAnimaciones = false;
 
     // Theme & Background
-    [ObservableProperty] private string _currentTheme = "Modo Oscuro";
+    [ObservableProperty] private string _currentTheme = "Modo Claro";
     [ObservableProperty] private bool _modoHorarioAuto = false;
     [ObservableProperty] private string _estiloFondo = "Sólido";
     [ObservableProperty] private double _glassmorphismBlur = 0.0;

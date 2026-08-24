@@ -70,14 +70,15 @@ public sealed class ThemeService
             {
                 case "Modo Claro":
                 case "Light":
+                default:
                     _baseSecondaryColor = Color.Parse("#FFFFFF");
                     _baseTertiaryColor = Color.Parse("#F3F4F6");
                     SetDynamicResource("BgPrimaryBrush", Color.Parse("#F4F6F8"));
-                    SetDynamicResource("BorderBrush", Color.Parse("#E5E7EB"));
-                    SetDynamicResource("TextPrimaryBrush", Color.Parse("#111827"));
-                    SetDynamicResource("TextSecondaryBrush", Color.Parse("#4B5563"));
-                    SetDynamicResource("TextMutedBrush", Color.Parse("#9CA3AF"));
-                    SetDynamicResource("SidebarBgBrush", Color.Parse("#0F172A"));
+                    SetDynamicResource("BorderBrush", Color.Parse("#94A3B8"));
+                    SetDynamicResource("TextPrimaryBrush", Color.Parse("#0F172A"));
+                    SetDynamicResource("TextSecondaryBrush", Color.Parse("#334155"));
+                    SetDynamicResource("TextMutedBrush", Color.Parse("#64748B"));
+                    SetDynamicResource("SidebarBgBrush", Color.Parse("#F1F5F9"));
                     break;
 
                 case "Modo Oscuro":
