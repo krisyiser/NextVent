@@ -43,11 +43,11 @@
         <Setter Property="FontSize" Value="{DynamicResource AppBaseFontSize}" />
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="CornerRadius" Value="{DynamicResource AppCornerRadius}" />
         <Setter Property="Background" Value="{DynamicResource BgSecondaryBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
-        <Setter Property="MinHeight" Value="38" />
-        <Setter Property="Padding" Value="10,8" />
+        <Setter Property="MinHeight" Value="{DynamicResource ControlMinHeight}" />
+        <Setter Property="Padding" Value="{DynamicResource ControlPadding}" />
         <Setter Property="VerticalContentAlignment" Value="Center" />
     </Style>
 
@@ -62,11 +62,11 @@
         <Setter Property="FontSize" Value="{DynamicResource AppBaseFontSize}" />
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="6" />
+        <Setter Property="CornerRadius" Value="{DynamicResource AppCornerRadius}" />
         <Setter Property="Background" Value="{DynamicResource BgSecondaryBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
-        <Setter Property="MinHeight" Value="38" />
-        <Setter Property="Padding" Value="10,8" />
+        <Setter Property="MinHeight" Value="{DynamicResource ControlMinHeight}" />
+        <Setter Property="Padding" Value="{DynamicResource ControlPadding}" />
     </Style>
 
     <Style Selector="ComboBoxItem">
@@ -91,7 +91,7 @@
         <Setter Property="Background" Value="{DynamicResource BgSecondaryBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
         <Setter Property="BorderThickness" Value="1" />
-        <Setter Property="CornerRadius" Value="{DynamicResource AppCornerRadius}" />
+        <Setter Property="CornerRadius" Value="{DynamicResource CardCornerRadius}" />
         <Setter Property="Effect">
             <BlurEffect Radius="{DynamicResource GlassmorphismBlurRadius}" />
         </Setter>
@@ -111,7 +111,7 @@
         <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Transitions">
             <Transitions>
-                <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.15">
+                <TransformOperationsTransition Property="RenderTransform" Duration="{DynamicResource TransitionDuration}">
                     <TransformOperationsTransition.Easing>
                         <CubicEaseOut />
                     </TransformOperationsTransition.Easing>

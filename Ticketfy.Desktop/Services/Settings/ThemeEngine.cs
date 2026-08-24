@@ -11,7 +11,7 @@ namespace Ticketfy.Services.Settings;
 /// <summary>
 /// High-performance reactive ThemeEngine under Protocol Valcore v4.0.
 /// Direct manipulation of Application.Current.Resources for zero-latency UI customizer updates.
-/// Generates radical, distinct brand identity presets across all UI surfaces, colors, typography, borders, and geometry.
+/// Forces visual measure invalidation across active window hierarchy to apply fonts, density and radiuses instant-live.
 /// </summary>
 public sealed class ThemeEngine
 {
@@ -26,14 +26,8 @@ public sealed class ThemeEngine
         {
             if (value is Color colorVal)
             {
-                if (app.Resources.TryGetValue(key, out var existing) && existing is SolidColorBrush solidBrush)
-                {
-                    solidBrush.Color = colorVal;
-                }
-                else
-                {
-                    app.Resources[key] = new SolidColorBrush(colorVal);
-                }
+                var brush = new SolidColorBrush(colorVal);
+                app.Resources[key] = brush;
             }
             else
             {
@@ -45,14 +39,8 @@ public sealed class ThemeEngine
         {
             if (value is Color winColorVal)
             {
-                if (desktop.MainWindow.Resources.TryGetValue(key, out var winExisting) && winExisting is SolidColorBrush winBrush)
-                {
-                    winBrush.Color = winColorVal;
-                }
-                else
-                {
-                    desktop.MainWindow.Resources[key] = new SolidColorBrush(winColorVal);
-                }
+                var winBrush = new SolidColorBrush(winColorVal);
+                desktop.MainWindow.Resources[key] = winBrush;
             }
             else
             {
@@ -156,28 +144,47 @@ public sealed class ThemeEngine
             SetResource("AppBaseFontSize", vis.FontSizeScale);
             SetResource("PosPriceFontSize", vis.PosPriceFontSize);
 
-            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktopWin && desktopWin.MainWindow != null)
-            {
-                desktopWin.MainWindow.FontFamily = fontFam;
-                desktopWin.MainWindow.FontSize = vis.FontSizeScale;
-            }
-
             // 5. Spatial Density & Cart Layout
             SetResource("PosCartWidth", vis.PosCartWidth);
-            SetResource("ControlSpacing", vis.Density switch
+            switch (vis.Density)
             {
-                UIDensity.Compact => new Thickness(4, 2),
-                UIDensity.Touch => new Thickness(14, 10),
-                _ => new Thickness(8, 6)
-            });
+                case UIDensity.Compact:
+                    SetResource("ControlPadding", new Thickness(8, 4));
+                    SetResource("ControlMinHeight", 30.0);
+                    SetResource("ControlSpacing", 4.0);
+                    break;
+                case UIDensity.Touch:
+                    SetResource("ControlPadding", new Thickness(18, 12));
+                    SetResource("ControlMinHeight", 48.0);
+                    SetResource("ControlSpacing", 14.0);
+                    break;
+                case UIDensity.Comfortable:
+                default:
+                    SetResource("ControlPadding", new Thickness(14, 10));
+                    SetResource("ControlMinHeight", 38.0);
+                    SetResource("ControlSpacing", 8.0);
+                    break;
+            }
 
-            // 6. Glassmorphism & Effects
+            // 6. Animations & Transitions
+            SetResource("TransitionDuration", vis.EnableAnimations ? TimeSpan.FromSeconds(0.15) : TimeSpan.Zero);
+
+            // 7. Glassmorphism & Effects
             SetResource("GlassmorphismBlurRadius", vis.GlassmorphismBlur);
             if (vis.GlassmorphismOpacity < 100.0)
             {
                 byte alpha = (byte)Math.Clamp((int)(255.0 * (vis.GlassmorphismOpacity / 100.0)), 40, 255);
                 var secCol = Color.Parse("#151D2A");
                 SetResource("BgSecondaryBrush", Color.FromArgb(alpha, secCol.R, secCol.G, secCol.B));
+            }
+
+            // 8. Force Immediate Visual Measure & Visual Tree Invalidation in MainWindow
+            if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktopWin && desktopWin.MainWindow != null)
+            {
+                desktopWin.MainWindow.FontFamily = fontFam;
+                desktopWin.MainWindow.FontSize = vis.FontSizeScale;
+                desktopWin.MainWindow.InvalidateMeasure();
+                desktopWin.MainWindow.InvalidateVisual();
             }
 
             SettingsApplied?.Invoke(settings);

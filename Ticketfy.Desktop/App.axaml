@@ -1,5 +1,6 @@
 <Application xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:sys="clr-namespace:System;assembly=System.Runtime"
              xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              xmlns:semi="https://irihi.tech/semi"
              x:Class="Ticketfy.App"
@@ -50,11 +51,18 @@
             <SolidColorBrush x:Key="SidebarNavIconBrush" Color="#94A3B8" />
 
             <CornerRadius x:Key="AppCornerRadius">8</CornerRadius>
+            <CornerRadius x:Key="CardCornerRadius">12</CornerRadius>
             <x:Double x:Key="AppBaseFontSize">14</x:Double>
             <x:Double x:Key="PosPriceFontSize">24</x:Double>
             <x:Double x:Key="PosCartWidth">380</x:Double>
             <x:Double x:Key="AppLogoHeight">32</x:Double>
             <x:Double x:Key="GlassmorphismBlurRadius">0</x:Double>
+
+            <!-- Spatial Density & Dynamic UI Controls -->
+            <Thickness x:Key="ControlPadding">14,10</Thickness>
+            <x:Double x:Key="ControlMinHeight">38</x:Double>
+            <x:Double x:Key="ControlSpacing">8</x:Double>
+            <sys:TimeSpan x:Key="TransitionDuration">0:0:0.15</sys:TimeSpan>
         </ResourceDictionary>
     </Application.Resources>
 
@@ -64,37 +72,41 @@
         <materialIcons:MaterialIconStyles />
         <StyleInclude Source="avares://Ticketfy.Desktop/Styles/AppTheme.axaml" />
 
-        <!-- ═══ REUSABLE POS BUTTON STYLES ═══ -->
+        <!-- ═══ REUSABLE POS BUTTON STYLES WITH DYNAMIC RESOURCES ═══ -->
         <Style Selector="Button.PrimaryPOS">
             <Setter Property="Background" Value="{DynamicResource AccentPrimaryBrush}" />
             <Setter Property="Foreground" Value="White" />
             <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="CornerRadius" Value="8" />
-            <Setter Property="Padding" Value="14,10" />
+            <Setter Property="CornerRadius" Value="{DynamicResource AppCornerRadius}" />
+            <Setter Property="Padding" Value="{DynamicResource ControlPadding}" />
+            <Setter Property="MinHeight" Value="{DynamicResource ControlMinHeight}" />
         </Style>
 
         <Style Selector="Button.SuccessPOS">
             <Setter Property="Background" Value="{DynamicResource AccentSuccessBrush}" />
             <Setter Property="Foreground" Value="White" />
             <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="CornerRadius" Value="8" />
-            <Setter Property="Padding" Value="14,10" />
+            <Setter Property="CornerRadius" Value="{DynamicResource AppCornerRadius}" />
+            <Setter Property="Padding" Value="{DynamicResource ControlPadding}" />
+            <Setter Property="MinHeight" Value="{DynamicResource ControlMinHeight}" />
         </Style>
 
         <Style Selector="Button.DangerPOS">
             <Setter Property="Background" Value="{DynamicResource AccentDangerBrush}" />
             <Setter Property="Foreground" Value="White" />
             <Setter Property="FontWeight" Value="Bold" />
-            <Setter Property="CornerRadius" Value="8" />
-            <Setter Property="Padding" Value="14,10" />
+            <Setter Property="CornerRadius" Value="{DynamicResource AppCornerRadius}" />
+            <Setter Property="Padding" Value="{DynamicResource ControlPadding}" />
+            <Setter Property="MinHeight" Value="{DynamicResource ControlMinHeight}" />
         </Style>
 
         <Style Selector="Button.SecondaryPOS">
             <Setter Property="Background" Value="{DynamicResource BgTertiaryBrush}" />
             <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
             <Setter Property="FontWeight" Value="SemiBold" />
-            <Setter Property="CornerRadius" Value="8" />
-            <Setter Property="Padding" Value="14,10" />
+            <Setter Property="CornerRadius" Value="{DynamicResource AppCornerRadius}" />
+            <Setter Property="Padding" Value="{DynamicResource ControlPadding}" />
+            <Setter Property="MinHeight" Value="{DynamicResource ControlMinHeight}" />
         </Style>
     </Application.Styles>
 

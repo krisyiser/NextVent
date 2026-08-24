@@ -7,7 +7,7 @@
              x:DataType="vm:CartViewModel">
 
     <!-- Right Column Panel Container -->
-    <Border x:Name="PosCartSection" Width="{Binding CartWidthPx}" CornerRadius="8" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+    <Border x:Name="PosCartSection" Width="{DynamicResource PosCartWidth}" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
         <Grid RowDefinitions="Auto, *, Auto">
             
             <!-- ROW 0: Customer & Header -->
@@ -15,7 +15,7 @@
                 <StackPanel Spacing="6">
                     <Grid ColumnDefinitions="*, Auto">
                         <StackPanel Orientation="Horizontal" Spacing="8">
-                            <mi:MaterialIcon Kind="AccountBox" Width="18" Height="18" Foreground="#2563EB" VerticalAlignment="Center"/>
+                            <mi:MaterialIcon Kind="AccountBox" Width="18" Height="18" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center"/>
                             <ComboBox ItemsSource="{Binding Customers}" SelectedItem="{Binding SelectedCustomer, Mode=TwoWay}" Width="200" VerticalAlignment="Center">
                                 <ComboBox.ItemTemplate>
                                     <DataTemplate x:DataType="dto:CustomerDto">
@@ -24,14 +24,14 @@
                                 </ComboBox.ItemTemplate>
                             </ComboBox>
                         </StackPanel>
-                        <Button Grid.Column="1" Content="+" Command="{Binding OpenCustomerSelectCommand}" Padding="8,4" Background="{DynamicResource AccentPrimaryBrush}" Foreground="White" FontWeight="Bold" CornerRadius="4" VerticalAlignment="Center"/>
+                        <Button Grid.Column="1" Content="+" Command="{Binding OpenCustomerSelectCommand}" Padding="8,4" Background="{DynamicResource AccentPrimaryBrush}" Foreground="White" FontWeight="Bold" CornerRadius="{DynamicResource AppCornerRadius}" VerticalAlignment="Center"/>
                     </Grid>
 
                     <!-- Credit Status Badge — visible only when customer has a credit line configured -->
                     <Border IsVisible="{Binding HasCustomerCredit}"
                             Background="{DynamicResource BgTertiaryBrush}"
                             BorderBrush="{Binding CustomerCreditBadgeColor}"
-                            BorderThickness="1" CornerRadius="4" Padding="8,4">
+                            BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}" Padding="8,4">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <mi:MaterialIcon Kind="CreditCardCheckOutline" Width="14" Height="14"
                                              Foreground="{Binding CustomerCreditBadgeColor}"
@@ -56,23 +56,23 @@
                                     <!-- Item Info -->
                                     <StackPanel Grid.Column="0" Spacing="2">
                                         <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis"/>
-                                        <TextBlock Text="{Binding UnitPrice, StringFormat='${0:N2} c/u'}" FontSize="11" Foreground="#64748B" FontFamily="Consolas, monospace"/>
+                                        <TextBlock Text="{Binding UnitPrice, StringFormat='${0:N2} c/u'}" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" FontFamily="{DynamicResource AppFontFamily}"/>
                                     </StackPanel>
 
                                     <!-- Touch Stepper Quantity Controls -->
                                     <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center" Margin="8,0">
-                                        <Button Content="-" Command="{Binding $parent[UserControl].((vm:CartViewModel)DataContext).DecreaseQuantityCommand}" CommandParameter="{Binding}" IsEnabled="{Binding IsNotFractional}" Width="24" Height="24" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
-                                        <TextBlock Text="{Binding Quantity, StringFormat='{}{0:0.###}'}" Width="45" TextAlignment="Center" FontWeight="Bold" VerticalAlignment="Center" FontFamily="Consolas, monospace"/>
-                                        <Button Content="+" Command="{Binding $parent[UserControl].((vm:CartViewModel)DataContext).IncreaseQuantityCommand}" CommandParameter="{Binding}" IsEnabled="{Binding IsNotFractional}" Width="24" Height="24" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                                        <Button Content="-" Command="{Binding $parent[UserControl].((vm:CartViewModel)DataContext).DecreaseQuantityCommand}" CommandParameter="{Binding}" IsEnabled="{Binding IsNotFractional}" Width="24" Height="24" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" CornerRadius="{DynamicResource AppCornerRadius}"/>
+                                        <TextBlock Text="{Binding Quantity, StringFormat='{}{0:0.###}'}" Width="45" TextAlignment="Center" FontWeight="Bold" VerticalAlignment="Center" FontFamily="{DynamicResource AppFontFamily}"/>
+                                        <Button Content="+" Command="{Binding $parent[UserControl].((vm:CartViewModel)DataContext).IncreaseQuantityCommand}" CommandParameter="{Binding}" IsEnabled="{Binding IsNotFractional}" Width="24" Height="24" Padding="0" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" CornerRadius="{DynamicResource AppCornerRadius}"/>
                                     </StackPanel>
 
                                     <!-- Total Price -->
                                     <TextBlock Grid.Column="2" Text="{Binding TotalPrice, StringFormat='${0:N2}'}" 
-                                               FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" Width="70" TextAlignment="Right" VerticalAlignment="Center" FontFamily="Consolas, monospace"/>
+                                               FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" Width="70" TextAlignment="Right" VerticalAlignment="Center" FontFamily="{DynamicResource AppFontFamily}"/>
 
                                     <!-- Delete Button -->
                                     <Button Grid.Column="3" Command="{Binding $parent[UserControl].((vm:CartViewModel)DataContext).RemoveFromCartCommand}" CommandParameter="{Binding}" Background="Transparent" BorderThickness="0" Margin="6,0,0,0">
-                                        <mi:MaterialIcon Kind="TrashCanOutline" Width="16" Height="16" Foreground="#EF4444"/>
+                                        <mi:MaterialIcon Kind="TrashCanOutline" Width="16" Height="16" Foreground="{DynamicResource AccentDangerBrush}"/>
                                     </Button>
                                 </Grid>
                             </Border>
@@ -86,16 +86,16 @@
                 <StackPanel Spacing="10">
                     <!-- Subtotal, Discount, Tax -->
                     <Grid RowDefinitions="Auto, Auto, Auto" ColumnDefinitions="*, Auto">
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Subtotal:" Foreground="#64748B"/>
-                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding CartState.Subtotal, StringFormat='${0:N2}'}" Foreground="{DynamicResource TextPrimaryBrush}" FontFamily="Consolas, monospace"/>
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Subtotal:" Foreground="{DynamicResource TextMutedBrush}"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding CartState.Subtotal, StringFormat='${0:N2}'}" Foreground="{DynamicResource TextPrimaryBrush}" FontFamily="{DynamicResource AppFontFamily}"/>
 
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Descuento:" Foreground="#64748B"/>
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Descuento:" Foreground="{DynamicResource TextMutedBrush}"/>
                         <!-- We assume Discount is zero since CartStateStore doesn't handle it yet -->
-                        <TextBlock Grid.Row="1" Grid.Column="1" Text="-$0.00" Foreground="#EF4444" FontFamily="Consolas, monospace"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="-$0.00" Foreground="{DynamicResource AccentDangerBrush}" FontFamily="{DynamicResource AppFontFamily}"/>
 
-                        <TextBlock Grid.Row="2" Grid.Column="0" Text="IVA (16%):" Foreground="#64748B"/>
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="IVA (16%):" Foreground="{DynamicResource TextMutedBrush}"/>
                         <!-- Same for Tax -->
-                        <TextBlock Grid.Row="2" Grid.Column="1" Text="$0.00" Foreground="{DynamicResource TextPrimaryBrush}" FontFamily="Consolas, monospace"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="$0.00" Foreground="{DynamicResource TextPrimaryBrush}" FontFamily="{DynamicResource AppFontFamily}"/>
                     </Grid>
 
                     <Separator Background="{DynamicResource BorderBrush}" Height="1"/>
@@ -104,12 +104,11 @@
                     <Grid ColumnDefinitions="*, Auto">
                         <TextBlock Text="TOTAL:" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
                         <TextBlock Grid.Column="1" Text="{Binding CartState.Total, StringFormat='${0:N2}'}" 
-                                   FontSize="26" FontWeight="ExtraBold" Foreground="#2563EB" FontFamily="Consolas, monospace"/>
+                                   FontSize="{DynamicResource PosPriceFontSize}" FontWeight="ExtraBold" Foreground="{DynamicResource AccentPrimaryBrush}" FontFamily="{DynamicResource AppFontFamily}"/>
                     </Grid>
 
-
                     <!-- PRIMARY CHECKOUT CTA -->
-                    <Button Command="{Binding CheckoutCommand}" CommandParameter="Efectivo" Height="50" Background="#10B981" Foreground="White" CornerRadius="6" HorizontalAlignment="Stretch">
+                    <Button Command="{Binding CheckoutCommand}" CommandParameter="Efectivo" Height="50" Background="{DynamicResource AccentSuccessBrush}" Foreground="White" CornerRadius="{DynamicResource AppCornerRadius}" HorizontalAlignment="Stretch" Cursor="Hand">
                         <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
                             <mi:MaterialIcon Kind="LightningBolt" Width="22" Height="22"/>
                             <TextBlock Text="COBRAR TICKET" FontSize="15" FontWeight="Bold" VerticalAlignment="Center"/>
@@ -121,4 +120,3 @@
         </Grid>
     </Border>
 </UserControl>
-
