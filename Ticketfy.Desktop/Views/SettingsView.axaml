@@ -150,7 +150,9 @@
                     <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
                         <Grid Margin="20">
                             <settings:EmpresaSettingsView IsVisible="{Binding IsEmpresaTab}" />
-                            <settings:InterfazSettingsView IsVisible="{Binding IsInterfazTab}" />
+                            <Panel IsVisible="{Binding IsInterfazTab}">
+                                <settings:InterfazSettingsView DataContext="{Binding InterfazVM}" />
+                            </Panel>
                             <settings:TicketSettingsView IsVisible="{Binding IsTicketTab}" />
                             <settings:ConexionesSettingsView IsVisible="{Binding IsConexionesTab}" />
                             <settings:SeguridadSettingsView IsVisible="{Binding IsSeguridadTab}" />

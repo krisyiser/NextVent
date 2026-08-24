@@ -1,11 +1,11 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vm="using:Ticketfy.ViewModels"
+             xmlns:vmsettings="using:Ticketfy.ViewModels.Settings"
              x:Class="Ticketfy.Views.Settings.Interfaz.AnimacionesSettingsTab"
-             x:DataType="vm:SettingsViewModel">
+             x:DataType="vmsettings:InterfazSettingsViewModel">
 
     <StackPanel Spacing="14">
-        <TextBlock Text="Motor Cinemático &amp; Transiciones" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+        <TextBlock Text="Animaciones &amp; Transiciones de Interfaz" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
 
         <Grid ColumnDefinitions="*,Auto">
             <TextBlock Text="Duración de Transición" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
@@ -13,11 +13,11 @@
                 <TextBlock Text="{Binding DuracionTransicionMs, StringFormat='{}{0:F0} ms'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
             </Border>
         </Grid>
-        <Slider Minimum="0" Maximum="400" Value="{Binding DuracionTransicionMs, Mode=TwoWay}" />
+        <Slider Minimum="60" Maximum="300" Value="{Binding DuracionTransicionMs, Mode=TwoWay}" />
 
-        <Grid ColumnDefinitions="*,*">
-            <ToggleSwitch Grid.Column="0" IsChecked="{Binding EnableAnimations, Mode=TwoWay}" OffContent="Transiciones" OnContent="Transiciones" />
-            <ToggleSwitch Grid.Column="1" IsChecked="{Binding EnableHoverEffects, Mode=TwoWay}" OffContent="Efecto Hover" OnContent="Efecto Hover" />
+        <Grid ColumnDefinitions="*,*" Margin="0,6,0,0">
+            <ToggleSwitch Grid.Column="0" IsChecked="{Binding EnableAnimations, Mode=TwoWay}" OffContent="Animaciones" OnContent="Animaciones" />
+            <ToggleSwitch Grid.Column="1" IsChecked="{Binding EnableHoverEffects, Mode=TwoWay}" OffContent="Efectos Hover" OnContent="Efectos Hover" />
         </Grid>
     </StackPanel>
 </UserControl>

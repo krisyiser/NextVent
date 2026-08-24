@@ -1,8 +1,9 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Ticketfy.ViewModels"
+             xmlns:vmsettings="using:Ticketfy.ViewModels.Settings"
              x:Class="Ticketfy.Views.Settings.Interfaz.ColoresSettingsTab"
-             x:DataType="vm:SettingsViewModel">
+             x:DataType="vmsettings:InterfazSettingsViewModel">
 
     <StackPanel Spacing="16">
         <TextBlock Text="Paletas de Colores &amp; Identidad Visual (Sin códigos Hexadecimales)" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
@@ -31,7 +32,7 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="vm:ColorPaletteItem">
-                        <Button Command="{Binding $parent[UserControl].((vm:SettingsViewModel)DataContext).SelectSuccessColorCommand}"
+                        <Button Command="{Binding $parent[UserControl].((vmsettings:InterfazSettingsViewModel)DataContext).SelectSuccessColorCommand}"
                                 CommandParameter="{Binding HexColor}"
                                 Margin="2" Padding="6" Height="36" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgSecondaryBrush}">
                             <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
@@ -55,7 +56,7 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="vm:ColorPaletteItem">
-                        <Button Command="{Binding $parent[UserControl].((vm:SettingsViewModel)DataContext).SelectDangerColorCommand}"
+                        <Button Command="{Binding $parent[UserControl].((vmsettings:InterfazSettingsViewModel)DataContext).SelectDangerColorCommand}"
                                 CommandParameter="{Binding HexColor}"
                                 Margin="2" Padding="6" Height="36" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgSecondaryBrush}">
                             <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
@@ -79,7 +80,7 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="vm:ColorPaletteItem">
-                        <Button Command="{Binding $parent[UserControl].((vm:SettingsViewModel)DataContext).SelectAccentCommand}"
+                        <Button Command="{Binding $parent[UserControl].((vmsettings:InterfazSettingsViewModel)DataContext).SelectAccentCommand}"
                                 CommandParameter="{Binding HexColor}"
                                 Margin="2" Padding="6" Height="36" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgSecondaryBrush}">
                             <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
@@ -103,7 +104,7 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="vm:ColorPaletteItem">
-                        <Button Command="{Binding $parent[UserControl].((vm:SettingsViewModel)DataContext).SelectSidebarColorCommand}"
+                        <Button Command="{Binding $parent[UserControl].((vmsettings:InterfazSettingsViewModel)DataContext).SelectSidebarColorCommand}"
                                 CommandParameter="{Binding HexColor}"
                                 Margin="2" Padding="6" Height="36" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgSecondaryBrush}">
                             <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">

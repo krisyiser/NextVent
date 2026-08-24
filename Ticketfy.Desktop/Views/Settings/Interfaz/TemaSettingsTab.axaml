@@ -1,21 +1,21 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vm="using:Ticketfy.ViewModels"
+             xmlns:vmsettings="using:Ticketfy.ViewModels.Settings"
              x:Class="Ticketfy.Views.Settings.Interfaz.TemaSettingsTab"
-             x:DataType="vm:SettingsViewModel">
+             x:DataType="vmsettings:InterfazSettingsViewModel">
 
     <StackPanel Spacing="14">
         <TextBlock Text="Modos &amp; Textura de Fondo (7 Presets)" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
         
         <UniformGrid Columns="2">
-            <Button Command="{Binding SelectThemeCommand}" CommandParameter="Modo Claro" Margin="0,0,4,6" Padding="10" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgPrimaryBrush}" BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="2">
-                <TextBlock Text="Modo Claro" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" />
+            <Button Command="{Binding SelectThemeCommand}" CommandParameter="Modo Claro" Margin="0,0,4,6" Padding="10" CornerRadius="{DynamicResource AppCornerRadius}" Background="#F4F6F8" BorderBrush="#E5E7EB" BorderThickness="2">
+                <TextBlock Text="Modo Claro" FontSize="12" FontWeight="Bold" Foreground="#111827" HorizontalAlignment="Center" />
             </Button>
-            <Button Command="{Binding SelectThemeCommand}" CommandParameter="Modo Oscuro" Margin="4,0,0,6" Padding="10" CornerRadius="{DynamicResource AppCornerRadius}" Background="#0F172A" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+            <Button Command="{Binding SelectThemeCommand}" CommandParameter="Modo Oscuro" Margin="4,0,0,6" Padding="10" CornerRadius="{DynamicResource AppCornerRadius}" Background="#0F172A" BorderBrush="#475569" BorderThickness="1">
                 <TextBlock Text="Modo Oscuro" FontSize="12" FontWeight="Bold" Foreground="#F8FAFC" HorizontalAlignment="Center" />
             </Button>
             <Button Command="{Binding SelectThemeCommand}" CommandParameter="Alto Contraste" Margin="0,0,4,6" Padding="10" CornerRadius="{DynamicResource AppCornerRadius}" Background="#000000" BorderBrush="#FFFFFF" BorderThickness="2">
-                <TextBlock Text="Alto Contraste" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource AccentWarningBrush}" HorizontalAlignment="Center" />
+                <TextBlock Text="Alto Contraste" FontSize="12" FontWeight="Bold" Foreground="#FACC15" HorizontalAlignment="Center" />
             </Button>
             <Button Command="{Binding SelectThemeCommand}" CommandParameter="Cyberpunk Dark" Margin="4,0,0,6" Padding="10" CornerRadius="{DynamicResource AppCornerRadius}" Background="#09090B" BorderBrush="#8B5CF6" BorderThickness="2">
                 <TextBlock Text="Cyberpunk Dark" FontSize="12" FontWeight="Bold" Foreground="#38BDF8" HorizontalAlignment="Center" />

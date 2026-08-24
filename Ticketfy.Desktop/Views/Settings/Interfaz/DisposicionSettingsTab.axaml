@@ -1,8 +1,8 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vm="using:Ticketfy.ViewModels"
+             xmlns:vmsettings="using:Ticketfy.ViewModels.Settings"
              x:Class="Ticketfy.Views.Settings.Interfaz.DisposicionSettingsTab"
-             x:DataType="vm:SettingsViewModel">
+             x:DataType="vmsettings:InterfazSettingsViewModel">
 
     <StackPanel Spacing="14">
         <TextBlock Text="Disposición de Espacio POS &amp; Densidad" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
