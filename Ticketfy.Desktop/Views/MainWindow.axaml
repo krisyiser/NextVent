@@ -13,7 +13,8 @@
         MinWidth="1024" MinHeight="680"
         WindowStartupLocation="CenterScreen"
         ExtendClientAreaToDecorationsHint="True"
-        ExtendClientAreaTitleBarHeightHint="-1">
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaTitleBarHeightHint="36">
 
     <Window.DataTemplates>
         <!-- Module View Templates -->
@@ -54,7 +55,38 @@
     </Window.DataTemplates>
 
     <Panel>
-        <DockPanel LastChildFill="True" Margin="0,30,0,0">
+        <!-- ═══ CUSTOM WINDOW TITLE BAR & HIGH-CONTRAST ACTION BUTTONS ═══ -->
+        <Border Height="36" VerticalAlignment="Top" ZIndex="3000" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1" PointerPressed="OnTitleBarPointerPressed">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8" Margin="12,0,0,0" VerticalAlignment="Center">
+                    <Border Width="20" Height="20" CornerRadius="4" Background="{DynamicResource AccentPrimaryBrush}">
+                        <TextBlock Text="TF" FontSize="10" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <TextBlock Text="TICKETFY! — Sistema de Gestión de Punto de Venta" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                </StackPanel>
+
+                <!-- Draggable Titlebar Area -->
+                <Panel Grid.Column="1" Background="Transparent" />
+
+                <!-- High-Contrast Top-Right Action Buttons -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Stretch">
+                    <Button Click="OnLockClick" Classes="window-action-btn" ToolTip.Tip="Bloquear Pantalla">
+                        <mi:MaterialIcon Kind="LockOutline" Width="16" Height="16" Foreground="{DynamicResource TextPrimaryBrush}" />
+                    </Button>
+                    <Button Click="OnMinimizeClick" Classes="window-action-btn" ToolTip.Tip="Minimizar">
+                        <mi:MaterialIcon Kind="Minus" Width="16" Height="16" Foreground="{DynamicResource TextPrimaryBrush}" />
+                    </Button>
+                    <Button Click="OnMaximizeClick" Classes="window-action-btn" ToolTip.Tip="Maximizar / Restaurar">
+                        <mi:MaterialIcon Kind="WindowMaximize" Width="16" Height="16" Foreground="{DynamicResource TextPrimaryBrush}" />
+                    </Button>
+                    <Button Click="OnCloseClick" Classes="window-action-btn-close" ToolTip.Tip="Cerrar Ventana">
+                        <mi:MaterialIcon Kind="Close" Width="16" Height="16" />
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <DockPanel LastChildFill="True" Margin="0,36,0,0">
             <!-- ═══ SIDEBAR NAVIGATION ═══ -->
             <controls:SidebarNavigationControl />
 
