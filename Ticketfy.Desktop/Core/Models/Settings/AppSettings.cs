@@ -1,3 +1,4 @@
+using CommunityToolkit.Mvvm.ComponentModel;
 using System;
 using System.Text.Json.Serialization;
 
@@ -42,33 +43,37 @@ public sealed class AppSettings
     public SystemSecurityConfig System { get; set; } = new();
 }
 
-public sealed class VisualCustomizationConfig
+/// <summary>
+/// Reactive Visual Customization Configuration backing the live UI theme engine.
+/// Inherits from ObservableObject so slider, toggle, and combobox mutations dispatch 0ms GPU updates.
+/// </summary>
+public partial class VisualCustomizationConfig : ObservableObject
 {
-    public ThemeMode Mode { get; set; } = ThemeMode.Dark;
-    public string ThemeName { get; set; } = "Modo Oscuro";
-    public string PrimaryColor { get; set; } = "#3B82F6";
-    public string AccentColor { get; set; } = "#38BDF8";
-    public string SuccessColor { get; set; } = "#10B981";
-    public string DangerColor { get; set; } = "#EF4444";
-    public string SidebarBgColor { get; set; } = "#0F172A";
-    public double CornerRadius { get; set; } = 6.0;
-    public double FontSizeScale { get; set; } = 14.0;
-    public double PosPriceFontSize { get; set; } = 24.0;
-    public string FontFamily { get; set; } = "Inter";
-    public bool EnableAnimations { get; set; } = true;
-    public double TransitionDurationMs { get; set; } = 120.0;
-    public UIDensity Density { get; set; } = UIDensity.Comfortable;
-    public double GlassmorphismBlur { get; set; } = 0.0;
-    public double GlassmorphismOpacity { get; set; } = 100.0;
-    public double PosCartWidth { get; set; } = 380.0;
-    public string SidebarPosition { get; set; } = "Izquierda";
-    public string CartPosition { get; set; } = "Derecha";
-    public bool ShowStockBadge { get; set; } = true;
-    public bool ShowSkuProducto { get; set; } = true;
-    public bool ShowQuickAddButton { get; set; } = true;
-    public bool ShowProductImages { get; set; } = true;
-    public double GrosorBordePx { get; set; } = 1.0;
-    public double EscalaLogoTopbar { get; set; } = 24.0;
+    [ObservableProperty] private ThemeMode _mode = ThemeMode.Dark;
+    [ObservableProperty] private string _themeName = "Modo Oscuro";
+    [ObservableProperty] private string _primaryColor = "#3B82F6";
+    [ObservableProperty] private string _accentColor = "#38BDF8";
+    [ObservableProperty] private string _successColor = "#10B981";
+    [ObservableProperty] private string _dangerColor = "#EF4444";
+    [ObservableProperty] private string _sidebarBgColor = "#0B111E";
+    [ObservableProperty] private double _cornerRadius = 8.0;
+    [ObservableProperty] private double _fontSizeScale = 14.0;
+    [ObservableProperty] private double _posPriceFontSize = 24.0;
+    [ObservableProperty] private string _fontFamily = "Inter";
+    [ObservableProperty] private bool _enableAnimations = true;
+    [ObservableProperty] private double _transitionDurationMs = 120.0;
+    [ObservableProperty] private UIDensity _density = UIDensity.Comfortable;
+    [ObservableProperty] private double _glassmorphismBlur = 0.0;
+    [ObservableProperty] private double _glassmorphismOpacity = 100.0;
+    [ObservableProperty] private double _posCartWidth = 380.0;
+    [ObservableProperty] private string _sidebarPosition = "Izquierda";
+    [ObservableProperty] private string _cartPosition = "Derecha";
+    [ObservableProperty] private bool _showStockBadge = true;
+    [ObservableProperty] private bool _showSkuProducto = true;
+    [ObservableProperty] private bool _showQuickAddButton = true;
+    [ObservableProperty] private bool _showProductImages = true;
+    [ObservableProperty] private double _grosorBordePx = 1.0;
+    [ObservableProperty] private double _escalaLogoTopbar = 24.0;
 }
 
 public sealed class CompanyProfileConfig

@@ -6,6 +6,7 @@ using Ticketfy.Services.Settings;
 using Serilog;
 using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,7 +14,8 @@ namespace Ticketfy.ViewModels.Settings;
 
 /// <summary>
 /// Strongly-typed ViewModel for Section 1: Personalización & UI.
-/// Reactive theme engine dispatcher with real-time POS component preview.
+/// Reactive theme engine dispatcher with real-time 0ms POS component preview.
+/// Listen to VisualCustomizationConfig PropertyChanged events to instantly apply and save settings.
 /// </summary>
 public partial class PersonalizacionSettingsViewModel : ObservableObject
 {
@@ -31,6 +33,20 @@ public partial class PersonalizacionSettingsViewModel : ObservableObject
 
     // Master AppSettings POCO
     [ObservableProperty] private AppSettings _state = new();
+
+    partial void OnStateChanged(AppSettings value)
+    {
+        if (value?.Visual != null)
+        {
+            value.Visual.PropertyChanged -= Visual_PropertyChanged;
+            value.Visual.PropertyChanged += Visual_PropertyChanged;
+        }
+    }
+
+    private void Visual_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        OnVisualStateChanged();
+    }
 
     // Universal Master 12-Color Palette (12 Distinct Chromatic Hues)
     public ObservableCollection<ColorPaletteItem> Master12ColorPalette { get; } = [
@@ -56,6 +72,10 @@ public partial class PersonalizacionSettingsViewModel : ObservableObject
     public PersonalizacionSettingsViewModel(ISettingsService? settingsService = null)
     {
         _settingsService = settingsService;
+        if (State?.Visual != null)
+        {
+            State.Visual.PropertyChanged += Visual_PropertyChanged;
+        }
         if (_settingsService != null) _ = LoadAsync();
     }
 
@@ -188,6 +208,11 @@ public partial class PersonalizacionSettingsViewModel : ObservableObject
         try
         {
             State = await _settingsService.GetAppSettingsAsync();
+            if (State?.Visual != null)
+            {
+                State.Visual.PropertyChanged -= Visual_PropertyChanged;
+                State.Visual.PropertyChanged += Visual_PropertyChanged;
+            }
             _themeEngine.Apply(State);
         }
         catch (Exception ex)

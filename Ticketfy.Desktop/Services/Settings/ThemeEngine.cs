@@ -12,6 +12,7 @@ namespace Ticketfy.Services.Settings;
 /// High-performance reactive ThemeEngine under Protocol Valcore v4.0.
 /// Direct manipulation of Application.Current.Resources for zero-latency UI customizer updates.
 /// Enforces Valcore UX Hover Protocol with solid contrast tones and accent border strokes.
+/// Registers all reactive visual customization parameters as dynamic resources.
 /// </summary>
 public sealed class ThemeEngine
 {
@@ -134,10 +135,11 @@ public sealed class ThemeEngine
                     break;
             }
 
-            // 2. Custom Brand Accents
+            // 2. Custom Brand Accents & Sidebar Overrides
             if (!string.IsNullOrWhiteSpace(vis.PrimaryColor)) SetResource("AccentPrimaryBrush", Color.Parse(vis.PrimaryColor));
             if (!string.IsNullOrWhiteSpace(vis.SuccessColor)) SetResource("AccentSuccessBrush", Color.Parse(vis.SuccessColor));
             if (!string.IsNullOrWhiteSpace(vis.DangerColor)) SetResource("AccentDangerBrush", Color.Parse(vis.DangerColor));
+            if (!string.IsNullOrWhiteSpace(vis.SidebarBgColor)) SetResource("SidebarBgBrush", Color.Parse(vis.SidebarBgColor));
 
             // 3. Geometry & Corner Radiuses
             SetResource("AppCornerRadius", new CornerRadius(vis.CornerRadius));
@@ -150,8 +152,9 @@ public sealed class ThemeEngine
             SetResource("AppBaseFontSize", vis.FontSizeScale);
             SetResource("PosPriceFontSize", vis.PosPriceFontSize);
 
-            // 5. Spatial Density & Cart Layout
+            // 5. Spatial Density & Cart Layout & Logo Scale
             SetResource("PosCartWidth", vis.PosCartWidth);
+            SetResource("EscalaLogoTopbar", vis.EscalaLogoTopbar);
             switch (vis.Density)
             {
                 case UIDensity.Compact:
@@ -172,10 +175,15 @@ public sealed class ThemeEngine
                     break;
             }
 
-            // 6. Animations & Transitions
+            // 6. Component Visibilities & Flags
+            SetResource("ShowStockBadgeResource", vis.ShowStockBadge);
+            SetResource("ShowQuickAddButtonResource", vis.ShowQuickAddButton);
+            SetResource("ShowBarcodeIconResource", vis.ShowSkuProducto);
+
+            // 7. Animations & Transitions
             SetResource("TransitionDuration", vis.EnableAnimations ? TimeSpan.FromSeconds(0.15) : TimeSpan.Zero);
 
-            // 7. Glassmorphism & Effects
+            // 8. Glassmorphism & Effects
             SetResource("GlassmorphismBlurRadius", vis.GlassmorphismBlur);
             if (vis.GlassmorphismOpacity < 100.0)
             {
@@ -184,7 +192,7 @@ public sealed class ThemeEngine
                 SetResource("BgSecondaryBrush", Color.FromArgb(alpha, secCol.R, secCol.G, secCol.B));
             }
 
-            // 8. Force Immediate Visual Measure & Visual Tree Invalidation in MainWindow
+            // 9. Force Immediate Visual Measure & Visual Tree Invalidation in MainWindow
             if (Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktopWin && desktopWin.MainWindow != null)
             {
                 desktopWin.MainWindow.FontFamily = fontFam;
@@ -194,7 +202,7 @@ public sealed class ThemeEngine
             }
 
             SettingsApplied?.Invoke(settings);
-            Log.Information("ThemeEngine applied app settings cleanly. Theme: {Theme}, Font: {Font}", vis.ThemeName, cleanFont);
+            Log.Information("ThemeEngine applied app settings cleanly. Theme: {Theme}, Font: {Font}, CartWidth: {Width}", vis.ThemeName, cleanFont, vis.PosCartWidth);
         }
         catch (Exception ex)
         {
