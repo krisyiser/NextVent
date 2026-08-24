@@ -26,9 +26,9 @@
                 <!-- Status Feedback & Action Buttons Header -->
                 <WrapPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center">
                     <TextBlock Text="De:" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="4,0" />
-                    <CalendarDatePicker SelectedDate="{Binding StartDate}" Width="120" Margin="4,0" CustomDateFormatString="dd/MM/yyyy" />
+                    <CalendarDatePicker SelectedDate="{Binding StartDate}" Width="155" Margin="4,0" CustomDateFormatString="dd/MM/yyyy" />
                     <TextBlock Text="A:" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="4,0" />
-                    <CalendarDatePicker SelectedDate="{Binding EndDate}" Width="120" Margin="4,0" CustomDateFormatString="dd/MM/yyyy" />
+                    <CalendarDatePicker SelectedDate="{Binding EndDate}" Width="155" Margin="4,0" CustomDateFormatString="dd/MM/yyyy" />
                     <Button Command="{Binding FetchSalesHistoryCommand}" Margin="4,0" Padding="10,6" CornerRadius="{DynamicResource AppCornerRadius}">
                         <StackPanel Orientation="Horizontal" Spacing="4">
                             <mi:MaterialIcon Kind="Filter" Width="14" Height="14" />
