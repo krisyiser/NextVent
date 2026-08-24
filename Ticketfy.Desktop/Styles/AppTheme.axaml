@@ -4,8 +4,8 @@
     <!-- ═══════════════════════════════════════════════════════════
          TICKETFY POS — NEXT.JS AESTHETIC DESIGN TOKEN SYSTEM
          Protocol VALCORE v4.0 — Dynamic Theme Token System
-         Valcore Mandatory Input Border & Vector Spinner Standard
-         (High-Specificity Rest-State Override & High-Contrast Arrow Paths)
+         Valcore Maximum Specificity Input Border & PathIcon Standard
+         (High-Specificity Dual Pseudo-Class Overrides & Visible Arrow Icons)
          ═══════════════════════════════════════════════════════════ -->
 
     <Style Selector=":root">
@@ -75,7 +75,19 @@
         <Setter Property="Background" Value="{DynamicResource HoverBgBrush}" />
     </Style>
 
+    <Style Selector="TextBox:pointerover:not(:focus) /template/ Border#PART_BorderElement">
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentPrimaryBrush}" />
+        <Setter Property="BorderThickness" Value="1.5" />
+        <Setter Property="Background" Value="{DynamicResource HoverBgBrush}" />
+    </Style>
+
     <Style Selector="TextBox:focus /template/ Border#PART_BorderElement">
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentPrimaryBrush}" />
+        <Setter Property="BorderThickness" Value="2" />
+        <Setter Property="Background" Value="{DynamicResource BgSecondaryBrush}" />
+    </Style>
+
+    <Style Selector="TextBox:focus:pointerover /template/ Border#PART_BorderElement">
         <Setter Property="BorderBrush" Value="{DynamicResource AccentPrimaryBrush}" />
         <Setter Property="BorderThickness" Value="2" />
         <Setter Property="Background" Value="{DynamicResource BgSecondaryBrush}" />
@@ -108,6 +120,12 @@
     </Style>
 
     <Style Selector="ComboBox:pointerover /template/ Border#Background">
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentPrimaryBrush}" />
+        <Setter Property="BorderThickness" Value="1.5" />
+        <Setter Property="Background" Value="{DynamicResource HoverBgBrush}" />
+    </Style>
+
+    <Style Selector="ComboBox:pointerover:not(:focus) /template/ Border#Background">
         <Setter Property="BorderBrush" Value="{DynamicResource AccentPrimaryBrush}" />
         <Setter Property="BorderThickness" Value="1.5" />
         <Setter Property="Background" Value="{DynamicResource HoverBgBrush}" />
@@ -189,6 +207,12 @@
         <Setter Property="Background" Value="{DynamicResource HoverBgBrush}" />
     </Style>
 
+    <Style Selector="CalendarDatePicker:pointerover:not(:focus) /template/ Border#Background">
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentPrimaryBrush}" />
+        <Setter Property="BorderThickness" Value="1.5" />
+        <Setter Property="Background" Value="{DynamicResource HoverBgBrush}" />
+    </Style>
+
     <Style Selector="CalendarDatePicker:pointerover /template/ TextBox#PART_TextBox /template/ Border#PART_BorderElement">
         <Setter Property="BorderBrush" Value="{DynamicResource AccentPrimaryBrush}" />
         <Setter Property="BorderThickness" Value="1.5" />
@@ -224,6 +248,12 @@
         <Setter Property="Background" Value="{DynamicResource HoverBgBrush}" />
     </Style>
 
+    <Style Selector="DatePicker:pointerover:not(:focus) /template/ Button#PART_FlyoutButton">
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentPrimaryBrush}" />
+        <Setter Property="BorderThickness" Value="1.5" />
+        <Setter Property="Background" Value="{DynamicResource HoverBgBrush}" />
+    </Style>
+
     <!-- 5. NUMERICUPDOWN & BUTTONSPINNER SPINNER ARROWS -->
     <Style Selector="NumericUpDown">
         <Setter Property="FontFamily" Value="{DynamicResource AppFontFamily}" />
@@ -243,26 +273,24 @@
         <Setter Property="Background" Value="Transparent" />
     </Style>
 
-    <Style Selector="NumericUpDown /template/ ButtonSpinner#PART_Spinner /template/ RepeatButton">
-        <Setter Property="Background" Value="{DynamicResource BgSecondaryBrush}" />
+    <Style Selector="ButtonSpinner /template/ RepeatButton">
+        <Setter Property="Background" Value="{DynamicResource BgTertiaryBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
         <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
         <Setter Property="BorderThickness" Value="0" />
     </Style>
 
-    <Style Selector="NumericUpDown /template/ ButtonSpinner#PART_Spinner /template/ RepeatButton Path">
-        <Setter Property="Fill" Value="{DynamicResource TextPrimaryBrush}" />
-        <Setter Property="Stroke" Value="{DynamicResource TextPrimaryBrush}" />
-    </Style>
-
-    <Style Selector="NumericUpDown /template/ ButtonSpinner#PART_Spinner /template/ RepeatButton:pointerover">
+    <Style Selector="ButtonSpinner /template/ RepeatButton:pointerover">
         <Setter Property="Background" Value="{DynamicResource HoverBgBrush}" />
         <Setter Property="Foreground" Value="{DynamicResource AccentPrimaryBrush}" />
     </Style>
 
-    <Style Selector="NumericUpDown /template/ ButtonSpinner#PART_Spinner /template/ RepeatButton:pointerover Path">
-        <Setter Property="Fill" Value="{DynamicResource AccentPrimaryBrush}" />
-        <Setter Property="Stroke" Value="{DynamicResource AccentPrimaryBrush}" />
+    <Style Selector="ButtonSpinner /template/ RepeatButton PathIcon">
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    </Style>
+
+    <Style Selector="ButtonSpinner /template/ RepeatButton:pointerover PathIcon">
+        <Setter Property="Foreground" Value="{DynamicResource AccentPrimaryBrush}" />
     </Style>
 
     <Style Selector="ButtonSpinner /template/ RepeatButton Path">
@@ -271,6 +299,36 @@
     </Style>
 
     <Style Selector="ButtonSpinner /template/ RepeatButton:pointerover Path">
+        <Setter Property="Fill" Value="{DynamicResource AccentPrimaryBrush}" />
+        <Setter Property="Stroke" Value="{DynamicResource AccentPrimaryBrush}" />
+    </Style>
+
+    <Style Selector="NumericUpDown /template/ ButtonSpinner#PART_Spinner /template/ RepeatButton">
+        <Setter Property="Background" Value="{DynamicResource BgTertiaryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource BorderBrush}" />
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
+
+    <Style Selector="NumericUpDown /template/ ButtonSpinner#PART_Spinner /template/ RepeatButton:pointerover">
+        <Setter Property="Background" Value="{DynamicResource HoverBgBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource AccentPrimaryBrush}" />
+    </Style>
+
+    <Style Selector="NumericUpDown /template/ ButtonSpinner#PART_Spinner /template/ RepeatButton PathIcon">
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    </Style>
+
+    <Style Selector="NumericUpDown /template/ ButtonSpinner#PART_Spinner /template/ RepeatButton:pointerover PathIcon">
+        <Setter Property="Foreground" Value="{DynamicResource AccentPrimaryBrush}" />
+    </Style>
+
+    <Style Selector="NumericUpDown /template/ ButtonSpinner#PART_Spinner /template/ RepeatButton Path">
+        <Setter Property="Fill" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="Stroke" Value="{DynamicResource TextPrimaryBrush}" />
+    </Style>
+
+    <Style Selector="NumericUpDown /template/ ButtonSpinner#PART_Spinner /template/ RepeatButton:pointerover Path">
         <Setter Property="Fill" Value="{DynamicResource AccentPrimaryBrush}" />
         <Setter Property="Stroke" Value="{DynamicResource AccentPrimaryBrush}" />
     </Style>
@@ -311,6 +369,11 @@
     </Style>
 
     <Style Selector="AutoCompleteBox:pointerover /template/ TextBox#PART_TextBox /template/ Border#PART_BorderElement">
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentPrimaryBrush}" />
+        <Setter Property="BorderThickness" Value="1.5" />
+    </Style>
+
+    <Style Selector="AutoCompleteBox:pointerover:not(:focus) /template/ TextBox#PART_TextBox /template/ Border#PART_BorderElement">
         <Setter Property="BorderBrush" Value="{DynamicResource AccentPrimaryBrush}" />
         <Setter Property="BorderThickness" Value="1.5" />
     </Style>
