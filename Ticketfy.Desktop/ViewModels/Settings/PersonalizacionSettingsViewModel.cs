@@ -89,6 +89,70 @@ public partial class PersonalizacionSettingsViewModel : ObservableObject
     private void SelectTheme(string themeName)
     {
         State.Visual.ThemeName = themeName;
+        switch (themeName)
+        {
+            case "Modo Claro":
+            case "Light":
+                State.Visual.Mode = ThemeMode.Light;
+                State.Visual.PrimaryColor = "#0284C7";
+                State.Visual.SuccessColor = "#059669";
+                State.Visual.DangerColor = "#DC2626";
+                State.Visual.SidebarBgColor = "#F1F5F9";
+                State.Visual.CornerRadius = 6.0;
+                State.Visual.FontFamily = "Outfit";
+                break;
+
+            case "Alto Contraste":
+                State.Visual.Mode = ThemeMode.HighContrast;
+                State.Visual.PrimaryColor = "#FACC15";
+                State.Visual.SuccessColor = "#00FF66";
+                State.Visual.DangerColor = "#FF0033";
+                State.Visual.SidebarBgColor = "#000000";
+                State.Visual.CornerRadius = 0.0;
+                State.Visual.FontFamily = "Roboto";
+                break;
+
+            case "Cyberpunk Dark":
+                State.Visual.Mode = ThemeMode.Cyberpunk;
+                State.Visual.PrimaryColor = "#EC4899";
+                State.Visual.SuccessColor = "#06B6D4";
+                State.Visual.DangerColor = "#FF2E63";
+                State.Visual.SidebarBgColor = "#0B0719";
+                State.Visual.CornerRadius = 4.0;
+                State.Visual.FontFamily = "JetBrains Mono";
+                break;
+
+            case "Emerald Glass":
+                State.Visual.Mode = ThemeMode.Emerald;
+                State.Visual.PrimaryColor = "#10B981";
+                State.Visual.SuccessColor = "#34D399";
+                State.Visual.DangerColor = "#F43F5E";
+                State.Visual.SidebarBgColor = "#011711";
+                State.Visual.CornerRadius = 10.0;
+                State.Visual.FontFamily = "Montserrat";
+                break;
+
+            case "Nordic Slate":
+                State.Visual.Mode = ThemeMode.Nordic;
+                State.Visual.PrimaryColor = "#38BDF8";
+                State.Visual.SuccessColor = "#34D399";
+                State.Visual.DangerColor = "#F87171";
+                State.Visual.SidebarBgColor = "#0F172A";
+                State.Visual.CornerRadius = 12.0;
+                State.Visual.FontFamily = "Plus Jakarta Sans";
+                break;
+
+            case "Modo Oscuro":
+            default:
+                State.Visual.Mode = ThemeMode.Dark;
+                State.Visual.PrimaryColor = "#3B82F6";
+                State.Visual.SuccessColor = "#10B981";
+                State.Visual.DangerColor = "#EF4444";
+                State.Visual.SidebarBgColor = "#0B111E";
+                State.Visual.CornerRadius = 8.0;
+                State.Visual.FontFamily = "Inter";
+                break;
+        }
         OnVisualStateChanged();
     }
 
