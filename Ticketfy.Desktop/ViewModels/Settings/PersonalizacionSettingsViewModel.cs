@@ -32,35 +32,20 @@ public partial class PersonalizacionSettingsViewModel : ObservableObject
     // Master AppSettings POCO
     [ObservableProperty] private AppSettings _state = new();
 
-    // Color Swatches
-    public ObservableCollection<ColorPaletteItem> SuccessColors { get; } = [
-        new("Esmeralda Muted", "#10B981"),
-        new("Verde POS", "#059669"),
-        new("Jade", "#047857"),
-        new("Menta Neón", "#34D399")
-    ];
-
-    public ObservableCollection<ColorPaletteItem> DangerColors { get; } = [
-        new("Rojo Carmesí", "#EF4444"),
-        new("Rosa Intenso", "#F43F5E"),
-        new("Granate", "#B91C1C"),
-        new("Coral Vibrante", "#FB7185")
-    ];
-
-    public ObservableCollection<ColorPaletteItem> AccentColors { get; } = [
+    // Universal Master 12-Color Palette (12 Distinct Chromatic Hues)
+    public ObservableCollection<ColorPaletteItem> Master12ColorPalette { get; } = [
         new("Azul Eléctrico", "#3B82F6"),
-        new("Púrpura", "#8B5CF6"),
-        new("Ámbar", "#F59E0B"),
-        new("Cian Neón", "#06B6D4"),
-        new("Índigo Profundo", "#6366F1"),
-        new("Verde Esmeralda", "#10B981")
-    ];
-
-    public ObservableCollection<ColorPaletteItem> SidebarColors { get; } = [
-        new("Oscuro Profundo", "#090D16"),
-        new("Azul Noche", "#0F172A"),
-        new("Gris Grafito", "#1E293B"),
-        new("Negro OLED", "#000000")
+        new("Verde Esmeralda", "#10B981"),
+        new("Rojo Carmesí", "#EF4444"),
+        new("Púrpura Neón", "#8B5CF6"),
+        new("Ámbar Dorado", "#F59E0B"),
+        new("Cian Ártico", "#06B6D4"),
+        new("Rosa Magenta", "#EC4899"),
+        new("Naranja Neón", "#F97316"),
+        new("Lima Verde", "#84CC16"),
+        new("Índigo Violeta", "#6366F1"),
+        new("Gris Grafito", "#475569"),
+        new("Negro OLED", "#090D16")
     ];
 
     public ObservableCollection<string> AvailableFontOptions { get; } = [

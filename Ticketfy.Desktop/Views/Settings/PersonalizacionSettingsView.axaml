@@ -143,8 +143,8 @@
                         </Border>
                     </StackPanel>
 
-                    <!-- SUB-TAB 2: COLORES & PALETAS (CORREGIDO DATA TEMPLATE STRONGLY TYPED) -->
-                    <StackPanel IsVisible="{Binding IsSubColoresTab}" Spacing="16">
+                    <!-- SUB-TAB 2: COLORES & PALETA MAESTRA UNIVERSAL (12 COLORES ÚNICOS DISPONIBLES EN TODAS LAS ÁREAS) -->
+                    <StackPanel IsVisible="{Binding IsSubColoresTab}" Spacing="14">
 
                         <!-- Escala de Logo Corporativo en Barra -->
                         <Border Padding="14,12" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
@@ -169,22 +169,22 @@
                                     <mi:MaterialIcon Kind="CheckCircleOutline" Width="16" Height="16" Foreground="{DynamicResource AccentSuccessBrush}" VerticalAlignment="Center" />
                                     <TextBlock Text="Color Botón Cobrar (Éxito en Ventas)" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
                                 </StackPanel>
-                                <ItemsControl ItemsSource="{Binding SuccessColors}">
+                                <ItemsControl ItemsSource="{Binding Master12ColorPalette}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
-                                            <UniformGrid Columns="4" />
+                                            <UniformGrid Columns="6" />
                                         </ItemsPanelTemplate>
                                     </ItemsControl.ItemsPanel>
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate x:DataType="vmsettings:ColorPaletteItem">
                                             <Button Command="{Binding $parent[UserControl].((vmsettings:PersonalizacionSettingsViewModel)DataContext).SelectSuccessColorCommand}"
                                                     CommandParameter="{Binding HexColor}"
-                                                    Margin="3" Padding="8,6" Height="40" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" Cursor="Hand">
+                                                    Margin="2" Padding="6,4" Height="38" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" Cursor="Hand">
                                                 <Grid ColumnDefinitions="Auto,*">
-                                                    <Border Width="16" Height="16" CornerRadius="8" Background="{Binding HexColor}" VerticalAlignment="Center" />
-                                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="8,0,0,0">
-                                                        <TextBlock Text="{Binding Name}" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis" />
-                                                        <TextBlock Text="{Binding HexColor}" FontSize="9" Foreground="{DynamicResource TextMutedBrush}" />
+                                                    <Border Width="14" Height="14" CornerRadius="7" Background="{Binding HexColor}" VerticalAlignment="Center" />
+                                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="6,0,0,0">
+                                                        <TextBlock Text="{Binding Name}" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                                                        <TextBlock Text="{Binding HexColor}" FontSize="8" Foreground="{DynamicResource TextMutedBrush}" />
                                                     </StackPanel>
                                                 </Grid>
                                             </Button>
@@ -201,22 +201,22 @@
                                     <mi:MaterialIcon Kind="AlertOctagonOutline" Width="16" Height="16" Foreground="{DynamicResource AccentDangerBrush}" VerticalAlignment="Center" />
                                     <TextBlock Text="Color Botón Anular / Cancelar (Alertas)" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
                                 </StackPanel>
-                                <ItemsControl ItemsSource="{Binding DangerColors}">
+                                <ItemsControl ItemsSource="{Binding Master12ColorPalette}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
-                                            <UniformGrid Columns="4" />
+                                            <UniformGrid Columns="6" />
                                         </ItemsPanelTemplate>
                                     </ItemsControl.ItemsPanel>
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate x:DataType="vmsettings:ColorPaletteItem">
                                             <Button Command="{Binding $parent[UserControl].((vmsettings:PersonalizacionSettingsViewModel)DataContext).SelectDangerColorCommand}"
                                                     CommandParameter="{Binding HexColor}"
-                                                    Margin="3" Padding="8,6" Height="40" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" Cursor="Hand">
+                                                    Margin="2" Padding="6,4" Height="38" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" Cursor="Hand">
                                                 <Grid ColumnDefinitions="Auto,*">
-                                                    <Border Width="16" Height="16" CornerRadius="8" Background="{Binding HexColor}" VerticalAlignment="Center" />
-                                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="8,0,0,0">
-                                                        <TextBlock Text="{Binding Name}" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis" />
-                                                        <TextBlock Text="{Binding HexColor}" FontSize="9" Foreground="{DynamicResource TextMutedBrush}" />
+                                                    <Border Width="14" Height="14" CornerRadius="7" Background="{Binding HexColor}" VerticalAlignment="Center" />
+                                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="6,0,0,0">
+                                                        <TextBlock Text="{Binding Name}" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                                                        <TextBlock Text="{Binding HexColor}" FontSize="8" Foreground="{DynamicResource TextMutedBrush}" />
                                                     </StackPanel>
                                                 </Grid>
                                             </Button>
@@ -233,22 +233,22 @@
                                     <mi:MaterialIcon Kind="Palette" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
                                     <TextBlock Text="Color Acento Principal (Foco del Sistema)" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
                                 </StackPanel>
-                                <ItemsControl ItemsSource="{Binding AccentColors}">
+                                <ItemsControl ItemsSource="{Binding Master12ColorPalette}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
-                                            <UniformGrid Columns="3" />
+                                            <UniformGrid Columns="6" />
                                         </ItemsPanelTemplate>
                                     </ItemsControl.ItemsPanel>
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate x:DataType="vmsettings:ColorPaletteItem">
                                             <Button Command="{Binding $parent[UserControl].((vmsettings:PersonalizacionSettingsViewModel)DataContext).SelectPrimaryColorCommand}"
                                                     CommandParameter="{Binding HexColor}"
-                                                    Margin="3" Padding="8,6" Height="40" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" Cursor="Hand">
+                                                    Margin="2" Padding="6,4" Height="38" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" Cursor="Hand">
                                                 <Grid ColumnDefinitions="Auto,*">
-                                                    <Border Width="16" Height="16" CornerRadius="8" Background="{Binding HexColor}" VerticalAlignment="Center" />
-                                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="8,0,0,0">
-                                                        <TextBlock Text="{Binding Name}" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis" />
-                                                        <TextBlock Text="{Binding HexColor}" FontSize="9" Foreground="{DynamicResource TextMutedBrush}" />
+                                                    <Border Width="14" Height="14" CornerRadius="7" Background="{Binding HexColor}" VerticalAlignment="Center" />
+                                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="6,0,0,0">
+                                                        <TextBlock Text="{Binding Name}" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                                                        <TextBlock Text="{Binding HexColor}" FontSize="8" Foreground="{DynamicResource TextMutedBrush}" />
                                                     </StackPanel>
                                                 </Grid>
                                             </Button>
@@ -265,22 +265,22 @@
                                     <mi:MaterialIcon Kind="NavigationOutline" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
                                     <TextBlock Text="Color de Fondo de Barra Lateral de Navegación" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
                                 </StackPanel>
-                                <ItemsControl ItemsSource="{Binding SidebarColors}">
+                                <ItemsControl ItemsSource="{Binding Master12ColorPalette}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
-                                            <UniformGrid Columns="4" />
+                                            <UniformGrid Columns="6" />
                                         </ItemsPanelTemplate>
                                     </ItemsControl.ItemsPanel>
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate x:DataType="vmsettings:ColorPaletteItem">
                                             <Button Command="{Binding $parent[UserControl].((vmsettings:PersonalizacionSettingsViewModel)DataContext).SelectSidebarColorCommand}"
                                                     CommandParameter="{Binding HexColor}"
-                                                    Margin="3" Padding="8,6" Height="40" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" Cursor="Hand">
+                                                    Margin="2" Padding="6,4" Height="38" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" Cursor="Hand">
                                                 <Grid ColumnDefinitions="Auto,*">
-                                                    <Border Width="16" Height="16" CornerRadius="8" Background="{Binding HexColor}" VerticalAlignment="Center" />
-                                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="8,0,0,0">
-                                                        <TextBlock Text="{Binding Name}" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis" />
-                                                        <TextBlock Text="{Binding HexColor}" FontSize="9" Foreground="{DynamicResource TextMutedBrush}" />
+                                                    <Border Width="14" Height="14" CornerRadius="7" Background="{Binding HexColor}" VerticalAlignment="Center" />
+                                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="6,0,0,0">
+                                                        <TextBlock Text="{Binding Name}" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                                                        <TextBlock Text="{Binding HexColor}" FontSize="8" Foreground="{DynamicResource TextMutedBrush}" />
                                                     </StackPanel>
                                                 </Grid>
                                             </Button>
