@@ -13,6 +13,7 @@ namespace Ticketfy.Services.Settings;
 /// Direct manipulation of Application.Current.Resources for zero-latency UI customizer updates.
 /// Enforces Valcore UX Hover Protocol with solid contrast tones and accent border strokes.
 /// Registers all reactive visual customization parameters as dynamic resources.
+/// Enforces Valcore Mandatory Input Border Standard (Universal Visible Outline).
 /// </summary>
 public sealed class ThemeEngine
 {
@@ -57,7 +58,7 @@ public sealed class ThemeEngine
 
         try
         {
-            // 1. RADICAL BRAND PRESETS WITH VALCORE HOVER CONTRAST PROTOCOL
+            // 1. RADICAL BRAND PRESETS WITH VALCORE HOVER & MANDATORY BORDER CONTRAST PROTOCOL
             switch (vis.ThemeName)
             {
                 case "Modo Claro":
@@ -65,8 +66,8 @@ public sealed class ThemeEngine
                     SetResource("BgPrimaryBrush", Color.Parse("#F8FAFC"));
                     SetResource("BgSecondaryBrush", Color.Parse("#FFFFFF"));
                     SetResource("BgTertiaryBrush", Color.Parse("#F1F5F9"));
-                    SetResource("HoverBgBrush", Color.Parse("#E2E8F0")); // Contrast slate tint (NEVER disappears into white!)
-                    SetResource("BorderBrush", Color.Parse("#CBD5E1"));
+                    SetResource("HoverBgBrush", Color.Parse("#E2E8F0"));
+                    SetResource("BorderBrush", Color.Parse("#94A3B8")); // High-contrast slate border stroke (NEVER disappears into white!)
                     SetResource("TextPrimaryBrush", Color.Parse("#0F172A"));
                     SetResource("TextSecondaryBrush", Color.Parse("#334155"));
                     SetResource("TextMutedBrush", Color.Parse("#64748B"));
@@ -114,7 +115,7 @@ public sealed class ThemeEngine
                     SetResource("BgSecondaryBrush", Color.Parse("#27354A"));
                     SetResource("BgTertiaryBrush", Color.Parse("#334155"));
                     SetResource("HoverBgBrush", Color.Parse("#475569"));
-                    SetResource("BorderBrush", Color.Parse("#475569"));
+                    SetResource("BorderBrush", Color.Parse("#64748B"));
                     SetResource("TextPrimaryBrush", Color.Parse("#F1F5F9"));
                     SetResource("TextSecondaryBrush", Color.Parse("#CBD5E1"));
                     SetResource("TextMutedBrush", Color.Parse("#94A3B8"));
@@ -126,8 +127,8 @@ public sealed class ThemeEngine
                     SetResource("BgPrimaryBrush", Color.Parse("#090D16"));
                     SetResource("BgSecondaryBrush", Color.Parse("#151D2A"));
                     SetResource("BgTertiaryBrush", Color.Parse("#1E293B"));
-                    SetResource("HoverBgBrush", Color.Parse("#27354A")); // Elevated dark slate hover
-                    SetResource("BorderBrush", Color.Parse("#334155"));
+                    SetResource("HoverBgBrush", Color.Parse("#27354A"));
+                    SetResource("BorderBrush", Color.Parse("#475569"));
                     SetResource("TextPrimaryBrush", Color.Parse("#F8FAFC"));
                     SetResource("TextSecondaryBrush", Color.Parse("#94A3B8"));
                     SetResource("TextMutedBrush", Color.Parse("#64748B"));
