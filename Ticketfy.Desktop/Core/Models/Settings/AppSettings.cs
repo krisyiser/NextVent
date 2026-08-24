@@ -61,6 +61,7 @@ public sealed class VisualCustomizationConfig
     public bool ShowQuickAddButton { get; set; } = true;
     public bool ShowProductImages { get; set; } = true;
     public double GrosorBordePx { get; set; } = 1.0;
+    public double EscalaLogoTopbar { get; set; } = 24.0;
 }
 
 public sealed class CompanyProfileConfig

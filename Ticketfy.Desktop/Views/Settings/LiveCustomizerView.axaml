@@ -1,144 +1,296 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ticketfy.ViewModels"
              xmlns:vmsettings="using:Ticketfy.ViewModels.Settings"
-             xmlns:models="using:Ticketfy.Core.Models.Settings"
              xmlns:mi="using:Material.Icons.Avalonia"
              x:Class="Ticketfy.Views.Settings.LiveCustomizerView"
              x:DataType="vmsettings:UnifiedSettingsViewModel">
 
-    <!-- 2-COLUMN LAYOUT: GRANULAR STYLES STUDIO (LEFT) vs REAL-TIME COMPONENT PREVIEW BOX (RIGHT) -->
-    <Grid ColumnDefinitions="*,320">
+    <!-- 2-COLUMN LAYOUT: GRANULAR SUB-TABS STUDIO (LEFT) vs REAL-TIME COMPONENT PREVIEW BOX (RIGHT) -->
+    <Grid ColumnDefinitions="*,340">
 
-        <!-- ─── LEFT COLUMN: GRANULAR STYLES STUDIO ─── -->
-        <ScrollViewer Grid.Column="0" VerticalScrollBarVisibility="Auto" Padding="0,0,16,0">
-            <StackPanel Spacing="16">
+        <!-- ─── LEFT COLUMN: GRANULAR SUB-TABS STUDIO ─── -->
+        <DockPanel Grid.Column="0" LastChildFill="True" Margin="0,0,16,0">
 
-                <!-- 1. Presets de Temas Base -->
-                <Border Padding="14" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
-                    <StackPanel Spacing="10">
-                        <TextBlock Text="Preset de Tema &amp; Apariencia" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
-                        <UniformGrid Columns="3">
-                            <Button Command="{Binding SelectThemeCommand}" CommandParameter="Modo Oscuro" Margin="2" Padding="8" CornerRadius="{DynamicResource AppCornerRadius}" Background="#090D16" BorderBrush="#334155" BorderThickness="1">
-                                <TextBlock Text="Modo Oscuro" FontSize="11" FontWeight="Bold" Foreground="#F8FAFC" HorizontalAlignment="Center" />
-                            </Button>
-                            <Button Command="{Binding SelectThemeCommand}" CommandParameter="Modo Claro" Margin="2" Padding="8" CornerRadius="{DynamicResource AppCornerRadius}" Background="#F4F6F8" BorderBrush="#E5E7EB" BorderThickness="1">
-                                <TextBlock Text="Modo Claro" FontSize="11" FontWeight="Bold" Foreground="#111827" HorizontalAlignment="Center" />
-                            </Button>
-                            <Button Command="{Binding SelectThemeCommand}" CommandParameter="Nordic Slate" Margin="2" Padding="8" CornerRadius="{DynamicResource AppCornerRadius}" Background="#1E293B" BorderBrush="#94A3B8" BorderThickness="1">
-                                <TextBlock Text="Nordic Slate" FontSize="11" FontWeight="Bold" Foreground="#F8FAFC" HorizontalAlignment="Center" />
-                            </Button>
-                            <Button Command="{Binding SelectThemeCommand}" CommandParameter="Cyberpunk Dark" Margin="2" Padding="8" CornerRadius="{DynamicResource AppCornerRadius}" Background="#09090B" BorderBrush="#8B5CF6" BorderThickness="1">
-                                <TextBlock Text="Cyberpunk" FontSize="11" FontWeight="Bold" Foreground="#38BDF8" HorizontalAlignment="Center" />
-                            </Button>
-                            <Button Command="{Binding SelectThemeCommand}" CommandParameter="Emerald Glass" Margin="2" Padding="8" CornerRadius="{DynamicResource AppCornerRadius}" Background="#022C22" BorderBrush="#34D399" BorderThickness="1">
-                                <TextBlock Text="Emerald Glass" FontSize="11" FontWeight="Bold" Foreground="#A7F3D0" HorizontalAlignment="Center" />
-                            </Button>
-                            <Button Command="{Binding SelectThemeCommand}" CommandParameter="Alto Contraste" Margin="2" Padding="8" CornerRadius="{DynamicResource AppCornerRadius}" Background="#000000" BorderBrush="#FFFFFF" BorderThickness="1">
-                                <TextBlock Text="Alto Contraste" FontSize="11" FontWeight="Bold" Foreground="#FACC15" HorizontalAlignment="Center" />
-                            </Button>
-                        </UniformGrid>
-                    </StackPanel>
-                </Border>
+            <!-- 1. HORIZONTAL SUB-TAB NAVIGATION BAR (MATCHING CLASSIC LAYOUT & DESIGN SKILLS) -->
+            <Border DockPanel.Dock="Top" Margin="0,0,0,14" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="4" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                <UniformGrid Columns="6">
+                    <Button Command="{Binding SelectSubTabCommand}" CommandParameter="tema" Padding="8,8" CornerRadius="{DynamicResource AppCornerRadius}" HorizontalAlignment="Stretch" Cursor="Hand">
+                        <TextBlock Text="Tema" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" />
+                    </Button>
+                    <Button Command="{Binding SelectSubTabCommand}" CommandParameter="colores" Padding="8,8" CornerRadius="{DynamicResource AppCornerRadius}" HorizontalAlignment="Stretch" Cursor="Hand">
+                        <TextBlock Text="Colores" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" />
+                    </Button>
+                    <Button Command="{Binding SelectSubTabCommand}" CommandParameter="tipografia" Padding="8,8" CornerRadius="{DynamicResource AppCornerRadius}" HorizontalAlignment="Stretch" Cursor="Hand">
+                        <TextBlock Text="Tipografía" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" />
+                    </Button>
+                    <Button Command="{Binding SelectSubTabCommand}" CommandParameter="disposicion" Padding="8,8" CornerRadius="{DynamicResource AppCornerRadius}" HorizontalAlignment="Stretch" Cursor="Hand">
+                        <TextBlock Text="Disposición" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" />
+                    </Button>
+                    <Button Command="{Binding SelectSubTabCommand}" CommandParameter="botones" Padding="8,8" CornerRadius="{DynamicResource AppCornerRadius}" HorizontalAlignment="Stretch" Cursor="Hand">
+                        <TextBlock Text="Botones" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" />
+                    </Button>
+                    <Button Command="{Binding SelectSubTabCommand}" CommandParameter="animaciones" Padding="8,8" CornerRadius="{DynamicResource AppCornerRadius}" HorizontalAlignment="Stretch" Cursor="Hand">
+                        <TextBlock Text="Animaciones" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" />
+                    </Button>
+                </UniformGrid>
+            </Border>
 
-                <!-- 2. Paleta de Color de Acento Principal -->
-                <Border Padding="14" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
-                    <StackPanel Spacing="10">
-                        <TextBlock Text="Color de Acento de Identidad" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
-                        <ItemsControl ItemsSource="{Binding AccentColors}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <UniformGrid Columns="4" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Button Command="{Binding $parent[UserControl].((vmsettings:UnifiedSettingsViewModel)DataContext).SelectPrimaryColorCommand}"
-                                            CommandParameter="{Binding HexColor}"
-                                            Margin="2" Padding="6" Height="36" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}">
-                                        <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                                            <Border Width="14" Height="14" CornerRadius="7" Background="{Binding HexColor}" />
-                                            <TextBlock Text="{Binding Name}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
-                                        </StackPanel>
+            <!-- 2. SUB-TAB HOST PANELS -->
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <Grid>
+                    <!-- SUB-TAB 1: TEMA -->
+                    <StackPanel IsVisible="{Binding IsSubTemaTab}" Spacing="16">
+                        <Border Padding="14" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                            <StackPanel Spacing="12">
+                                <TextBlock Text="Presets de Temas Base &amp; Canvas GPU" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                <UniformGrid Columns="3">
+                                    <Button Command="{Binding SelectThemeCommand}" CommandParameter="Modo Oscuro" Margin="3" Padding="10" CornerRadius="{DynamicResource AppCornerRadius}" Background="#090D16" BorderBrush="#334155" BorderThickness="1">
+                                        <TextBlock Text="Modo Oscuro" FontSize="11" FontWeight="Bold" Foreground="#F8FAFC" HorizontalAlignment="Center" />
                                     </Button>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                                    <Button Command="{Binding SelectThemeCommand}" CommandParameter="Modo Claro" Margin="3" Padding="10" CornerRadius="{DynamicResource AppCornerRadius}" Background="#F4F6F8" BorderBrush="#E5E7EB" BorderThickness="1">
+                                        <TextBlock Text="Modo Claro" FontSize="11" FontWeight="Bold" Foreground="#111827" HorizontalAlignment="Center" />
+                                    </Button>
+                                    <Button Command="{Binding SelectThemeCommand}" CommandParameter="Nordic Slate" Margin="3" Padding="10" CornerRadius="{DynamicResource AppCornerRadius}" Background="#1E293B" BorderBrush="#94A3B8" BorderThickness="1">
+                                        <TextBlock Text="Nordic Slate" FontSize="11" FontWeight="Bold" Foreground="#F8FAFC" HorizontalAlignment="Center" />
+                                    </Button>
+                                    <Button Command="{Binding SelectThemeCommand}" CommandParameter="Cyberpunk Dark" Margin="3" Padding="10" CornerRadius="{DynamicResource AppCornerRadius}" Background="#09090B" BorderBrush="#8B5CF6" BorderThickness="1">
+                                        <TextBlock Text="Cyberpunk Dark" FontSize="11" FontWeight="Bold" Foreground="#38BDF8" HorizontalAlignment="Center" />
+                                    </Button>
+                                    <Button Command="{Binding SelectThemeCommand}" CommandParameter="Emerald Glass" Margin="3" Padding="10" CornerRadius="{DynamicResource AppCornerRadius}" Background="#022C22" BorderBrush="#34D399" BorderThickness="1">
+                                        <TextBlock Text="Emerald Glass" FontSize="11" FontWeight="Bold" Foreground="#A7F3D0" HorizontalAlignment="Center" />
+                                    </Button>
+                                    <Button Command="{Binding SelectThemeCommand}" CommandParameter="Alto Contraste" Margin="3" Padding="10" CornerRadius="{DynamicResource AppCornerRadius}" Background="#000000" BorderBrush="#FFFFFF" BorderThickness="1">
+                                        <TextBlock Text="Alto Contraste" FontSize="11" FontWeight="Bold" Foreground="#FACC15" HorizontalAlignment="Center" />
+                                    </Button>
+                                </UniformGrid>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
-                </Border>
 
-                <!-- 3. Tipografía & Escalamiento de Texto -->
-                <Border Padding="14" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
-                    <StackPanel Spacing="12">
-                        <TextBlock Text="Tipografía &amp; Escalamiento de Fuente" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
-                        
-                        <StackPanel Spacing="4">
-                            <TextBlock Text="Familia Tipográfica" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                            <ComboBox ItemsSource="{Binding AvailableFontOptions}" SelectedItem="{Binding State.Visual.FontFamily, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="8,6" />
+                    <!-- SUB-TAB 2: COLORES (EXACT MATCH TO USER SCREENSHOT!) -->
+                    <StackPanel IsVisible="{Binding IsSubColoresTab}" Spacing="16">
+                        <TextBlock Text="Paletas de Colores &amp; Identidad Visual (Sin códigos Hexadecimales)" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+
+                        <!-- Escala de Logo Corporativo en Barra -->
+                        <Border Padding="14,12" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                            <StackPanel Spacing="10">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="Escala de Logo Corporativo en Barra" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,12,0" />
+                                    <Border Grid.Column="1" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="6,2">
+                                        <TextBlock Text="{Binding State.Visual.EscalaLogoTopbar, StringFormat='{}{0:F0} px'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                    </Border>
+                                </Grid>
+                                <Slider Minimum="20" Maximum="56" Value="{Binding State.Visual.EscalaLogoTopbar, Mode=TwoWay}" Margin="0,4,0,0" />
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Color Botón Cobrar (Éxito en Ventas) -->
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Color Botón Cobrar (Éxito en Ventas)" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <ItemsControl ItemsSource="{Binding SuccessColors}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid Columns="4" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:ColorPaletteItem">
+                                        <Button Command="{Binding $parent[UserControl].((vmsettings:UnifiedSettingsViewModel)DataContext).SelectSuccessColorCommand}"
+                                                CommandParameter="{Binding HexColor}"
+                                                Margin="2" Padding="6" Height="36" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgSecondaryBrush}">
+                                            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                                                <Border Width="14" Height="14" CornerRadius="7" Background="{Binding HexColor}" />
+                                                <TextBlock Text="{Binding Name}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
                         </StackPanel>
 
-                        <Grid ColumnDefinitions="*,Auto">
-                            <TextBlock Text="Tamaño Base de Fuente (UI)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
-                            <Border Grid.Column="1" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="6,2">
-                                <TextBlock Text="{Binding State.Visual.FontSizeScale, StringFormat='{}{0:F0} px'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                            </Border>
-                        </Grid>
-                        <Slider Minimum="12" Maximum="18" Value="{Binding State.Visual.FontSizeScale, Mode=TwoWay}" />
+                        <!-- Color Botón Anular / Cancelar (Alertas) -->
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Color Botón Anular / Cancelar (Alertas)" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <ItemsControl ItemsSource="{Binding DangerColors}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid Columns="4" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:ColorPaletteItem">
+                                        <Button Command="{Binding $parent[UserControl].((vmsettings:UnifiedSettingsViewModel)DataContext).SelectDangerColorCommand}"
+                                                CommandParameter="{Binding HexColor}"
+                                                Margin="2" Padding="6" Height="36" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgSecondaryBrush}">
+                                            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                                                <Border Width="14" Height="14" CornerRadius="7" Background="{Binding HexColor}" />
+                                                <TextBlock Text="{Binding Name}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
 
-                        <Grid ColumnDefinitions="*,Auto">
-                            <TextBlock Text="Tamaño de Precios Monospaciados POS" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
-                            <Border Grid.Column="1" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="6,2">
-                                <TextBlock Text="{Binding State.Visual.PosPriceFontSize, StringFormat='{}{0:F0} px'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                            </Border>
-                        </Grid>
-                        <Slider Minimum="18" Maximum="36" Value="{Binding State.Visual.PosPriceFontSize, Mode=TwoWay}" />
+                        <!-- Color Acento Principal (Foco del Sistema) -->
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Color Acento Principal (Foco del Sistema)" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <ItemsControl ItemsSource="{Binding AccentColors}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid Columns="4" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:ColorPaletteItem">
+                                        <Button Command="{Binding $parent[UserControl].((vmsettings:UnifiedSettingsViewModel)DataContext).SelectPrimaryColorCommand}"
+                                                CommandParameter="{Binding HexColor}"
+                                                Margin="2" Padding="6" Height="36" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgSecondaryBrush}">
+                                            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                                                <Border Width="14" Height="14" CornerRadius="7" Background="{Binding HexColor}" />
+                                                <TextBlock Text="{Binding Name}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+
+                        <!-- Color de Fondo de Barra Lateral de Navegación -->
+                        <StackPanel Spacing="6">
+                            <TextBlock Text="Color de Fondo de Barra Lateral de Navegación" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <ItemsControl ItemsSource="{Binding SidebarColors}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <UniformGrid Columns="4" />
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate x:DataType="vm:ColorPaletteItem">
+                                        <Button Command="{Binding $parent[UserControl].((vmsettings:UnifiedSettingsViewModel)DataContext).SelectSidebarColorCommand}"
+                                                CommandParameter="{Binding HexColor}"
+                                                Margin="2" Padding="6" Height="36" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgSecondaryBrush}">
+                                            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
+                                                <Border Width="14" Height="14" CornerRadius="7" Background="{Binding HexColor}" />
+                                                <TextBlock Text="{Binding Name}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                            </StackPanel>
+                                        </Button>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
                     </StackPanel>
-                </Border>
 
-                <!-- 4. Geometría, Radio de Bordes & Densidad Espacial -->
-                <Border Padding="14" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
-                    <StackPanel Spacing="12">
-                        <TextBlock Text="Geometría, Radio de Bordes &amp; Densidad Espacial" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
-                        
-                        <Grid ColumnDefinitions="*,Auto">
-                            <TextBlock Text="Radio de Curvatura de Bordes (Corner Radius)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
-                            <Border Grid.Column="1" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="6,2">
-                                <TextBlock Text="{Binding State.Visual.CornerRadius, StringFormat='{}{0:F0} px'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                            </Border>
-                        </Grid>
-                        <Slider Minimum="0" Maximum="24" Value="{Binding State.Visual.CornerRadius, Mode=TwoWay}" />
+                    <!-- SUB-TAB 3: TIPOGRAFÍA -->
+                    <StackPanel IsVisible="{Binding IsSubTipografiaTab}" Spacing="16">
+                        <Border Padding="14" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                            <StackPanel Spacing="14">
+                                <TextBlock Text="Familia Tipográfica &amp; Escalamiento de Fuente" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
 
-                        <Grid ColumnDefinitions="*,Auto">
-                            <TextBlock Text="Ancho de Carrito POS" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
-                            <Border Grid.Column="1" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="6,2">
-                                <TextBlock Text="{Binding State.Visual.PosCartWidth, StringFormat='{}{0:F0} px'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                            </Border>
-                        </Grid>
-                        <Slider Minimum="300" Maximum="550" Value="{Binding State.Visual.PosCartWidth, Mode=TwoWay}" />
+                                <StackPanel Spacing="4">
+                                    <TextBlock Text="Fuente Tipográfica Principal" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    <ComboBox ItemsSource="{Binding AvailableFontOptions}" SelectedItem="{Binding State.Visual.FontFamily, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="8,6" />
+                                </StackPanel>
+
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="Tamaño Base de Fuente UI (General)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
+                                    <Border Grid.Column="1" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="6,2">
+                                        <TextBlock Text="{Binding State.Visual.FontSizeScale, StringFormat='{}{0:F0} px'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                    </Border>
+                                </Grid>
+                                <Slider Minimum="12" Maximum="18" Value="{Binding State.Visual.FontSizeScale, Mode=TwoWay}" />
+
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="Tamaño de Precios POS (Gran Monospaciado)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
+                                    <Border Grid.Column="1" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="6,2">
+                                        <TextBlock Text="{Binding State.Visual.PosPriceFontSize, StringFormat='{}{0:F0} px'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                    </Border>
+                                </Grid>
+                                <Slider Minimum="18" Maximum="36" Value="{Binding State.Visual.PosPriceFontSize, Mode=TwoWay}" />
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
-                </Border>
 
-            </StackPanel>
-        </ScrollViewer>
+                    <!-- SUB-TAB 4: DISPOSICIÓN -->
+                    <StackPanel IsVisible="{Binding IsSubDisposicionTab}" Spacing="16">
+                        <Border Padding="14" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                            <StackPanel Spacing="14">
+                                <TextBlock Text="Disposición de Pantalla &amp; Ancho de Paneles" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
 
-        <!-- ─── RIGHT COLUMN: MANDATORY LIVE INTERACTIVE COMPONENT PREVIEW BOX ─── -->
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="Ancho del Panel Lateral de Carrito POS" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
+                                    <Border Grid.Column="1" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="6,2">
+                                        <TextBlock Text="{Binding State.Visual.PosCartWidth, StringFormat='{}{0:F0} px'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                    </Border>
+                                </Grid>
+                                <Slider Minimum="300" Maximum="550" Value="{Binding State.Visual.PosCartWidth, Mode=TwoWay}" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- SUB-TAB 5: BOTONES -->
+                    <StackPanel IsVisible="{Binding IsSubBotonesTab}" Spacing="16">
+                        <Border Padding="14" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                            <StackPanel Spacing="14">
+                                <TextBlock Text="Geometría, Curvatura de Bordes &amp; Componentes" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="Radio de Curvatura de Botones &amp; Tarjetas" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
+                                    <Border Grid.Column="1" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="6,2">
+                                        <TextBlock Text="{Binding State.Visual.CornerRadius, StringFormat='{}{0:F0} px'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                    </Border>
+                                </Grid>
+                                <Slider Minimum="0" Maximum="24" Value="{Binding State.Visual.CornerRadius, Mode=TwoWay}" />
+
+                                <ToggleSwitch IsChecked="{Binding State.Visual.ShowStockBadge, Mode=TwoWay}" OffContent="Mostrar Insignia de Stock" OnContent="Mostrar Insignia de Stock" />
+                                <ToggleSwitch IsChecked="{Binding State.Visual.ShowQuickAddButton, Mode=TwoWay}" OffContent="Mostrar Botón Rápido + AGREGAR" OnContent="Mostrar Botón Rápido + AGREGAR" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- SUB-TAB 6: ANIMACIONES -->
+                    <StackPanel IsVisible="{Binding IsSubAnimacionesTab}" Spacing="16">
+                        <Border Padding="14" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                            <StackPanel Spacing="14">
+                                <TextBlock Text="Efectos de Transición &amp; Glassmorphism GPU" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+
+                                <ToggleSwitch IsChecked="{Binding State.Visual.EnableAnimations, Mode=TwoWay}" OffContent="Activar Transiciones Animadas Suaves" OnContent="Activar Transiciones Animadas Suaves" />
+
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="Desenfoque de Cristal (Glassmorphism)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
+                                    <Border Grid.Column="1" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="6,2">
+                                        <TextBlock Text="{Binding State.Visual.GlassmorphismBlur, StringFormat='{}{0:F0} px'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                    </Border>
+                                </Grid>
+                                <Slider Minimum="0" Maximum="30" Value="{Binding State.Visual.GlassmorphismBlur, Mode=TwoWay}" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Grid>
+            </ScrollViewer>
+        </DockPanel>
+
+        <!-- ─── RIGHT COLUMN: PREVISUALIZACIÓN EN TIEMPO REAL (EXACT MATCH TO USER SCREENSHOT) ─── -->
         <Border Grid.Column="1" Background="{DynamicResource BgPrimaryBrush}"
                 BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
                 CornerRadius="{DynamicResource AppCornerRadius}" Padding="14">
             <DockPanel LastChildFill="True">
-                <TextBlock DockPanel.Dock="Top" Text="PREVISUALIZACIÓN EN TIEMPO REAL" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" HorizontalAlignment="Center" Margin="0,0,0,12" />
+                <TextBlock DockPanel.Dock="Top" Text="PREVISUALIZACIÓN EN TIEMPO REAL" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" HorizontalAlignment="Center" Margin="0,0,0,14" />
 
                 <StackPanel Spacing="14" VerticalAlignment="Center">
-                    <!-- 1. Mini Topbar Header Preview -->
+
+                    <!-- 1. Mini Topbar Preview with Logo Scale binding! -->
                     <Border Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}" Padding="10,8">
                         <Grid ColumnDefinitions="Auto,*">
-                            <Border Width="28" Height="28" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,8,0">
-                                <TextBlock Text="TF" FontSize="11" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <Border Width="{Binding State.Visual.EscalaLogoTopbar}" Height="{Binding State.Visual.EscalaLogoTopbar}" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,8,0">
+                                <TextBlock Text="NV" FontSize="10" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
                             </Border>
                             <TextBlock Grid.Column="1" Text="{Binding State.Company.CommercialName}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                         </Grid>
                     </Border>
 
-                    <!-- 2. Mini Live POS Product Card Preview -->
+                    <!-- 2. Mini Live POS Product Card Preview (EXACT IMAGE REPRODUCTION) -->
                     <Border Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}" Padding="12">
                         <StackPanel Spacing="8">
                             <Grid ColumnDefinitions="*,Auto">
@@ -154,13 +306,13 @@
                             </StackPanel>
 
                             <Grid ColumnDefinitions="*,Auto">
-                                <TextBlock Text="$19.00 MXN" FontSize="{DynamicResource PosPriceFontSize}" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
-                                <Button Grid.Column="1" IsVisible="{Binding State.Visual.ShowQuickAddButton}" Content="+ AGREGAR" Padding="8,4" FontSize="10" FontWeight="Bold" Classes="primary-action" CornerRadius="{DynamicResource AppCornerRadius}" />
+                                <TextBlock Text="$19.00 MXN" FontSize="{Binding State.Visual.PosPriceFontSize}" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
+                                <Button Grid.Column="1" IsVisible="{Binding State.Visual.ShowQuickAddButton}" Content="+ AGREGAR" Padding="8,4" FontSize="10" FontWeight="Bold" Background="{DynamicResource AccentPrimaryBrush}" Foreground="White" CornerRadius="{DynamicResource AppCornerRadius}" />
                             </Grid>
                         </StackPanel>
                     </Border>
 
-                    <!-- 3. Mini Call-to-Action Payment Buttons Preview -->
+                    <!-- 3. Mini Call-to-Action Payment Buttons Preview (EXACT SUCCESS & DANGER COLOR BINDINGS) -->
                     <StackPanel Spacing="8">
                         <Button Content="[ COBRAR TICKET $116.00 ]" Padding="10" FontSize="11" FontWeight="Bold"
                                 Background="{DynamicResource AccentSuccessBrush}" Foreground="White" CornerRadius="{DynamicResource AppCornerRadius}" HorizontalContentAlignment="Center" HorizontalAlignment="Stretch" />

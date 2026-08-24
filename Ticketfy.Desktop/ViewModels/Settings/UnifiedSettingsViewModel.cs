@@ -13,8 +13,8 @@ namespace Ticketfy.ViewModels.Settings;
 
 /// <summary>
 /// Unified Reactive Settings ViewModel orchestrating the 4 Key Operational Axes under Protocol Valcore v4.0.
-/// Replaces fragmented sub-ViewModels with atomic AppSettings POCO state, instant ThemeEngine reactive dispatch,
-/// and 300ms debounced persistence to SQLite storage.
+/// Enhanced with UI Customization Sub-Tabs (Tema, Colores, Tipografía, Disposición, Botones, Animaciones)
+/// and live component preview based on design skills.
 /// </summary>
 public partial class UnifiedSettingsViewModel : ObservableObject
 {
@@ -28,22 +28,49 @@ public partial class UnifiedSettingsViewModel : ObservableObject
     [ObservableProperty] private bool _isHardwareTab = false;
     [ObservableProperty] private bool _isSystemTab = false;
 
+    // UI Customization Sub-Tabs Navigation State (Eje 1: Personalización & UI)
+    [ObservableProperty] private bool _isSubTemaTab = true;
+    [ObservableProperty] private bool _isSubColoresTab = false;
+    [ObservableProperty] private bool _isSubTipografiaTab = false;
+    [ObservableProperty] private bool _isSubDisposicionTab = false;
+    [ObservableProperty] private bool _isSubBotonesTab = false;
+    [ObservableProperty] private bool _isSubAnimacionesTab = false;
+
     // Atomic Master AppSettings State POCO
     [ObservableProperty] private AppSettings _state = new();
 
     // Feedback Message
     [ObservableProperty] private string _feedbackMessage = string.Empty;
 
-    // Color Swatch Palette Options
+    // Color Swatch Palette Collections
+    public ObservableCollection<ColorPaletteItem> SuccessColors { get; } = [
+        new("Esmeralda Muted", "#10B981"),
+        new("Verde POS", "#059669"),
+        new("Jade", "#047857"),
+        new("Menta Neón", "#34D399")
+    ];
+
+    public ObservableCollection<ColorPaletteItem> DangerColors { get; } = [
+        new("Rojo Carmesí", "#EF4444"),
+        new("Rosa Intenso", "#F43F5E"),
+        new("Granate", "#B91C1C"),
+        new("Coral Vibrante", "#FB7185")
+    ];
+
     public ObservableCollection<ColorPaletteItem> AccentColors { get; } = [
-        new("Azul Zafiro", "#3B82F6"),
-        new("Verde Esmeralda", "#10B981"),
+        new("Azul Eléctrico", "#3B82F6"),
+        new("Púrpura", "#8B5CF6"),
+        new("Ámbar", "#F59E0B"),
+        new("Cian Neón", "#06B6D4"),
         new("Índigo Profundo", "#6366F1"),
-        new("Carmesí Rubí", "#E11D48"),
-        new("Ámbar Dorado", "#F59E0B"),
-        new("Cian Eléctrico", "#06B6D4"),
-        new("Púrpura Neón", "#8B5CF6"),
-        new("Gris Acero", "#64748B")
+        new("Verde Esmeralda", "#10B981")
+    ];
+
+    public ObservableCollection<ColorPaletteItem> SidebarColors { get; } = [
+        new("Oscuro Profundo", "#090D16"),
+        new("Azul Noche", "#0F172A"),
+        new("Gris Grafito", "#1E293B"),
+        new("Negro OLED", "#000000")
     ];
 
     public ObservableCollection<string> ThemePresetNames { get; } = [
@@ -76,6 +103,17 @@ public partial class UnifiedSettingsViewModel : ObservableObject
     }
 
     [RelayCommand]
+    public void SelectSubTab(string subTab)
+    {
+        IsSubTemaTab        = subTab == "tema";
+        IsSubColoresTab     = subTab == "colores";
+        IsSubTipografiaTab  = subTab == "tipografia";
+        IsSubDisposicionTab = subTab == "disposicion";
+        IsSubBotonesTab     = subTab == "botones";
+        IsSubAnimacionesTab = subTab == "animaciones";
+    }
+
+    [RelayCommand]
     private void SelectTheme(string themeName)
     {
         State.Visual.ThemeName = themeName;
@@ -86,6 +124,27 @@ public partial class UnifiedSettingsViewModel : ObservableObject
     private void SelectPrimaryColor(string hexColor)
     {
         State.Visual.PrimaryColor = hexColor;
+        OnVisualStateChanged();
+    }
+
+    [RelayCommand]
+    private void SelectSuccessColor(string hexColor)
+    {
+        State.Visual.SuccessColor = hexColor;
+        OnVisualStateChanged();
+    }
+
+    [RelayCommand]
+    private void SelectDangerColor(string hexColor)
+    {
+        State.Visual.DangerColor = hexColor;
+        OnVisualStateChanged();
+    }
+
+    [RelayCommand]
+    private void SelectSidebarColor(string hexColor)
+    {
+        State.Visual.SidebarBgColor = hexColor;
         OnVisualStateChanged();
     }
 
