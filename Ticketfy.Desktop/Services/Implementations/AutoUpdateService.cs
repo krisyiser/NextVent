@@ -31,7 +31,7 @@ public class AutoUpdateService
     }
 
     /// <summary>
-    /// Checks for updates via valcore.cloud API/manifest.
+    /// Checks for updates via valcore.cloud API/manifest with failsafe anti-HTML JSON verification.
     /// Downloads the update installer asynchronously with real-time percentage progress.
     /// </summary>
     public async Task CheckAndDownloadUpdatesAsync()
@@ -44,15 +44,54 @@ public class AutoUpdateService
             httpClient.Timeout = TimeSpan.FromSeconds(15);
             httpClient.DefaultRequestHeaders.UserAgent.ParseAdd("TicketfyDesktopApp/3.0");
 
-            string jsonString;
+            string? jsonString = null;
+
+            // Try primary endpoint: /api/latest-release
             try
             {
-                jsonString = await httpClient.GetStringAsync($"{ApiUrl}?cb={DateTime.UtcNow.Ticks}");
+                var resp1 = await httpClient.GetAsync($"{ApiUrl}?cb={DateTime.UtcNow.Ticks}");
+                if (resp1.IsSuccessStatusCode)
+                {
+                    var raw1 = await resp1.Content.ReadAsStringAsync();
+                    if (!string.IsNullOrWhiteSpace(raw1) && raw1.Trim().StartsWith("{"))
+                    {
+                        jsonString = raw1;
+                    }
+                }
             }
-            catch
+            catch (Exception ex1)
             {
-                // Fallback to releases.json
-                jsonString = await httpClient.GetStringAsync($"{BaseUrl}/downloads/releases.json?cb={DateTime.UtcNow.Ticks}");
+                Log.Warning("AutoUpdateService: Endpoint {Url} query threw exception: {Msg}", ApiUrl, ex1.Message);
+            }
+
+            // Fallback to secondary endpoint: /downloads/releases.json
+            if (string.IsNullOrEmpty(jsonString))
+            {
+                var fallbackUrl = $"{BaseUrl}/downloads/releases.json?cb={DateTime.UtcNow.Ticks}";
+                Log.Information("AutoUpdateService: Attempting fallback update manifest at {Url}", fallbackUrl);
+                try
+                {
+                    var resp2 = await httpClient.GetAsync(fallbackUrl);
+                    if (resp2.IsSuccessStatusCode)
+                    {
+                        var raw2 = await resp2.Content.ReadAsStringAsync();
+                        if (!string.IsNullOrWhiteSpace(raw2) && raw2.Trim().StartsWith("{"))
+                        {
+                            jsonString = raw2;
+                        }
+                    }
+                }
+                catch (Exception ex2)
+                {
+                    Log.Warning("AutoUpdateService: Fallback manifest {Url} query threw exception: {Msg}", fallbackUrl, ex2.Message);
+                }
+            }
+
+            if (string.IsNullOrEmpty(jsonString))
+            {
+                Log.Warning("AutoUpdateService: No valid JSON release manifest obtained from server.");
+                Dispatcher.UIThread.Post(() => UpdateUpToDateEvent?.Invoke());
+                return;
             }
 
             using var doc = JsonDocument.Parse(jsonString);
@@ -201,4 +240,3 @@ public class AutoUpdateService
         });
     }
 }
-
