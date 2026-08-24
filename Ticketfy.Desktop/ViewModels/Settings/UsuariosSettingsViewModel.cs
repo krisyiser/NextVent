@@ -33,13 +33,40 @@ public partial class UsuariosSettingsViewModel : ObservableObject
     [ObservableProperty] private string _newPin3 = string.Empty;
     [ObservableProperty] private string _newPin4 = string.Empty;
 
-    public ObservableCollection<string> RoleOptions { get; } = ["CAJERO", "SUPERVISOR", "ADMIN"];
+    public ObservableCollection<string> RoleOptions { get; } = ["ADMINISTRADOR", "GERENTE", "SUPERVISOR", "CAJERO", "VENDEDOR"];
+
+    // ── Dynamic custom role creation (+ Nuevo Rol) ──────────────────────────
+    [ObservableProperty] private bool _isAddingCustomRole = false;
+    [ObservableProperty] private string _customRoleName = string.Empty;
 
     // ── Admin delete confirmation ──────────────────────────────────────────
     [ObservableProperty] private UserDto? _userToDelete;
     [ObservableProperty] private bool _isConfirmingAdminDelete = false;
     [ObservableProperty] private string _adminDeletePassword = string.Empty;
     [ObservableProperty] private string _feedbackMessage = string.Empty;
+
+    [RelayCommand]
+    private void ToggleAddCustomRole()
+    {
+        IsAddingCustomRole = !IsAddingCustomRole;
+        CustomRoleName = string.Empty;
+    }
+
+    [RelayCommand]
+    private void AddCustomRole()
+    {
+        if (string.IsNullOrWhiteSpace(CustomRoleName)) return;
+
+        string normalized = CustomRoleName.Trim().ToUpper();
+        if (!RoleOptions.Contains(normalized))
+        {
+            RoleOptions.Add(normalized);
+        }
+        NewRole = normalized;
+        CustomRoleName = string.Empty;
+        IsAddingCustomRole = false;
+        FeedbackMessage = $"¡Nuevo rol '{normalized}' agregado correctamente!";
+    }
 
     public UsuariosSettingsViewModel(IUserService? userService = null)
     {
