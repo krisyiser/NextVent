@@ -356,11 +356,16 @@ public partial class MainWindowViewModel : ObservableObject
                 return;
             }
 
+            string? setupDone = await settingsService.GetAsync("IsOnboardingCompleted");
             bool hasUsers = await userRepository.HasAnyUsersAsync();
-            if (!hasUsers)
+            if (setupDone != "true" || !hasUsers)
             {
                 var dialogService = new DialogService((vm) => Task.FromResult<object?>(null), () => { });
-                Action finishSetup = () => Navigation.GoToLogin();
+                Action finishSetup = async () =>
+                {
+                    await settingsService.SetAsync("IsOnboardingCompleted", "true");
+                    Navigation.GoToLogin();
+                };
                 Action goToAdditionalUsers = () =>
                     Navigation.GoTo(new SetupAdditionalUsersViewModel(userRepository, finishSetup));
                 Action goToBusinessData = () =>

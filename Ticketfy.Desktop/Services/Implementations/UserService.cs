@@ -27,24 +27,6 @@ public class UserService : IUserService
 
     public async Task<List<UserDto>> GetAllAsync()
     {
-        var count = await _context.Users.CountAsync();
-        if (count == 0)
-        {
-            var adminUser = new UserEntity
-            {
-                Id = Guid.NewGuid(),
-                Username = "admin",
-                FullName = "Administrador del Sistema",
-                Role = UserRole.Admin,
-                PasswordHash = Ticketfy.Core.Helpers.CryptoHelper.HashPassword("admin"),
-                PinCode = "1234",
-                PasswordHint = "Credencial de sistema predeterminada",
-                IsActive = true
-            };
-            _context.Users.Add(adminUser);
-            await _context.SaveChangesAsync();
-        }
-
         var entities = await _context.Users.AsNoTracking().ToListAsync();
         return entities.Select(MapToDto).ToList();
     }
