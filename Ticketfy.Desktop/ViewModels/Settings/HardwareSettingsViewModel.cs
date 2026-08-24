@@ -3,21 +3,26 @@ using Ticketfy.Core.Models.Settings;
 using Ticketfy.Services.Interfaces;
 using Serilog;
 using System;
+using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
 namespace Ticketfy.ViewModels.Settings;
 
 /// <summary>
-/// Strongly-typed ViewModel for Section 4: Sistema & Seguridad.
-/// Configures SQLite backup paths, automatic closing backups, auto-lock timeouts and security PIN enforcement.
+/// Strongly-typed ViewModel for Section 3: Hardware & Tickets POS.
+/// Configures ESC/POS thermal printers, paper width (58mm/80mm), barcode scanner and scales.
 /// </summary>
-public partial class SeguridadSettingsViewModel : ObservableObject
+public partial class HardwareSettingsViewModel : ObservableObject
 {
     private readonly ISettingsService? _settingsService;
 
     [ObservableProperty] private AppSettings _state = new();
 
-    public SeguridadSettingsViewModel(ISettingsService? settingsService = null)
+    public ObservableCollection<string> PaperWidthOptions { get; } = [
+        "80mm (Estándar POS)", "58mm (Térmica Mini)", "Carta / A4 (PDF Fiscal)"
+    ];
+
+    public HardwareSettingsViewModel(ISettingsService? settingsService = null)
     {
         _settingsService = settingsService;
         if (_settingsService != null) _ = LoadAsync();
@@ -32,7 +37,7 @@ public partial class SeguridadSettingsViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Failed loading AppSettings in SeguridadSettingsViewModel");
+            Log.Error(ex, "Failed loading AppSettings in HardwareSettingsViewModel");
         }
     }
 
@@ -45,7 +50,7 @@ public partial class SeguridadSettingsViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Failed saving AppSettings in SeguridadSettingsViewModel");
+            Log.Error(ex, "Failed saving AppSettings in HardwareSettingsViewModel");
         }
     }
 }

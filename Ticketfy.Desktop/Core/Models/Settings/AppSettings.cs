@@ -22,6 +22,13 @@ public enum UIDensity
     Touch
 }
 
+public enum PaperWidth
+{
+    Paper58mm,
+    Paper80mm,
+    PaperLetter
+}
+
 /// <summary>
 /// Unified Root Settings POCO representing the entire application configuration and UI customization state.
 /// Designed under Protocol Valcore v4.0 for zero-fragmentation reactive state management.

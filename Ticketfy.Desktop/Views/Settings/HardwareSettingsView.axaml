@@ -1,0 +1,86 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vmsettings="using:Ticketfy.ViewModels.Settings"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             x:Class="Ticketfy.Views.Settings.HardwareSettingsView"
+             x:DataType="vmsettings:HardwareSettingsViewModel">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,8,0">
+        <StackPanel Spacing="16">
+
+            <!-- Title Header -->
+            <Border Padding="16,12" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                <Grid ColumnDefinitions="Auto,*">
+                    <Border Width="36" Height="36" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource AccentPrimaryBrush}">
+                        <mi:MaterialIcon Kind="PrinterOutline" Width="22" Height="22" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="12,0,0,0">
+                        <TextBlock Text="Hardware POS, Periféricos de Caja &amp; Diseño de Ticket" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        <TextBlock Text="Configuración de impresoras térmicas ESC/POS, lectores de códigos, báscula y formato de impresión" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- 1. IMPRESORAS TÉRMICAS & FORMATO DE PAPEL -->
+            <Border Padding="16" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                <StackPanel Spacing="14">
+                    <TextBlock Text="1. Impresora Térmica &amp; Formato de Papel" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+
+                    <Grid ColumnDefinitions="*,*">
+                        <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,8,0">
+                            <TextBlock Text="Ancho de Papel de Impresión" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <ComboBox ItemsSource="{Binding PaperWidthOptions}" SelectedItem="{Binding State.Ticket.PaperWidthMm, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="8,6" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Spacing="4" Margin="8,0,0,0">
+                            <TextBlock Text="Puerto / Conexión de Impresora" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <TextBox Text="{Binding State.Hardware.PrinterPort, Mode=TwoWay}" Watermark="LPT1 / RAW Direct Socket" Padding="8,6" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,*">
+                        <ToggleSwitch Grid.Column="0" IsChecked="{Binding State.Ticket.AutoPrintReceipt, Mode=TwoWay}" OffContent="Impresión Automática" OnContent="Impresión Automática" />
+                        <ToggleSwitch Grid.Column="1" IsChecked="{Binding State.Ticket.ShowTaxBreakdown, Mode=TwoWay}" OffContent="Desglosar IVA (16%)" OnContent="Desglosar IVA (16%)" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- 2. PLANTILLA DE TEXTO EN TICKET -->
+            <Border Padding="16" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                <StackPanel Spacing="14">
+                    <TextBlock Text="2. Plantilla de Textos de Encabezado &amp; Pie" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Mensaje de Encabezado (Arriba del Ticket)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBox Text="{Binding State.Ticket.HeaderText, Mode=TwoWay}" Watermark="¡Gracias por su preferencia!" Padding="8,6" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Mensaje de Pie de Página (Abajo del Ticket)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBox Text="{Binding State.Ticket.FooterText, Mode=TwoWay}" Watermark="Conserve su ticket para cambios y garantías." Padding="8,6" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- 3. OTROS PERIFÉRICOS POS -->
+            <Border Padding="16" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                <StackPanel Spacing="14">
+                    <TextBlock Text="3. Lector, Báscula &amp; Cajón de Dinero" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+
+                    <Grid ColumnDefinitions="*,*">
+                        <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,8,0">
+                            <TextBlock Text="Lector de Código de Barras" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <TextBox Text="{Binding State.Hardware.ScannerPort, Mode=TwoWay}" Watermark="HID Barcode Scanner" Padding="8,6" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Spacing="4" Margin="8,0,0,0">
+                            <TextBlock Text="Puerto Serial Báscula RS-232" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <TextBox Text="{Binding State.Hardware.ScalePort, Mode=TwoWay}" Watermark="COM1 (9600-8-N-1)" Padding="8,6" />
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

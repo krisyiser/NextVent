@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Ticketfy.ViewModels"
+             xmlns:vmsettings="using:Ticketfy.ViewModels.Settings"
              xmlns:mi="using:Material.Icons.Avalonia"
              xmlns:settings="using:Ticketfy.Views.Settings"
              x:Class="Ticketfy.Views.SettingsView"
@@ -51,10 +52,10 @@
                     </Grid>
                 </Border>
 
-                <!-- ═══ 3. MAIN BODY (4 KEY OPERATIONAL AXES NAV + ISOLATED VIEWS) ═══ -->
-                <Grid ColumnDefinitions="240,*">
+                <!-- ═══ 3. MAIN BODY (ATOMIC NAVIGATION & ZERO Z-INDEX LEAK) ═══ -->
+                <Grid ColumnDefinitions="250,*">
 
-                    <!-- ─── LEFT SIDEBAR NAVIGATION (4 KEY OPERATIONAL AXES) ─── -->
+                    <!-- ─── LEFT SIDEBAR NAVIGATION ─── -->
                     <Border Grid.Column="0" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,1,0">
                         <DockPanel LastChildFill="True">
                             <Border DockPanel.Dock="Bottom" Padding="16,14" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0">
@@ -68,91 +69,62 @@
                                 <StackPanel Spacing="6" Margin="8">
                                     <TextBlock Text="EJES DE CONFIGURACIÓN" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" Margin="8,8,8,4" />
 
-                                    <!-- 1. Personalización & UI -->
-                                    <Button Command="{Binding UnifiedVM.SelectAxisTabCommand}" CommandParameter="ui" Padding="12,11" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch" Cursor="Hand">
-                                        <StackPanel Orientation="Horizontal" Spacing="10">
-                                            <mi:MaterialIcon Kind="PaletteOutline" Width="20" Height="20" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                                            <StackPanel VerticalAlignment="Center">
-                                                <TextBlock Text="Personalización &amp; UI" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
-                                                <TextBlock Text="Estilos, Colores &amp; Fuentes" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" />
-                                            </StackPanel>
-                                        </StackPanel>
-                                    </Button>
-
-                                    <!-- 2. Identidad & Empresa -->
-                                    <Button Command="{Binding UnifiedVM.SelectAxisTabCommand}" CommandParameter="company" Padding="12,11" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch" Cursor="Hand">
-                                        <StackPanel Orientation="Horizontal" Spacing="10">
-                                            <mi:MaterialIcon Kind="Domain" Width="20" Height="20" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                                            <StackPanel VerticalAlignment="Center">
-                                                <TextBlock Text="Identidad &amp; Empresa" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
-                                                <TextBlock Text="Datos Comerciales &amp; Fiscales" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" />
-                                            </StackPanel>
-                                        </StackPanel>
-                                    </Button>
-
-                                    <!-- 3. Hardware & Tickets -->
-                                    <Button Command="{Binding UnifiedVM.SelectAxisTabCommand}" CommandParameter="hardware" Padding="12,11" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch" Cursor="Hand">
-                                        <StackPanel Orientation="Horizontal" Spacing="10">
-                                            <mi:MaterialIcon Kind="PrinterOutline" Width="20" Height="20" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                                            <StackPanel VerticalAlignment="Center">
-                                                <TextBlock Text="Hardware &amp; Tickets" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
-                                                <TextBlock Text="Impresoras 58/80mm &amp; Lector" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" />
-                                            </StackPanel>
-                                        </StackPanel>
-                                    </Button>
-
-                                    <!-- 4. Sistema & Seguridad -->
-                                    <Button Command="{Binding UnifiedVM.SelectAxisTabCommand}" CommandParameter="system" Padding="12,11" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch" Cursor="Hand">
-                                        <StackPanel Orientation="Horizontal" Spacing="10">
-                                            <mi:MaterialIcon Kind="ShieldCheckOutline" Width="20" Height="20" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                                            <StackPanel VerticalAlignment="Center">
-                                                <TextBlock Text="Sistema &amp; Seguridad" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
-                                                <TextBlock Text="Base de Datos, PIN &amp; Backup" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" />
-                                            </StackPanel>
-                                        </StackPanel>
-                                    </Button>
-
-                                    <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="4,8" />
-
-                                    <!-- Usuarios & Acerca de (Acceso Rápido) -->
-                                    <Button Command="{Binding SelectMainTabCommand}" CommandParameter="usuarios" Padding="12,8" CornerRadius="{DynamicResource AppCornerRadius}" Background="Transparent" HorizontalAlignment="Stretch">
-                                        <StackPanel Orientation="Horizontal" Spacing="10">
-                                            <mi:MaterialIcon Kind="AccountGroupOutline" Width="16" Height="16" Foreground="{DynamicResource TextSecondaryBrush}" />
-                                            <TextBlock Text="Usuarios &amp; Roles" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
-                                        </StackPanel>
-                                    </Button>
-
-                                    <Button Command="{Binding SelectMainTabCommand}" CommandParameter="acercade" Padding="12,8" CornerRadius="{DynamicResource AppCornerRadius}" Background="Transparent" HorizontalAlignment="Stretch">
-                                        <StackPanel Orientation="Horizontal" Spacing="10">
-                                            <mi:MaterialIcon Kind="InformationOutline" Width="16" Height="16" Foreground="{DynamicResource TextSecondaryBrush}" />
-                                            <TextBlock Text="Acerca de Ticketfy" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
-                                        </StackPanel>
-                                    </Button>
+                                    <ItemsControl ItemsSource="{Binding Sections}">
+                                        <ItemsControl.ItemTemplate>
+                                            <DataTemplate x:DataType="vmsettings:SettingsSectionItem">
+                                                <Button Command="{Binding $parent[UserControl].((vm:SettingsViewModel)DataContext).SelectSectionCommand}"
+                                                        CommandParameter="{Binding}"
+                                                        Padding="12,11" Margin="0,2" CornerRadius="{DynamicResource AppCornerRadius}" HorizontalAlignment="Stretch" Cursor="Hand"
+                                                        Background="{DynamicResource BgTertiaryBrush}">
+                                                    <Grid ColumnDefinitions="Auto,*">
+                                                        <mi:MaterialIcon Kind="{Binding IconKind}" Width="20" Height="20" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
+                                                        <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="10,0,0,0">
+                                                            <TextBlock Text="{Binding Title}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                                            <TextBlock Text="{Binding Subtitle}" FontSize="9" Foreground="{DynamicResource TextMutedBrush}" TextTrimming="CharacterEllipsis" />
+                                                        </StackPanel>
+                                                    </Grid>
+                                                </Button>
+                                            </DataTemplate>
+                                        </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
                                 </StackPanel>
                             </ScrollViewer>
                         </DockPanel>
                     </Border>
 
-                    <!-- ─── UNIFIED MODULAR SUB-VIEW HOST ─── -->
+                    <!-- ─── ATOMIC VIEW HOST (TRANSITIONING CONTENT CONTROL - ZERO OVERLAP GUARANTEE) ─── -->
                     <Grid Grid.Column="1" Margin="20">
-                        <Panel IsVisible="{Binding UnifiedVM.IsUiTab}">
-                            <settings:LiveCustomizerView DataContext="{Binding UnifiedVM}" />
-                        </Panel>
-                        <Panel IsVisible="{Binding UnifiedVM.IsCompanyTab}">
-                            <settings:CompanyProfileView DataContext="{Binding UnifiedVM}" />
-                        </Panel>
-                        <Panel IsVisible="{Binding UnifiedVM.IsHardwareTab}">
-                            <settings:HardwareTicketsView DataContext="{Binding UnifiedVM}" />
-                        </Panel>
-                        <Panel IsVisible="{Binding UnifiedVM.IsSystemTab}">
-                            <settings:SystemSecurityView DataContext="{Binding UnifiedVM}" />
-                        </Panel>
-                        <Panel IsVisible="{Binding IsUsuariosTab}">
-                            <settings:UsuariosSettingsView DataContext="{Binding UsuariosVM}" />
-                        </Panel>
-                        <Panel IsVisible="{Binding IsAcercaDeTab}">
-                            <settings:AcercaDeSettingsView DataContext="{Binding AcercaDeVM}" />
-                        </Panel>
+                        <TransitioningContentControl Content="{Binding CurrentSectionViewModel}">
+                            <TransitioningContentControl.PageTransition>
+                                <CrossFade Duration="0:0:0.200" />
+                            </TransitioningContentControl.PageTransition>
+
+                            <TransitioningContentControl.DataTemplates>
+                                <DataTemplate DataType="{x:Type vmsettings:PersonalizacionSettingsViewModel}">
+                                    <settings:PersonalizacionSettingsView />
+                                </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type vmsettings:EmpresaSettingsViewModel}">
+                                    <settings:CompanyProfileView />
+                                </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type vmsettings:HardwareSettingsViewModel}">
+                                    <settings:HardwareSettingsView />
+                                </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type vmsettings:SeguridadSettingsViewModel}">
+                                    <settings:SeguridadSettingsView />
+                                </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type vmsettings:UsuariosSettingsViewModel}">
+                                    <settings:UsuariosSettingsView />
+                                </DataTemplate>
+
+                                <DataTemplate DataType="{x:Type vmsettings:AcercaDeSettingsViewModel}">
+                                    <settings:AcercaDeSettingsView />
+                                </DataTemplate>
+                            </TransitioningContentControl.DataTemplates>
+                        </TransitioningContentControl>
                     </Grid>
                 </Grid>
             </DockPanel>
