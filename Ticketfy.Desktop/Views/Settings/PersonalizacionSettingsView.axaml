@@ -2,82 +2,159 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Ticketfy.ViewModels"
              xmlns:vmsettings="using:Ticketfy.ViewModels.Settings"
+             xmlns:models="using:Ticketfy.Core.Models.Settings"
              xmlns:mi="using:Material.Icons.Avalonia"
              x:Class="Ticketfy.Views.Settings.PersonalizacionSettingsView"
              x:DataType="vmsettings:PersonalizacionSettingsViewModel">
 
-    <!-- 2-COLUMN LAYOUT: GRANULAR SUB-TABS STUDIO (LEFT) vs REAL-TIME COMPONENT PREVIEW BOX (RIGHT) -->
-    <Grid ColumnDefinitions="*,340">
+    <!-- 2-COLUMN INDUSTRIAL LAYOUT: CUSTOMIZATION STUDIO (LEFT) vs LIVE POS PREVIEW (RIGHT) -->
+    <Grid ColumnDefinitions="*,350">
 
-        <!-- ─── LEFT COLUMN: GRANULAR SUB-TABS STUDIO ─── -->
+        <!-- ─── LEFT COLUMN: SUB-TABS CUSTOMIZATION STUDIO ─── -->
         <DockPanel Grid.Column="0" LastChildFill="True" Margin="0,0,16,0">
 
             <!-- 1. HORIZONTAL SUB-TAB NAVIGATION BAR -->
             <Border DockPanel.Dock="Top" Margin="0,0,0,14" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="4" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                 <UniformGrid Columns="6">
-                    <Button Command="{Binding SelectSubTabCommand}" CommandParameter="tema" Padding="8,8" CornerRadius="{DynamicResource AppCornerRadius}" HorizontalAlignment="Stretch" Cursor="Hand">
-                        <TextBlock Text="Tema" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" />
+                    <Button Command="{Binding SelectSubTabCommand}" CommandParameter="tema" Padding="8,8" CornerRadius="{DynamicResource AppCornerRadius}" HorizontalAlignment="Stretch" Cursor="Hand" Background="{DynamicResource BgTertiaryBrush}">
+                        <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
+                            <mi:MaterialIcon Kind="PaletteOutline" Width="14" Height="14" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                            <TextBlock Text="Tema" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        </StackPanel>
                     </Button>
-                    <Button Command="{Binding SelectSubTabCommand}" CommandParameter="colores" Padding="8,8" CornerRadius="{DynamicResource AppCornerRadius}" HorizontalAlignment="Stretch" Cursor="Hand">
-                        <TextBlock Text="Colores" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" />
+                    <Button Command="{Binding SelectSubTabCommand}" CommandParameter="colores" Padding="8,8" CornerRadius="{DynamicResource AppCornerRadius}" HorizontalAlignment="Stretch" Cursor="Hand" Background="{DynamicResource BgTertiaryBrush}">
+                        <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
+                            <mi:MaterialIcon Kind="ColorLens" Width="14" Height="14" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                            <TextBlock Text="Colores" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        </StackPanel>
                     </Button>
-                    <Button Command="{Binding SelectSubTabCommand}" CommandParameter="tipografia" Padding="8,8" CornerRadius="{DynamicResource AppCornerRadius}" HorizontalAlignment="Stretch" Cursor="Hand">
-                        <TextBlock Text="Tipografía" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" />
+                    <Button Command="{Binding SelectSubTabCommand}" CommandParameter="tipografia" Padding="8,8" CornerRadius="{DynamicResource AppCornerRadius}" HorizontalAlignment="Stretch" Cursor="Hand" Background="{DynamicResource BgTertiaryBrush}">
+                        <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
+                            <mi:MaterialIcon Kind="FormatSize" Width="14" Height="14" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                            <TextBlock Text="Tipografía" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        </StackPanel>
                     </Button>
-                    <Button Command="{Binding SelectSubTabCommand}" CommandParameter="disposicion" Padding="8,8" CornerRadius="{DynamicResource AppCornerRadius}" HorizontalAlignment="Stretch" Cursor="Hand">
-                        <TextBlock Text="Disposición" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" />
+                    <Button Command="{Binding SelectSubTabCommand}" CommandParameter="disposicion" Padding="8,8" CornerRadius="{DynamicResource AppCornerRadius}" HorizontalAlignment="Stretch" Cursor="Hand" Background="{DynamicResource BgTertiaryBrush}">
+                        <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
+                            <mi:MaterialIcon Kind="ViewDashboardOutline" Width="14" Height="14" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                            <TextBlock Text="Disposición" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        </StackPanel>
                     </Button>
-                    <Button Command="{Binding SelectSubTabCommand}" CommandParameter="botones" Padding="8,8" CornerRadius="{DynamicResource AppCornerRadius}" HorizontalAlignment="Stretch" Cursor="Hand">
-                        <TextBlock Text="Botones" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" />
+                    <Button Command="{Binding SelectSubTabCommand}" CommandParameter="botones" Padding="8,8" CornerRadius="{DynamicResource AppCornerRadius}" HorizontalAlignment="Stretch" Cursor="Hand" Background="{DynamicResource BgTertiaryBrush}">
+                        <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
+                            <mi:MaterialIcon Kind="GestureTapButton" Width="14" Height="14" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                            <TextBlock Text="Botones" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        </StackPanel>
                     </Button>
-                    <Button Command="{Binding SelectSubTabCommand}" CommandParameter="animaciones" Padding="8,8" CornerRadius="{DynamicResource AppCornerRadius}" HorizontalAlignment="Stretch" Cursor="Hand">
-                        <TextBlock Text="Animaciones" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" />
+                    <Button Command="{Binding SelectSubTabCommand}" CommandParameter="animaciones" Padding="8,8" CornerRadius="{DynamicResource AppCornerRadius}" HorizontalAlignment="Stretch" Cursor="Hand" Background="{DynamicResource BgTertiaryBrush}">
+                        <StackPanel Orientation="Horizontal" Spacing="4" HorizontalAlignment="Center">
+                            <mi:MaterialIcon Kind="MotionOutline" Width="14" Height="14" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                            <TextBlock Text="Animaciones" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        </StackPanel>
                     </Button>
                 </UniformGrid>
             </Border>
 
             <!-- 2. SUB-TAB HOST PANELS -->
-            <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,4,0">
                 <Grid>
-                    <!-- SUB-TAB 1: TEMA -->
+                    <!-- SUB-TAB 1: TEMA BASE & PRESETS -->
                     <StackPanel IsVisible="{Binding IsSubTemaTab}" Spacing="16">
-                        <Border Padding="14" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
-                            <StackPanel Spacing="12">
-                                <TextBlock Text="Presets de Temas Base &amp; Canvas GPU" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        <Border Padding="16" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                            <StackPanel Spacing="14">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <StackPanel>
+                                        <TextBlock Text="Presets de Temas Base &amp; Renderizado GPU" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                        <TextBlock Text="Seleccione un esquema cromático optimizado para entornos comerciales de alta exigencia" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
+                                    </StackPanel>
+                                    <Border Grid.Column="1" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="8,4" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding State.Visual.ThemeName, StringFormat='Activo: {0}'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                    </Border>
+                                </Grid>
+
                                 <UniformGrid Columns="3">
-                                    <Button Command="{Binding SelectThemeCommand}" CommandParameter="Modo Oscuro" Margin="3" Padding="10" CornerRadius="{DynamicResource AppCornerRadius}" Background="#090D16" BorderBrush="#334155" BorderThickness="1">
-                                        <TextBlock Text="Modo Oscuro" FontSize="11" FontWeight="Bold" Foreground="#F8FAFC" HorizontalAlignment="Center" />
+                                    <!-- Preset 1: Modo Oscuro -->
+                                    <Button Command="{Binding SelectThemeCommand}" CommandParameter="Modo Oscuro" Margin="4" Padding="12" CornerRadius="{DynamicResource AppCornerRadius}" Background="#090D16" BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="1" Cursor="Hand">
+                                        <StackPanel Spacing="6" HorizontalAlignment="Center">
+                                            <Border Width="28" Height="28" CornerRadius="14" Background="#0F172A">
+                                                <mi:MaterialIcon Kind="WeatherNight" Width="16" Height="16" Foreground="#38BDF8" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                            <TextBlock Text="Modo Oscuro" FontSize="11" FontWeight="Bold" Foreground="#F8FAFC" HorizontalAlignment="Center" />
+                                            <TextBlock Text="Grafito Profundo POS" FontSize="9" Foreground="#94A3B8" HorizontalAlignment="Center" />
+                                        </StackPanel>
                                     </Button>
-                                    <Button Command="{Binding SelectThemeCommand}" CommandParameter="Modo Claro" Margin="3" Padding="10" CornerRadius="{DynamicResource AppCornerRadius}" Background="#F4F6F8" BorderBrush="#E5E7EB" BorderThickness="1">
-                                        <TextBlock Text="Modo Claro" FontSize="11" FontWeight="Bold" Foreground="#111827" HorizontalAlignment="Center" />
+
+                                    <!-- Preset 2: Modo Claro -->
+                                    <Button Command="{Binding SelectThemeCommand}" CommandParameter="Modo Claro" Margin="4" Padding="12" CornerRadius="{DynamicResource AppCornerRadius}" Background="#F4F6F8" BorderBrush="#E5E7EB" BorderThickness="1" Cursor="Hand">
+                                        <StackPanel Spacing="6" HorizontalAlignment="Center">
+                                            <Border Width="28" Height="28" CornerRadius="14" Background="#FFFFFF">
+                                                <mi:MaterialIcon Kind="WeatherSunny" Width="16" Height="16" Foreground="#F59E0B" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                            <TextBlock Text="Modo Claro" FontSize="11" FontWeight="Bold" Foreground="#111827" HorizontalAlignment="Center" />
+                                            <TextBlock Text="Luminosidad Pulcra" FontSize="9" Foreground="#6B7280" HorizontalAlignment="Center" />
+                                        </StackPanel>
                                     </Button>
-                                    <Button Command="{Binding SelectThemeCommand}" CommandParameter="Nordic Slate" Margin="3" Padding="10" CornerRadius="{DynamicResource AppCornerRadius}" Background="#1E293B" BorderBrush="#94A3B8" BorderThickness="1">
-                                        <TextBlock Text="Nordic Slate" FontSize="11" FontWeight="Bold" Foreground="#F8FAFC" HorizontalAlignment="Center" />
+
+                                    <!-- Preset 3: Nordic Slate -->
+                                    <Button Command="{Binding SelectThemeCommand}" CommandParameter="Nordic Slate" Margin="4" Padding="12" CornerRadius="{DynamicResource AppCornerRadius}" Background="#1E293B" BorderBrush="#334155" BorderThickness="1" Cursor="Hand">
+                                        <StackPanel Spacing="6" HorizontalAlignment="Center">
+                                            <Border Width="28" Height="28" CornerRadius="14" Background="#334155">
+                                                <mi:MaterialIcon Kind="CompassOutline" Width="16" Height="16" Foreground="#38BDF8" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                            <TextBlock Text="Nordic Slate" FontSize="11" FontWeight="Bold" Foreground="#F8FAFC" HorizontalAlignment="Center" />
+                                            <TextBlock Text="Azul Escandinavo" FontSize="9" Foreground="#94A3B8" HorizontalAlignment="Center" />
+                                        </StackPanel>
                                     </Button>
-                                    <Button Command="{Binding SelectThemeCommand}" CommandParameter="Cyberpunk Dark" Margin="3" Padding="10" CornerRadius="{DynamicResource AppCornerRadius}" Background="#09090B" BorderBrush="#8B5CF6" BorderThickness="1">
-                                        <TextBlock Text="Cyberpunk Dark" FontSize="11" FontWeight="Bold" Foreground="#38BDF8" HorizontalAlignment="Center" />
+
+                                    <!-- Preset 4: Cyberpunk Dark -->
+                                    <Button Command="{Binding SelectThemeCommand}" CommandParameter="Cyberpunk Dark" Margin="4" Padding="12" CornerRadius="{DynamicResource AppCornerRadius}" Background="#09090B" BorderBrush="#8B5CF6" BorderThickness="1" Cursor="Hand">
+                                        <StackPanel Spacing="6" HorizontalAlignment="Center">
+                                            <Border Width="28" Height="28" CornerRadius="14" Background="#18181B">
+                                                <mi:MaterialIcon Kind="LightningBolt" Width="16" Height="16" Foreground="#A855F7" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                            <TextBlock Text="Cyberpunk Dark" FontSize="11" FontWeight="Bold" Foreground="#A855F7" HorizontalAlignment="Center" />
+                                            <TextBlock Text="Neón Alto Contraste" FontSize="9" Foreground="#71717A" HorizontalAlignment="Center" />
+                                        </StackPanel>
                                     </Button>
-                                    <Button Command="{Binding SelectThemeCommand}" CommandParameter="Emerald Glass" Margin="3" Padding="10" CornerRadius="{DynamicResource AppCornerRadius}" Background="#022C22" BorderBrush="#34D399" BorderThickness="1">
-                                        <TextBlock Text="Emerald Glass" FontSize="11" FontWeight="Bold" Foreground="#A7F3D0" HorizontalAlignment="Center" />
+
+                                    <!-- Preset 5: Emerald Glass -->
+                                    <Button Command="{Binding SelectThemeCommand}" CommandParameter="Emerald Glass" Margin="4" Padding="12" CornerRadius="{DynamicResource AppCornerRadius}" Background="#022C22" BorderBrush="#059669" BorderThickness="1" Cursor="Hand">
+                                        <StackPanel Spacing="6" HorizontalAlignment="Center">
+                                            <Border Width="28" Height="28" CornerRadius="14" Background="#064E3B">
+                                                <mi:MaterialIcon Kind="Leaf" Width="16" Height="16" Foreground="#34D399" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                            <TextBlock Text="Emerald Glass" FontSize="11" FontWeight="Bold" Foreground="#A7F3D0" HorizontalAlignment="Center" />
+                                            <TextBlock Text="Jade Orgánico POS" FontSize="9" Foreground="#6EE7B7" HorizontalAlignment="Center" />
+                                        </StackPanel>
                                     </Button>
-                                    <Button Command="{Binding SelectThemeCommand}" CommandParameter="Alto Contraste" Margin="3" Padding="10" CornerRadius="{DynamicResource AppCornerRadius}" Background="#000000" BorderBrush="#FFFFFF" BorderThickness="1">
-                                        <TextBlock Text="Alto Contraste" FontSize="11" FontWeight="Bold" Foreground="#FACC15" HorizontalAlignment="Center" />
+
+                                    <!-- Preset 6: Alto Contraste -->
+                                    <Button Command="{Binding SelectThemeCommand}" CommandParameter="Alto Contraste" Margin="4" Padding="12" CornerRadius="{DynamicResource AppCornerRadius}" Background="#000000" BorderBrush="#FACC15" BorderThickness="1" Cursor="Hand">
+                                        <StackPanel Spacing="6" HorizontalAlignment="Center">
+                                            <Border Width="28" Height="28" CornerRadius="14" Background="#18181B">
+                                                <mi:MaterialIcon Kind="EyeOutline" Width="16" Height="16" Foreground="#FACC15" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                            </Border>
+                                            <TextBlock Text="Alto Contraste" FontSize="11" FontWeight="Bold" Foreground="#FACC15" HorizontalAlignment="Center" />
+                                            <TextBlock Text="Legibilidad Máxima" FontSize="9" Foreground="#EAB308" HorizontalAlignment="Center" />
+                                        </StackPanel>
                                     </Button>
                                 </UniformGrid>
                             </StackPanel>
                         </Border>
                     </StackPanel>
 
-                    <!-- SUB-TAB 2: COLORES -->
+                    <!-- SUB-TAB 2: COLORES & PALETAS (CORREGIDO DATA TEMPLATE STRONGLY TYPED) -->
                     <StackPanel IsVisible="{Binding IsSubColoresTab}" Spacing="16">
-                        <TextBlock Text="Paletas de Colores &amp; Identidad Visual (Sin códigos Hexadecimales)" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
 
                         <!-- Escala de Logo Corporativo en Barra -->
                         <Border Padding="14,12" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                             <StackPanel Spacing="10">
                                 <Grid ColumnDefinitions="*,Auto">
-                                    <TextBlock Text="Escala de Logo Corporativo en Barra" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,12,0" />
-                                    <Border Grid.Column="1" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="6,2">
+                                    <StackPanel Orientation="Horizontal" Spacing="8">
+                                        <mi:MaterialIcon Kind="AspectRatio" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
+                                        <TextBlock Text="Escala de Logo Corporativo en Barra" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                    <Border Grid.Column="1" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="8,2">
                                         <TextBlock Text="{Binding State.Visual.EscalaLogoTopbar, StringFormat='{}{0:F0} px'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
                                     </Border>
                                 </Grid>
@@ -86,141 +163,206 @@
                         </Border>
 
                         <!-- Color Botón Cobrar (Éxito en Ventas) -->
-                        <StackPanel Spacing="6">
-                            <TextBlock Text="Color Botón Cobrar (Éxito en Ventas)" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                            <ItemsControl ItemsSource="{Binding SuccessColors}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <UniformGrid Columns="4" />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="vm:ColorPaletteItem">
-                                        <Button Command="{Binding $parent[UserControl].((vmsettings:PersonalizacionSettingsViewModel)DataContext).SelectSuccessColorCommand}"
-                                                CommandParameter="{Binding HexColor}"
-                                                Margin="2" Padding="6" Height="36" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgSecondaryBrush}">
-                                            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                                                <Border Width="14" Height="14" CornerRadius="7" Background="{Binding HexColor}" />
-                                                <TextBlock Text="{Binding Name}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
-                                            </StackPanel>
-                                        </Button>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
+                        <Border Padding="14" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                            <StackPanel Spacing="10">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <mi:MaterialIcon Kind="CheckCircleOutline" Width="16" Height="16" Foreground="{DynamicResource AccentSuccessBrush}" VerticalAlignment="Center" />
+                                    <TextBlock Text="Color Botón Cobrar (Éxito en Ventas)" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                </StackPanel>
+                                <ItemsControl ItemsSource="{Binding SuccessColors}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <UniformGrid Columns="4" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vmsettings:ColorPaletteItem">
+                                            <Button Command="{Binding $parent[UserControl].((vmsettings:PersonalizacionSettingsViewModel)DataContext).SelectSuccessColorCommand}"
+                                                    CommandParameter="{Binding HexColor}"
+                                                    Margin="3" Padding="8,6" Height="40" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" Cursor="Hand">
+                                                <Grid ColumnDefinitions="Auto,*">
+                                                    <Border Width="16" Height="16" CornerRadius="8" Background="{Binding HexColor}" VerticalAlignment="Center" />
+                                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="8,0,0,0">
+                                                        <TextBlock Text="{Binding Name}" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                                                        <TextBlock Text="{Binding HexColor}" FontSize="9" Foreground="{DynamicResource TextMutedBrush}" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Button>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
 
                         <!-- Color Botón Anular / Cancelar (Alertas) -->
-                        <StackPanel Spacing="6">
-                            <TextBlock Text="Color Botón Anular / Cancelar (Alertas)" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                            <ItemsControl ItemsSource="{Binding DangerColors}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <UniformGrid Columns="4" />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="vm:ColorPaletteItem">
-                                        <Button Command="{Binding $parent[UserControl].((vmsettings:PersonalizacionSettingsViewModel)DataContext).SelectDangerColorCommand}"
-                                                CommandParameter="{Binding HexColor}"
-                                                Margin="2" Padding="6" Height="36" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgSecondaryBrush}">
-                                            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                                                <Border Width="14" Height="14" CornerRadius="7" Background="{Binding HexColor}" />
-                                                <TextBlock Text="{Binding Name}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
-                                            </StackPanel>
-                                        </Button>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
+                        <Border Padding="14" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                            <StackPanel Spacing="10">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <mi:MaterialIcon Kind="AlertOctagonOutline" Width="16" Height="16" Foreground="{DynamicResource AccentDangerBrush}" VerticalAlignment="Center" />
+                                    <TextBlock Text="Color Botón Anular / Cancelar (Alertas)" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                </StackPanel>
+                                <ItemsControl ItemsSource="{Binding DangerColors}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <UniformGrid Columns="4" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vmsettings:ColorPaletteItem">
+                                            <Button Command="{Binding $parent[UserControl].((vmsettings:PersonalizacionSettingsViewModel)DataContext).SelectDangerColorCommand}"
+                                                    CommandParameter="{Binding HexColor}"
+                                                    Margin="3" Padding="8,6" Height="40" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" Cursor="Hand">
+                                                <Grid ColumnDefinitions="Auto,*">
+                                                    <Border Width="16" Height="16" CornerRadius="8" Background="{Binding HexColor}" VerticalAlignment="Center" />
+                                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="8,0,0,0">
+                                                        <TextBlock Text="{Binding Name}" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                                                        <TextBlock Text="{Binding HexColor}" FontSize="9" Foreground="{DynamicResource TextMutedBrush}" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Button>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
 
                         <!-- Color Acento Principal (Foco del Sistema) -->
-                        <StackPanel Spacing="6">
-                            <TextBlock Text="Color Acento Principal (Foco del Sistema)" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                            <ItemsControl ItemsSource="{Binding AccentColors}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <UniformGrid Columns="4" />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="vm:ColorPaletteItem">
-                                        <Button Command="{Binding $parent[UserControl].((vmsettings:PersonalizacionSettingsViewModel)DataContext).SelectPrimaryColorCommand}"
-                                                CommandParameter="{Binding HexColor}"
-                                                Margin="2" Padding="6" Height="36" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgSecondaryBrush}">
-                                            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                                                <Border Width="14" Height="14" CornerRadius="7" Background="{Binding HexColor}" />
-                                                <TextBlock Text="{Binding Name}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
-                                            </StackPanel>
-                                        </Button>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
+                        <Border Padding="14" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                            <StackPanel Spacing="10">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <mi:MaterialIcon Kind="Palette" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
+                                    <TextBlock Text="Color Acento Principal (Foco del Sistema)" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                </StackPanel>
+                                <ItemsControl ItemsSource="{Binding AccentColors}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <UniformGrid Columns="3" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vmsettings:ColorPaletteItem">
+                                            <Button Command="{Binding $parent[UserControl].((vmsettings:PersonalizacionSettingsViewModel)DataContext).SelectPrimaryColorCommand}"
+                                                    CommandParameter="{Binding HexColor}"
+                                                    Margin="3" Padding="8,6" Height="40" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" Cursor="Hand">
+                                                <Grid ColumnDefinitions="Auto,*">
+                                                    <Border Width="16" Height="16" CornerRadius="8" Background="{Binding HexColor}" VerticalAlignment="Center" />
+                                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="8,0,0,0">
+                                                        <TextBlock Text="{Binding Name}" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                                                        <TextBlock Text="{Binding HexColor}" FontSize="9" Foreground="{DynamicResource TextMutedBrush}" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Button>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
 
                         <!-- Color de Fondo de Barra Lateral de Navegación -->
-                        <StackPanel Spacing="6">
-                            <TextBlock Text="Color de Fondo de Barra Lateral de Navegación" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                            <ItemsControl ItemsSource="{Binding SidebarColors}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <UniformGrid Columns="4" />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                                <ItemsControl.ItemTemplate>
-                                    <DataTemplate x:DataType="vm:ColorPaletteItem">
-                                        <Button Command="{Binding $parent[UserControl].((vmsettings:PersonalizacionSettingsViewModel)DataContext).SelectSidebarColorCommand}"
-                                                CommandParameter="{Binding HexColor}"
-                                                Margin="2" Padding="6" Height="36" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgSecondaryBrush}">
-                                            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center">
-                                                <Border Width="14" Height="14" CornerRadius="7" Background="{Binding HexColor}" />
-                                                <TextBlock Text="{Binding Name}" FontSize="10" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
-                                            </StackPanel>
-                                        </Button>
-                                    </DataTemplate>
-                                </ItemsControl.ItemTemplate>
-                            </ItemsControl>
-                        </StackPanel>
+                        <Border Padding="14" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                            <StackPanel Spacing="10">
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <mi:MaterialIcon Kind="NavigationOutline" Width="16" Height="16" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
+                                    <TextBlock Text="Color de Fondo de Barra Lateral de Navegación" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                </StackPanel>
+                                <ItemsControl ItemsSource="{Binding SidebarColors}">
+                                    <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                            <UniformGrid Columns="4" />
+                                        </ItemsPanelTemplate>
+                                    </ItemsControl.ItemsPanel>
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="vmsettings:ColorPaletteItem">
+                                            <Button Command="{Binding $parent[UserControl].((vmsettings:PersonalizacionSettingsViewModel)DataContext).SelectSidebarColorCommand}"
+                                                    CommandParameter="{Binding HexColor}"
+                                                    Margin="3" Padding="8,6" Height="40" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" Cursor="Hand">
+                                                <Grid ColumnDefinitions="Auto,*">
+                                                    <Border Width="16" Height="16" CornerRadius="8" Background="{Binding HexColor}" VerticalAlignment="Center" />
+                                                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="8,0,0,0">
+                                                        <TextBlock Text="{Binding Name}" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                                                        <TextBlock Text="{Binding HexColor}" FontSize="9" Foreground="{DynamicResource TextMutedBrush}" />
+                                                    </StackPanel>
+                                                </Grid>
+                                            </Button>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </Border>
                     </StackPanel>
 
-                    <!-- SUB-TAB 3: TIPOGRAFÍA -->
+                    <!-- SUB-TAB 3: TIPOGRAFÍA & ESCALADO MONOSPACIADO POS -->
                     <StackPanel IsVisible="{Binding IsSubTipografiaTab}" Spacing="16">
-                        <Border Padding="14" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                        <Border Padding="16" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                             <StackPanel Spacing="14">
-                                <TextBlock Text="Familia Tipográfica &amp; Escalamiento de Fuente" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                <TextBlock Text="Familia Tipográfica &amp; Escalamiento de Texto UI" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
 
                                 <StackPanel Spacing="4">
-                                    <TextBlock Text="Fuente Tipográfica Principal" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                                    <ComboBox ItemsSource="{Binding AvailableFontOptions}" SelectedItem="{Binding State.Visual.FontFamily, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="8,6" />
+                                    <TextBlock Text="Fuente Tipográfica Principal del Sistema" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    <ComboBox ItemsSource="{Binding AvailableFontOptions}" SelectedItem="{Binding State.Visual.FontFamily, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="10,8" />
                                 </StackPanel>
 
                                 <Grid ColumnDefinitions="*,Auto">
-                                    <TextBlock Text="Tamaño Base de Fuente UI (General)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
-                                    <Border Grid.Column="1" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="6,2">
+                                    <TextBlock Text="Tamaño Base de Fuente General UI" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
+                                    <Border Grid.Column="1" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="8,2">
                                         <TextBlock Text="{Binding State.Visual.FontSizeScale, StringFormat='{}{0:F0} px'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
                                     </Border>
                                 </Grid>
                                 <Slider Minimum="12" Maximum="18" Value="{Binding State.Visual.FontSizeScale, Mode=TwoWay}" />
 
                                 <Grid ColumnDefinitions="*,Auto">
-                                    <TextBlock Text="Tamaño de Precios POS (Gran Monospaciado)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
-                                    <Border Grid.Column="1" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="6,2">
+                                    <TextBlock Text="Tamaño de Precios POS (Monospaciado de Alta Densidad)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
+                                    <Border Grid.Column="1" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="8,2">
                                         <TextBlock Text="{Binding State.Visual.PosPriceFontSize, StringFormat='{}{0:F0} px'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
                                     </Border>
                                 </Grid>
-                                <Slider Minimum="18" Maximum="36" Value="{Binding State.Visual.PosPriceFontSize, Mode=TwoWay}" />
+                                <Slider Minimum="18" Maximum="38" Value="{Binding State.Visual.PosPriceFontSize, Mode=TwoWay}" />
+
+                                <!-- Muestra Tipográfica en Tiempo Real -->
+                                <Border Background="{DynamicResource BgPrimaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="12" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="MUESTRA TIPOGRÁFICA EN VIVO" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" />
+                                        <TextBlock Text="TICKETFY ENTERPRISE POS - ABCDEFGHIJKLMNOPQRSTUVWXYZ 1234567890" FontFamily="{Binding State.Visual.FontFamily}" FontSize="{Binding State.Visual.FontSizeScale}" Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="$1,450.00 MXN" FontFamily="{Binding State.Visual.FontFamily}" FontSize="{Binding State.Visual.PosPriceFontSize}" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                    </StackPanel>
+                                </Border>
                             </StackPanel>
                         </Border>
                     </StackPanel>
 
-                    <!-- SUB-TAB 4: DISPOSICIÓN -->
+                    <!-- SUB-TAB 4: DISPOSICIÓN & DENSIDAD EMPRESARIAL -->
                     <StackPanel IsVisible="{Binding IsSubDisposicionTab}" Spacing="16">
-                        <Border Padding="14" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                        <Border Padding="16" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                             <StackPanel Spacing="14">
-                                <TextBlock Text="Disposición de Pantalla &amp; Ancho de Paneles" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                <TextBlock Text="Disposición de Pantalla &amp; Densidad Visual" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+
+                                <StackPanel Spacing="6">
+                                    <TextBlock Text="Nivel de Densidad de Información Visual" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                    <UniformGrid Columns="3">
+                                        <Button Command="{Binding SelectDensityCommand}" CommandParameter="{x:Static models:UIDensity.Compact}" Padding="10" Margin="2" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" Cursor="Hand">
+                                            <StackPanel Spacing="4" HorizontalAlignment="Center">
+                                                <TextBlock Text="Compacto" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" />
+                                                <TextBlock Text="Máxima Densidad POS" FontSize="9" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" />
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Command="{Binding SelectDensityCommand}" CommandParameter="{x:Static models:UIDensity.Comfortable}" Padding="10" Margin="2" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" Cursor="Hand">
+                                            <StackPanel Spacing="4" HorizontalAlignment="Center">
+                                                <TextBlock Text="Confortable" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" />
+                                                <TextBlock Text="Equilibrado Estándar" FontSize="9" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" />
+                                            </StackPanel>
+                                        </Button>
+                                        <Button Command="{Binding SelectDensityCommand}" CommandParameter="{x:Static models:UIDensity.Touch}" Padding="10" Margin="2" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" Cursor="Hand">
+                                            <StackPanel Spacing="4" HorizontalAlignment="Center">
+                                                <TextBlock Text="Táctil / Espacioso" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" />
+                                                <TextBlock Text="Optimizado Touchscreen" FontSize="9" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" />
+                                            </StackPanel>
+                                        </Button>
+                                    </UniformGrid>
+                                </StackPanel>
 
                                 <Grid ColumnDefinitions="*,Auto">
                                     <TextBlock Text="Ancho del Panel Lateral de Carrito POS" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
-                                    <Border Grid.Column="1" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="6,2">
+                                    <Border Grid.Column="1" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="8,2">
                                         <TextBlock Text="{Binding State.Visual.PosCartWidth, StringFormat='{}{0:F0} px'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
                                     </Border>
                                 </Grid>
@@ -229,37 +371,38 @@
                         </Border>
                     </StackPanel>
 
-                    <!-- SUB-TAB 5: BOTONES -->
+                    <!-- SUB-TAB 5: BOTONES & GEOMETRÍA -->
                     <StackPanel IsVisible="{Binding IsSubBotonesTab}" Spacing="16">
-                        <Border Padding="14" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                        <Border Padding="16" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                             <StackPanel Spacing="14">
-                                <TextBlock Text="Geometría, Curvatura de Bordes &amp; Componentes" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                <TextBlock Text="Geometría, Curvatura de Bordes &amp; Componentes" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
 
                                 <Grid ColumnDefinitions="*,Auto">
                                     <TextBlock Text="Radio de Curvatura de Botones &amp; Tarjetas" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
-                                    <Border Grid.Column="1" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="6,2">
+                                    <Border Grid.Column="1" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="8,2">
                                         <TextBlock Text="{Binding State.Visual.CornerRadius, StringFormat='{}{0:F0} px'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
                                     </Border>
                                 </Grid>
                                 <Slider Minimum="0" Maximum="24" Value="{Binding State.Visual.CornerRadius, Mode=TwoWay}" />
 
-                                <ToggleSwitch IsChecked="{Binding State.Visual.ShowStockBadge, Mode=TwoWay}" OffContent="Mostrar Insignia de Stock" OnContent="Mostrar Insignia de Stock" />
+                                <ToggleSwitch IsChecked="{Binding State.Visual.ShowStockBadge, Mode=TwoWay}" OffContent="Mostrar Insignia de Stock en Tarjeta" OnContent="Mostrar Insignia de Stock en Tarjeta" />
                                 <ToggleSwitch IsChecked="{Binding State.Visual.ShowQuickAddButton, Mode=TwoWay}" OffContent="Mostrar Botón Rápido + AGREGAR" OnContent="Mostrar Botón Rápido + AGREGAR" />
+                                <ToggleSwitch IsChecked="{Binding State.Visual.ShowSkuProducto, Mode=TwoWay}" OffContent="Mostrar Ícono de Código de Barras" OnContent="Mostrar Ícono de Código de Barras" />
                             </StackPanel>
                         </Border>
                     </StackPanel>
 
-                    <!-- SUB-TAB 6: ANIMACIONES -->
+                    <!-- SUB-TAB 6: ANIMACIONES & ACELERACIÓN GPU -->
                     <StackPanel IsVisible="{Binding IsSubAnimacionesTab}" Spacing="16">
-                        <Border Padding="14" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                        <Border Padding="16" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                             <StackPanel Spacing="14">
-                                <TextBlock Text="Efectos de Transición &amp; Glassmorphism GPU" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                <TextBlock Text="Transiciones Animadas &amp; Efectos Glassmorphism GPU" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
 
                                 <ToggleSwitch IsChecked="{Binding State.Visual.EnableAnimations, Mode=TwoWay}" OffContent="Activar Transiciones Animadas Suaves" OnContent="Activar Transiciones Animadas Suaves" />
 
                                 <Grid ColumnDefinitions="*,Auto">
-                                    <TextBlock Text="Desenfoque de Cristal (Glassmorphism)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
-                                    <Border Grid.Column="1" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="6,2">
+                                    <TextBlock Text="Desenfoque de Cristal (Glassmorphism Blur)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
+                                    <Border Grid.Column="1" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="8,2">
                                         <TextBlock Text="{Binding State.Visual.GlassmorphismBlur, StringFormat='{}{0:F0} px'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
                                     </Border>
                                 </Grid>
@@ -271,57 +414,67 @@
             </ScrollViewer>
         </DockPanel>
 
-        <!-- ─── RIGHT COLUMN: PREVISUALIZACIÓN EN TIEMPO REAL ─── -->
+        <!-- ─── RIGHT COLUMN: PREVISUALIZACIÓN POS EN TIEMPO REAL ─── -->
         <Border Grid.Column="1" Background="{DynamicResource BgPrimaryBrush}"
                 BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
-                CornerRadius="{DynamicResource AppCornerRadius}" Padding="14">
+                CornerRadius="{DynamicResource AppCornerRadius}" Padding="16">
             <DockPanel LastChildFill="True">
-                <TextBlock DockPanel.Dock="Top" Text="PREVISUALIZACIÓN EN TIEMPO REAL" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" HorizontalAlignment="Center" Margin="0,0,0,14" />
-
-                <StackPanel Spacing="14" VerticalAlignment="Center">
-
-                    <!-- 1. Mini Topbar Preview with Logo Scale binding -->
-                    <Border Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}" Padding="10,8">
-                        <Grid ColumnDefinitions="Auto,*">
-                            <Border Width="{Binding State.Visual.EscalaLogoTopbar}" Height="{Binding State.Visual.EscalaLogoTopbar}" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,8,0">
-                                <TextBlock Text="NV" FontSize="10" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                            </Border>
-                            <TextBlock Grid.Column="1" Text="{Binding State.Company.CommercialName}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-                        </Grid>
-                    </Border>
-
-                    <!-- 2. Mini Live POS Product Card Preview -->
-                    <Border Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}" Padding="12">
-                        <StackPanel Spacing="8">
-                            <Grid ColumnDefinitions="*,Auto">
-                                <Border IsVisible="{Binding State.Visual.ShowStockBadge}" Background="{DynamicResource AccentSuccessBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="6,2">
-                                    <TextBlock Text="Stock: 45 pza" FontSize="9" FontWeight="Bold" Foreground="White" />
-                                </Border>
-                                <mi:MaterialIcon Grid.Column="1" Kind="Barcode" Width="16" Height="16" Foreground="{DynamicResource TextMutedBrush}" IsVisible="{Binding State.Visual.ShowSkuProducto}" />
-                            </Grid>
-
-                            <StackPanel Spacing="2">
-                                <TextBlock Text="Refresco Cola 600ml" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
-                                <TextBlock Text="Bebidas / Abarrotes" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" />
-                            </StackPanel>
-
-                            <Grid ColumnDefinitions="*,Auto">
-                                <TextBlock Text="$19.00 MXN" FontSize="{Binding State.Visual.PosPriceFontSize}" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
-                                <Button Grid.Column="1" IsVisible="{Binding State.Visual.ShowQuickAddButton}" Content="+ AGREGAR" Padding="8,4" FontSize="10" FontWeight="Bold" Background="{DynamicResource AccentPrimaryBrush}" Foreground="White" CornerRadius="{DynamicResource AppCornerRadius}" />
-                            </Grid>
-                        </StackPanel>
-                    </Border>
-
-                    <!-- 3. Mini Call-to-Action Payment Buttons Preview -->
-                    <StackPanel Spacing="8">
-                        <Button Content="[ COBRAR TICKET $116.00 ]" Padding="10" FontSize="11" FontWeight="Bold"
-                                Background="{DynamicResource AccentSuccessBrush}" Foreground="White" CornerRadius="{DynamicResource AppCornerRadius}" HorizontalContentAlignment="Center" HorizontalAlignment="Stretch" />
-
-                        <Button Content="CANCELAR / ANULAR VENTA" Padding="8" FontSize="10" FontWeight="Bold"
-                                Background="{DynamicResource AccentDangerBrush}" Foreground="White" CornerRadius="{DynamicResource AppCornerRadius}" HorizontalContentAlignment="Center" HorizontalAlignment="Stretch" />
+                <Border DockPanel.Dock="Top" Margin="0,0,0,16" Padding="0,0,0,10" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,0,1">
+                    <StackPanel HorizontalAlignment="Center" Spacing="2">
+                        <TextBlock Text="PREVISUALIZACIÓN EN TIEMPO REAL" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" HorizontalAlignment="Center" />
+                        <TextBlock Text="Respuesta instantánea GPU por {DynamicResource}" FontSize="9" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" />
                     </StackPanel>
+                </Border>
 
-                </StackPanel>
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Spacing="16" VerticalAlignment="Center">
+
+                        <!-- 1. Mini Topbar Preview with Logo Scale binding -->
+                        <Border Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}" Padding="10,8">
+                            <Grid ColumnDefinitions="Auto,*">
+                                <Border Width="{Binding State.Visual.EscalaLogoTopbar}" Height="{Binding State.Visual.EscalaLogoTopbar}" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,10,0">
+                                    <TextBlock Text="NV" FontSize="11" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                </Border>
+                                <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding State.Company.CommercialName}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="Cajero: surtidor" FontSize="9" Foreground="{DynamicResource TextMutedBrush}" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <!-- 2. Mini Live POS Product Card Preview -->
+                        <Border Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}" Padding="14">
+                            <StackPanel Spacing="10">
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <Border IsVisible="{Binding State.Visual.ShowStockBadge}" Background="{DynamicResource AccentSuccessBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="8,3">
+                                        <TextBlock Text="Stock: 45 pza" FontSize="9" FontWeight="Bold" Foreground="White" />
+                                    </Border>
+                                    <mi:MaterialIcon Grid.Column="1" Kind="Barcode" Width="18" Height="18" Foreground="{DynamicResource TextMutedBrush}" IsVisible="{Binding State.Visual.ShowSkuProducto}" />
+                                </Grid>
+
+                                <StackPanel Spacing="3">
+                                    <TextBlock Text="Refresco Cola 600ml" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" FontFamily="{Binding State.Visual.FontFamily}" />
+                                    <TextBlock Text="Bebidas / Abarrotes" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" FontFamily="{Binding State.Visual.FontFamily}" />
+                                </StackPanel>
+
+                                <Grid ColumnDefinitions="*,Auto">
+                                    <TextBlock Text="$19.00 MXN" FontSize="{Binding State.Visual.PosPriceFontSize}" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" FontFamily="{Binding State.Visual.FontFamily}" VerticalAlignment="Center" />
+                                    <Button Grid.Column="1" IsVisible="{Binding State.Visual.ShowQuickAddButton}" Content="+ AGREGAR" Padding="10,6" FontSize="10" FontWeight="Bold" Background="{DynamicResource AccentPrimaryBrush}" Foreground="White" CornerRadius="{DynamicResource AppCornerRadius}" Cursor="Hand" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- 3. Mini Call-to-Action Payment Buttons Preview -->
+                        <StackPanel Spacing="10">
+                            <Button Content="[ COBRAR TICKET $116.00 ]" Padding="12" FontSize="12" FontWeight="Bold"
+                                    Background="{DynamicResource AccentSuccessBrush}" Foreground="White" CornerRadius="{DynamicResource AppCornerRadius}" HorizontalContentAlignment="Center" HorizontalAlignment="Stretch" Cursor="Hand" />
+
+                            <Button Content="CANCELAR / ANULAR VENTA" Padding="10" FontSize="10" FontWeight="Bold"
+                                    Background="{DynamicResource AccentDangerBrush}" Foreground="White" CornerRadius="{DynamicResource AppCornerRadius}" HorizontalContentAlignment="Center" HorizontalAlignment="Stretch" Cursor="Hand" />
+                        </StackPanel>
+
+                    </StackPanel>
+                </ScrollViewer>
             </DockPanel>
         </Border>
     </Grid>
