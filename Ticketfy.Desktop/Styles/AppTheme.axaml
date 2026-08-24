@@ -4,8 +4,8 @@
     <!-- ═══════════════════════════════════════════════════════════
          TICKETFY POS — NEXT.JS AESTHETIC DESIGN TOKEN SYSTEM
          Protocol VALCORE v4.0 — Dynamic Theme Token System
-         Valcore Maximum Specificity Input Border & PathIcon Standard
-         (High-Specificity Dual Pseudo-Class Overrides & Visible Arrow Icons)
+         Valcore Native CaptionButtons & High-Contrast Icons Standard
+         (Eliminates 4-Box Artifacts & Restores Standard Window Controls)
          ═══════════════════════════════════════════════════════════ -->
 
     <Style Selector=":root">
@@ -38,6 +38,66 @@
         <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
         <Setter Property="FontFamily" Value="{DynamicResource AppFontFamily}" />
         <Setter Property="FontSize" Value="{DynamicResource AppBaseFontSize}" />
+    </Style>
+
+    <!-- ─── WINDOW TITLE BAR CAPTION BUTTONS (MINIMIZE, MAXIMIZE, CLOSE) ─── -->
+    <Style Selector="CaptionButtons">
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    </Style>
+
+    <Style Selector="CaptionButtons Button">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="RenderTransform" Value="none" />
+        <Setter Property="MinWidth" Value="46" />
+        <Setter Property="MinHeight" Value="30" />
+    </Style>
+
+    <Style Selector="CaptionButtons Button:pointerover">
+        <Setter Property="RenderTransform" Value="none" />
+    </Style>
+
+    <Style Selector="CaptionButtons Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource HoverBgBrush}" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    </Style>
+
+    <Style Selector="CaptionButtons Button#PART_CloseButton:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="#EF4444" />
+        <Setter Property="BorderBrush" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground" Value="White" />
+    </Style>
+
+    <Style Selector="CaptionButtons Button Path">
+        <Setter Property="Fill" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="Stroke" Value="{DynamicResource TextPrimaryBrush}" />
+    </Style>
+
+    <Style Selector="CaptionButtons Button PathIcon">
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    </Style>
+
+    <Style Selector="CaptionButtons Button:pointerover Path">
+        <Setter Property="Fill" Value="{DynamicResource TextPrimaryBrush}" />
+        <Setter Property="Stroke" Value="{DynamicResource TextPrimaryBrush}" />
+    </Style>
+
+    <Style Selector="CaptionButtons Button:pointerover PathIcon">
+        <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}" />
+    </Style>
+
+    <Style Selector="CaptionButtons Button#PART_CloseButton:pointerover Path">
+        <Setter Property="Fill" Value="White" />
+        <Setter Property="Stroke" Value="White" />
+    </Style>
+
+    <Style Selector="CaptionButtons Button#PART_CloseButton:pointerover PathIcon">
+        <Setter Property="Foreground" Value="White" />
     </Style>
 
     <!-- ─── UNIVERSAL MANDATORY INPUT FIELD BORDERS (1.5PX ALWAYS VISIBLE IN ALL STATES) ─── -->
