@@ -1,0 +1,60 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vmsettings="using:Ticketfy.ViewModels.Settings"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             x:Class="Ticketfy.Views.Settings.SystemSecurityView"
+             x:DataType="vmsettings:UnifiedSettingsViewModel">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,8,0">
+        <StackPanel Spacing="16">
+
+            <!-- Title Header -->
+            <Border Padding="16,12" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                <Grid ColumnDefinitions="Auto,*">
+                    <Border Width="36" Height="36" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource AccentPrimaryBrush}">
+                        <mi:MaterialIcon Kind="ShieldCheckOutline" Width="22" Height="22" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="12,0,0,0">
+                        <TextBlock Text="Mantenimiento de Sistema, Respaldos &amp; Seguridad RBAC" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        <TextBlock Text="Administración de copias de seguridad de SQLite, auditoría tamper-evident y bloqueo automático de pantalla" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- 1. COPIAS DE SEGURIDAD SQLITE -->
+            <Border Padding="16" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                <StackPanel Spacing="14">
+                    <TextBlock Text="1. Copias de Seguridad &amp; Almacenamiento Local" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Ruta Destino de Copias de Seguridad (.db / .zip)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBox Text="{Binding State.System.BackupPath, Mode=TwoWay}" Watermark="C:\TicketfyData\Backups" Padding="8,6" />
+                    </StackPanel>
+
+                    <Grid ColumnDefinitions="*,*">
+                        <ToggleSwitch Grid.Column="0" IsChecked="{Binding State.System.AutoBackupOnClose, Mode=TwoWay}" OffContent="Respaldo al Cerrar" OnContent="Respaldo al Cerrar" />
+                        <ToggleSwitch Grid.Column="1" IsChecked="{Binding State.System.EnableAuditLogs, Mode=TwoWay}" OffContent="Auditoría de Acciones" OnContent="Auditoría de Acciones" />
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- 2. SEGURIDAD & INACTIVIDAD -->
+            <Border Padding="16" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                <StackPanel Spacing="14">
+                    <TextBlock Text="2. Seguridad &amp; Bloqueo por Inactividad" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="Minutos de Inactividad para Bloqueo por PIN" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
+                        <Border Grid.Column="1" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="6,2">
+                            <TextBlock Text="{Binding State.System.AutoLockTimeoutMinutes, StringFormat='{}{0} min'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                        </Border>
+                    </Grid>
+                    <Slider Minimum="1" Maximum="60" Value="{Binding State.System.AutoLockTimeoutMinutes, Mode=TwoWay}" />
+
+                    <ToggleSwitch IsChecked="{Binding State.System.EnablePinLock, Mode=TwoWay}" OffContent="Exigir PIN al Desbloquear" OnContent="Exigir PIN al Desbloquear" />
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

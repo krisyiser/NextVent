@@ -1,0 +1,91 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vmsettings="using:Ticketfy.ViewModels.Settings"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             x:Class="Ticketfy.Views.Settings.CompanyProfileView"
+             x:DataType="vmsettings:UnifiedSettingsViewModel">
+
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,8,0">
+        <StackPanel Spacing="16">
+
+            <!-- Title Header -->
+            <Border Padding="16,12" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                <Grid ColumnDefinitions="Auto,*">
+                    <Border Width="36" Height="36" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource AccentPrimaryBrush}">
+                        <mi:MaterialIcon Kind="Domain" Width="22" Height="22" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="12,0,0,0">
+                        <TextBlock Text="Perfil Corporativo, Datos Comerciales &amp; Fiscales CFDI 4.0" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        <TextBlock Text="Configuración unificada de identidad corporativa, sucursales y timbrado SAT" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Datos Comerciales & Branding -->
+            <Border Padding="16" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                <StackPanel Spacing="14">
+                    <TextBlock Text="1. Identidad Comercial &amp; Branding" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                    
+                    <Grid ColumnDefinitions="*,*">
+                        <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,8,0">
+                            <TextBlock Text="Nombre Comercial del Negocio" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <TextBox Text="{Binding State.Company.CommercialName, Mode=TwoWay}" Watermark="Ej. Supermercado El Trébol" Padding="8,6" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Spacing="4" Margin="8,0,0,0">
+                            <TextBlock Text="Teléfono de Atención a Clientes" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <TextBox Text="{Binding State.Company.Phone, Mode=TwoWay}" Watermark="5512345678" Padding="8,6" />
+                        </StackPanel>
+                    </Grid>
+
+                    <Grid ColumnDefinitions="*,*">
+                        <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,8,0">
+                            <TextBlock Text="Correo Electrónico Oficial" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <TextBox Text="{Binding State.Company.Email, Mode=TwoWay}" Watermark="contacto@miempresa.com" Padding="8,6" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Spacing="4" Margin="8,0,0,0">
+                            <TextBlock Text="Sitio Web o Tienda Online" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <TextBox Text="{Binding State.Company.Website, Mode=TwoWay}" Watermark="https://miempresa.com" Padding="8,6" />
+                        </StackPanel>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Datos Fiscales CFDI 4.0 -->
+            <Border Padding="16" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                <StackPanel Spacing="14">
+                    <TextBlock Text="2. Datos Fiscales para Facturación SAT (CFDI 4.0)" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Razón Social Completa (Sin Régimen Capital)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBox Text="{Binding State.Company.LegalName, Mode=TwoWay}" Watermark="TICKETFY ENTERPRISE S.A. DE C.V." Padding="8,6" />
+                    </StackPanel>
+
+                    <Grid ColumnDefinitions="*,*">
+                        <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,8,0">
+                            <TextBlock Text="RFC Emisor SAT" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <TextBox Text="{Binding State.Company.Rfc, Mode=TwoWay}" Watermark="XAXX010101000" Padding="8,6" />
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="1" Spacing="4" Margin="8,0,0,0">
+                            <TextBlock Text="Código Postal Fiscal" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                            <TextBox Text="{Binding State.Company.ZipCode, Mode=TwoWay}" Watermark="06000" Padding="8,6" />
+                        </StackPanel>
+                    </Grid>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Régimen Fiscal Clave SAT" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBox Text="{Binding State.Company.FiscalRegime, Mode=TwoWay}" Watermark="601 - General de Ley Personas Morales" Padding="8,6" />
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Dirección Fiscal Completa" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBox Text="{Binding State.Company.Address, Mode=TwoWay}" Watermark="Av. Insurgentes Sur 1234, Col. Del Valle, Benito Juárez, CDMX" Padding="8,6" />
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

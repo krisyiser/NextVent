@@ -24,10 +24,8 @@
                     <Grid ColumnDefinitions="*,Auto">
                         <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                             <mi:MaterialIcon Kind="CogOutline" Width="22" Height="22" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                            <TextBlock Text="Configuración General del Sistema" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="Motor Unificado de Configuración &amp; Personalización" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
                         </StackPanel>
-
-                        <!-- Close button removed per user request -->
                     </Grid>
                 </Border>
 
@@ -47,98 +45,87 @@
                         <Button Grid.Column="2" Command="{Binding SaveAllSettingsCommand}" Padding="20,10" Classes="primary-action" FontSize="13" FontWeight="Bold" CornerRadius="{DynamicResource AppCornerRadius}" Cursor="Hand">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <mi:MaterialIcon Kind="ContentSave" Width="18" Height="18" />
-                                <TextBlock Text="GUARDAR TODO" VerticalAlignment="Center" />
+                                <TextBlock Text="GUARDAR CONFIGURACIÓN" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
                     </Grid>
                 </Border>
 
-                <!-- ═══ 3. MAIN BODY (MODULAR LEFT NAVIGATION + ISOLATED RIGHT SUB-VIEWS) ═══ -->
-                <Grid ColumnDefinitions="220,*">
+                <!-- ═══ 3. MAIN BODY (4 KEY OPERATIONAL AXES NAV + ISOLATED VIEWS) ═══ -->
+                <Grid ColumnDefinitions="240,*">
 
-                    <!-- ─── LEFT SIDEBAR NAVIGATION (10 CATEGORIES) ─── -->
+                    <!-- ─── LEFT SIDEBAR NAVIGATION (4 KEY OPERATIONAL AXES) ─── -->
                     <Border Grid.Column="0" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,0,1,0">
                         <DockPanel LastChildFill="True">
                             <Border DockPanel.Dock="Bottom" Padding="16,14" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="0,1,0,0">
                                 <StackPanel HorizontalAlignment="Center" Spacing="2">
                                     <TextBlock Text="{Binding CurrentAppVersion, StringFormat='TICKETFY! {0}'}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" />
-                                    <TextBlock Text="Valcore" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" />
+                                    <TextBlock Text="Valcore Engine 4.0" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" />
                                 </StackPanel>
                             </Border>
 
                             <ScrollViewer VerticalScrollBarVisibility="Auto">
-                                <StackPanel Spacing="4" Margin="8">
-                                    <!-- 1. Empresa -->
-                                    <Button Command="{Binding SelectMainTabCommand}" CommandParameter="empresa" Padding="12,10" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch">
+                                <StackPanel Spacing="6" Margin="8">
+                                    <TextBlock Text="EJES DE CONFIGURACIÓN" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" Margin="8,8,8,4" />
+
+                                    <!-- 1. Personalización & UI -->
+                                    <Button Command="{Binding UnifiedVM.SelectAxisTabCommand}" CommandParameter="ui" Padding="12,11" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch" Cursor="Hand">
                                         <StackPanel Orientation="Horizontal" Spacing="10">
-                                            <mi:MaterialIcon Kind="Domain" Width="18" Height="18" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                                            <TextBlock Text="Empresa" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                            <mi:MaterialIcon Kind="PaletteOutline" Width="20" Height="20" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                            <StackPanel VerticalAlignment="Center">
+                                                <TextBlock Text="Personalización &amp; UI" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                                <TextBlock Text="Estilos, Colores &amp; Fuentes" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" />
+                                            </StackPanel>
                                         </StackPanel>
                                     </Button>
 
-                                    <!-- 2. Interfaz -->
-                                    <Button Command="{Binding SelectMainTabCommand}" CommandParameter="interfaz" Padding="12,10" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch">
+                                    <!-- 2. Identidad & Empresa -->
+                                    <Button Command="{Binding UnifiedVM.SelectAxisTabCommand}" CommandParameter="company" Padding="12,11" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch" Cursor="Hand">
                                         <StackPanel Orientation="Horizontal" Spacing="10">
-                                            <mi:MaterialIcon Kind="PaletteOutline" Width="18" Height="18" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                                            <TextBlock Text="Interfaz" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                            <mi:MaterialIcon Kind="Domain" Width="20" Height="20" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                            <StackPanel VerticalAlignment="Center">
+                                                <TextBlock Text="Identidad &amp; Empresa" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                                <TextBlock Text="Datos Comerciales &amp; Fiscales" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" />
+                                            </StackPanel>
                                         </StackPanel>
                                     </Button>
 
-                                    <!-- 3. Ticket -->
-                                    <Button Command="{Binding SelectMainTabCommand}" CommandParameter="ticket" Padding="12,10" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch">
+                                    <!-- 3. Hardware & Tickets -->
+                                    <Button Command="{Binding UnifiedVM.SelectAxisTabCommand}" CommandParameter="hardware" Padding="12,11" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch" Cursor="Hand">
                                         <StackPanel Orientation="Horizontal" Spacing="10">
-                                            <mi:MaterialIcon Kind="PrinterOutline" Width="18" Height="18" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                                            <TextBlock Text="Ticket" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                            <mi:MaterialIcon Kind="PrinterOutline" Width="20" Height="20" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                            <StackPanel VerticalAlignment="Center">
+                                                <TextBlock Text="Hardware &amp; Tickets" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                                <TextBlock Text="Impresoras 58/80mm &amp; Lector" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" />
+                                            </StackPanel>
                                         </StackPanel>
                                     </Button>
 
-                                    <!-- 4. Conexiones -->
-                                    <Button Command="{Binding SelectMainTabCommand}" CommandParameter="conexiones" Padding="12,10" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch">
+                                    <!-- 4. Sistema & Seguridad -->
+                                    <Button Command="{Binding UnifiedVM.SelectAxisTabCommand}" CommandParameter="system" Padding="12,11" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch" Cursor="Hand">
                                         <StackPanel Orientation="Horizontal" Spacing="10">
-                                            <mi:MaterialIcon Kind="Lan" Width="18" Height="18" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                                            <TextBlock Text="Conexiones" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                            <mi:MaterialIcon Kind="ShieldCheckOutline" Width="20" Height="20" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                            <StackPanel VerticalAlignment="Center">
+                                                <TextBlock Text="Sistema &amp; Seguridad" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                                <TextBlock Text="Base de Datos, PIN &amp; Backup" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" />
+                                            </StackPanel>
                                         </StackPanel>
                                     </Button>
 
-                                    <!-- 5. Seguridad -->
-                                    <Button Command="{Binding SelectMainTabCommand}" CommandParameter="seguridad" Padding="12,10" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch">
+                                    <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="4,8" />
+
+                                    <!-- Usuarios & Acerca de (Acceso Rápido) -->
+                                    <Button Command="{Binding SelectMainTabCommand}" CommandParameter="usuarios" Padding="12,8" CornerRadius="{DynamicResource AppCornerRadius}" Background="Transparent" HorizontalAlignment="Stretch">
                                         <StackPanel Orientation="Horizontal" Spacing="10">
-                                            <mi:MaterialIcon Kind="ShieldCheckOutline" Width="18" Height="18" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                                            <TextBlock Text="Seguridad" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                            <mi:MaterialIcon Kind="AccountGroupOutline" Width="16" Height="16" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                            <TextBlock Text="Usuarios &amp; Roles" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
                                         </StackPanel>
                                     </Button>
 
-                                    <!-- 6. Datos -->
-                                    <Button Command="{Binding SelectMainTabCommand}" CommandParameter="datos" Padding="12,10" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch">
+                                    <Button Command="{Binding SelectMainTabCommand}" CommandParameter="acercade" Padding="12,8" CornerRadius="{DynamicResource AppCornerRadius}" Background="Transparent" HorizontalAlignment="Stretch">
                                         <StackPanel Orientation="Horizontal" Spacing="10">
-                                            <mi:MaterialIcon Kind="DatabaseOutline" Width="18" Height="18" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                                            <TextBlock Text="Datos" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
-                                        </StackPanel>
-                                    </Button>
-
-                                    <!-- 7. Alertas -->
-                                    <Button Command="{Binding SelectMainTabCommand}" CommandParameter="alertas" Padding="12,10" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch">
-                                        <StackPanel Orientation="Horizontal" Spacing="10">
-                                            <mi:MaterialIcon Kind="BellOutline" Width="18" Height="18" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                                            <TextBlock Text="Alertas" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
-                                        </StackPanel>
-                                    </Button>
-
-                                    <!-- 8. Usuarios y Roles -->
-                                    <Button Command="{Binding SelectMainTabCommand}" CommandParameter="usuarios" Padding="12,10" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch">
-                                        <StackPanel Orientation="Horizontal" Spacing="10">
-                                            <mi:MaterialIcon Kind="AccountGroupOutline" Width="18" Height="18" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                                            <TextBlock Text="Usuarios y Roles" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
-                                        </StackPanel>
-                                    </Button>
-
-
-
-                                    <!-- 10. Acerca de -->
-                                    <Button Command="{Binding SelectMainTabCommand}" CommandParameter="acercade" Padding="12,10" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" HorizontalAlignment="Stretch">
-                                        <StackPanel Orientation="Horizontal" Spacing="10">
-                                            <mi:MaterialIcon Kind="InformationOutline" Width="18" Height="18" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                                            <TextBlock Text="Acerca de" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                                            <mi:MaterialIcon Kind="InformationOutline" Width="16" Height="16" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                            <TextBlock Text="Acerca de Ticketfy" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
                                         </StackPanel>
                                     </Button>
                                 </StackPanel>
@@ -146,25 +133,29 @@
                         </DockPanel>
                     </Border>
 
-                    <!-- ─── ISOLATED MODULAR SUB-VIEW HOST ─── -->
-                    <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto">
-                        <Grid Margin="20">
-                            <settings:EmpresaSettingsView IsVisible="{Binding IsEmpresaTab}" />
-                            <Panel IsVisible="{Binding IsInterfazTab}">
-                                <settings:InterfazSettingsView DataContext="{Binding InterfazVM}" />
-                            </Panel>
-                            <settings:TicketSettingsView IsVisible="{Binding IsTicketTab}" />
-                            <settings:ConexionesSettingsView IsVisible="{Binding IsConexionesTab}" />
-                            <settings:SeguridadSettingsView IsVisible="{Binding IsSeguridadTab}" />
-                            <settings:DatosSettingsView IsVisible="{Binding IsDatosTab}" />
-                            <settings:AlertasSettingsView IsVisible="{Binding IsAlertasTab}" />
-                            <settings:UsuariosSettingsView IsVisible="{Binding IsUsuariosTab}" />
-                            <settings:AcercaDeSettingsView IsVisible="{Binding IsAcercaDeTab}" />
-                        </Grid>
-                    </ScrollViewer>
+                    <!-- ─── UNIFIED MODULAR SUB-VIEW HOST ─── -->
+                    <Grid Grid.Column="1" Margin="20">
+                        <Panel IsVisible="{Binding UnifiedVM.IsUiTab}">
+                            <settings:LiveCustomizerView DataContext="{Binding UnifiedVM}" />
+                        </Panel>
+                        <Panel IsVisible="{Binding UnifiedVM.IsCompanyTab}">
+                            <settings:CompanyProfileView DataContext="{Binding UnifiedVM}" />
+                        </Panel>
+                        <Panel IsVisible="{Binding UnifiedVM.IsHardwareTab}">
+                            <settings:HardwareTicketsView DataContext="{Binding UnifiedVM}" />
+                        </Panel>
+                        <Panel IsVisible="{Binding UnifiedVM.IsSystemTab}">
+                            <settings:SystemSecurityView DataContext="{Binding UnifiedVM}" />
+                        </Panel>
+                        <Panel IsVisible="{Binding IsUsuariosTab}">
+                            <settings:UsuariosSettingsView DataContext="{Binding UsuariosVM}" />
+                        </Panel>
+                        <Panel IsVisible="{Binding IsAcercaDeTab}">
+                            <settings:AcercaDeSettingsView DataContext="{Binding AcercaDeVM}" />
+                        </Panel>
+                    </Grid>
                 </Grid>
             </DockPanel>
         </Border>
     </Grid>
 </UserControl>
-

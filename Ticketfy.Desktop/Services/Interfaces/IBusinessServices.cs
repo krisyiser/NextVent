@@ -37,9 +37,11 @@ Task<string?> GetPasswordHintAsync(string username);
 /// <summary>Key-value settings persistence.</summary>
 public interface ISettingsService
 {
-Task<string?> GetAsync(string key);
-Task SetAsync(string key, string value);
-Task<Dictionary<string, string>> GetAllAsync();
+    Task<string?> GetAsync(string key);
+    Task SetAsync(string key, string value);
+    Task<Dictionary<string, string>> GetAllAsync();
+    Task<Ticketfy.Core.Models.Settings.AppSettings> GetAppSettingsAsync();
+    Task SaveAppSettingsAsync(Ticketfy.Core.Models.Settings.AppSettings settings);
 }
 
 /// <summary>System audit log writer for tamper-evident security tracking.</summary>
