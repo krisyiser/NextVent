@@ -4,7 +4,7 @@
     <!-- ═══════════════════════════════════════════════════════════
          TICKETFY POS — NEXT.JS AESTHETIC DESIGN TOKEN SYSTEM
          Protocol VALCORE v4.0 — Dynamic Theme Token System
-         Valcore UX Protocol: High-Contrast Hover & Accent Strokes
+         Valcore Typography Protocol: High-Contrast Text Standard
          ═══════════════════════════════════════════════════════════ -->
 
     <Style Selector=":root">
@@ -86,7 +86,7 @@
     <Style Selector="ComboBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="Background" Value="{DynamicResource AccentPrimaryBrush}"/>
         <Setter Property="Foreground" Value="White"/>
-        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="FontWeight" Value="Bold"/>
     </Style>
 
     <!-- ─── CLEAN CARDS WITH DYNAMIC CORNER RADIUS & ACCENT HOVER STROKE ─── -->

@@ -56,13 +56,13 @@
                         <Grid ColumnDefinitions="*, Auto">
                             <TextBlock Text="Total a Cobrar:" FontSize="16" FontWeight="SemiBold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center"/>
                             <TextBlock Grid.Column="1" Text="{Binding TotalToPay, StringFormat='${0:N2}'}" 
-                                       FontSize="32" FontWeight="ExtraBold" Foreground="{DynamicResource AccentPrimaryBrush}" FontFamily="Consolas, monospace"/>
+                                       FontSize="32" FontWeight="ExtraBold" Foreground="{DynamicResource AccentPrimaryBrush}" FontFamily="{DynamicResource AppFontFamily}"/>
                         </Grid>
                     </Border>
 
                     <!-- Quick Cash Denominations Strip -->
                     <StackPanel Spacing="6">
-                        <TextBlock Text="Monedas Rápidas:" FontSize="12" FontWeight="SemiBold" Foreground="#475569"/>
+                        <TextBlock Text="Monedas Rápidas:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}"/>
                         <WrapPanel Orientation="Horizontal">
                             <Button Content="+$0.50" Command="{Binding AddCashDenominationCommand}" CommandParameter="0.5" Margin="0,0,6,6" Padding="8,5" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4"/>
                             <Button Content="+$1" Command="{Binding AddCashDenominationCommand}" CommandParameter="1" Margin="0,0,6,6" Padding="8,5" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4"/>
@@ -71,7 +71,7 @@
                             <Button Content="+$10" Command="{Binding AddCashDenominationCommand}" CommandParameter="10" Margin="0,0,6,6" Padding="8,5" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4"/>
                         </WrapPanel>
 
-                        <TextBlock Text="Billetes Rápidos:" FontSize="12" FontWeight="SemiBold" Foreground="#475569"/>
+                        <TextBlock Text="Billetes Rápidos:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}"/>
                         <WrapPanel Orientation="Horizontal">
                             <Button Content="+$20" Command="{Binding AddCashDenominationCommand}" CommandParameter="20" Margin="0,0,6,6" Padding="8,5" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4"/>
                             <Button Content="+$50" Command="{Binding AddCashDenominationCommand}" CommandParameter="50" Margin="0,0,6,6" Padding="8,5" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4"/>
@@ -86,17 +86,17 @@
                         <!-- Standard Received Amount Input (Visible if NOT Mixed) -->
                         <Grid ColumnDefinitions="*,*" IsVisible="{Binding IsNotMixedPayment}">
                             <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,6,0">
-                                <TextBlock Text="Monto Recibido ($):" FontSize="12" FontWeight="SemiBold" Foreground="#334155"/>
+                                <TextBlock Text="Monto Recibido ($):" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                 <controls:NumericTextBox x:Name="ReceivedAmountTextBox" AllowDecimals="True" Text="{Binding ReceivedAmountInput, Mode=TwoWay}" FontSize="20" FontWeight="Bold" 
-                                                         FontFamily="Consolas, monospace" HorizontalContentAlignment="Right" Padding="8"/>
+                                                         FontFamily="{DynamicResource AppFontFamily}" HorizontalContentAlignment="Right" Padding="8"/>
                             </StackPanel>
 
                             <StackPanel Grid.Column="1" Spacing="4" Margin="6,0,0,0">
-                                <TextBlock Text="Estado de Cambio:" FontSize="12" FontWeight="SemiBold" Foreground="#334155"/>
+                                <TextBlock Text="Estado de Cambio:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                 <Border Background="{Binding ChangeBgColor}" CornerRadius="4" Padding="10,6" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                                     <TextBlock Text="{Binding ChangeOrShortageText}" 
                                                Foreground="{Binding ChangeTextColor}" 
-                                               FontSize="18" FontWeight="ExtraBold" FontFamily="Consolas, monospace" HorizontalAlignment="Right"/>
+                                               FontSize="18" FontWeight="ExtraBold" FontFamily="{DynamicResource AppFontFamily}" HorizontalAlignment="Right"/>
                                 </Border>
                             </StackPanel>
                         </Grid>
@@ -106,17 +106,17 @@
                             <TextBlock Text="Desglose de Pago Mixto:" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}"/>
                             <Grid ColumnDefinitions="*,*,*">
                                 <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,4,0">
-                                    <TextBlock Text="Efectivo ($):" FontSize="11" FontWeight="SemiBold" Foreground="#334155"/>
+                                    <TextBlock Text="Efectivo ($):" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                     <controls:NumericTextBox AllowDecimals="True" Text="{Binding CashAmount, Mode=TwoWay}" FontSize="14" FontWeight="Bold" 
                                                              Background="{DynamicResource BgTertiaryBrush}" Padding="8" Watermark="0.00" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Spacing="4" Margin="4,0,4,0">
-                                    <TextBlock Text="Tarjeta ($):" FontSize="11" FontWeight="SemiBold" Foreground="#334155"/>
+                                    <TextBlock Text="Tarjeta ($):" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                     <controls:NumericTextBox AllowDecimals="True" Text="{Binding CardAmount, Mode=TwoWay}" FontSize="14" FontWeight="Bold" 
                                                              Background="{DynamicResource BgTertiaryBrush}" Padding="8" Watermark="0.00" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="2" Spacing="4" Margin="4,0,0,0">
-                                    <TextBlock Text="Monedero ($):" FontSize="11" FontWeight="SemiBold" Foreground="#334155"/>
+                                    <TextBlock Text="Monedero ($):" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                     <controls:NumericTextBox AllowDecimals="True" Text="{Binding WalletAmount, Mode=TwoWay}" FontSize="14" FontWeight="Bold" 
                                                              Background="{DynamicResource BgTertiaryBrush}" Padding="8" Watermark="0.00" />
                                 </StackPanel>
@@ -124,15 +124,15 @@
                             
                             <Grid ColumnDefinitions="*,*">
                                 <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,6,0">
-                                    <TextBlock Text="Total Recibido (Mixto):" FontSize="11" FontWeight="SemiBold" Foreground="#334155"/>
-                                    <TextBlock Text="{Binding TotalMixedReceived, StringFormat='${0:N2}'}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" FontFamily="Consolas, monospace"/>
+                                    <TextBlock Text="Total Recibido (Mixto):" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}"/>
+                                    <TextBlock Text="{Binding TotalMixedReceived, StringFormat='${0:N2}'}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" FontFamily="{DynamicResource AppFontFamily}"/>
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Spacing="4" Margin="6,0,0,0">
-                                    <TextBlock Text="Cambio (Mixto):" FontSize="11" FontWeight="SemiBold" Foreground="#334155"/>
+                                    <TextBlock Text="Cambio (Mixto):" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                     <Border Background="{Binding ChangeBgColor}" CornerRadius="4" Padding="8,4" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                                         <TextBlock Text="{Binding ChangeAmount, StringFormat='Cambio: ${0:N2}'}" 
                                                    Foreground="{Binding ChangeTextColor}" 
-                                                   FontSize="16" FontWeight="ExtraBold" FontFamily="Consolas, monospace" HorizontalAlignment="Right"/>
+                                                   FontSize="16" FontWeight="ExtraBold" FontFamily="{DynamicResource AppFontFamily}" HorizontalAlignment="Right"/>
                                     </Border>
                                 </StackPanel>
                             </Grid>
@@ -180,7 +180,7 @@
                                   HorizontalAlignment="Stretch" Padding="8">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate x:DataType="x:String">
-                                    <TextBlock Text="{Binding}" Foreground="#1E293B" />
+                                    <TextBlock Text="{Binding}" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" />
                                 </DataTemplate>
                             </ComboBox.ItemTemplate>
                         </ComboBox>
@@ -216,15 +216,15 @@
                                     <TextBlock Grid.Row="1" Grid.Column="0"
                                                Text="{Binding CustomerCreditLimit, StringFormat='${0:N2}'}"
                                                FontSize="15" FontWeight="ExtraBold" Foreground="{DynamicResource TextPrimaryBrush}"
-                                               FontFamily="Consolas, monospace"/>
+                                               FontFamily="{DynamicResource AppFontFamily}"/>
                                     <TextBlock Grid.Row="1" Grid.Column="1"
                                                Text="{Binding CustomerCurrentDebt, StringFormat='${0:N2}'}"
                                                FontSize="15" FontWeight="ExtraBold" Foreground="#DC2626"
-                                               HorizontalAlignment="Center" FontFamily="Consolas, monospace"/>
+                                               HorizontalAlignment="Center" FontFamily="{DynamicResource AppFontFamily}"/>
                                     <TextBlock Grid.Row="1" Grid.Column="2"
                                                Text="{Binding AvailableCredit, StringFormat='${0:N2}'}"
                                                FontSize="15" FontWeight="ExtraBold" Foreground="#059669"
-                                               HorizontalAlignment="Right" FontFamily="Consolas, monospace"/>
+                                               HorizontalAlignment="Right" FontFamily="{DynamicResource AppFontFamily}"/>
                                 </Grid>
                             </Border>
 
@@ -264,7 +264,7 @@
                                                 <TextBlock Text="{Binding MethodName}" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="12"/>
                                                 <TextBlock Text="{Binding ReferenceOrFolio}" FontSize="10" Foreground="{DynamicResource TextSecondaryBrush}"/>
                                             </StackPanel>
-                                            <TextBlock Grid.Column="1" Text="{Binding AmountPaid, StringFormat='${0:N2}'}" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" Margin="10,0" FontFamily="Consolas, monospace"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding AmountPaid, StringFormat='${0:N2}'}" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" Margin="10,0" FontFamily="{DynamicResource AppFontFamily}"/>
                                             <Button Grid.Column="2" Command="{Binding $parent[ItemsControl].((vm:CheckoutDialogViewModel)DataContext).RemoveTenderCommand}" CommandParameter="{Binding}" Background="Transparent" BorderThickness="0" Padding="4">
                                                 <mi:MaterialIcon Kind="TrashCanOutline" Width="16" Height="16" Foreground="#EF4444"/>
                                             </Button>
@@ -305,7 +305,7 @@
                                     <ComboBox ItemsSource="{Binding UsoCfdiOptions}" SelectedItem="{Binding FiscalUsoCfdi, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="6">
                                         <ComboBox.ItemTemplate>
                                             <DataTemplate x:DataType="x:String">
-                                                <TextBlock Text="{Binding}" Foreground="#1E293B" />
+                                                <TextBlock Text="{Binding}" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" />
                                             </DataTemplate>
                                         </ComboBox.ItemTemplate>
                                     </ComboBox>
@@ -315,7 +315,7 @@
                                     <ComboBox ItemsSource="{Binding RegimenFiscalOptions}" SelectedItem="{Binding FiscalRegime, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="6">
                                         <ComboBox.ItemTemplate>
                                             <DataTemplate x:DataType="x:String">
-                                                <TextBlock Text="{Binding}" Foreground="#1E293B" />
+                                                <TextBlock Text="{Binding}" Foreground="{DynamicResource TextPrimaryBrush}" FontWeight="SemiBold" />
                                             </DataTemplate>
                                         </ComboBox.ItemTemplate>
                                     </ComboBox>
@@ -350,4 +350,3 @@
         </Grid>
     </Border>
 </UserControl>
-
