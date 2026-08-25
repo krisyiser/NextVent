@@ -43,16 +43,18 @@ public partial class UsuariosSettingsViewModel : ObservableObject
     public ObservableCollection<UserDto> Users { get; } = [];
 
     // ── Sub-tab navigation ──────────────────────────────────────────────────
-    [ObservableProperty] private int _selectedSubTabIndex = 0;
-    public bool IsUsuariosTabVisible => SelectedSubTabIndex == 0;
-    public bool IsPermisosTabVisible => SelectedSubTabIndex == 1;
+    [ObservableProperty] private bool _isUsuariosTabVisible = true;
+    [ObservableProperty] private bool _isPermisosTabVisible = false;
 
     [RelayCommand]
-    private void SelectSubTab(int index)
+    private void SelectSubTab(object? param)
     {
-        SelectedSubTabIndex = index;
-        OnPropertyChanged(nameof(IsUsuariosTabVisible));
-        OnPropertyChanged(nameof(IsPermisosTabVisible));
+        int subIndex = 0;
+        if (param is int iVal) subIndex = iVal;
+        else if (param is string sVal && int.TryParse(sVal, out int parsed)) subIndex = parsed;
+
+        IsUsuariosTabVisible = (subIndex == 0);
+        IsPermisosTabVisible = (subIndex == 1);
     }
 
     // ── Create new user form ───────────────────────────────────────────────
