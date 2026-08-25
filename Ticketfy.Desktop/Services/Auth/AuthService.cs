@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using Ticketfy.Core.Helpers;
 using Ticketfy.Core.Models;
+using Ticketfy.Core.Services;
 using Ticketfy.Data.Dtos;
 using Ticketfy.Services.Interfaces;
 using Serilog;
@@ -14,6 +15,7 @@ public record AuthenticateResult(bool IsSuccess, UserModel? User = null);
 public sealed partial class AuthService : ObservableObject
 {
     private readonly IUserService _userService;
+    private readonly IUserRolePermissionEngine _permissionEngine;
 
     [ObservableProperty]
     private UserDto? _currentUser;
@@ -21,9 +23,10 @@ public sealed partial class AuthService : ObservableObject
     [ObservableProperty]
     private bool _isAuthenticated;
 
-    public AuthService(IUserService userService)
+    public AuthService(IUserService userService, IUserRolePermissionEngine? permissionEngine = null)
     {
         _userService = userService;
+        _permissionEngine = permissionEngine ?? new UserRolePermissionEngine();
     }
 
     public async Task<bool> LoginAsync(string username, string password)
@@ -48,27 +51,12 @@ public sealed partial class AuthService : ObservableObject
             return new AuthenticateResult(false);
         }
 
-        var systemRole = string.Equals(user.Rol, "ADMIN", StringComparison.OrdinalIgnoreCase) ||
-                         string.Equals(user.Rol, "GERENTE", StringComparison.OrdinalIgnoreCase)
-            ? SystemRole.ADMIN
-            : SystemRole.CAJERO;
-
         var pin = await _userService.GetPinHashAsync(user.Id) ?? "1234";
-
-        var userModel = new UserModel
-        {
-            Id = Guid.TryParse(user.Id, out var parsedGuid) ? parsedGuid : Guid.NewGuid(),
-            FullName = user.FullName,
-            Username = user.Username,
-            Role = systemRole,
-            RoleString = user.Rol,
-            Pin4Digits = pin,
-            IsActive = user.IsActive
-        };
+        var userModel = _permissionEngine.MapDtoToModel(user, pin);
 
         CurrentUser = user;
         IsAuthenticated = true;
-        Log.Information("Login successful: {Username} ({Role})", user.Nombre, user.Rol);
+        Log.Information("Login successful: {Username} ({Role})", user.Nombre, userModel.RoleString);
 
         return new AuthenticateResult(true, userModel);
     }
@@ -101,12 +89,12 @@ public sealed partial class AuthService : ObservableObject
     {
         if (CurrentUser is null) return false;
 
-        return requiredRole switch
-        {
-            "CAJERO" => true,
-            "GERENTE" => CurrentUser.Rol is "GERENTE" or "ADMIN",
-            "ADMIN" => CurrentUser.Rol == "ADMIN",
-            _ => false
-        };
+        string normReq = _permissionEngine.NormalizeRoleName(requiredRole);
+        string normUser = _permissionEngine.NormalizeRoleName(CurrentUser.Rol);
+
+        if (normReq == "CAJERO") return true;
+        if (normReq == "GERENTE") return normUser is "GERENTE" or "ADMINISTRADOR";
+        if (normReq == "ADMIN") return normUser is "ADMINISTRADOR";
+        return string.Equals(normUser, normReq, StringComparison.OrdinalIgnoreCase);
     }
 }

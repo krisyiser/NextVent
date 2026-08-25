@@ -48,11 +48,22 @@ public partial class SwitchUserPinDialogViewModel : ObservableObject
             // Default active cashiers
             AvailableUsers = new ObservableCollection<UserModel>
             {
-                new UserModel { FullName = "Alexa S.", Role = SystemRole.CAJERO, Pin4Digits = "4321" },
-                new UserModel { FullName = "Administrador", Role = SystemRole.ADMIN, Pin4Digits = "1234" }
+                new UserModel { FullName = "Alexa S.", Role = SystemRole.CAJERO, RoleString = "CAJERO", Pin4Digits = "4321" },
+                new UserModel { FullName = "Administrador", Role = SystemRole.ADMIN, RoleString = "ADMINISTRADOR", Pin4Digits = "1234" }
             };
         }
-        SelectedUser = AvailableUsers.FirstOrDefault();
+
+        // Pre-select the currently active cashier session user
+        if (_sessionManager?.CurrentCashier != null)
+        {
+            SelectedUser = AvailableUsers.FirstOrDefault(u => u.Id == _sessionManager.CurrentCashier.Id 
+                                                            || u.FullName.Equals(_sessionManager.CurrentCashier.FullName, StringComparison.OrdinalIgnoreCase))
+                           ?? AvailableUsers.FirstOrDefault();
+        }
+        else
+        {
+            SelectedUser = AvailableUsers.FirstOrDefault();
+        }
     }
 
     [RelayCommand]

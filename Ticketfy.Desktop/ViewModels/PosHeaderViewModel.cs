@@ -71,7 +71,8 @@ public partial class PosHeaderViewModel : ObservableObject
 
     private void OnCashierChanged(Ticketfy.Core.Models.UserModel user)
     {
-        string roleDisplay = !string.IsNullOrWhiteSpace(user.RoleString) ? user.RoleString : user.Role.ToString();
+        if (user == null) return;
+        string roleDisplay = user.DisplayRole;
         ActiveCashierName = $"{user.FullName} ({roleDisplay})";
     }
 

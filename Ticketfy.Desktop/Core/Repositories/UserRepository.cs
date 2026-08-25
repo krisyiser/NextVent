@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Ticketfy.Core.Models;
-using Ticketfy.Core.Enums;
+using Ticketfy.Core.Services;
 using Ticketfy.Data;
 using Ticketfy.Data.Entities;
 
@@ -13,10 +13,12 @@ namespace Ticketfy.Core.Repositories;
 public class UserRepository : IUserRepository
 {
     private readonly AppDbContext _context;
+    private readonly IUserRolePermissionEngine _permissionEngine;
 
-    public UserRepository(AppDbContext context)
+    public UserRepository(AppDbContext context, IUserRolePermissionEngine? permissionEngine = null)
     {
         _context = context;
+        _permissionEngine = permissionEngine ?? new UserRolePermissionEngine();
     }
 
     public async Task<List<UserModel>> GetActiveUsersAsync()
@@ -58,12 +60,12 @@ public class UserRepository : IUserRepository
 
     public async Task<bool> ValidateAdminPinAsync(string pin4Digits)
     {
-        var admins = await _context.Users
-            .Where(u => u.IsActive && (u.Role == UserRole.Admin || u.Role == UserRole.Gerente))
+        var activeUsers = await _context.Users
+            .Where(u => u.IsActive)
             .AsNoTracking()
             .ToListAsync();
 
-        return admins.Any(u => (u.PinCode ?? "1234") == pin4Digits);
+        return activeUsers.Any(u => (u.PinCode ?? "1234") == pin4Digits && _permissionEngine.IsAdminOrManager(u.RoleString ?? u.Role.ToString()));
     }
 
     public async Task<bool> HasAnyUsersAsync()
@@ -83,20 +85,8 @@ public class UserRepository : IUserRepository
             .FirstOrDefaultAsync(u => u.Username.ToLower() == username.ToLower());
     }
 
-    private static UserModel MapToModel(UserEntity entity)
+    private UserModel MapToModel(UserEntity entity)
     {
-        var roleEnum = entity.Role == UserRole.Admin || entity.Role == UserRole.Gerente
-            ? SystemRole.ADMIN
-            : SystemRole.CAJERO;
-
-        return new UserModel
-        {
-            Id = entity.Id,
-            FullName = entity.FullName,
-            Username = entity.Username,
-            Role = roleEnum,
-            Pin4Digits = entity.PinCode,
-            IsActive = entity.IsActive
-        };
+        return _permissionEngine.MapToModel(entity);
     }
 }
