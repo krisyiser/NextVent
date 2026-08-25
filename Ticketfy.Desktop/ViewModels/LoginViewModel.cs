@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Ticketfy.Services.Auth;
 using Ticketfy.Core.Services;
+using Serilog;
 using System;
 using System.Threading.Tasks;
 
@@ -50,17 +51,25 @@ public partial class LoginViewModel : ObservableObject
             return;
         }
 
-        var authResult = await _authService.AuthenticateAsync(Username, Password);
-        if (authResult.IsSuccess && authResult.User != null)
+        try
         {
-            _sessionManager.StartSession(authResult.User);
-            LoginSuccessful?.Invoke();
-            Username = string.Empty;
-            Password = string.Empty;
+            var authResult = await _authService.AuthenticateAsync(Username, Password);
+            if (authResult.IsSuccess && authResult.User != null)
+            {
+                _sessionManager.StartSession(authResult.User);
+                LoginSuccessful?.Invoke();
+                Username = string.Empty;
+                Password = string.Empty;
+            }
+            else
+            {
+                ErrorMessage = "Credenciales incorrectas.";
+            }
         }
-        else
+        catch (Exception ex)
         {
-            ErrorMessage = "Credenciales incorrectas.";
+            Log.Error(ex, "Error unhandled during login attempt for user {Username}", Username);
+            ErrorMessage = "Error de conexión o autenticación en la base de datos.";
         }
     }
 
@@ -77,15 +86,23 @@ public partial class LoginViewModel : ObservableObject
             return;
         }
 
-        var hint = await _authService.GetPasswordHintAsync(Username);
-        if (!string.IsNullOrEmpty(hint))
+        try
         {
-            HintMessage = $"Pista: {hint}";
-            IsHintVisible = true;
+            var hint = await _authService.GetPasswordHintAsync(Username);
+            if (!string.IsNullOrEmpty(hint))
+            {
+                HintMessage = $"Pista: {hint}";
+                IsHintVisible = true;
+            }
+            else
+            {
+                ErrorMessage = "El usuario no existe o no tiene pista configurada.";
+            }
         }
-        else
+        catch (Exception ex)
         {
-            ErrorMessage = "El usuario no existe o no tiene pista configurada.";
+            Log.Error(ex, "Error fetching password hint for user {Username}", Username);
+            ErrorMessage = "Error al consultar pista de contraseña.";
         }
     }
 }

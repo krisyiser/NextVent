@@ -46,6 +46,11 @@ public static class DatabaseInitializer
                 await rawConn.OpenAsync();
                 string[] alterQueries = new[]
                 {
+                    "ALTER TABLE usuarios ADD COLUMN role_string TEXT NULL DEFAULT '';",
+                    "ALTER TABLE usuarios ADD COLUMN password_hint TEXT NULL DEFAULT '';",
+                    "ALTER TABLE usuarios ADD COLUMN pin_checador_hash TEXT NULL DEFAULT '';",
+                    "ALTER TABLE usuarios ADD COLUMN password_salt BLOB NULL;",
+                    "ALTER TABLE usuarios ADD COLUMN password_hash_bytes BLOB NULL;",
                     "ALTER TABLE sales ADD COLUMN status INTEGER NOT NULL DEFAULT 0;",
                     "ALTER TABLE sales ADD COLUMN cancellation_reason TEXT NULL;",
                     "ALTER TABLE sales ADD COLUMN cancellation_date TEXT NULL;",
