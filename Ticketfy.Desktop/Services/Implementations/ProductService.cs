@@ -265,7 +265,7 @@ public sealed class ProductService : IProductService
         await connection.OpenAsync();
         
         // Consulta SQL cruda y estricta, mapeada a un DTO por el compilador AOT
-        const string sql = "SELECT Id, Barcode, Name, Cost, Price, WholesalePrice, WholesaleThreshold, Stock, Category, Unit, ExpiresSoon, CreatedAt, PointsRewarded, ReorderQuantity, LocationRack, sat_product_code AS SatProductCode, sat_unit_code AS SatUnitCode, MinStock FROM products WHERE Stock > 0";
+        const string sql = "SELECT Id, Barcode, Name, Cost, Price, WholesalePrice, WholesaleThreshold, Stock, Category, Unit, ExpiresSoon, CreatedAt, PointsRewarded, ReorderQuantity, LocationRack, sat_product_code AS SatProductCode, sat_unit_code AS SatUnitCode, MinStock FROM products";
         return await Dapper.SqlMapper.QueryAsync<ProductDto>(connection, sql);
     }
 
