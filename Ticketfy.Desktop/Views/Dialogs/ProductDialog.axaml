@@ -108,12 +108,12 @@
                             <Grid ColumnDefinitions="*,*">
                                 <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,6,0">
                                     <TextBlock Text="Stock Actual *" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                                    <controls:NumericTextBox AllowDecimals="False" Text="{Binding Stock, Mode=TwoWay, Converter={StaticResource StringToDoubleConverter}}" Watermark="0" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                                    <controls:NumericTextBox AllowDecimals="True" Text="{Binding Stock, Mode=TwoWay, Converter={StaticResource StringToDoubleConverter}}" Watermark="0.00" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
                                 </StackPanel>
 
                                 <StackPanel Grid.Column="1" Spacing="4" Margin="6,0,0,0">
                                     <TextBlock Text="Stock Mínimo (Alerta) *" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                                    <controls:NumericTextBox AllowDecimals="False" Text="{Binding MinStock, Mode=TwoWay, Converter={StaticResource StringToDoubleConverter}}" Watermark="0" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
+                                    <controls:NumericTextBox AllowDecimals="True" Text="{Binding MinStock, Mode=TwoWay, Converter={StaticResource StringToDoubleConverter}}" Watermark="0.00" Background="{DynamicResource BgSecondaryBrush}" Padding="8" />
                                 </StackPanel>
                             </Grid>
 

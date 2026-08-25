@@ -79,7 +79,9 @@ public sealed class ProductService : IProductService
         entity.SatProductCode = product.SatProductCode;
         entity.SatUnitCode = product.SatUnitCode;
         entity.MinStock = product.MinStock;
+        entity.DefaultSupplierId = product.DefaultSupplierId;
 
+        _ctx.Products.Update(entity);
         await _ctx.SaveChangesAsync();
     }
 

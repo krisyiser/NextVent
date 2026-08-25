@@ -39,7 +39,9 @@ public partial class ProductDialogViewModel : ObservableObject
     private double? _retailPrice;
 
     [ObservableProperty]
-    private int? _stock;
+    private double? _stock;
+
+    private string? _pendingSupplierId = null;
 
     [ObservableProperty]
     private string _category = "General";
@@ -149,6 +151,11 @@ public partial class ProductDialogViewModel : ObservableObject
             {
                 Suppliers.Add(new SupplierDto(s.Id, s.Name, s.Rfc, s.Phone, s.Email, s.Address, s.ContactPerson));
             }
+
+            if (!string.IsNullOrEmpty(_pendingSupplierId))
+            {
+                SelectedSupplier = System.Linq.Enumerable.FirstOrDefault(Suppliers, s => s.Id == _pendingSupplierId);
+            }
         }
         catch (Exception ex)
         {
@@ -164,13 +171,13 @@ public partial class ProductDialogViewModel : ObservableObject
         Name = product.Name;
         CostPrice = product.Cost;
         RetailPrice = product.Price;
-        Stock = (int)product.Stock;
+        Stock = product.Stock;
         Category = product.Category;
         if (!string.IsNullOrEmpty(Category) && !Categories.Contains(Category))
         {
             Categories.Add(Category);
         }
-        SerialNumber = product.LocationRack; // Wait, let's keep attributes / serial number empty or set them if present.
+        SerialNumber = product.LocationRack;
         PointsRewarded = product.PointsRewarded;
         ReorderQuantity = product.ReorderQuantity;
         LocationRack = product.LocationRack;
@@ -180,7 +187,11 @@ public partial class ProductDialogViewModel : ObservableObject
 
         if (!string.IsNullOrEmpty(product.DefaultSupplierId))
         {
-            SelectedSupplier = System.Linq.Enumerable.FirstOrDefault(Suppliers, s => s.Id == product.DefaultSupplierId);
+            _pendingSupplierId = product.DefaultSupplierId;
+            if (Suppliers.Count > 0)
+            {
+                SelectedSupplier = System.Linq.Enumerable.FirstOrDefault(Suppliers, s => s.Id == product.DefaultSupplierId);
+            }
         }
 
         _originalStockSnapshot = product.Stock;
