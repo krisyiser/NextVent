@@ -81,7 +81,17 @@ public record FiscalClientDto(
     string UsoCfdi
 );
 
-public record PromotionDto(string Id, string Name, double DiscountValue, bool IsActive);
+public record PromotionDto(
+    string Id,
+    string Name,
+    double DiscountValue,
+    bool IsActive,
+    Ticketfy.Core.Enums.PromotionType StrategyType = Ticketfy.Core.Enums.PromotionType.PercentageDiscount,
+    string? TargetProductId = null,
+    string TargetCategory = "",
+    double MinQuantity = 1.0,
+    double FreeQuantity = 0.0
+);
 
 public record UserDto(string Id, string Username, string FullName, string Role, bool IsActive)
 {

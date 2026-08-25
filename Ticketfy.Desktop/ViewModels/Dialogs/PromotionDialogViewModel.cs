@@ -2,8 +2,10 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Ticketfy.Data.Dtos;
 using Ticketfy.Services.Interfaces;
+using Ticketfy.Core.Enums;
 using Serilog;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Ticketfy.ViewModels.Dialogs;
@@ -14,6 +16,9 @@ public partial class PromotionDialogViewModel : ObservableObject
 
     [ObservableProperty]
     private string _name = string.Empty;
+
+    [ObservableProperty]
+    private int _selectedTypeIndex = 0; // 0: Porcentaje (%), 1: Monto Fijo ($), 2: 2x1 Especial
 
     [ObservableProperty]
     private string _discountValueText = string.Empty;
@@ -48,14 +53,54 @@ public partial class PromotionDialogViewModel : ObservableObject
                 return;
             }
 
-            if (string.IsNullOrWhiteSpace(DiscountValueText) || !double.TryParse(DiscountValueText, out double parsedVal) || parsedVal <= 0)
+            // Sanitize discount numeric input
+            string rawDiscount = new string((DiscountValueText ?? string.Empty).Where(c => char.IsDigit(c) || c == '.').ToArray());
+            
+            if (SelectedTypeIndex == 2) // 2x1 Especial
+            {
+                var dto2x1 = new PromotionDto(
+                    Guid.NewGuid().ToString(),
+                    Name.Trim(),
+                    0.0,
+                    IsActive,
+                    PromotionType.BuyNGetM,
+                    null,
+                    "",
+                    2.0, // MinQuantity = 2
+                    1.0  // FreeQuantity = 1
+                );
+                await _promotionService.SaveAsync(dto2x1);
+                RequestClose?.Invoke();
+                return;
+            }
+
+            if (string.IsNullOrWhiteSpace(rawDiscount) || !double.TryParse(rawDiscount, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double parsedVal) || parsedVal <= 0)
             {
                 ErrorMessage = "El valor del descuento es obligatorio y debe ser un número válido mayor a 0.";
                 return;
             }
 
+            PromotionType strategy = SelectedTypeIndex == 0 ? PromotionType.PercentageDiscount : PromotionType.FixedAmountDiscount;
+
+            if (strategy == PromotionType.PercentageDiscount && parsedVal > 100)
+            {
+                ErrorMessage = "El descuento en porcentaje no puede ser mayor al 100%.";
+                return;
+            }
+
             ErrorMessage = string.Empty;
-            var dto = new PromotionDto(Guid.NewGuid().ToString(), Name, parsedVal, IsActive);
+            var dto = new PromotionDto(
+                Guid.NewGuid().ToString(),
+                Name.Trim(),
+                parsedVal,
+                IsActive,
+                strategy,
+                null,
+                "",
+                1.0,
+                0.0
+            );
+
             await _promotionService.SaveAsync(dto);
             RequestClose?.Invoke();
         }

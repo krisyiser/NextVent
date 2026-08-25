@@ -29,13 +29,13 @@
                 <StackPanel Spacing="14">
                     <StackPanel Spacing="4">
                         <TextBlock Text="Nombre de la Promoción *" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                        <TextBox Text="{Binding Name, Mode=TwoWay}" Watermark="Ej. 2x1 en Bebidas o 15% Descuento" Background="{DynamicResource BgTertiaryBrush}" Padding="10" />
+                        <TextBox Text="{Binding Name, Mode=TwoWay}" Watermark="Ej. 15% Descuento General o 2x1 Especial" Background="{DynamicResource BgTertiaryBrush}" Padding="10" />
                     </StackPanel>
 
                     <Grid ColumnDefinitions="*,*">
                         <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,6,0">
                             <TextBlock Text="Tipo de Descuento" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                            <ComboBox SelectedIndex="0" HorizontalAlignment="Stretch" Padding="10" Background="{DynamicResource BgTertiaryBrush}">
+                            <ComboBox SelectedIndex="{Binding SelectedTypeIndex, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="10" Background="{DynamicResource BgTertiaryBrush}">
                                 <ComboBoxItem Content="Porcentaje (%)" />
                                 <ComboBoxItem Content="Monto Fijo ($)" />
                                 <ComboBoxItem Content="2x1 Especial" />
@@ -44,7 +44,7 @@
 
                         <StackPanel Grid.Column="1" Spacing="4" Margin="6,0,0,0">
                             <TextBlock Text="Valor Descuento *" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                            <TextBox Text="{Binding DiscountValueText, Mode=TwoWay}" Watermark="Ej. 15.0" Background="{DynamicResource BgTertiaryBrush}" Padding="10" />
+                            <controls:NumericTextBox AllowDecimals="True" Text="{Binding DiscountValueText, Mode=TwoWay}" Watermark="Ej. 15.0" Padding="10" />
                         </StackPanel>
                     </Grid>
                 </StackPanel>
@@ -52,4 +52,3 @@
         </DockPanel>
     </Border>
 </UserControl>
-

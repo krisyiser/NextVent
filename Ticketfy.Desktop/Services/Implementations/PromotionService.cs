@@ -22,13 +22,13 @@ public class PromotionService : IPromotionService
     public async Task<List<PromotionDto>> GetAllAsync()
     {
         var list = await _ctx.Promotions.AsNoTracking().ToListAsync();
-        return list.Select(p => new PromotionDto(p.Id, p.Name, p.DiscountValue, p.IsActive == 1)).ToList();
+        return list.Select(p => new PromotionDto(p.Id, p.Name, p.DiscountValue, p.IsActive == 1, p.StrategyType, p.TargetProductId, p.TargetCategory ?? "", p.MinQuantity, p.FreeQuantity)).ToList();
     }
 
     public async Task<List<PromotionDto>> GetActiveAsync()
     {
         var list = await _ctx.Promotions.AsNoTracking().Where(p => p.IsActive == 1).ToListAsync();
-        return list.Select(p => new PromotionDto(p.Id, p.Name, p.DiscountValue, p.IsActive == 1)).ToList();
+        return list.Select(p => new PromotionDto(p.Id, p.Name, p.DiscountValue, p.IsActive == 1, p.StrategyType, p.TargetProductId, p.TargetCategory ?? "", p.MinQuantity, p.FreeQuantity)).ToList();
     }
 
     public async Task SaveAsync(PromotionDto promotion)
@@ -39,6 +39,11 @@ public class PromotionService : IPromotionService
             entity.Name = promotion.Name;
             entity.DiscountValue = promotion.DiscountValue;
             entity.IsActive = promotion.IsActive ? 1 : 0;
+            entity.StrategyType = promotion.StrategyType;
+            entity.TargetProductId = promotion.TargetProductId;
+            entity.TargetCategory = promotion.TargetCategory ?? "";
+            entity.MinQuantity = promotion.MinQuantity;
+            entity.FreeQuantity = promotion.FreeQuantity;
         }
         else
         {
@@ -47,7 +52,12 @@ public class PromotionService : IPromotionService
                 Id = string.IsNullOrEmpty(promotion.Id) ? Guid.NewGuid().ToString() : promotion.Id,
                 Name = promotion.Name,
                 DiscountValue = promotion.DiscountValue,
-                IsActive = promotion.IsActive ? 1 : 0
+                IsActive = promotion.IsActive ? 1 : 0,
+                StrategyType = promotion.StrategyType,
+                TargetProductId = promotion.TargetProductId,
+                TargetCategory = promotion.TargetCategory ?? "",
+                MinQuantity = promotion.MinQuantity,
+                FreeQuantity = promotion.FreeQuantity
             });
         }
         await _ctx.SaveChangesAsync();
@@ -96,8 +106,9 @@ public class PromotionService : IPromotionService
             item.PromotionDescription = string.Empty;
 
             var matchingPromo = activePromotions.FirstOrDefault(p =>
-                (p.TargetProductId == item.ProductId || p.TargetId == item.ProductId ||
-                (!string.IsNullOrEmpty(p.TargetCategory) && item.Category.Equals(p.TargetCategory, StringComparison.OrdinalIgnoreCase))) &&
+                ((string.IsNullOrEmpty(p.TargetProductId) && string.IsNullOrEmpty(p.TargetId) && string.IsNullOrEmpty(p.TargetCategory)) ||
+                 p.TargetProductId == item.ProductId || p.TargetId == item.ProductId ||
+                 (!string.IsNullOrEmpty(p.TargetCategory) && item.Category.Equals(p.TargetCategory, StringComparison.OrdinalIgnoreCase))) &&
                 item.Quantity >= p.MinQuantity);
 
             if (matchingPromo == null) continue;

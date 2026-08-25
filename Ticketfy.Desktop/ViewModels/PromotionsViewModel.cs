@@ -15,6 +15,8 @@ public partial class PromotionsViewModel : ObservableObject
     private readonly IPromotionService _promotionService;
     public ObservableCollection<PromotionDto> Promotions { get; } = [];
 
+    [ObservableProperty] private string _feedbackMessage = string.Empty;
+
     public event Action? OpenAddPromotionRequested;
     public event Action? OpenCreateItemKitRequested;
 
@@ -46,4 +48,38 @@ public partial class PromotionsViewModel : ObservableObject
 
     [RelayCommand]
     private void OpenCreateItemKitDialog() => OpenCreateItemKitRequested?.Invoke();
+
+    [RelayCommand]
+    private async Task ToggleStatusAsync(PromotionDto promo)
+    {
+        if (promo == null) return;
+        try
+        {
+            var updated = promo with { IsActive = !promo.IsActive };
+            await _promotionService.SaveAsync(updated);
+            FeedbackMessage = promo.IsActive ? "Promoción desactivada" : "Promoción activada";
+            await LoadPromotionsAsync();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error toggling promotion status");
+        }
+    }
+
+    [RelayCommand]
+    private async Task DeletePromotionAsync(PromotionDto promo)
+    {
+        if (promo == null) return;
+        try
+        {
+            await _promotionService.DeleteAsync(promo.Id);
+            Promotions.Remove(promo);
+            FeedbackMessage = "Promoción eliminada con éxito";
+            await LoadPromotionsAsync();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error deleting promotion");
+        }
+    }
 }
