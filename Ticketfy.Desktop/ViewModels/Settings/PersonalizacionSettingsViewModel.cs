@@ -213,7 +213,7 @@ public partial class PersonalizacionSettingsViewModel : ObservableObject
                 State.Visual.PropertyChanged -= Visual_PropertyChanged;
                 State.Visual.PropertyChanged += Visual_PropertyChanged;
             }
-            _themeEngine.Apply(State);
+            if (State != null) _themeEngine.Apply(State);
         }
         catch (Exception ex)
         {

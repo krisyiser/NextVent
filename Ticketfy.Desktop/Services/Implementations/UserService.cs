@@ -50,6 +50,9 @@ public class UserService : IUserService
         var entity = await _context.Users.FindAsync(guidId);
         
         var enumRole = ParseRole(rol);
+        string normalizedRole = string.IsNullOrWhiteSpace(rol)
+            ? (enumRole == UserRole.Admin ? "ADMINISTRADOR" : (enumRole == UserRole.Gerente ? "GERENTE" : "CAJERO"))
+            : (rol.Trim().Equals("ADMIN", StringComparison.OrdinalIgnoreCase) ? "ADMINISTRADOR" : rol.Trim().ToUpperInvariant());
 
         if (entity == null)
         {
@@ -59,7 +62,7 @@ public class UserService : IUserService
                 FullName = nombre,
                 Username = username,
                 Role = enumRole,
-                RoleString = rol.Trim().ToUpperInvariant(),
+                RoleString = normalizedRole,
                 PasswordHash = passwordHash ?? string.Empty,
                 PasswordHint = passwordHint ?? string.Empty,
                 PinCode = string.IsNullOrEmpty(pinHash) ? "1234" : pinHash,
@@ -71,7 +74,7 @@ public class UserService : IUserService
         {
             entity.FullName = nombre;
             entity.Role = enumRole;
-            entity.RoleString = rol.Trim().ToUpperInvariant();
+            entity.RoleString = normalizedRole;
             if (!string.IsNullOrEmpty(pinHash)) entity.PinCode = pinHash;
             if (!string.IsNullOrEmpty(passwordHash)) entity.PasswordHash = passwordHash;
             if (passwordHint != null) entity.PasswordHint = passwordHint;

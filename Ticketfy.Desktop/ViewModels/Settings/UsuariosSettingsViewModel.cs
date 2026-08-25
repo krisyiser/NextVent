@@ -175,7 +175,7 @@ public partial class UsuariosSettingsViewModel : ObservableObject
         if (_settingsService == null) return;
         try
         {
-            string json = await _settingsService.GetAsync("CustomRolesList");
+            string? json = await _settingsService.GetAsync("CustomRolesList");
             if (!string.IsNullOrWhiteSpace(json))
             {
                 var customRoles = JsonSerializer.Deserialize<List<string>>(json);

@@ -182,6 +182,8 @@ public partial class CashupDialogViewModel : ObservableObject
                 Difference = DifferenceAmount,
                 Notes = Notes,
                 Type = IsFinalZCut ? "Final" : "Parcial",
+                CashierName = _sessionManager?.CurrentCashier?.FullName ?? "Cajero en turno",
+                CashierRole = _sessionManager?.CurrentCashier?.DisplayRole ?? "CAJERO",
                 Timestamp = DateTime.Now.ToString("g")
             };
 
@@ -217,7 +219,7 @@ public partial class CashupDialogViewModel : ObservableObject
 
             if (IsFinalZCut)
             {
-                var activeShift = _activeShift ?? await _shiftService?.GetActiveAsync();
+                var activeShift = _activeShift ?? (_shiftService != null ? await _shiftService.GetActiveAsync() : null);
                 string? shiftId = activeShift?.Id;
 
                 if (string.IsNullOrEmpty(shiftId))

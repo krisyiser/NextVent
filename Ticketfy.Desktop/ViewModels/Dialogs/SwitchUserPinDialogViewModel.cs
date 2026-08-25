@@ -56,9 +56,12 @@ public partial class SwitchUserPinDialogViewModel : ObservableObject
         // Pre-select the currently active cashier session user
         if (_sessionManager?.CurrentCashier != null)
         {
-            SelectedUser = AvailableUsers.FirstOrDefault(u => u.Id == _sessionManager.CurrentCashier.Id 
-                                                            || u.FullName.Equals(_sessionManager.CurrentCashier.FullName, StringComparison.OrdinalIgnoreCase))
-                           ?? AvailableUsers.FirstOrDefault();
+            var active = _sessionManager.CurrentCashier;
+            SelectedUser = AvailableUsers.FirstOrDefault(u => 
+                (u.Id != Guid.Empty && u.Id == active.Id)
+                || (!string.IsNullOrWhiteSpace(u.Username) && u.Username.Equals(active.Username, StringComparison.OrdinalIgnoreCase))
+                || (!string.IsNullOrWhiteSpace(u.FullName) && u.FullName.Equals(active.FullName, StringComparison.OrdinalIgnoreCase))
+            ) ?? AvailableUsers.FirstOrDefault();
         }
         else
         {
@@ -103,7 +106,11 @@ public partial class SwitchUserPinDialogViewModel : ObservableObject
 
         if (_userRepository != null)
         {
-            validatedUser = await _userRepository.ValidatePinAsync(SelectedUser.FullName, EnteredPin);
+            string lookupKey = !string.IsNullOrWhiteSpace(SelectedUser.Username)
+                ? SelectedUser.Username
+                : SelectedUser.FullName;
+
+            validatedUser = await _userRepository.ValidatePinAsync(lookupKey, EnteredPin);
             isValid = validatedUser != null;
         }
         else

@@ -20,7 +20,7 @@ public partial class UserModel : ObservableObject
     public bool IsActive { get; init; } = true;
 
     public string DisplayRole => !string.IsNullOrWhiteSpace(RoleString) 
-        ? RoleString 
+        ? RoleString.Trim().ToUpperInvariant() 
         : Role switch
         {
             SystemRole.ADMIN => "ADMINISTRADOR",

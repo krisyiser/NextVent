@@ -64,6 +64,12 @@ public class CashupEntity
     [Column("type")]
     public string Type { get; set; } = "Final";
 
+    [Column("cashier_name")]
+    public string CashierName { get; set; } = "Cajero en turno";
+
+    [Column("cashier_role")]
+    public string CashierRole { get; set; } = "CAJERO";
+
     [Column("timestamp")]
     public string Timestamp { get; set; } = string.Empty;
 

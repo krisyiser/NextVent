@@ -13,7 +13,8 @@
 
                 <DataGrid Grid.Row="1" ItemsSource="{Binding Cashups}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" HeadersVisibility="Column" SelectionMode="Single">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Fecha / Hora" Binding="{Binding Timestamp}" Width="1.5*" />
+                        <DataGridTextColumn Header="Fecha / Hora" Binding="{Binding Timestamp}" Width="1.4*" />
+                        <DataGridTextColumn Header="Cajero / Usuario" Binding="{Binding CashierName}" Width="1.5*" />
                         <DataGridTextColumn Header="Tipo" Binding="{Binding Type}" Width="1*" />
                         <DataGridTextColumn Header="Fondo Inicial" Binding="{Binding OpenCashAmount, StringFormat='${0:N2}'}" Width="1.2*" />
                         <DataGridTextColumn Header="Fondo Final" Binding="{Binding ClosedCashAmount, StringFormat='${0:N2}'}" Width="1.2*" />
@@ -92,8 +93,11 @@
                                     </StackPanel>
 
                                     <StackPanel Grid.Row="0" Grid.Column="1" Spacing="2">
-                                        <TextBlock Text="Fondo Inicial:" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" />
-                                        <TextBlock Text="{Binding OpenCashAmount, StringFormat='${0:N2}'}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                        <TextBlock Text="Cajero Responsable:" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" />
+                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                            <TextBlock Text="{Binding CashierName}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                            <TextBlock Text="{Binding CashierRole, StringFormat='({0})'}" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" />
+                                        </StackPanel>
                                     </StackPanel>
 
                                     <StackPanel Grid.Row="0" Grid.Column="2" Spacing="2">

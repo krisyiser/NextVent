@@ -74,6 +74,7 @@ public partial class SetupAdditionalUsersViewModel : ValidatableViewModelBase
                 PasswordHint = PasswordHint,
                 PinCode = Pin,
                 Role = SelectedRole,
+                RoleString = SelectedRole == UserRole.Admin ? "ADMINISTRADOR" : (SelectedRole == UserRole.Gerente ? "GERENTE" : "CAJERO"),
                 IsActive = true
             };
 

@@ -69,7 +69,7 @@ public sealed class CustomerAndAuthServiceTests : IDisposable
         var success = await _authService.LoginAsync("ADMIN", "securePass123");
         Assert.True(success);
         Assert.True(_authService.IsAuthenticated);
-        Assert.Equal("ADMIN", _authService.CurrentUser?.Rol);
+        Assert.Equal("ADMINISTRADOR", _authService.CurrentUser?.Rol);
 
         // Invalid Login
         var invalid = await _authService.LoginAsync("ADMIN", "wrongPass");

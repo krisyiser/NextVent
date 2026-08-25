@@ -74,6 +74,7 @@ public partial class FirstTimeSetupViewModel : ValidatableViewModelBase
                 PasswordHint = PasswordHint,
                 PinCode = AdminPin,
                 Role = UserRole.Admin,
+                RoleString = "ADMINISTRADOR",
                 IsActive = true
             };
 

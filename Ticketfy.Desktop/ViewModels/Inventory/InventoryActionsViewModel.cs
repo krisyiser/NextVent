@@ -1,8 +1,10 @@
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Ticketfy.Data.Dtos;
+using Ticketfy.Services.Implementations;
 using Ticketfy.Services.Interfaces;
 using Serilog;
 using System;
@@ -13,23 +15,31 @@ using System.Threading.Tasks;
 namespace Ticketfy.ViewModels.Inventory;
 
 /// <summary>
-/// Handles inventory CSV imports, snapshots, and checklist printing.
+/// Handles inventory CSV imports, snapshots (copia de seguridad), and checklist printing.
 /// Extracted from InventoryViewModel.
 /// </summary>
 public partial class InventoryActionsViewModel : ObservableObject
 {
     private readonly IProductService _productService;
     private readonly IExternalCatalogService _externalCatalogService;
+    private readonly IInventorySnapshotService _snapshotService;
+    private readonly IEscPosPrinterService _printerService;
 
     [ObservableProperty] private string _feedbackMessage = string.Empty;
     [ObservableProperty] private bool _isFeedbackError = false;
 
     public event Action? ProductsUpdated;
 
-    public InventoryActionsViewModel(IProductService productService, IExternalCatalogService externalCatalogService)
+    public InventoryActionsViewModel(
+        IProductService productService, 
+        IExternalCatalogService externalCatalogService,
+        IInventorySnapshotService? snapshotService = null,
+        IEscPosPrinterService? printerService = null)
     {
         _productService = productService;
         _externalCatalogService = externalCatalogService;
+        _snapshotService = snapshotService ?? new InventorySnapshotService();
+        _printerService = printerService ?? new EscPosPrinterService();
     }
 
     [RelayCommand]
@@ -79,33 +89,28 @@ public partial class InventoryActionsViewModel : ObservableObject
         try
         {
             var products = await _productService.GetAllAsync();
-            if (Avalonia.Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop && desktop.MainWindow != null)
+            if (products == null || products.Count == 0)
             {
-                var storageProvider = desktop.MainWindow.StorageProvider;
-                var file = await storageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
-                {
-                    Title = "Guardar Checklist de Inventario Físico",
-                    DefaultExtension = "csv",
-                    SuggestedFileName = $"Checklist_Inventario_{DateTime.Now:yyyyMMdd_HHmm}.csv"
-                });
+                IsFeedbackError = true;
+                FeedbackMessage = "No hay productos registrados en el catálogo para imprimir el checklist.";
+                return;
+            }
 
-                if (file != null)
-                {
-                    using var stream = await file.OpenWriteAsync();
-                    using var writer = new StreamWriter(stream);
-                    await writer.WriteLineAsync("Codigo_SKU,Nombre_Producto,Categoria,Stock_Teorico,Conteo_Fisico,Diferencia,Notas");
-                    foreach (var p in products)
-                    {
-                        await writer.WriteLineAsync($"\"{p.Barcode}\",\"{p.Name}\",\"{p.Category}\",{p.Stock},,,");
-                    }
-                    IsFeedbackError = false;
-                    FeedbackMessage = $"¡Checklist de conteo físico guardado con {products.Count} productos!";
-                }
+            bool printed = await _printerService.PrintInventoryChecklistAsync(products);
+            if (printed)
+            {
+                IsFeedbackError = false;
+                FeedbackMessage = $"¡Checklist de conteo físico de inventario enviado a la impresora ({products.Count} productos)!";
+            }
+            else
+            {
+                IsFeedbackError = true;
+                FeedbackMessage = "No se pudo comunicar con la impresora térmica para imprimir el checklist.";
             }
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Error printing checklist");
+            Log.Error(ex, "Error printing inventory checklist");
             IsFeedbackError = true;
             FeedbackMessage = "Error al generar el checklist de inventario.";
         }
@@ -115,30 +120,11 @@ public partial class InventoryActionsViewModel : ObservableObject
     {
         try
         {
-            var products = await _productService.GetAllAsync();
-            if (Avalonia.Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop && desktop.MainWindow != null)
-            {
-                var storageProvider = desktop.MainWindow.StorageProvider;
-                var file = await storageProvider.SaveFilePickerAsync(new FilePickerSaveOptions
-                {
-                    Title = "Guardar Respaldo / Copia de Seguridad de Inventario",
-                    DefaultExtension = "csv",
-                    SuggestedFileName = $"Respaldo_Inventario_{DateTime.Now:yyyyMMdd_HHmmss}.csv"
-                });
+            string note = $"Snapshot congelado automático - {DateTime.Now:dd/MM/yyyy HH:mm}";
+            var snapshot = await _snapshotService.CreateSnapshotAsync(note);
 
-                if (file != null)
-                {
-                    using var stream = await file.OpenWriteAsync();
-                    using var writer = new StreamWriter(stream);
-                    await writer.WriteLineAsync("Id,Codigo_SKU,Nombre,Costo,Precio,Stock,MinStock,Categoria,Puntos");
-                    foreach (var p in products)
-                    {
-                        await writer.WriteLineAsync($"\"{p.Id}\",\"{p.Barcode}\",\"{p.Name}\",{p.Cost},{p.Price},{p.Stock},{p.MinStock},\"{p.Category}\",{p.PointsRewarded}");
-                    }
-                    IsFeedbackError = false;
-                    FeedbackMessage = $"¡Copia de seguridad del inventario exportada con éxito ({products.Count} productos)!";
-                }
-            }
+            IsFeedbackError = false;
+            FeedbackMessage = $"¡Copia de seguridad del inventario creada con éxito! ({snapshot.TotalItems} productos congelados - Valor Total: ${snapshot.TotalValue:N2})";
         }
         catch (Exception ex)
         {
@@ -152,19 +138,24 @@ public partial class InventoryActionsViewModel : ObservableObject
     {
         try
         {
-            var products = await _productService.GetAllAsync();
-            double totalCostVal = products.Sum(p => p.Cost * p.Stock);
-            double totalSaleVal = products.Sum(p => p.Price * p.Stock);
-            int lowStockCount = products.Count(p => p.Stock <= p.MinStock);
-
-            IsFeedbackError = false;
-            FeedbackMessage = $"[AUDITORÍA E HISTORIAL] Total Productos: {products.Count} | Valuación Costo: ${totalCostVal:N2} | Valuación Venta: ${totalSaleVal:N2} | Alertas Stock Mínimo: {lowStockCount}";
+            await Dispatcher.UIThread.InvokeAsync(async () =>
+            {
+                if (Avalonia.Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop && desktop.MainWindow != null)
+                {
+                    var vm = new InventorySnapshotsViewModel();
+                    var win = new Ticketfy.Views.InventorySnapshotsWindow
+                    {
+                        DataContext = vm
+                    };
+                    await win.ShowDialog(desktop.MainWindow);
+                }
+            });
         }
         catch (Exception ex)
         {
-            Log.Error(ex, "Error viewing snapshots");
+            Log.Error(ex, "Error viewing inventory snapshots window");
             IsFeedbackError = true;
-            FeedbackMessage = "Error al consultar el historial de auditoría de inventario.";
+            FeedbackMessage = "Error al abrir el historial de puntos de guardado.";
         }
     }
 

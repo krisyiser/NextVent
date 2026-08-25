@@ -38,7 +38,9 @@ internal static class Program
     public static void Main(string[] args)
     {
         // 0. Disable SSL globally for Velopack auto-updates on self-signed Forgejo
+#pragma warning disable SYSLIB0014
         System.Net.ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+#pragma warning restore SYSLIB0014
 
         // 1. Initialize Velopack (crucial for shortcuts, uninstalls, and OTA background updates)
         VelopackApp.Build().Run();

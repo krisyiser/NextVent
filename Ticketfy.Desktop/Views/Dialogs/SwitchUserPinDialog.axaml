@@ -36,7 +36,7 @@
                                 <StackPanel Orientation="Horizontal" Spacing="8">
                                     <mi:MaterialIcon Kind="AccountCircle" Width="18" Height="18" Foreground="{DynamicResource AccentPrimaryBrush}"/>
                                     <TextBlock Text="{Binding FullName}" FontWeight="SemiBold"/>
-                                    <TextBlock Text="{Binding Role, StringFormat='({0})'}" FontSize="11" Foreground="{DynamicResource TextMutedBrush}"/>
+                                    <TextBlock Text="{Binding DisplayRole, StringFormat='({0})'}" FontSize="11" Foreground="{DynamicResource TextMutedBrush}"/>
                                 </StackPanel>
                             </DataTemplate>
                         </ComboBox.ItemTemplate>

@@ -72,7 +72,7 @@ public partial class SetupBusinessDataViewModel : ValidatableViewModelBase
             await registrationService.PingServerAsync(new Ticketfy.Services.Implementations.BusinessProfile 
             { 
                 BusinessName = BusinessName,
-                Email = Email
+                Email = Email ?? string.Empty
             });
 
             _navigateToNextStep();
