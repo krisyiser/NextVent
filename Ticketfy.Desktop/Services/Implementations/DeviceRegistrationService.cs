@@ -24,7 +24,9 @@ public class BusinessData
     [JsonPropertyName("commercialName")] public string CommercialName { get; set; } = string.Empty;
     [JsonPropertyName("email")] public string Email { get; set; } = string.Empty;
     [JsonPropertyName("industry")] public string Industry { get; set; } = string.Empty;
-    [JsonPropertyName("location")] public string Location { get; set; } = "Ubicación Desconocida";
+    [JsonPropertyName("location")] public string Location { get; set; } = string.Empty;
+    [JsonPropertyName("city")] public string City { get; set; } = string.Empty;
+    [JsonPropertyName("state")] public string State { get; set; } = string.Empty;
 }
 
 public class SystemSpecs
@@ -163,9 +165,9 @@ public class DeviceRegistrationService
                 if (!string.IsNullOrWhiteSpace(ciudad)) locParts.Add(ciudad.Trim());
                 if (!string.IsNullOrWhiteSpace(estado)) locParts.Add(estado.Trim());
 
-                payload.Business.Location = locParts.Count > 0 
-                    ? string.Join(", ", locParts) 
-                    : (!string.IsNullOrWhiteSpace(profile.BusinessName) ? profile.BusinessName : "Ubicación Desconocida");
+                payload.Business.Location = locParts.Count > 0 ? string.Join(", ", locParts) : string.Empty;
+                payload.Business.City = !string.IsNullOrWhiteSpace(ciudad) ? ciudad.Trim() : string.Empty;
+                payload.Business.State = !string.IsNullOrWhiteSpace(estado) ? estado.Trim() : string.Empty;
             }
             else
             {
