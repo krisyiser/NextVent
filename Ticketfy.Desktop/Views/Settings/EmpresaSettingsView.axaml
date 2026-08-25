@@ -1,10 +1,10 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vm="using:Ticketfy.ViewModels"
+             xmlns:vmsettings="using:Ticketfy.ViewModels.Settings"
              xmlns:mi="using:Material.Icons.Avalonia"
              xmlns:tabs="using:Ticketfy.Views.Settings.Empresa"
              x:Class="Ticketfy.Views.Settings.EmpresaSettingsView"
-             x:DataType="vm:SettingsViewModel">
+             x:DataType="vmsettings:EmpresaSettingsViewModel">
 
     <StackPanel Spacing="20">
         <TextBlock Text="Datos &amp; Configuración de la Empresa" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />

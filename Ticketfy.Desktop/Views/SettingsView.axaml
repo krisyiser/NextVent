@@ -105,7 +105,7 @@
                                 </DataTemplate>
 
                                 <DataTemplate DataType="{x:Type vmsettings:EmpresaSettingsViewModel}">
-                                    <settings:CompanyProfileView />
+                                    <settings:EmpresaSettingsView />
                                 </DataTemplate>
 
                                 <DataTemplate DataType="{x:Type vmsettings:HardwareSettingsViewModel}">

@@ -22,6 +22,7 @@ public class BusinessProfile
 public class BusinessData
 {
     [JsonPropertyName("commercialName")] public string CommercialName { get; set; } = string.Empty;
+    [JsonPropertyName("email")] public string Email { get; set; } = string.Empty;
     [JsonPropertyName("industry")] public string Industry { get; set; } = string.Empty;
     [JsonPropertyName("location")] public string Location { get; set; } = "Ubicación Desconocida";
 }
@@ -144,6 +145,10 @@ public class DeviceRegistrationService
                 payload.Business.CommercialName = string.IsNullOrWhiteSpace(name) ? profile.BusinessName : name;
                 if (string.IsNullOrWhiteSpace(payload.Business.CommercialName)) payload.Business.CommercialName = "Negocio Ticketfy";
                 
+                var email = await _settingsService.GetAsync("EmpresaEmailContacto");
+                if (string.IsNullOrWhiteSpace(email)) email = await _settingsService.GetAsync("BusinessEmail");
+                payload.Business.Email = string.IsNullOrWhiteSpace(email) ? profile.Email : email;
+
                 var industry = await _settingsService.GetAsync("EmpresaGiroComercial");
                 payload.Business.Industry = string.IsNullOrWhiteSpace(industry) ? "Comercio General" : industry;
                 
