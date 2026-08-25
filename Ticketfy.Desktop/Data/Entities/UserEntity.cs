@@ -43,6 +43,9 @@ public partial class UserEntity
     [Column("rol")]
     public UserRole Role { get; set; } = UserRole.Cajero;
 
+    [Column("role_string")]
+    public string RoleString { get; set; } = string.Empty;
+
     [Column("estatus")]
     public bool IsActive { get; set; } = true;
 

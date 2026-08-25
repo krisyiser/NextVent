@@ -29,10 +29,11 @@ public class SessionManager : ISessionManager
     {
         CurrentCashier = new UserModel
         {
-            FullName = "Alexa S. (Caja 01)",
-            Username = "alexa",
-            Role = SystemRole.CAJERO,
-            Pin4Digits = "4321"
+            FullName = "Administrador Principal",
+            Username = "admin",
+            Role = SystemRole.ADMIN,
+            RoleString = "ADMINISTRADOR",
+            Pin4Digits = "1234"
         };
     }
 

@@ -61,6 +61,7 @@ public sealed partial class AuthService : ObservableObject
             FullName = user.FullName,
             Username = user.Username,
             Role = systemRole,
+            RoleString = user.Rol,
             Pin4Digits = pin,
             IsActive = user.IsActive
         };

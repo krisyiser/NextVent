@@ -59,6 +59,7 @@ public class UserService : IUserService
                 FullName = nombre,
                 Username = username,
                 Role = enumRole,
+                RoleString = rol.Trim().ToUpperInvariant(),
                 PasswordHash = passwordHash ?? string.Empty,
                 PasswordHint = passwordHint ?? string.Empty,
                 PinCode = string.IsNullOrEmpty(pinHash) ? "1234" : pinHash,
@@ -70,6 +71,7 @@ public class UserService : IUserService
         {
             entity.FullName = nombre;
             entity.Role = enumRole;
+            entity.RoleString = rol.Trim().ToUpperInvariant();
             if (!string.IsNullOrEmpty(pinHash)) entity.PinCode = pinHash;
             if (!string.IsNullOrEmpty(passwordHash)) entity.PasswordHash = passwordHash;
             if (passwordHint != null) entity.PasswordHint = passwordHint;
@@ -128,12 +130,14 @@ public class UserService : IUserService
 
     private static UserDto MapToDto(UserEntity e)
     {
-        string roleStr = e.Role switch
-        {
-            UserRole.Admin => "ADMINISTRADOR",
-            UserRole.Gerente => "GERENTE",
-            _ => "CAJERO"
-        };
+        string roleStr = !string.IsNullOrWhiteSpace(e.RoleString)
+            ? e.RoleString
+            : e.Role switch
+            {
+                UserRole.Admin => "ADMINISTRADOR",
+                UserRole.Gerente => "GERENTE",
+                _ => "CAJERO"
+            };
         return new UserDto(e.Id.ToString(), e.Username, e.FullName, roleStr, e.IsActive);
     }
 }
