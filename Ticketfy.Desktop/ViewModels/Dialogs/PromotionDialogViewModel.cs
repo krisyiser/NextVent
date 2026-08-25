@@ -16,7 +16,7 @@ public partial class PromotionDialogViewModel : ObservableObject
     private string _name = string.Empty;
 
     [ObservableProperty]
-    private double _discountValue;
+    private string _discountValueText = string.Empty;
 
     [ObservableProperty]
     private bool _isActive = true;
@@ -44,18 +44,25 @@ public partial class PromotionDialogViewModel : ObservableObject
         {
             if (string.IsNullOrWhiteSpace(Name))
             {
-                ErrorMessage = "El nombre de la promoción es obligatorio.";
+                ErrorMessage = "El nombre de la promoción u oferta es obligatorio.";
                 return;
             }
 
-            var dto = new PromotionDto(Guid.NewGuid().ToString(), Name, DiscountValue, IsActive);
+            if (string.IsNullOrWhiteSpace(DiscountValueText) || !double.TryParse(DiscountValueText, out double parsedVal) || parsedVal <= 0)
+            {
+                ErrorMessage = "El valor del descuento es obligatorio y debe ser un número válido mayor a 0.";
+                return;
+            }
+
+            ErrorMessage = string.Empty;
+            var dto = new PromotionDto(Guid.NewGuid().ToString(), Name, parsedVal, IsActive);
             await _promotionService.SaveAsync(dto);
             RequestClose?.Invoke();
         }
         catch (Exception ex)
         {
             Log.Error(ex, "Error saving promotion");
-            ErrorMessage = ex.Message;
+            ErrorMessage = "Error interno al guardar la promoción. Verifique los datos ingresados.";
         }
     }
 }

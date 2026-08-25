@@ -31,7 +31,17 @@ public partial class InventoryViewModel : ObservableObject
     public string SearchQuery
     {
         get => CatalogVM.SearchQuery;
-        set => CatalogVM.SearchQuery = value;
+        set
+        {
+            if (CatalogVM.SearchQuery != value)
+            {
+                CatalogVM.SearchQuery = value;
+                OnPropertyChanged(nameof(SearchQuery));
+                OnPropertyChanged(nameof(FilteredProducts));
+                OnPropertyChanged(nameof(TotalStockCost));
+                OnPropertyChanged(nameof(TotalStockSale));
+            }
+        }
     }
 
     public ObservableCollection<ProductDto> FilteredProducts => CatalogVM.FilteredProducts;

@@ -15,7 +15,7 @@
                         <TextBlock Text="TF!" FontSize="22" FontWeight="Bold" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <TextBlock Text="Ticketfy! POS" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" HorizontalAlignment="Center" />
-                    <TextBlock Text="Ingrese sus credenciales de cajero" FontSize="13" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" />
+                    <TextBlock Text="Ingrese su perfil" FontSize="13" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" />
                 </StackPanel>
 
                 <StackPanel Spacing="12">

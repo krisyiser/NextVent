@@ -23,19 +23,19 @@
             </StackPanel>
         </Border>
 
-        <!-- 3. PAGOS CON TARJETA / TRANSF. (NUEVO CAMPO ESPECIAL) -->
-        <Border Margin="2,0" Padding="10" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
-            <StackPanel Spacing="4">
-                <TextBlock Text="Pagos con Tarjeta / Transf." FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" ToolTip.Tip="Ventas cobradas con Tarjeta, Débito, Crédito o Transferencias" />
-                <TextBlock Text="{Binding PagosConTarjeta, StringFormat='${0:N2}'}" FontSize="15" FontWeight="Bold" Foreground="#3B82F6" />
-            </StackPanel>
-        </Border>
-
-        <!-- 4. EGRESOS (GASTOS) -->
+        <!-- 3. EGRESOS (GASTOS) -->
         <Border Margin="2,0" Padding="10" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
             <StackPanel Spacing="4">
                 <TextBlock Text="Egresos (Gastos)" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" ToolTip.Tip="Gastos operativos registrados en el turno" />
                 <TextBlock Text="{Binding Egresos, StringFormat='${0:N2}'}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource AccentDangerBrush}" />
+            </StackPanel>
+        </Border>
+
+        <!-- 4. PAGOS CON TARJETA / TRANSF. (NUEVO CAMPO ESPECIAL) -->
+        <Border Margin="2,0" Padding="10" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
+            <StackPanel Spacing="4">
+                <TextBlock Text="Pagos con Tarjeta / Transf." FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" ToolTip.Tip="Ventas cobradas con Tarjeta, Débito, Crédito o Transferencias" />
+                <TextBlock Text="{Binding PagosConTarjeta, StringFormat='${0:N2}'}" FontSize="15" FontWeight="Bold" Foreground="#3B82F6" />
             </StackPanel>
         </Border>
 

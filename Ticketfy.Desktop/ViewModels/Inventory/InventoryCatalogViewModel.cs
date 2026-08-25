@@ -25,6 +25,11 @@ public partial class InventoryCatalogViewModel : ObservableObject
     [ObservableProperty] private string _searchQuery = string.Empty;
     [ObservableProperty] private bool _showOnlyLowStock = false;
 
+    partial void OnSearchQueryChanged(string value)
+    {
+        ApplyFilter();
+    }
+
     partial void OnShowOnlyLowStockChanged(bool value)
     {
         ApplyFilter();

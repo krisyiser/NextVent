@@ -102,8 +102,8 @@
                                     </StackPanel>
 
                                     <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,10,0,0" Spacing="2">
-                                        <TextBlock Text="Total Teórico Esperado:" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" />
-                                        <TextBlock Text="{Binding TheoreticalCash, StringFormat='${0:N2}'}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                        <TextBlock Text="Egresos:" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" />
+                                        <TextBlock Text="{Binding TheoreticalCash, StringFormat='${0:N2}'}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource AccentDangerBrush}" />
                                     </StackPanel>
 
                                     <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,10,0,0" Spacing="2">

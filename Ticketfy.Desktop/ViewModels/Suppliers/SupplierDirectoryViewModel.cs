@@ -70,7 +70,7 @@ public partial class SupplierDirectoryViewModel : ObservableObject
             );
 
             var created = await _supplierService.CreateAsync(newSupplier);
-            Suppliers.Add(created);
+            await LoadSuppliersAsync();
 
             SupplierName = string.Empty;
             SupplierRfc = string.Empty;

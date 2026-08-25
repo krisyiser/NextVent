@@ -1,5 +1,5 @@
 #define MyAppName "TICKETFY!"
-#define MyAppVersion "3.1.12"
+#define MyAppVersion "3.1.13"
 #define MyAppPublisher "Valcore"
 #define MyAppURL "https://valcore.cloud"
 #define MyAppExeName "Ticketfy.Desktop.exe"
@@ -17,7 +17,7 @@ DefaultDirName={userappdata}\Ticketfy.Desktop\current
 DisableDirPage=yes
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
-OutputBaseFilename=Ticketfy-Setup-v3.1.12-x64
+OutputBaseFilename=Ticketfy-Setup-v3.1.13-x64
 OutputDir=c:\Users\YERSI\.gemini\antigravity-ide\scratch\NextVent\Ticketfy.Desktop\Output\Releases
 Compression=lzma2/ultra64
 SolidCompression=yes

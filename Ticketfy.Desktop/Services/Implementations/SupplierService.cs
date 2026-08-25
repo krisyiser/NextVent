@@ -21,6 +21,26 @@ public class SupplierService : ISupplierService
     public async Task<List<SupplierDto>> GetAllAsync()
     {
         var entities = await _context.Suppliers.AsNoTracking().ToListAsync();
+        if (entities.Count == 0 || !entities.Any(e => e.Name.ToUpper().Contains("GENERAL")))
+        {
+            var defaultGeneral = new SupplierEntity
+            {
+                Id = "sup_compra_general",
+                Name = "COMPRA GENERAL",
+                Rfc = "XAXX010101000",
+                Phone = "0000000000",
+                Email = "compras@ticketfy.mx",
+                Address = "Mostrador Principal / Compras Directas",
+                ContactPerson = "Administrador",
+                IsActive = 1
+            };
+            if (!entities.Any(e => e.Id == defaultGeneral.Id))
+            {
+                _context.Suppliers.Add(defaultGeneral);
+                await _context.SaveChangesAsync();
+                entities = await _context.Suppliers.AsNoTracking().ToListAsync();
+            }
+        }
         return entities.Select(MapToDto).ToList();
     }
 
