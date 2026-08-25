@@ -91,8 +91,7 @@ public partial class CatalogViewModel : ObservableObject
             (SelectedCategory == "⭐ Top Ventas" || SelectedCategory == "Todos" || p.Category == SelectedCategory) &&
             (string.IsNullOrWhiteSpace(query) ||
              p.Name.ToLower().Contains(query) ||
-             (p.Barcode != null && p.Barcode.ToLower().Contains(query))) &&
-            p.Stock > 0.0
+             (p.Barcode != null && p.Barcode.ToLower().Contains(query)))
         );
 
         foreach (var m in matches) FilteredProducts.Add(m);
