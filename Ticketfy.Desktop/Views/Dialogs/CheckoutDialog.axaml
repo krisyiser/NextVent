@@ -60,8 +60,8 @@
                         </Grid>
                     </Border>
 
-                    <!-- Quick Cash Denominations Strip -->
-                    <StackPanel Spacing="6">
+                    <!-- Quick Cash Denominations Strip (Visible ONLY when PaymentMethod == 'Efectivo') -->
+                    <StackPanel Spacing="6" IsVisible="{Binding IsCashPayment}">
                         <TextBlock Text="Monedas Rápidas:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}"/>
                         <WrapPanel Orientation="Horizontal">
                             <Button Content="+$0.50" Command="{Binding AddCashDenominationCommand}" CommandParameter="0.5" Margin="0,0,6,6" Padding="8,5" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4"/>

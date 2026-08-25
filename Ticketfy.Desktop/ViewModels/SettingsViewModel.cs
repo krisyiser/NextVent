@@ -48,7 +48,7 @@ public partial class SettingsViewModel : ObservableObject
         var empresaVM = new EmpresaSettingsViewModel(settingsService);
         var hardwareVM = new HardwareSettingsViewModel(settingsService);
         var seguridadVM = new SeguridadSettingsViewModel(settingsService);
-        var usuariosVM = new UsuariosSettingsViewModel(userService);
+        var usuariosVM = new UsuariosSettingsViewModel(userService, settingsService);
         var acercaDeVM = new AcercaDeSettingsViewModel();
 
         Sections = [

@@ -52,6 +52,7 @@ public partial class CheckoutDialogViewModel : ObservableObject
     [ObservableProperty] private decimal _walletAmount;
     [ObservableProperty] private decimal _totalBill;
 
+    public bool IsCashPayment => PaymentMethod == "Efectivo";
     public bool IsMixedPayment => PaymentMethod == "Mixto";
     public bool IsNotMixedPayment => PaymentMethod != "Mixto";
     public decimal TotalMixedReceived => CashAmount + CardAmount + WalletAmount;

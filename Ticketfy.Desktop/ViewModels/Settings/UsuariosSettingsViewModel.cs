@@ -10,17 +10,50 @@ using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
+
 namespace Ticketfy.ViewModels.Settings;
 
+public class PermissionItemModel : ObservableObject
+{
+    public string Key { get; set; } = string.Empty;
+    public string Title { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string Category { get; set; } = string.Empty;
+
+    private bool _isGranted;
+    public bool IsGranted
+    {
+        get => _isGranted;
+        set => SetProperty(ref _isGranted, value);
+    }
+}
+
 /// <summary>
-/// Full CRUD for user accounts. Previously embedded in the monolithic SettingsViewModel.
-/// Handles cashier/admin creation, 4-digit PIN management, and admin-confirmed deletion.
+/// Full CRUD for user accounts and RBAC Permission Matrix management.
+/// Handles cashier/admin creation, 4-digit PIN management, custom role creation, and granular permission editing per role.
 /// </summary>
 public partial class UsuariosSettingsViewModel : ObservableObject
 {
     private readonly IUserService? _userService;
+    private readonly ISettingsService? _settingsService;
 
     public ObservableCollection<UserDto> Users { get; } = [];
+
+    // ── Sub-tab navigation ──────────────────────────────────────────────────
+    [ObservableProperty] private int _selectedSubTabIndex = 0;
+    public bool IsUsuariosTabVisible => SelectedSubTabIndex == 0;
+    public bool IsPermisosTabVisible => SelectedSubTabIndex == 1;
+
+    [RelayCommand]
+    private void SelectSubTab(int index)
+    {
+        SelectedSubTabIndex = index;
+        OnPropertyChanged(nameof(IsUsuariosTabVisible));
+        OnPropertyChanged(nameof(IsPermisosTabVisible));
+    }
 
     // ── Create new user form ───────────────────────────────────────────────
     [ObservableProperty] private string _newUsername = string.Empty;
@@ -45,6 +78,11 @@ public partial class UsuariosSettingsViewModel : ObservableObject
     [ObservableProperty] private string _adminDeletePassword = string.Empty;
     [ObservableProperty] private string _feedbackMessage = string.Empty;
 
+    // ── Granular RBAC Permissions ──────────────────────────────────────────
+    [ObservableProperty] private string _selectedPermissionRole = "CAJERO";
+    public ObservableCollection<PermissionItemModel> RolePermissions { get; } = [];
+    [ObservableProperty] private string _permissionFeedbackMessage = string.Empty;
+
     [RelayCommand]
     private void ToggleAddCustomRole()
     {
@@ -63,15 +101,27 @@ public partial class UsuariosSettingsViewModel : ObservableObject
             RoleOptions.Add(normalized);
         }
         NewRole = normalized;
+        SelectedPermissionRole = normalized;
         CustomRoleName = string.Empty;
         IsAddingCustomRole = false;
-        FeedbackMessage = $"¡Nuevo rol '{normalized}' agregado correctamente!";
+        FeedbackMessage = $"¡Nuevo rol '{normalized}' agregado correctamente! Puede personalizar sus permisos a continuación.";
     }
 
-    public UsuariosSettingsViewModel(IUserService? userService = null)
+    public UsuariosSettingsViewModel(IUserService? userService = null, ISettingsService? settingsService = null)
     {
         _userService = userService;
+        _settingsService = settingsService;
+
         if (_userService != null) _ = LoadAsync();
+        _ = LoadRolePermissionsAsync(SelectedPermissionRole);
+    }
+
+    partial void OnSelectedPermissionRoleChanged(string value)
+    {
+        if (!string.IsNullOrWhiteSpace(value))
+        {
+            _ = LoadRolePermissionsAsync(value);
+        }
     }
 
     public async Task LoadAsync()
@@ -90,6 +140,140 @@ public partial class UsuariosSettingsViewModel : ObservableObject
     }
 
     public Task LoadUsersAsync() => LoadAsync();
+
+    // ── RBAC Permission Engine ─────────────────────────────────────────────
+    public async Task LoadRolePermissionsAsync(string roleName)
+    {
+        var allPermissions = GetDefaultPermissionCatalog();
+        Dictionary<string, bool>? savedPermissions = null;
+
+        if (_settingsService != null)
+        {
+            try
+            {
+                var json = await _settingsService.GetAsync($"RolePermissions_{roleName.ToUpper()}");
+                if (!string.IsNullOrWhiteSpace(json))
+                {
+                    savedPermissions = JsonSerializer.Deserialize<Dictionary<string, bool>>(json);
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error loading saved permissions for role {Role}", roleName);
+            }
+        }
+
+        // Default Presets if no custom settings exist yet
+        if (savedPermissions == null)
+        {
+            savedPermissions = GetDefaultRolePreset(roleName);
+        }
+
+        await Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            RolePermissions.Clear();
+            foreach (var perm in allPermissions)
+            {
+                if (savedPermissions.TryGetValue(perm.Key, out bool granted))
+                {
+                    perm.IsGranted = granted;
+                }
+                RolePermissions.Add(perm);
+            }
+        });
+    }
+
+    [RelayCommand]
+    private async Task SaveRolePermissionsAsync()
+    {
+        if (_settingsService == null) return;
+        try
+        {
+            var dict = RolePermissions.ToDictionary(p => p.Key, p => p.IsGranted);
+            string json = JsonSerializer.Serialize(dict);
+            await _settingsService.SetAsync($"RolePermissions_{SelectedPermissionRole.ToUpper()}", json);
+            PermissionFeedbackMessage = $"¡Permisos del rol '{SelectedPermissionRole}' guardados y aplicados correctamente!";
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "Error saving permissions for role {Role}", SelectedPermissionRole);
+            PermissionFeedbackMessage = "Error al guardar los permisos del rol.";
+        }
+    }
+
+    private static List<PermissionItemModel> GetDefaultPermissionCatalog() => [
+        new() { Key = "pos.checkout", Category = "POS & Ventas", Title = "Procesar Cobro y Ventas", Description = "Permite realizar ventas y cobros en el terminal POS" },
+        new() { Key = "pos.discount", Category = "POS & Ventas", Title = "Aplicar Descuentos Directos", Description = "Permite modificar precios o aplicar descuentos directos al carrito" },
+        new() { Key = "pos.cancel", Category = "POS & Ventas", Title = "Cancelar Ventas & Devoluciones", Description = "Permite anular tickets de venta y procesar reembolsos" },
+
+        new() { Key = "cash.open_close", Category = "Caja & Dinero", Title = "Apertura y Cierre de Caja", Description = "Permite abrir turno de caja, realizar arqueos y corte de caja" },
+        new() { Key = "cash.in_out", Category = "Caja & Dinero", Title = "Entradas y Salidas de Efectivo", Description = "Permite registrar gastos directos o ingresos extra de caja" },
+
+        new() { Key = "inventory.manage", Category = "Inventario & Productos", Title = "Gestión de Productos & Stock", Description = "Permite registrar, editar o eliminar productos en catálogo" },
+        new() { Key = "inventory.pricing", Category = "Inventario & Precios", Title = "Ajustar Precios & Promociones", Description = "Permite modificar precios de venta, costos y promociones" },
+
+        new() { Key = "customers.manage", Category = "Clientes & Crédito", Title = "Administrar Clientes", Description = "Permite alta de clientes, consulta de saldo y monedero" },
+        new() { Key = "customers.credit", Category = "Clientes & Crédito", Title = "Otorgar & Ajustar Crédito", Description = "Permite modificar límites de crédito corriente de clientes" },
+
+        new() { Key = "reports.view", Category = "Reportes & Finanzas", Title = "Ver Reportes & Ganancias", Description = "Permite consultar métricas financieras, cortes X/Z y utilidades" },
+        new() { Key = "reports.export", Category = "Reportes & Finanzas", Title = "Exportar Reportes & Auditoría", Description = "Permite exportar reportes en Excel/PDF y bitácoras de auditoría" },
+
+        new() { Key = "system.users", Category = "Administración & Sistema", Title = "Gestión de Usuarios & Roles", Description = "Permite crear, modificar o eliminar usuarios y ajustar roles RBAC" },
+        new() { Key = "system.settings", Category = "Administración & Sistema", Title = "Configuración Global del Sistema", Description = "Permite modificar impresoras, datos de la empresa y temas" }
+    ];
+
+    private static Dictionary<string, bool> GetDefaultRolePreset(string role)
+    {
+        string norm = role.Trim().ToUpper();
+        return norm switch
+        {
+            "ADMINISTRADOR" or "ADMIN" => new()
+            {
+                ["pos.checkout"] = true, ["pos.discount"] = true, ["pos.cancel"] = true,
+                ["cash.open_close"] = true, ["cash.in_out"] = true,
+                ["inventory.manage"] = true, ["inventory.pricing"] = true,
+                ["customers.manage"] = true, ["customers.credit"] = true,
+                ["reports.view"] = true, ["reports.export"] = true,
+                ["system.users"] = true, ["system.settings"] = true
+            },
+            "GERENTE" => new()
+            {
+                ["pos.checkout"] = true, ["pos.discount"] = true, ["pos.cancel"] = true,
+                ["cash.open_close"] = true, ["cash.in_out"] = true,
+                ["inventory.manage"] = true, ["inventory.pricing"] = true,
+                ["customers.manage"] = true, ["customers.credit"] = true,
+                ["reports.view"] = true, ["reports.export"] = true,
+                ["system.users"] = false, ["system.settings"] = false
+            },
+            "SUPERVISOR" => new()
+            {
+                ["pos.checkout"] = true, ["pos.discount"] = true, ["pos.cancel"] = true,
+                ["cash.open_close"] = true, ["cash.in_out"] = true,
+                ["inventory.manage"] = true, ["inventory.pricing"] = false,
+                ["customers.manage"] = true, ["customers.credit"] = false,
+                ["reports.view"] = true, ["reports.export"] = false,
+                ["system.users"] = false, ["system.settings"] = false
+            },
+            "VENDEDOR" => new()
+            {
+                ["pos.checkout"] = true, ["pos.discount"] = false, ["pos.cancel"] = false,
+                ["cash.open_close"] = false, ["cash.in_out"] = false,
+                ["inventory.manage"] = false, ["inventory.pricing"] = false,
+                ["customers.manage"] = true, ["customers.credit"] = false,
+                ["reports.view"] = false, ["reports.export"] = false,
+                ["system.users"] = false, ["system.settings"] = false
+            },
+            _ => new() // CAJERO and Custom Roles
+            {
+                ["pos.checkout"] = true, ["pos.discount"] = false, ["pos.cancel"] = false,
+                ["cash.open_close"] = true, ["cash.in_out"] = true,
+                ["inventory.manage"] = false, ["inventory.pricing"] = false,
+                ["customers.manage"] = true, ["customers.credit"] = false,
+                ["reports.view"] = false, ["reports.export"] = false,
+                ["system.users"] = false, ["system.settings"] = false
+            }
+        };
+    }
 
     [RelayCommand]
     private async Task SaveUserAsync()

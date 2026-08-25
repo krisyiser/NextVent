@@ -96,7 +96,19 @@ public partial class CheckoutDialogViewModel
         ChangeAmount = 0m;
         ErrorMessage = string.Empty;
 
+        if (value != "Efectivo" && value != "Mixto")
+        {
+            ReceivedAmount = TotalToPay;
+            PaidAmount = TotalToPay;
+            ReceivedAmountInput = TotalToPay.ToString("0.##");
+        }
+        else if (value == "Efectivo" && ReceivedAmount == 0.0)
+        {
+            ReceivedAmountInput = "0";
+        }
+
         // TRIGGER UI UPDATES
+        OnPropertyChanged(nameof(IsCashPayment));
         OnPropertyChanged(nameof(IsMixedPayment));
         OnPropertyChanged(nameof(IsNotMixedPayment));
         OnPropertyChanged(nameof(IsCreditPayment));
