@@ -19,6 +19,9 @@ public partial class ExpensesViewModel : ObservableObject
     public ObservableCollection<string> Categories { get; } = [
         "Renta", "Servicios (Luz/Agua/Internet)", "Nómina / Salarios", "Mantenimiento", "Transporte", "Varios"
     ];
+    public ObservableCollection<string> PaymentMethods { get; } = [
+        "Efectivo", "Tarjeta / Transferencia"
+    ];
 
     [ObservableProperty] private string _selectedCategory = "Renta";
     [ObservableProperty] private double _expenseAmount;

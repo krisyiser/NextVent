@@ -146,15 +146,15 @@ public class ExpenseService : IExpenseService
         double netProfit = grossProfit - totalExpenses;
 
         double cashRevenue = salesList
-            .Where(s => s.PaymentMethod == "Cash" || s.PaymentMethod == "Efectivo")
+            .Where(s => !string.IsNullOrEmpty(s.PaymentMethod) && (s.PaymentMethod.Equals("Cash", StringComparison.OrdinalIgnoreCase) || s.PaymentMethod.Equals("Efectivo", StringComparison.OrdinalIgnoreCase)))
             .Sum(s => s.Total);
 
         double cardRevenue = salesList
-            .Where(s => s.PaymentMethod != "Cash" && s.PaymentMethod != "Efectivo")
+            .Where(s => string.IsNullOrEmpty(s.PaymentMethod) || (!s.PaymentMethod.Equals("Cash", StringComparison.OrdinalIgnoreCase) && !s.PaymentMethod.Equals("Efectivo", StringComparison.OrdinalIgnoreCase)))
             .Sum(s => s.Total);
 
         double cashExpenses = expensesList
-            .Where(e => e.PaymentMethod == "Cash" || e.PaymentMethod == "Efectivo")
+            .Where(e => string.IsNullOrEmpty(e.PaymentMethod) || e.PaymentMethod.Equals("Cash", StringComparison.OrdinalIgnoreCase) || e.PaymentMethod.Equals("Efectivo", StringComparison.OrdinalIgnoreCase))
             .Sum(e => e.Amount);
 
         return new FinancialSummaryDto(totalRevenue, totalCostOfGoodsSold, grossProfit, totalExpenses, netProfit, cashRevenue, cashExpenses, cardRevenue);
