@@ -3,6 +3,7 @@
              xmlns:vm="using:Ticketfy.ViewModels.Suppliers"
              xmlns:dto="using:Ticketfy.Data.Dtos"
              xmlns:controls="using:Ticketfy.Controls"
+             xmlns:mi="using:Material.Icons.Avalonia"
              x:Class="Ticketfy.Views.Suppliers.SuppliersDirectoryView"
              x:DataType="vm:SupplierDirectoryViewModel">
 
@@ -12,7 +13,8 @@
             BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
         <DockPanel LastChildFill="True">
             <StackPanel DockPanel.Dock="Top" Spacing="10" Margin="0,0,0,12">
-                <TextBlock Text="Registrar Nuevo Proveedor" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                <TextBlock Text="{Binding FormTitle}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                
                 <Grid RowDefinitions="Auto,Auto,Auto" ColumnDefinitions="*,*">
                     <TextBox Grid.Row="0" Grid.Column="0" Text="{Binding SupplierName, Mode=TwoWay}" Watermark="Nombre Comercial *" Margin="0,0,4,8" Padding="10,8" />
                     <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding SupplierRfc, Mode=TwoWay}" Watermark="RFC Proveedor" Margin="4,0,0,8" Padding="10,8" />
@@ -20,9 +22,28 @@
                     <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding SupplierEmail, Mode=TwoWay}" Watermark="Correo Electrónico" Margin="4,0,0,8" Padding="10,8" />
                     <TextBox Grid.Row="2" Grid.ColumnSpan="2" Text="{Binding SupplierContact, Mode=TwoWay}" Watermark="Persona de Contacto / Vendedor" Margin="0,0,0,8" Padding="10,8" />
                 </Grid>
-                <Button Command="{Binding SaveSupplierCommand}" Content="GUARDAR PROVEEDOR" Padding="16,8" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource AccentPrimaryBrush}" Foreground="White" FontWeight="Bold" HorizontalAlignment="Right" />
+
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+                    <Button Command="{Binding CancelEditCommand}" Content="CANCELAR" Padding="14,8" CornerRadius="{DynamicResource AppCornerRadius}" IsVisible="{Binding IsEditing}" Background="{DynamicResource BgTertiaryBrush}" Foreground="{DynamicResource TextPrimaryBrush}" />
+                    <Button Command="{Binding SaveSupplierCommand}" Content="{Binding SaveButtonText}" Padding="16,8" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource AccentPrimaryBrush}" Foreground="White" FontWeight="Bold" />
+                </StackPanel>
+
+                <TextBlock Text="{Binding FeedbackMessage}" FontSize="12" Foreground="{DynamicResource AccentSuccessBrush}" Margin="0,4,0,0" />
+
                 <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,8,0,0" />
-                <TextBlock Text="Directorio de Proveedores Registrados" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+
+                <!-- Search Bar & Directory Header -->
+                <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Grid.Column="0" Text="Directorio de Proveedores Registrados" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" />
+                </Grid>
+
+                <!-- Instant Search Input -->
+                <Border CornerRadius="4" Padding="10,4" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                    <Grid ColumnDefinitions="Auto,*">
+                        <mi:MaterialIcon Kind="Magnify" Width="16" Height="16" Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" Margin="0,0,6,0" />
+                        <TextBox Grid.Column="1" Text="{Binding SearchQuery, Mode=TwoWay}" Watermark="Buscar proveedor por nombre, RFC, teléfono o contacto..." Background="Transparent" BorderThickness="0" Foreground="{DynamicResource TextPrimaryBrush}" FontSize="12" VerticalAlignment="Center" />
+                    </Grid>
+                </Border>
             </StackPanel>
 
             <!-- Suppliers Table -->
@@ -31,12 +52,26 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate x:DataType="dto:SupplierDto">
                             <Border Margin="0,0,0,6" Padding="12,8" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
-                                <Grid ColumnDefinitions="*,Auto">
+                                <Grid ColumnDefinitions="*,Auto,Auto">
                                     <StackPanel Grid.Column="0" Spacing="2">
                                         <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
-                                        <TextBlock Text="{Binding Phone, StringFormat='Tel: {0}'}" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
+                                        <StackPanel Orientation="Horizontal" Spacing="10">
+                                            <TextBlock Text="{Binding Phone, StringFormat='Tel: {0}'}" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
+                                            <TextBlock Text="{Binding ContactPerson, StringFormat='Contacto: {0}'}" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
+                                        </StackPanel>
                                     </StackPanel>
-                                    <TextBlock Grid.Column="1" Text="{Binding Rfc}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
+
+                                    <TextBlock Grid.Column="1" Text="{Binding Rfc}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,12,0" />
+
+                                    <!-- Actions: Edit & Delete -->
+                                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                                        <Button Command="{Binding $parent[UserControl].((vm:SupplierDirectoryViewModel)DataContext).StartEditCommand}" CommandParameter="{Binding}" Padding="6,4" Background="Transparent" BorderThickness="0" ToolTip.Tip="Editar Proveedor">
+                                            <mi:MaterialIcon Kind="Pencil" Width="16" Height="16" Foreground="{DynamicResource AccentWarningBrush}" />
+                                        </Button>
+                                        <Button Command="{Binding $parent[UserControl].((vm:SupplierDirectoryViewModel)DataContext).DeleteSupplierCommand}" CommandParameter="{Binding}" Padding="6,4" Background="Transparent" BorderThickness="0" ToolTip.Tip="Eliminar Proveedor">
+                                            <mi:MaterialIcon Kind="TrashCan" Width="16" Height="16" Foreground="{DynamicResource AccentDangerBrush}" />
+                                        </Button>
+                                    </StackPanel>
                                 </Grid>
                             </Border>
                         </DataTemplate>
@@ -46,4 +81,3 @@
         </DockPanel>
     </Border>
 </UserControl>
-

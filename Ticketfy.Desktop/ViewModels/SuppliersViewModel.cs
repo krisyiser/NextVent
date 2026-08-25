@@ -25,6 +25,7 @@ public partial class SuppliersViewModel : ObservableObject
         HistoryVM = new PurchaseHistoryViewModel(purchaseService, printerService);
 
         OrderVM.PurchaseConfirmed += async _ => await HistoryVM.LoadPurchasesAsync();
+        DirectoryVM.SuppliersUpdated += async () => await OrderVM.LoadCatalogAsync(System.Linq.Enumerable.ToList(DirectoryVM.Suppliers));
         _ = LoadAllDataAsync();
     }
 
