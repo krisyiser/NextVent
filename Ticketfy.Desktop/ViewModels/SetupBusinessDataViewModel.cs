@@ -59,6 +59,14 @@ public partial class SetupBusinessDataViewModel : ValidatableViewModelBase
             await _settingsService.SetAsync("BusinessAddress", Address ?? string.Empty);
             await _settingsService.SetAsync("EmpresaCalleYNumero", Address ?? string.Empty);
 
+            // Persistir objeto AppSettings global
+            var appSettings = await _settingsService.GetAppSettingsAsync();
+            appSettings.Company.CommercialName = BusinessName;
+            appSettings.Company.Phone = Phone ?? string.Empty;
+            appSettings.Company.Email = Email ?? string.Empty;
+            appSettings.Company.Address = Address ?? string.Empty;
+            await _settingsService.SaveAppSettingsAsync(appSettings);
+
             // Enviar telemetría con datos reales
             var registrationService = new Ticketfy.Services.Implementations.DeviceRegistrationService(_settingsService, new Ticketfy.Core.Services.SessionManager());
             await registrationService.PingServerAsync(new Ticketfy.Services.Implementations.BusinessProfile 

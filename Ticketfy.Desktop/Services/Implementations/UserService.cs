@@ -49,7 +49,7 @@ public class UserService : IUserService
         Guid guidId = Guid.TryParse(id, out var parsed) ? parsed : Guid.NewGuid();
         var entity = await _context.Users.FindAsync(guidId);
         
-        var enumRole = Enum.TryParse<UserRole>(rol, true, out var parsedRole) ? parsedRole : UserRole.Cajero;
+        var enumRole = ParseRole(rol);
 
         if (entity == null)
         {
@@ -75,6 +75,16 @@ public class UserService : IUserService
             if (passwordHint != null) entity.PasswordHint = passwordHint;
         }
         await _context.SaveChangesAsync();
+    }
+
+    private static UserRole ParseRole(string rol)
+    {
+        if (string.IsNullOrWhiteSpace(rol)) return UserRole.Cajero;
+        string norm = rol.Trim().ToUpperInvariant();
+        if (norm == "ADMINISTRADOR" || norm == "ADMIN") return UserRole.Admin;
+        if (norm == "GERENTE" || norm == "SUPERVISOR") return UserRole.Gerente;
+        if (Enum.TryParse<UserRole>(rol, true, out var parsedRole)) return parsedRole;
+        return UserRole.Cajero;
     }
 
     public async Task DeleteAsync(string id)
@@ -118,7 +128,12 @@ public class UserService : IUserService
 
     private static UserDto MapToDto(UserEntity e)
     {
-        var roleStr = e.Role.ToString().ToUpper();
+        string roleStr = e.Role switch
+        {
+            UserRole.Admin => "ADMINISTRADOR",
+            UserRole.Gerente => "GERENTE",
+            _ => "CAJERO"
+        };
         return new UserDto(e.Id.ToString(), e.Username, e.FullName, roleStr, e.IsActive);
     }
 }

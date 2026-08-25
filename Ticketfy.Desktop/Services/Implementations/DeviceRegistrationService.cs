@@ -104,7 +104,7 @@ public class DeviceRegistrationService
             {
                 HardwareId = machineId,
                 LocalIp = localIp,
-                InstalledVersion = "1.0.0"
+                InstalledVersion = Ticketfy.Core.Constants.AppConstants.AppVersion
             };
 
             // 1. Lectura de Hardware Profunda (AOT-Safe)
@@ -140,18 +140,31 @@ public class DeviceRegistrationService
             if (_settingsService != null)
             {
                 var name = await _settingsService.GetAsync("EmpresaNombreComercial");
-                payload.Business.CommercialName = string.IsNullOrEmpty(name) ? profile.BusinessName : name;
+                if (string.IsNullOrWhiteSpace(name)) name = await _settingsService.GetAsync("BusinessName");
+                payload.Business.CommercialName = string.IsNullOrWhiteSpace(name) ? profile.BusinessName : name;
+                if (string.IsNullOrWhiteSpace(payload.Business.CommercialName)) payload.Business.CommercialName = "Negocio Ticketfy";
                 
                 var industry = await _settingsService.GetAsync("EmpresaGiroComercial");
-                payload.Business.Industry = string.IsNullOrEmpty(industry) ? "No especificado" : industry;
+                payload.Business.Industry = string.IsNullOrWhiteSpace(industry) ? "Comercio General" : industry;
                 
-                var estado = await _settingsService.GetAsync("EmpresaEstado");
+                var calle = await _settingsService.GetAsync("EmpresaCalleYNumero") ?? await _settingsService.GetAsync("BusinessAddress");
                 var colonia = await _settingsService.GetAsync("EmpresaColonia");
-                payload.Business.Location = string.IsNullOrEmpty(estado) ? "Ubicación Desconocida" : $"{colonia}, {estado}".Trim(',', ' ');
+                var ciudad = await _settingsService.GetAsync("EmpresaCiudadMunicipio");
+                var estado = await _settingsService.GetAsync("EmpresaEstado");
+
+                var locParts = new System.Collections.Generic.List<string>();
+                if (!string.IsNullOrWhiteSpace(calle)) locParts.Add(calle.Trim());
+                if (!string.IsNullOrWhiteSpace(colonia)) locParts.Add(colonia.Trim());
+                if (!string.IsNullOrWhiteSpace(ciudad)) locParts.Add(ciudad.Trim());
+                if (!string.IsNullOrWhiteSpace(estado)) locParts.Add(estado.Trim());
+
+                payload.Business.Location = locParts.Count > 0 
+                    ? string.Join(", ", locParts) 
+                    : (!string.IsNullOrWhiteSpace(profile.BusinessName) ? profile.BusinessName : "Ubicación Desconocida");
             }
             else
             {
-                payload.Business.CommercialName = string.IsNullOrEmpty(profile.BusinessName) ? "Negocio Prueba" : profile.BusinessName;
+                payload.Business.CommercialName = string.IsNullOrWhiteSpace(profile.BusinessName) ? "Negocio Ticketfy" : profile.BusinessName;
             }
 
             // 3. Lectura de Sesión Activa

@@ -51,13 +51,14 @@ public class SettingsService : ISettingsService
 
     public async Task<AppSettings> GetAppSettingsAsync()
     {
+        AppSettings settings = new();
         try
         {
             var json = await GetAsync(AppSettingsJsonKey);
             if (!string.IsNullOrWhiteSpace(json))
             {
-                var settings = JsonSerializer.Deserialize<AppSettings>(json);
-                if (settings != null) return settings;
+                var deserialized = JsonSerializer.Deserialize<AppSettings>(json);
+                if (deserialized != null) settings = deserialized;
             }
         }
         catch (Exception ex)
@@ -65,18 +66,29 @@ public class SettingsService : ISettingsService
             Log.Error(ex, "Failed deserializing AppSettings from DB, returning defaults");
         }
 
-        // Fallback to reading legacy individual keys or default instance
-        var defaults = new AppSettings();
+        // Always overlay individual keys for 100% full integration with Onboarding & Settings
         var all = await GetAllAsync();
 
-        if (all.TryGetValue("CurrentTheme", out var ct)) defaults.Visual.ThemeName = ct;
-        if (all.TryGetValue("AccentColor", out var ac)) defaults.Visual.PrimaryColor = ac;
-        if (all.TryGetValue("AppFont", out var af)) defaults.Visual.FontFamily = af;
-        if (all.TryGetValue("SidebarPosition", out var sp)) defaults.Visual.SidebarPosition = sp;
-        if (all.TryGetValue("EmpresaNombreComercial", out var nc)) defaults.Company.CommercialName = nc;
-        if (all.TryGetValue("EmpresaRfc", out var rfc)) defaults.Company.Rfc = rfc;
+        if (all.TryGetValue("CurrentTheme", out var ct)) settings.Visual.ThemeName = ct;
+        if (all.TryGetValue("AccentColor", out var ac)) settings.Visual.PrimaryColor = ac;
+        if (all.TryGetValue("AppFont", out var af)) settings.Visual.FontFamily = af;
+        if (all.TryGetValue("SidebarPosition", out var sp)) settings.Visual.SidebarPosition = sp;
 
-        return defaults;
+        if (all.TryGetValue("EmpresaNombreComercial", out var nc) && !string.IsNullOrWhiteSpace(nc)) settings.Company.CommercialName = nc;
+        else if (all.TryGetValue("BusinessName", out var bn) && !string.IsNullOrWhiteSpace(bn)) settings.Company.CommercialName = bn;
+
+        if (all.TryGetValue("EmpresaEmailContacto", out var ec) && !string.IsNullOrWhiteSpace(ec)) settings.Company.Email = ec;
+        else if (all.TryGetValue("BusinessEmail", out var be) && !string.IsNullOrWhiteSpace(be)) settings.Company.Email = be;
+
+        if (all.TryGetValue("EmpresaTelefonoFijo", out var tf) && !string.IsNullOrWhiteSpace(tf)) settings.Company.Phone = tf;
+        else if (all.TryGetValue("BusinessPhone", out var bp) && !string.IsNullOrWhiteSpace(bp)) settings.Company.Phone = bp;
+
+        if (all.TryGetValue("EmpresaCalleYNumero", out var cn) && !string.IsNullOrWhiteSpace(cn)) settings.Company.Address = cn;
+        else if (all.TryGetValue("BusinessAddress", out var ba) && !string.IsNullOrWhiteSpace(ba)) settings.Company.Address = ba;
+
+        if (all.TryGetValue("EmpresaRfc", out var rfc) && !string.IsNullOrWhiteSpace(rfc)) settings.Company.Rfc = rfc;
+
+        return settings;
     }
 
     public async Task SaveAppSettingsAsync(AppSettings settings)
@@ -87,13 +99,36 @@ public class SettingsService : ISettingsService
             var json = JsonSerializer.Serialize(settings, new JsonSerializerOptions { WriteIndented = true });
             await SetAsync(AppSettingsJsonKey, json);
 
-            // Synchronize legacy keys for backwards compatibility
+            // Synchronize legacy and individual keys for 100% full integration
             await SetAsync("CurrentTheme", settings.Visual.ThemeName);
             await SetAsync("AccentColor", settings.Visual.PrimaryColor);
             await SetAsync("AppFont", settings.Visual.FontFamily);
             await SetAsync("SidebarPosition", settings.Visual.SidebarPosition);
-            await SetAsync("EmpresaNombreComercial", settings.Company.CommercialName);
-            await SetAsync("EmpresaRfc", settings.Company.Rfc);
+
+            if (!string.IsNullOrWhiteSpace(settings.Company.CommercialName))
+            {
+                await SetAsync("EmpresaNombreComercial", settings.Company.CommercialName);
+                await SetAsync("BusinessName", settings.Company.CommercialName);
+            }
+            if (!string.IsNullOrWhiteSpace(settings.Company.Email))
+            {
+                await SetAsync("EmpresaEmailContacto", settings.Company.Email);
+                await SetAsync("BusinessEmail", settings.Company.Email);
+            }
+            if (!string.IsNullOrWhiteSpace(settings.Company.Phone))
+            {
+                await SetAsync("EmpresaTelefonoFijo", settings.Company.Phone);
+                await SetAsync("BusinessPhone", settings.Company.Phone);
+            }
+            if (!string.IsNullOrWhiteSpace(settings.Company.Address))
+            {
+                await SetAsync("EmpresaCalleYNumero", settings.Company.Address);
+                await SetAsync("BusinessAddress", settings.Company.Address);
+            }
+            if (!string.IsNullOrWhiteSpace(settings.Company.Rfc))
+            {
+                await SetAsync("EmpresaRfc", settings.Company.Rfc);
+            }
 
             Log.Information("AppSettings saved atomically to local SQLite storage");
         }
