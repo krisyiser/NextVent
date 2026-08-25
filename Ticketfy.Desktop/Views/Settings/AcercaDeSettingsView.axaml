@@ -1,19 +1,113 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:vm="using:Ticketfy.ViewModels"
+             xmlns:vmsettings="using:Ticketfy.ViewModels.Settings"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             xmlns:controls="using:Ticketfy.Controls"
              x:Class="Ticketfy.Views.Settings.AcercaDeSettingsView"
-             x:DataType="vm:SettingsViewModel">
+             x:DataType="vmsettings:AcercaDeSettingsViewModel">
 
-    <StackPanel Spacing="15">
-        <TextBlock Text="Acerca de TICKETFY! Enterprise" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Padding="0,0,8,0">
+        <StackPanel Spacing="16">
 
-        <Border Padding="20" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
-            <StackPanel Spacing="5" Margin="0,0,0,10">
-                <TextBlock Text="{Binding FullAppVersionTitle}" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                <TextBlock Text="Sistema de Gestión de Punto de Venta" FontSize="13" Foreground="{DynamicResource TextSecondaryBrush}" />
-                <TextBlock Text="© 2026 Valcore. Todos los derechos reservados." FontSize="11" Foreground="{DynamicResource TextMutedBrush}" Margin="0,10,0,0" />
-            </StackPanel>
-        </Border>
-    </StackPanel>
+            <!-- Title Header -->
+            <Border Padding="16,12" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                <Grid ColumnDefinitions="Auto,*">
+                    <Border Width="36" Height="36" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource AccentPrimaryBrush}">
+                        <mi:MaterialIcon Kind="InformationOutline" Width="22" Height="22" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="12,0,0,0">
+                        <TextBlock Text="Acerca de TICKETFY! Enterprise &amp; Sistema de Actualizaciones" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        <TextBlock Text="Información del sistema, licencia local y estado del motor de actualizaciones automáticas (OTA)" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- 1. INFORMACIÓN DE VERSIÓN Y LICENCIA -->
+            <Border Padding="16" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                <StackPanel Spacing="12">
+                    <TextBlock Text="1. Estado de Licencia &amp; Arquitectura Local" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel Spacing="4">
+                            <TextBlock Text="{Binding FullTitle}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                            <TextBlock Text="{Binding AppDescription}" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" TextWrapping="Wrap" />
+                            <TextBlock Text="{Binding LicenseType}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextMutedBrush}" Margin="0,4,0,0" />
+                        </StackPanel>
+
+                        <Border Grid.Column="1" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="12,8" VerticalAlignment="Top" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                            <StackPanel HorizontalAlignment="Center" Spacing="2">
+                                <TextBlock Text="VERSIÓN INSTALADA" FontSize="9" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" />
+                                <TextBlock Text="{Binding AppVersion}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" HorizontalAlignment="Center" />
+                                <TextBlock Text="Valcore Engine 4.0" FontSize="9" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- 2. MOTOR DE ACTUALIZACIONES AUTOMÁTICAS (OTA) -->
+            <Border Padding="16" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                <StackPanel Spacing="14">
+                    <TextBlock Text="2. Actualizaciones de Software en Tiempo Real" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                    <TextBlock Text="Verifique si hay nuevas versiones del software en el servidor oficial (valcore.cloud) e instálelas sin perder datos locales." FontSize="11" Foreground="{DynamicResource TextMutedBrush}" TextWrapping="Wrap" />
+
+                    <!-- Search Button -->
+                    <StackPanel Orientation="Horizontal" Spacing="12">
+                        <Button Command="{Binding CheckForUpdatesCommand}" IsEnabled="{Binding !IsChecking}" Classes="primary-action" Padding="16,10" CornerRadius="{DynamicResource AppCornerRadius}" Cursor="Hand">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <mi:MaterialIcon Kind="Update" Width="18" Height="18" />
+                                <TextBlock Text="BUSCAR ACTUALIZACIONES AHORA" FontWeight="Bold" FontSize="12" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <Border IsVisible="{Binding IsChecking}" Background="{DynamicResource BgTertiaryBrush}" CornerRadius="{DynamicResource AppCornerRadius}" Padding="12,6" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <ProgressBar IsIndeterminate="True" Width="20" Height="20" Theme="{DynamicResource ProgressRing}" VerticalAlignment="Center" />
+                                <TextBlock Text="Conectando al servidor..." FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+
+                    <!-- Status Banners & Controls -->
+                    <!-- Downloading -->
+                    <Border IsVisible="{Binding IsUpdateAvailable}" Padding="14,10" Background="#222563EB" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="1">
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                            <mi:MaterialIcon Kind="CloudDownload" Width="22" Height="22" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,10,0" />
+                            <TextBlock Grid.Column="1" Text="{Binding StatusMessage}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                <ProgressBar Width="100" Height="8" Minimum="0" Maximum="100" Value="{Binding ProgressPercentage}" VerticalAlignment="Center" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                <TextBlock Text="{Binding ProgressText}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" Width="36" TextAlignment="Right" />
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- Ready to install -->
+                    <Border IsVisible="{Binding IsUpdateReady}" Padding="14,10" Background="#22059669" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource AccentSuccessBrush}" BorderThickness="1.5">
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                            <mi:MaterialIcon Kind="CheckCircleOutline" Width="24" Height="24" Foreground="{DynamicResource AccentSuccessBrush}" VerticalAlignment="Center" Margin="0,0,10,0" />
+                            <TextBlock Grid.Column="1" Text="{Binding StatusMessage}" FontSize="13" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                            <Button Grid.Column="2" Command="{Binding ApplyUpdateAndRestartCommand}" Content="REINICIAR E INSTALAR" Classes="primary-action" Padding="14,8" CornerRadius="{DynamicResource AppCornerRadius}" Cursor="Hand" VerticalAlignment="Center" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Up to date -->
+                    <Border IsVisible="{Binding IsUpToDate}" Padding="12,8" Background="#15059669" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource AccentSuccessBrush}" BorderThickness="1">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <mi:MaterialIcon Kind="CheckAll" Width="20" Height="20" Foreground="{DynamicResource AccentSuccessBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding StatusMessage}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource AccentSuccessBrush}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Failed -->
+                    <Border IsVisible="{Binding IsUpdateFailed}" Padding="12,8" Background="#15DC2626" CornerRadius="{DynamicResource AppCornerRadius}" BorderBrush="{DynamicResource AccentDangerBrush}" BorderThickness="1">
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <mi:MaterialIcon Kind="AlertCircleOutline" Width="20" Height="20" Foreground="{DynamicResource AccentDangerBrush}" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding StatusMessage}" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource AccentDangerBrush}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Border>
+
+        </StackPanel>
+    </ScrollViewer>
 </UserControl>
-
