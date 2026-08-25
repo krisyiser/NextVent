@@ -54,13 +54,16 @@ public partial class CustomersViewModel : ObservableObject
     private void ApplySearchFilter()
     {
         Customers.Clear();
-        var q = SearchQuery?.ToLowerInvariant() ?? string.Empty;
+        var q = SearchQuery?.Trim().ToLowerInvariant() ?? string.Empty;
 
         foreach (var c in _allCustomers)
         {
             if (string.IsNullOrWhiteSpace(q) || 
                 c.Name.ToLowerInvariant().Contains(q) || 
-                (c.Phone != null && c.Phone.Contains(q)))
+                (!string.IsNullOrEmpty(c.Phone) && c.Phone.Contains(q)) ||
+                (!string.IsNullOrEmpty(c.Rfc) && c.Rfc.ToLowerInvariant().Contains(q)) ||
+                (!string.IsNullOrEmpty(c.Email) && c.Email.ToLowerInvariant().Contains(q)) ||
+                (!string.IsNullOrEmpty(c.CustomerCode) && c.CustomerCode.ToLowerInvariant().Contains(q)))
             {
                 Customers.Add(c);
             }

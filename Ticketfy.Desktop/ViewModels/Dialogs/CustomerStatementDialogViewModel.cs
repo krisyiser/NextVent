@@ -61,7 +61,8 @@ public partial class CustomerStatementDialogViewModel : ObservableObject
             foreach (var item in list)
             {
                 runningBalance += item.Charge - item.Payment;
-                LedgerEntries.Add(new CustomerLedgerEntryDto(item.Date, item.Concept, item.Charge, item.Payment, runningBalance));
+                string formattedDate = DateTime.TryParse(item.Date, out var dt) ? dt.ToString("dd/MM/yyyy HH:mm") : item.Date;
+                LedgerEntries.Add(new CustomerLedgerEntryDto(formattedDate, item.Concept, item.Charge, item.Payment, runningBalance));
             }
         }
         catch (Exception ex)

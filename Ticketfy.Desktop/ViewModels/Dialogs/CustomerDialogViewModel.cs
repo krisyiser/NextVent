@@ -72,16 +72,18 @@ public partial class CustomerDialogViewModel : ObservableObject
                 return;
             }
 
-            if (!string.IsNullOrWhiteSpace(Phone) && Phone.Trim().Length != 10)
+            string cleanPhone = string.IsNullOrWhiteSpace(Phone) ? string.Empty : new string(Phone.Where(char.IsDigit).ToArray());
+
+            if (!string.IsNullOrWhiteSpace(Phone) && cleanPhone.Length != 10)
             {
-                ErrorMessage = "El teléfono debe tener 10 dígitos.";
+                ErrorMessage = "El teléfono debe contener 10 dígitos numéricos.";
                 return;
             }
 
             var dto = new CustomerDto(
                 Id: _editingCustomerId ?? Guid.NewGuid().ToString(),
                 Nombre: Name.Trim(),
-                Telefono: Phone.Trim(),
+                Telefono: cleanPhone,
                 Email: Email.Trim(),
                 Rfc: Rfc.Trim(),
                 LimiteCredito: CreditLimit ?? 0,

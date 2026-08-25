@@ -71,6 +71,7 @@ public sealed class CustomerService : ICustomerService
             c.CreditLimit = customer.CreditLimit;
             c.Debt = customer.Debt;
             c.CustomerCode = customer.CustomerCode;
+            _ctx.Customers.Update(c);
             await _ctx.SaveChangesAsync();
         }
     }
