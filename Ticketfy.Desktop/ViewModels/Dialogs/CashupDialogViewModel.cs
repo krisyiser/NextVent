@@ -36,8 +36,8 @@ public partial class CashupDialogViewModel : ObservableObject
     [NotifyPropertyChangedFor(nameof(DifferenceStatusLabel))]
     private double _differenceAmount;
 
-    public string DifferenceAmountColor => DifferenceAmount == 0 ? "#10B981" : (DifferenceAmount > 0 ? "#3B82F6" : "#EF4444");
-    public string DifferenceStatusLabel => DifferenceAmount == 0 ? "Cuadre Exacto" : (DifferenceAmount > 0 ? "Sobrante" : "Faltante");
+    public string DifferenceAmountColor => Math.Abs(DifferenceAmount) < 0.001 ? "#10B981" : (DifferenceAmount > 0 ? "#3B82F6" : "#EF4444");
+    public string DifferenceStatusLabel => Math.Abs(DifferenceAmount) < 0.001 ? "Cuadre Exacto" : (DifferenceAmount > 0 ? "Sobrante" : "Faltante");
 
     [ObservableProperty] private double _grossProfit;
     [ObservableProperty] private double _netProfit;

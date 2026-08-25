@@ -35,7 +35,7 @@
                     <ComboBox ItemsSource="{Binding Items}" SelectedItem="{Binding SelectedItem, Mode=TwoWay}" HorizontalAlignment="Stretch" Padding="8">
                         <ComboBox.ItemTemplate>
                             <DataTemplate x:DataType="dto:SaleItemSnapshotDto">
-                                <TextBlock Foreground="#1E293B">
+                                <TextBlock Foreground="{DynamicResource TextPrimaryBrush}">
                                     <TextBlock.Text>
                                         <MultiBinding StringFormat="{}{0} (Comprado: {1:N1} pza @ ${2:N2})">
                                             <Binding Path="Name"/>
