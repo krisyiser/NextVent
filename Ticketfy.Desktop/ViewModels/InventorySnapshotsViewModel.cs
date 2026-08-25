@@ -21,6 +21,9 @@ public partial class InventorySnapshotsViewModel : ObservableObject
     [ObservableProperty]
     private bool _isLoading;
 
+    [ObservableProperty]
+    private string _statusMessage = string.Empty;
+
     partial void OnSelectedSnapshotChanged(InventorySnapshotEntity? value)
     {
         if (value != null && (value.Items == null || value.Items.Count == 0))
@@ -59,6 +62,10 @@ public partial class InventorySnapshotsViewModel : ObservableObject
         {
             var list = await _snapshotService.GetSnapshotsAsync();
             Snapshots = new ObservableCollection<InventorySnapshotEntity>(list);
+            if (Snapshots.Count > 0 && SelectedSnapshot == null)
+            {
+                SelectedSnapshot = Snapshots[0];
+            }
         }
         finally
         {
@@ -69,18 +76,34 @@ public partial class InventorySnapshotsViewModel : ObservableObject
     [RelayCommand]
     private async System.Threading.Tasks.Task PrintSnapshotAsync()
     {
-        if (SelectedSnapshot == null) return;
+        if (SelectedSnapshot == null)
+        {
+            if (Snapshots.Count > 0)
+                SelectedSnapshot = Snapshots[0];
+            else
+                return;
+        }
         
         var desktop = Avalonia.Application.Current?.ApplicationLifetime as Avalonia.Controls.ApplicationLifetimes.IClassicDesktopStyleApplicationLifetime;
         if (desktop?.MainWindow == null) return;
 
+        var ownerWin = System.Linq.Enumerable.FirstOrDefault(desktop.Windows, w => w.IsActive && w.IsVisible) ?? desktop.MainWindow;
+
         var vm = new Ticketfy.ViewModels.Dialogs.PrintPreviewWindowViewModel($"Reporte de Captura Física: {SelectedSnapshot.CreatedAt:g}");
         var win = new Ticketfy.Views.Dialogs.PrintPreviewWindow { DataContext = vm };
         
-        var confirmed = await win.ShowDialog<bool>(desktop.MainWindow);
+        var confirmed = await win.ShowDialog<bool>(ownerWin);
         if (!confirmed) return;
 
         var printerSvc = new Ticketfy.Services.Implementations.EscPosPrinterService();
-        await printerSvc.PrintSnapshotChecklistAsync(SelectedSnapshot);
+        bool printed = await printerSvc.PrintSnapshotChecklistAsync(SelectedSnapshot);
+        if (printed)
+        {
+            StatusMessage = "¡Reporte de captura física enviado a la impresora térmica con éxito!";
+        }
+        else
+        {
+            StatusMessage = "No se pudo comunicar con la impresora térmica.";
+        }
     }
 }

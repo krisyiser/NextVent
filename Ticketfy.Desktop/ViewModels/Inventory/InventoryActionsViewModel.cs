@@ -96,17 +96,29 @@ public partial class InventoryActionsViewModel : ObservableObject
                 return;
             }
 
-            bool printed = await _printerService.PrintInventoryChecklistAsync(products);
-            if (printed)
+            await Dispatcher.UIThread.InvokeAsync(async () =>
             {
-                IsFeedbackError = false;
-                FeedbackMessage = $"¡Checklist de conteo físico de inventario enviado a la impresora ({products.Count} productos)!";
-            }
-            else
-            {
-                IsFeedbackError = true;
-                FeedbackMessage = "No se pudo comunicar con la impresora térmica para imprimir el checklist.";
-            }
+                if (Avalonia.Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop && desktop.MainWindow != null)
+                {
+                    var vm = new Ticketfy.ViewModels.Dialogs.PrintPreviewWindowViewModel($"Checklist de Conteo Físico ({products.Count} productos)");
+                    var win = new Ticketfy.Views.Dialogs.PrintPreviewWindow { DataContext = vm };
+                    var confirmed = await win.ShowDialog<bool>(desktop.MainWindow);
+                    if (confirmed)
+                    {
+                        bool printed = await _printerService.PrintInventoryChecklistAsync(products);
+                        if (printed)
+                        {
+                            IsFeedbackError = false;
+                            FeedbackMessage = $"¡Checklist de conteo físico de inventario enviado a la impresora ({products.Count} productos)!";
+                        }
+                        else
+                        {
+                            IsFeedbackError = true;
+                            FeedbackMessage = "No se pudo comunicar con la impresora térmica para imprimir el checklist.";
+                        }
+                    }
+                }
+            });
         }
         catch (Exception ex)
         {

@@ -13,6 +13,9 @@
         <StackPanel Grid.Row="0" Margin="0,0,0,20">
             <TextBlock Text="Puntos de Guardado del Inventario" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}"/>
             <TextBlock Text="Aquí puedes visualizar el estado congelado del inventario en fechas y horas pasadas." FontSize="14" Foreground="{DynamicResource TextMutedBrush}"/>
+            <Border Background="{DynamicResource AccentSuccessBrush}" CornerRadius="6" Padding="10,6" Margin="0,8,0,0" IsVisible="{Binding StatusMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+                <TextBlock Text="{Binding StatusMessage}" FontSize="12" FontWeight="Bold" Foreground="White"/>
+            </Border>
         </StackPanel>
 
         <Grid Grid.Row="1" ColumnDefinitions="2*,3*">

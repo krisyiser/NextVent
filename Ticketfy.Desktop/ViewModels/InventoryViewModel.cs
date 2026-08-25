@@ -79,6 +79,13 @@ public partial class InventoryViewModel : ObservableObject
         IntelligenceVM = new InventoryIntelligenceViewModel(predictiveService);
 
         ActionsVM.ProductsUpdated += async () => await LoadProductsAsync();
+        ActionsVM.PropertyChanged += (s, e) =>
+        {
+            if (e.PropertyName == nameof(ActionsVM.FeedbackMessage))
+                OnPropertyChanged(nameof(FeedbackMessage));
+            if (e.PropertyName == nameof(ActionsVM.IsFeedbackError))
+                OnPropertyChanged(nameof(IsFeedbackError));
+        };
         _ = LoadProductsAsync();
     }
 
