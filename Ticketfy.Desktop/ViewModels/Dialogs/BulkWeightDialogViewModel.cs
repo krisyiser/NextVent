@@ -87,15 +87,31 @@ public partial class BulkWeightDialogViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void SetPresetGrams(double grams)
+    private void SetPresetGrams(object? param)
     {
-        QuantityInGrams = grams;
+        if (param == null) return;
+        if (param is double d)
+        {
+            QuantityInGrams = d;
+        }
+        else if (double.TryParse(param.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double parsed))
+        {
+            QuantityInGrams = parsed;
+        }
     }
 
     [RelayCommand]
-    private void SetPresetMoney(double money)
+    private void SetPresetMoney(object? param)
     {
-        MoneyAmount = money;
+        if (param == null) return;
+        if (param is double d)
+        {
+            MoneyAmount = d;
+        }
+        else if (double.TryParse(param.ToString(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double parsed))
+        {
+            MoneyAmount = parsed;
+        }
     }
 
     [RelayCommand]
