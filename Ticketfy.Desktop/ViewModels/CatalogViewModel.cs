@@ -88,7 +88,7 @@ public partial class CatalogViewModel : ObservableObject
         var query = SearchQuery.Trim().ToLower();
 
         var matches = Products.Where(p =>
-            (SelectedCategory == "⭐ Top Ventas" || SelectedCategory == "Todos" || p.Category == SelectedCategory) &&
+            (SelectedCategory == "⭐ Top Ventas" || SelectedCategory == "Todos" || string.Equals(p.Category, SelectedCategory, StringComparison.OrdinalIgnoreCase)) &&
             (string.IsNullOrWhiteSpace(query) ||
              p.Name.ToLower().Contains(query) ||
              (p.Barcode != null && p.Barcode.ToLower().Contains(query)))

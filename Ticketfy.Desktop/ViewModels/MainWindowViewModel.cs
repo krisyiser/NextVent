@@ -173,7 +173,7 @@ public partial class MainWindowViewModel : ObservableObject
         var inventoryVm = new InventoryViewModel(productService, externalCatalogService, purchaseService, predictiveService);
         var customersVm = new CustomersViewModel(customerService);
         var historyVm = new HistoryViewModel(saleService, printerService, db, settingsService);
-        var promotionsVm = new PromotionsViewModel(promotionService);
+        var promotionsVm = new PromotionsViewModel(promotionService, kitService);
         var fiscalVm = new FiscalViewModel(saleService, facturamaService);
         var cashierPerformanceVm = new CashierPerformanceViewModel(performanceAnalyticsService, attendanceService);
         var settingsVm = new SettingsViewModel(userService, settingsService);

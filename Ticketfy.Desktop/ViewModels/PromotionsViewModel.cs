@@ -13,6 +13,7 @@ namespace Ticketfy.ViewModels;
 public partial class PromotionsViewModel : ObservableObject
 {
     private readonly IPromotionService _promotionService;
+    private readonly IItemKitService? _kitService;
     public ObservableCollection<PromotionDto> Promotions { get; } = [];
 
     [ObservableProperty] private string _feedbackMessage = string.Empty;
@@ -20,9 +21,10 @@ public partial class PromotionsViewModel : ObservableObject
     public event Action? OpenAddPromotionRequested;
     public event Action? OpenCreateItemKitRequested;
 
-    public PromotionsViewModel(IPromotionService promotionService)
+    public PromotionsViewModel(IPromotionService promotionService, IItemKitService? kitService = null)
     {
         _promotionService = promotionService;
+        _kitService = kitService;
         _ = LoadPromotionsAsync();
     }
 
@@ -31,10 +33,34 @@ public partial class PromotionsViewModel : ObservableObject
         try
         {
             var items = await _promotionService.GetAllAsync();
+            var promosList = items.ToList();
+
+            if (_kitService != null)
+            {
+                var kits = await _kitService.GetAllAsync();
+                foreach (var k in kits)
+                {
+                    if (!promosList.Any(p => p.Id == k.Id))
+                    {
+                        promosList.Add(new PromotionDto(
+                            k.Id,
+                            $"{k.Name} (Combo)",
+                            k.Price,
+                            true,
+                            Ticketfy.Core.Enums.PromotionType.FixedAmountDiscount,
+                            k.Id,
+                            "Promociones",
+                            1.0,
+                            0.0
+                        ));
+                    }
+                }
+            }
+
             await Dispatcher.UIThread.InvokeAsync(() =>
             {
                 Promotions.Clear();
-                foreach (var item in items) Promotions.Add(item);
+                foreach (var item in promosList) Promotions.Add(item);
             });
         }
         catch (Exception ex)
@@ -44,7 +70,11 @@ public partial class PromotionsViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void OpenAddPromotionDialog() => OpenAddPromotionRequested?.Invoke();
+    private void OpenAddPromotionDialog()
+    {
+        OpenAddPromotionRequested?.Invoke();
+        OpenCreateItemKitRequested?.Invoke();
+    }
 
     [RelayCommand]
     private void OpenCreateItemKitDialog() => OpenCreateItemKitRequested?.Invoke();
@@ -72,9 +102,13 @@ public partial class PromotionsViewModel : ObservableObject
         if (promo == null) return;
         try
         {
+            if (_kitService != null)
+            {
+                await _kitService.DeleteAsync(promo.Id);
+            }
             await _promotionService.DeleteAsync(promo.Id);
             Promotions.Remove(promo);
-            FeedbackMessage = "Promoción eliminada con éxito";
+            FeedbackMessage = "Combo / Promoción eliminado con éxito";
             await LoadPromotionsAsync();
         }
         catch (Exception ex)

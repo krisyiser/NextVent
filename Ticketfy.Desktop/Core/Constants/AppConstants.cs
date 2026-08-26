@@ -8,7 +8,7 @@ public static class AppConstants
 {
     /// <summary>App Meta</summary>
     public const string AppName = "TICKETFY!";
-    public const string AppVersion = "v3.1.28";
+    public const string AppVersion = "v3.1.29";
 
     /// <summary>Default VAT / IVA rate (16%)</summary>
     public const double DefaultIvaRate = 0.16;

@@ -16,7 +16,7 @@
                 <Grid ColumnDefinitions="*,Auto">
                     <StackPanel Orientation="Horizontal" Spacing="8">
                         <mi:MaterialIcon Kind="PackageVariantClosed" Width="22" Height="22" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                        <TextBlock Text="Armar Nuevo Combo / Paquete (Item Kit)" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        <TextBlock Text="Armar Nuevo Combo / Paquete / Promoción" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
                     </StackPanel>
                     <Button Grid.Column="1" Command="{Binding CancelCommand}" Width="28" Height="28" Padding="0" Background="Transparent" BorderThickness="0">
                         <mi:MaterialIcon Kind="Close" Width="18" Height="18" Foreground="{DynamicResource TextSecondaryBrush}" />
@@ -27,23 +27,23 @@
 
                 <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="*,*">
                     <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,4,8" Spacing="4">
-                        <TextBlock Text="Código de Barras Combo *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                        <TextBox Text="{Binding KitBarcode, Mode=TwoWay}" Watermark="Ej. 750999888" Padding="8" />
+                        <TextBlock Text="Código de Barras Combo / Promoción" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBox Text="{Binding KitBarcode, Mode=TwoWay}" Watermark="Opcional (se autogenera si se omite)" Padding="8" />
                     </StackPanel>
 
                     <StackPanel Grid.Row="0" Grid.Column="1" Margin="4,0,0,8" Spacing="4">
-                        <TextBlock Text="Nombre del Combo *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                        <TextBox Text="{Binding KitName, Mode=TwoWay}" Watermark="Ej. Combo Desayuno Completo" Padding="8" />
+                        <TextBlock Text="Nombre del Combo / Promoción *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBox Text="{Binding KitName, Mode=TwoWay}" Watermark="Ej. Paquetecagao 2x$40" Padding="8" />
                     </StackPanel>
 
                     <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,4,0" Spacing="4">
-                        <TextBlock Text="Precio Combo ($ MXN) *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBlock Text="Precio Especial ($ MXN) *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
                         <controls:NumericTextBox AllowDecimals="True" Text="{Binding KitPrice, Mode=TwoWay}" Watermark="0.00" Padding="8" FontSize="14" FontWeight="Bold" />
                     </StackPanel>
 
                     <StackPanel Grid.Row="1" Grid.Column="1" Margin="4,0,0,0" Spacing="4">
-                        <TextBlock Text="Descripción" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                        <TextBox Text="{Binding KitDescription, Mode=TwoWay}" Watermark="Incluye café 400ml y dona" Padding="8" />
+                        <TextBlock Text="Descripción / Notas" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                        <TextBox Text="{Binding KitDescription, Mode=TwoWay}" Watermark="Incluye productos seleccionados" Padding="8" />
                     </StackPanel>
                 </Grid>
 
@@ -83,7 +83,7 @@
 
                 <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right" Margin="0,6,0,0">
                     <Button Command="{Binding CancelCommand}" Content="Cancelar" Padding="16,8" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource BgTertiaryBrush}" />
-                    <Button Command="{Binding SaveKitCommand}" Content="GUARDAR COMBO" Padding="16,8" CornerRadius="{DynamicResource AppCornerRadius}" Classes="success-action" FontWeight="Bold" />
+                    <Button Command="{Binding SaveKitCommand}" Content="GUARDAR COMBO / PROMOCIÓN" Padding="16,8" CornerRadius="{DynamicResource AppCornerRadius}" Classes="success-action" FontWeight="Bold" />
                 </StackPanel>
             </StackPanel>
         </Border>

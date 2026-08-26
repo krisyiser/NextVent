@@ -88,10 +88,27 @@ public partial class ItemKitDialogViewModel : ObservableObject
     [RelayCommand]
     private async Task SaveKitAsync()
     {
-        if (string.IsNullOrWhiteSpace(KitBarcode) || string.IsNullOrWhiteSpace(KitName) || DraftKitItems.Count == 0)
+        if (string.IsNullOrWhiteSpace(KitName))
         {
-            FeedbackMessage = "Código, Nombre e Ingredientes son obligatorios";
+            FeedbackMessage = "El nombre del combo / paquete es obligatorio";
             return;
+        }
+
+        if (KitPrice <= 0)
+        {
+            FeedbackMessage = "Ingrese un precio mayor a $0.00 MXN";
+            return;
+        }
+
+        if (DraftKitItems.Count == 0)
+        {
+            FeedbackMessage = "Debe agregar al menos 1 producto ingrediente al combo";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(KitBarcode))
+        {
+            KitBarcode = $"750{Random.Shared.Next(100000000, 999999999)}";
         }
 
         try
@@ -107,17 +124,18 @@ public partial class ItemKitDialogViewModel : ObservableObject
 
             if (success)
             {
+                FeedbackMessage = string.Empty;
                 RequestClose?.Invoke();
             }
             else
             {
-                FeedbackMessage = "Error guardando el combo / paquete";
+                FeedbackMessage = "Error guardando el combo / paquete. Verifique que el código no esté duplicado.";
             }
         }
         catch (Exception ex)
         {
             Log.Error(ex, "Error saving ItemKit");
-            FeedbackMessage = "Error al guardar combo";
+            FeedbackMessage = "Error al guardar combo / paquete";
         }
     }
 

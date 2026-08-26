@@ -88,27 +88,64 @@ public class ItemKitService : IItemKitService
         try
         {
             var kitId = string.IsNullOrWhiteSpace(id) ? Guid.NewGuid().ToString() : id;
-            var existing = await _db.ItemKits.FirstOrDefaultAsync(k => k.Id == kitId);
+            var cleanBarcode = string.IsNullOrWhiteSpace(barcode) ? $"750{Random.Shared.Next(100000000, 999999999)}" : barcode.Trim();
+            var cleanName = string.IsNullOrWhiteSpace(name) ? "Combo / Promoción" : name.Trim();
+
+            // 1. Sync ProductEntity so it appears in POS Catalog under category "Promociones"
+            var product = await _db.Products.FirstOrDefaultAsync(p => p.Id == kitId || (p.Barcode != null && p.Barcode == cleanBarcode));
+            if (product == null)
+            {
+                product = new ProductEntity
+                {
+                    Id = kitId,
+                    Barcode = cleanBarcode,
+                    Name = cleanName,
+                    Price = price,
+                    Cost = 0.0,
+                    Category = "Promociones",
+                    Unit = "Pza",
+                    Stock = 9999.0,
+                    MinStock = 1.0,
+                    IsKit = true,
+                    CreatedAt = DateTime.Now.ToString("s")
+                };
+                _db.Products.Add(product);
+            }
+            else
+            {
+                product.Barcode = cleanBarcode;
+                product.Name = cleanName;
+                product.Price = price;
+                product.Category = "Promociones";
+                product.IsKit = true;
+                _db.Products.Update(product);
+            }
+            await _db.SaveChangesAsync();
+
+            // 2. Sync ItemKitEntity & ItemKitItems
+            var existing = await _db.ItemKits.FirstOrDefaultAsync(k => k.Id == kitId || k.ParentProductId == kitId);
 
             if (existing == null)
             {
                 existing = new ItemKitEntity
                 {
                     Id = kitId,
-                    KitBarcode = barcode,
-                    Name = name,
+                    ParentProductId = kitId,
+                    KitBarcode = cleanBarcode,
+                    Name = cleanName,
                     Price = price,
-                    Description = description,
+                    Description = description ?? string.Empty,
                     CreatedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
                 };
                 _db.ItemKits.Add(existing);
             }
             else
             {
-                existing.KitBarcode = barcode;
-                existing.Name = name;
+                existing.ParentProductId = kitId;
+                existing.KitBarcode = cleanBarcode;
+                existing.Name = cleanName;
                 existing.Price = price;
-                existing.Description = description;
+                existing.Description = description ?? string.Empty;
 
                 var oldItems = await _db.ItemKitItems.Where(ki => ki.ItemKitId == kitId).ToListAsync();
                 _db.ItemKitItems.RemoveRange(oldItems);
@@ -125,8 +162,34 @@ public class ItemKitService : IItemKitService
                 });
             }
 
+            // 3. Sync PromotionEntity for unified Promotions module tracking
+            var promo = await _db.Promotions.FirstOrDefaultAsync(p => p.Id == kitId || p.TargetProductId == kitId);
+            if (promo == null)
+            {
+                _db.Promotions.Add(new PromotionEntity
+                {
+                    Id = kitId,
+                    Name = cleanName,
+                    Type = "product",
+                    StrategyType = Ticketfy.Core.Enums.PromotionType.FixedAmountDiscount,
+                    TargetProductId = kitId,
+                    DiscountType = "fixed",
+                    DiscountValue = price,
+                    IsActive = 1,
+                    StartDate = DateTime.Now.AddDays(-1).ToString("s"),
+                    EndDate = DateTime.Now.AddYears(5).ToString("s")
+                });
+            }
+            else
+            {
+                promo.Name = cleanName;
+                promo.DiscountValue = price;
+                promo.IsActive = 1;
+                promo.TargetProductId = kitId;
+            }
+
             await _db.SaveChangesAsync();
-            Log.Information("Saved ItemKit {Name} ({Barcode}) with {Count} items", name, barcode, items.Count);
+            Log.Information("Saved ItemKit {Name} ({Barcode}) with {Count} items as Product in 'Promociones'", cleanName, cleanBarcode, items.Count);
             return true;
         }
         catch (Exception ex)
@@ -140,14 +203,22 @@ public class ItemKitService : IItemKitService
     {
         try
         {
-            var kit = await _db.ItemKits.FirstOrDefaultAsync(k => k.Id == id);
-            if (kit == null) return false;
+            var kit = await _db.ItemKits.FirstOrDefaultAsync(k => k.Id == id || k.ParentProductId == id);
+            if (kit != null)
+            {
+                var items = await _db.ItemKitItems.Where(ki => ki.ItemKitId == kit.Id).ToListAsync();
+                _db.ItemKitItems.RemoveRange(items);
+                _db.ItemKits.Remove(kit);
+            }
 
-            var items = await _db.ItemKitItems.Where(ki => ki.ItemKitId == id).ToListAsync();
-            _db.ItemKitItems.RemoveRange(items);
-            _db.ItemKits.Remove(kit);
+            var product = await _db.Products.FirstOrDefaultAsync(p => p.Id == id);
+            if (product != null) _db.Products.Remove(product);
+
+            var promo = await _db.Promotions.FirstOrDefaultAsync(p => p.Id == id || p.TargetProductId == id);
+            if (promo != null) _db.Promotions.Remove(promo);
+
             await _db.SaveChangesAsync();
-            Log.Information("Deleted ItemKit {Id}", id);
+            Log.Information("Deleted ItemKit and linked Product/Promotion {Id}", id);
             return true;
         }
         catch (Exception ex)
