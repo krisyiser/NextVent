@@ -23,6 +23,23 @@ public partial class ExpensesViewModel : ObservableObject
         "Efectivo", "Tarjeta / Transferencia"
     ];
 
+    public ObservableCollection<string> PeriodOptions { get; } = [
+        "Turno Activo", "Hoy", "Esta Semana", "Este Mes", "Todo el Histórico"
+    ];
+
+    [ObservableProperty] private string _selectedPeriod = "Turno Activo";
+    [ObservableProperty] private string _periodSubtitleDisplay = string.Empty;
+
+    public event Action? OpenCashupRequested;
+
+    [RelayCommand]
+    private void PerformCashCutoff() => OpenCashupRequested?.Invoke();
+
+    partial void OnSelectedPeriodChanged(string value)
+    {
+        _ = LoadExpensesAsync();
+    }
+
     [ObservableProperty] private string _selectedCategory = "Renta";
     [ObservableProperty] private double _expenseAmount;
     [ObservableProperty] private string _expenseDescription = string.Empty;
@@ -67,16 +84,49 @@ public partial class ExpensesViewModel : ObservableObject
             var activeShift = await _shiftService.GetActiveAsync();
 
             DateTime? shiftStart = null;
-            if (activeShift != null && !string.IsNullOrWhiteSpace(activeShift.StartTime))
+            DateTime? shiftEnd = DateTime.Now;
+
+            if (SelectedPeriod == "Turno Activo")
             {
-                if (DateTime.TryParse(activeShift.StartTime, out var parsedStart))
+                if (activeShift != null && !string.IsNullOrWhiteSpace(activeShift.StartTime))
                 {
-                    shiftStart = parsedStart;
+                    if (DateTime.TryParse(activeShift.StartTime, out var parsedStart))
+                    {
+                        shiftStart = parsedStart;
+                        PeriodSubtitleDisplay = $"Turno Activo (Desde: {parsedStart:dd/MM/yyyy hh:mm tt})";
+                    }
+                }
+                if (!shiftStart.HasValue)
+                {
+                    shiftStart = DateTime.Today;
+                    PeriodSubtitleDisplay = $"Turno Activo (Desde Hoy: {DateTime.Today:dd/MM/yyyy})";
                 }
             }
+            else if (SelectedPeriod == "Hoy")
+            {
+                shiftStart = DateTime.Today;
+                PeriodSubtitleDisplay = $"Acumulado de Hoy ({DateTime.Today:dd/MM/yyyy})";
+            }
+            else if (SelectedPeriod == "Esta Semana")
+            {
+                int diff = (7 + (DateTime.Today.DayOfWeek - DayOfWeek.Monday)) % 7;
+                shiftStart = DateTime.Today.AddDays(-1 * diff);
+                PeriodSubtitleDisplay = $"Acumulado de Esta Semana (Desde: {shiftStart.Value:dd/MM/yyyy})";
+            }
+            else if (SelectedPeriod == "Este Mes")
+            {
+                shiftStart = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+                PeriodSubtitleDisplay = $"Acumulado de Este Mes ({shiftStart.Value:MMMM yyyy})";
+            }
+            else // Todo el Histórico
+            {
+                shiftStart = null;
+                shiftEnd = null;
+                PeriodSubtitleDisplay = "Acumulado Histórico Total de la Tienda";
+            }
 
-            var summary = await _expenseService.GetFinancialSummaryAsync(shiftStart, DateTime.Now);
-            decimal openingBalance = activeShift != null ? (decimal)activeShift.OpeningBalance : 0m;
+            var summary = await _expenseService.GetFinancialSummaryAsync(shiftStart, shiftEnd);
+            decimal openingBalance = (SelectedPeriod == "Turno Activo" && activeShift != null) ? (decimal)activeShift.OpeningBalance : 0m;
 
             await Dispatcher.UIThread.InvokeAsync(() =>
             {

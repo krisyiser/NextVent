@@ -347,4 +347,19 @@ public sealed class DialogWirer
             _dialogs.ShowDialog(dialog);
         };
     }
+
+    public void WireExpensesVm(ExpensesViewModel expensesVm)
+    {
+        expensesVm.OpenCashupRequested += () =>
+        {
+            var dialog = new CashupDialogViewModel(_db, _shiftService, _sessionManager, _printerService,
+                _backupService, attendanceService: _attendanceService);
+            dialog.RequestClose += () =>
+            {
+                _dialogs.CloseDialog();
+                _ = expensesVm.LoadExpensesAsync();
+            };
+            _dialogs.ShowDialog(dialog);
+        };
+    }
 }

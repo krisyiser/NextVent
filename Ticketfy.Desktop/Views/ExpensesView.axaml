@@ -12,18 +12,36 @@
         <Border Grid.Row="0" Margin="0,0,0,16" Padding="16,12"
                 Background="{DynamicResource BgSecondaryBrush}"
                 BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
-            <Grid ColumnDefinitions="*,Auto">
-                <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
-                    <Border Width="36" Height="36" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource AccentDangerBrush}">
+            <Grid ColumnDefinitions="*,Auto,Auto">
+                <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+                    <Border Width="38" Height="38" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource AccentDangerBrush}">
                         <mi:MaterialIcon Kind="CashMinus" Width="22" Height="22" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
-                    <StackPanel VerticalAlignment="Center">
+                    <StackPanel VerticalAlignment="Center" Spacing="2">
                         <TextBlock Text="Control de Gastos Operativos y Balance de Utilidad Neta Real" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
-                        <TextBlock Text="Registro de egresos y cálculo financiero (Ventas - Costos - Gastos)" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
+                        <StackPanel Orientation="Horizontal" Spacing="8">
+                            <TextBlock Text="{Binding PeriodSubtitleDisplay}" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                            <TextBlock Text="{Binding FeedbackMessage, StringFormat='• {0}'}" IsVisible="{Binding FeedbackMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource AccentSuccessBrush}" />
+                        </StackPanel>
                     </StackPanel>
                 </StackPanel>
 
-                <TextBlock Grid.Column="1" Text="{Binding FeedbackMessage}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource AccentSuccessBrush}" VerticalAlignment="Center" />
+                <!-- Period Selector ComboBox -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center" Margin="12,0">
+                    <TextBlock Text="Filtrar Período:" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
+                    <ComboBox ItemsSource="{Binding PeriodOptions}" SelectedItem="{Binding SelectedPeriod, Mode=TwoWay}" Width="160" Padding="8,6" VerticalAlignment="Center" />
+                </StackPanel>
+
+                <!-- Direct Cash Cutoff / Reset Button -->
+                <Button Grid.Column="2" Command="{Binding PerformCashCutoffCommand}"
+                        ToolTip.Tip="Realizar Arqueo y Corte de Caja para cerrar el turno actual y reiniciar todos los contadores a $0.00"
+                        Padding="12,8" CornerRadius="{DynamicResource AppCornerRadius}"
+                        Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource AccentWarningBrush}" BorderThickness="1.5" Cursor="Hand" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <mi:MaterialIcon Kind="CashRegister" Width="18" Height="18" Foreground="{DynamicResource AccentWarningBrush}" />
+                        <TextBlock Text="CORTE DE CAJA / REINICIAR" FontSize="11" FontWeight="Bold" Foreground="{DynamicResource AccentWarningBrush}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
             </Grid>
         </Border>
 

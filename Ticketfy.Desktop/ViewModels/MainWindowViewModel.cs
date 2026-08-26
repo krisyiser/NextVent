@@ -237,6 +237,7 @@ public partial class MainWindowViewModel : ObservableObject
         wirer.WireCustomersVm(customersVm, posVm);
         wirer.WireHistoryVm(historyVm, posVm);
         wirer.WirePromotionsVm(promotionsVm, posVm);
+        wirer.WireExpensesVm(expensesVm);
 
         // ── Fix PromotionsVm promotionService dependency ─────────────────────
         promotionsVm.OpenAddPromotionRequested += () =>
