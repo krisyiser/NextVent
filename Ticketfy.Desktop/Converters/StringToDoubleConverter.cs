@@ -10,16 +10,41 @@ public class StringToDoubleConverter : IValueConverter
 
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (value is double d) return d.ToString("G", culture);
+        if (value is double d)
+        {
+            return d.ToString("G", culture);
+        }
         return string.Empty;
     }
 
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        if (value is string s && double.TryParse(s, NumberStyles.Any, culture, out double d))
+        if (value is string s)
         {
-            return d;
+            if (string.IsNullOrWhiteSpace(s))
+            {
+                return 0.0;
+            }
+
+            s = s.Trim();
+
+            if (double.TryParse(s, NumberStyles.Any, culture, out double d))
+            {
+                return d;
+            }
+
+            if (double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out double dInv))
+            {
+                return dInv;
+            }
+
+            string altS = s.Contains('.') ? s.Replace('.', ',') : s.Replace(',', '.');
+            if (double.TryParse(altS, NumberStyles.Any, culture, out double dAlt))
+            {
+                return dAlt;
+            }
         }
-        return null;
+
+        return 0.0;
     }
 }
