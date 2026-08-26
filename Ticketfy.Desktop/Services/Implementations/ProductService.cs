@@ -80,6 +80,7 @@ public sealed class ProductService : IProductService
         entity.SatUnitCode = product.SatUnitCode;
         entity.MinStock = product.MinStock;
         entity.DefaultSupplierId = product.DefaultSupplierId;
+        entity.IsBulk = product.IsBulk;
 
         _ctx.Products.Update(entity);
         await _ctx.SaveChangesAsync();
@@ -127,6 +128,7 @@ public sealed class ProductService : IProductService
                 existing.SatProductCode = p.SatProductCode;
                 existing.SatUnitCode = p.SatUnitCode;
                 existing.MinStock = p.MinStock;
+                existing.IsBulk = p.IsBulk;
             }
         }
         await _ctx.SaveChangesAsync();
@@ -179,8 +181,9 @@ public sealed class ProductService : IProductService
             double stock = parts.Length > 4 && double.TryParse(parts[4], out double s) ? s : 10.0;
             string category = parts.Length > 5 ? parts[5] : "General";
             string unit = parts.Length > 6 ? parts[6] : "pza";
+            bool isBulk = unit.Equals("kg", StringComparison.OrdinalIgnoreCase) || unit.Equals("lt", StringComparison.OrdinalIgnoreCase) || unit.Equals("gr", StringComparison.OrdinalIgnoreCase);
 
-            items.Add(new ProductDto(Guid.NewGuid().ToString(), barcode, name, cost, price, Stock: stock, Category: category, Unit: unit));
+            items.Add(new ProductDto(Guid.NewGuid().ToString(), barcode, name, cost, price, Stock: stock, Category: category, Unit: unit, IsBulk: isBulk));
         }
 
         if (items.Count > 0) await BulkSaveAsync(items);
@@ -267,7 +270,7 @@ public sealed class ProductService : IProductService
         await connection.OpenAsync();
         
         // Consulta SQL cruda y estricta, mapeada a un DTO por el compilador AOT
-        const string sql = "SELECT Id, Barcode, Name, Cost, Price, WholesalePrice, WholesaleThreshold, Stock, Category, Unit, ExpiresSoon, CreatedAt, PointsRewarded, ReorderQuantity, LocationRack, sat_product_code AS SatProductCode, sat_unit_code AS SatUnitCode, MinStock FROM products";
+        const string sql = "SELECT Id, Barcode, Name, Cost, Price, WholesalePrice, WholesaleThreshold, Stock, Category, Unit, ExpiresSoon, CreatedAt, PointsRewarded, ReorderQuantity, LocationRack, sat_product_code AS SatProductCode, sat_unit_code AS SatUnitCode, MinStock, is_bulk AS IsBulk FROM products";
         return await Dapper.SqlMapper.QueryAsync<ProductDto>(connection, sql);
     }
 
@@ -276,7 +279,7 @@ public sealed class ProductService : IProductService
         e.WholesalePrice, e.WholesaleThreshold,
         e.Stock, e.Category, e.Unit, e.ExpiresSoon, e.CreatedAt,
         e.PointsRewarded, e.ReorderQuantity, e.LocationRack, e.SatProductCode, e.SatUnitCode, e.MinStock,
-        e.DefaultSupplierId);
+        e.DefaultSupplierId, e.IsBulk);
 
     private static ProductEntity MapToEntity(ProductDto d) => new()
     {
@@ -298,6 +301,7 @@ public sealed class ProductService : IProductService
         LocationRack = d.LocationRack,
         SatProductCode = d.SatProductCode,
         SatUnitCode = d.SatUnitCode,
-        DefaultSupplierId = d.DefaultSupplierId
+        DefaultSupplierId = d.DefaultSupplierId,
+        IsBulk = d.IsBulk
     };
 }

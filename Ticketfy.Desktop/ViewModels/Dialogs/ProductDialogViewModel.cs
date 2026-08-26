@@ -163,6 +163,28 @@ public partial class ProductDialogViewModel : ObservableObject
         }
     }
 
+    [ObservableProperty]
+    private string _unit = "Pza";
+
+    [ObservableProperty]
+    private bool _isBulk = false;
+
+    public System.Collections.ObjectModel.ObservableCollection<string> Units { get; } = [
+        "Pza", "Kg", "Gr", "Lt", "Ml", "Mt", "Paq"
+    ];
+
+    partial void OnUnitChanged(string value)
+    {
+        if (value.Equals("Kg", StringComparison.OrdinalIgnoreCase) ||
+            value.Equals("Gr", StringComparison.OrdinalIgnoreCase) ||
+            value.Equals("Lt", StringComparison.OrdinalIgnoreCase) ||
+            value.Equals("Ml", StringComparison.OrdinalIgnoreCase) ||
+            value.Equals("Mt", StringComparison.OrdinalIgnoreCase))
+        {
+            IsBulk = true;
+        }
+    }
+
     public void LoadProductForEdit(ProductDto product)
     {
         _editingProductId = product.Id;
@@ -173,6 +195,9 @@ public partial class ProductDialogViewModel : ObservableObject
         RetailPrice = product.Price;
         Stock = product.Stock;
         Category = product.Category;
+        Unit = string.IsNullOrWhiteSpace(product.Unit) ? "Pza" : product.Unit;
+        IsBulk = product.IsBulk || Unit.Equals("Kg", StringComparison.OrdinalIgnoreCase) || Unit.Equals("Lt", StringComparison.OrdinalIgnoreCase) || Unit.Equals("Gr", StringComparison.OrdinalIgnoreCase);
+
         if (!string.IsNullOrEmpty(Category) && !Categories.Contains(Category))
         {
             Categories.Add(Category);
@@ -255,14 +280,15 @@ public partial class ProductDialogViewModel : ObservableObject
 
             var dto = new ProductDto(
                 _editingProductId ?? Guid.NewGuid().ToString(), Barcode, Name, CostPrice ?? 0, RetailPrice ?? 0,
-                Stock: Stock ?? 0, Category: Category,
+                Stock: Stock ?? 0, Category: Category, Unit: Unit,
                 PointsRewarded: PointsRewarded ?? 1.0,
                 ReorderQuantity: ReorderQuantity ?? 10.0,
                 LocationRack: LocationRack,
                 SatProductCode: SatProductCode,
                 SatUnitCode: SatUnitCode,
                 MinStock: MinStock ?? 5.0,
-                DefaultSupplierId: SelectedSupplier?.Id
+                DefaultSupplierId: SelectedSupplier?.Id,
+                IsBulk: IsBulk
             );
 
             if (_editingProductId != null)

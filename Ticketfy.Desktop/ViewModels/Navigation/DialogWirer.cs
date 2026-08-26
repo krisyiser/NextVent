@@ -174,6 +174,21 @@ public sealed class DialogWirer
             });
             _dialogs.ShowDialog(dialog);
         };
+
+        posVm.Catalog.OpenBulkWeightRequested += (product) =>
+        {
+            var dialog = new BulkWeightDialogViewModel(product);
+            dialog.RequestCloseWithResult += (confirmed, quantity) =>
+            {
+                _dialogs.CloseDialog();
+                if (confirmed && quantity > 0)
+                {
+                    posVm.Catalog.DirectAddToCart(product, quantity);
+                }
+                WeakReferenceMessenger.Default.Send(new FocusSearchMessage());
+            };
+            _dialogs.ShowDialog(dialog);
+        };
     }
 
     public void WireInventoryVm(InventoryViewModel inventoryVm, PosViewModel posVm)

@@ -1,0 +1,110 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Ticketfy.ViewModels.Dialogs"
+             xmlns:mi="using:Material.Icons.Avalonia"
+             xmlns:controls="using:Ticketfy.Controls"
+             xmlns:converters="using:Ticketfy.Converters"
+             x:Class="Ticketfy.Views.Dialogs.BulkWeightDialog"
+             x:DataType="vm:BulkWeightDialogViewModel">
+
+    <UserControl.Resources>
+        <converters:StringToDoubleConverter x:Key="StringToDoubleConverter"/>
+    </UserControl.Resources>
+
+    <Grid Background="#80000000">
+        <Border Width="480" HorizontalAlignment="Center" VerticalAlignment="Center"
+                Background="{DynamicResource BgSecondaryBrush}"
+                BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                CornerRadius="{DynamicResource AppCornerRadius}" Padding="20">
+            <StackPanel Spacing="14">
+                <!-- Header -->
+                <Grid ColumnDefinitions="*,Auto">
+                    <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                        <Border Width="36" Height="36" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource AccentPrimaryBrush}">
+                            <mi:MaterialIcon Kind="ScaleBalance" Width="22" Height="22" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Calculadora Venta a Granel" FontSize="16" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                            <TextBlock Text="{Binding ProductName}" FontSize="13" FontWeight="SemiBold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Button Grid.Column="1" Command="{Binding CancelCommand}" Width="28" Height="28" Padding="0" Background="Transparent" BorderThickness="0">
+                        <mi:MaterialIcon Kind="Close" Width="18" Height="18" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    </Button>
+                </Grid>
+
+                <Border Height="1" Background="{DynamicResource BorderBrush}" />
+
+                <!-- Price Banner -->
+                <Border Padding="12,8" CornerRadius="6" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="Precio Lista Referencia:" FontSize="12" Foreground="{DynamicResource TextMutedBrush}" VerticalAlignment="Center" />
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4">
+                            <TextBlock Text="{Binding UnitPrice, StringFormat='${0:N2}'}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource AccentSuccessBrush}" />
+                            <TextBlock Text="{Binding UnitLabel, StringFormat='/ {0}'}" FontSize="12" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Presets Fast Bar -->
+                <StackPanel Spacing="6">
+                    <TextBlock Text="Acceso Rápido por Peso:" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                    <WrapPanel ItemWidth="105" ItemHeight="32">
+                        <Button Command="{Binding SetPresetGramsCommand}" CommandParameter="250" Content="250g (1/4)" Margin="0,0,4,4" Padding="6,4" FontSize="11" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+                        <Button Command="{Binding SetPresetGramsCommand}" CommandParameter="500" Content="500g (1/2)" Margin="0,0,4,4" Padding="6,4" FontSize="11" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+                        <Button Command="{Binding SetPresetGramsCommand}" CommandParameter="750" Content="750g (3/4)" Margin="0,0,4,4" Padding="6,4" FontSize="11" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+                        <Button Command="{Binding SetPresetGramsCommand}" CommandParameter="1000" Content="1,000g (1 Kg)" Margin="0,0,0,4" Padding="6,4" FontSize="11" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+                    </WrapPanel>
+
+                    <TextBlock Text="Acceso Rápido por Dinero ($ MXN):" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" Margin="0,4,0,0" />
+                    <WrapPanel ItemWidth="105" ItemHeight="32">
+                        <Button Command="{Binding SetPresetMoneyCommand}" CommandParameter="20" Content="$20.00" Margin="0,0,4,4" Padding="6,4" FontSize="11" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+                        <Button Command="{Binding SetPresetMoneyCommand}" CommandParameter="50" Content="$50.00" Margin="0,0,4,4" Padding="6,4" FontSize="11" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+                        <Button Command="{Binding SetPresetMoneyCommand}" CommandParameter="100" Content="$100.00" Margin="0,0,4,4" Padding="6,4" FontSize="11" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+                        <Button Command="{Binding SetPresetMoneyCommand}" CommandParameter="200" Content="$200.00" Margin="0,0,0,4" Padding="6,4" FontSize="11" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="4" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"/>
+                    </WrapPanel>
+                </StackPanel>
+
+                <!-- Dual Inputs -->
+                <Grid ColumnDefinitions="*,*">
+                    <StackPanel Grid.Column="0" Margin="0,0,6,0" Spacing="4">
+                        <TextBlock Text="Gramajing (Gramos)" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        <controls:NumericTextBox AllowDecimals="True" Text="{Binding QuantityInGrams, Mode=TwoWay, Converter={StaticResource StringToDoubleConverter}}" Watermark="Ej. 300" Padding="10" FontSize="16" FontWeight="Bold" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Margin="6,0,0,0" Spacing="4">
+                        <TextBlock Text="Monto Equivalente ($ MXN)" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                        <controls:NumericTextBox AllowDecimals="True" Text="{Binding MoneyAmount, Mode=TwoWay, Converter={StaticResource StringToDoubleConverter}}" Watermark="Ej. 54.00" Padding="10" FontSize="16" FontWeight="Bold" />
+                    </StackPanel>
+                </Grid>
+
+                <!-- Calculated Output Card -->
+                <Border Padding="14,10" CornerRadius="6" Background="{DynamicResource BgTertiaryBrush}" BorderBrush="{DynamicResource AccentPrimaryBrush}" BorderThickness="1.5">
+                    <Grid ColumnDefinitions="*,Auto">
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="Cantidad a despachar:" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" />
+                            <TextBlock Text="{Binding QuantityInKilos, StringFormat='{}{0:N3} Kg'}" FontSize="18" FontWeight="ExtraBold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                        </StackPanel>
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right">
+                            <TextBlock Text="Subtotal a cobrar:" FontSize="11" Foreground="{DynamicResource TextMutedBrush}" HorizontalAlignment="Right" />
+                            <TextBlock Text="{Binding MoneyAmount, StringFormat='${0:N2}'}" FontSize="20" FontWeight="ExtraBold" Foreground="{DynamicResource AccentSuccessBrush}" HorizontalAlignment="Right" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <controls:AlertBannerControl Message="{Binding ErrorMessage}" IsError="True" />
+
+                <!-- Action Buttons -->
+                <Grid ColumnDefinitions="*,*">
+                    <Button Grid.Column="0" Command="{Binding CancelCommand}" Content="Cancelar" Margin="0,0,6,0" Padding="12"
+                            Background="{DynamicResource BgPrimaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1"
+                            Foreground="{DynamicResource TextPrimaryBrush}" CornerRadius="6" HorizontalContentAlignment="Center" />
+
+                    <Button Grid.Column="1" Command="{Binding ConfirmCommand}" Content="AGREGAR AL TICKET" Margin="6,0,0,0" Padding="12"
+                            Classes="primary-action" FontWeight="Bold" CornerRadius="6" HorizontalContentAlignment="Center" />
+                </Grid>
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>

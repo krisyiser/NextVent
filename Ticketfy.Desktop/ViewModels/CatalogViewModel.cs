@@ -128,8 +128,19 @@ public partial class CatalogViewModel : ObservableObject
 
             if (p != null)
             {
-                AddToCartWithQuantity(p, quantityMultiplier);
                 SearchQuery = string.Empty;
+                if (quantityMultiplier != 1.0)
+                {
+                    AddToCartWithQuantity(p, quantityMultiplier);
+                }
+                else if (IsBulkProduct(p))
+                {
+                    OpenBulkWeightRequested?.Invoke(p);
+                }
+                else
+                {
+                    AddToCartWithQuantity(p, 1.0);
+                }
             }
             else
             {
@@ -190,8 +201,38 @@ public partial class CatalogViewModel : ObservableObject
         }
     }
 
+    public event Action<ProductDto>? OpenBulkWeightRequested;
+
     [RelayCommand]
-    private void AddToCart(ProductDto product) => AddToCartWithQuantity(product, 1.0);
+    private void AddToCart(ProductDto product)
+    {
+        if (product == null) return;
+
+        if (IsBulkProduct(product))
+        {
+            OpenBulkWeightRequested?.Invoke(product);
+        }
+        else
+        {
+            AddToCartWithQuantity(product, 1.0);
+        }
+    }
+
+    public void DirectAddToCart(ProductDto product, double qty)
+    {
+        AddToCartWithQuantity(product, qty);
+    }
+
+    private static bool IsBulkProduct(ProductDto p)
+    {
+        if (p == null) return false;
+        if (p.IsBulk) return true;
+        var u = p.Unit ?? "";
+        return u.Equals("kg", StringComparison.OrdinalIgnoreCase) ||
+               u.Equals("gr", StringComparison.OrdinalIgnoreCase) ||
+               u.Equals("lt", StringComparison.OrdinalIgnoreCase) ||
+               u.Equals("mt", StringComparison.OrdinalIgnoreCase);
+    }
 
     private void AddToCartWithQuantity(ProductDto product, double qty)
     {
@@ -209,6 +250,6 @@ public partial class CatalogViewModel : ObservableObject
         _cartStateStore.AddItem(cartItem, product.Stock);
 
         FeedbackIsError = false;
-        FeedbackMessage = $"Agregado: {product.Name}";
+        FeedbackMessage = $"Agregado: {product.Name} ({qty:N3} {product.Unit})";
     }
 }

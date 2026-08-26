@@ -56,6 +56,9 @@ public class ProductEntity
     [Column("is_kit")]
     public bool IsKit { get; set; } = false;
 
+    [Column("is_bulk")]
+    public bool IsBulk { get; set; } = false;
+
     [Column("default_supplier_id")]
     public string? DefaultSupplierId { get; set; }
 

@@ -27,7 +27,8 @@ public record ProductDto(
     string SatProductCode = "01010101",
     string SatUnitCode = "H87",
     double MinStock = 5.0,
-    string? DefaultSupplierId = null
+    string? DefaultSupplierId = null,
+    bool IsBulk = false
 )
 {
     public double CostPrice => Cost;
