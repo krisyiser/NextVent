@@ -1,5 +1,5 @@
 #define MyAppName "TICKETFY!"
-#define MyAppVersion "3.1.31"
+#define MyAppVersion "3.1.32"
 #define MyAppPublisher "Valcore"
 #define MyAppURL "https://valcore.cloud"
 #define MyAppExeName "Ticketfy.Desktop.exe"
@@ -17,7 +17,7 @@ DefaultDirName={userappdata}\Ticketfy.Desktop\current
 DisableDirPage=yes
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
-OutputBaseFilename=Ticketfy-Setup-v3.1.31-x64
+OutputBaseFilename=Ticketfy-Setup-v3.1.32-x64
 OutputDir=c:\Users\YERSI\.gemini\antigravity-ide\scratch\NextVent\Ticketfy.Desktop\Output\Releases
 Compression=lzma2/fast
 SolidCompression=no
@@ -32,7 +32,7 @@ RestartApplications=no
 VersionInfoCompany=Valcore
 VersionInfoDescription=Valcore TICKETFY! Punto de Venta - Instalador Nivel Industrial
 VersionInfoVersion=3.0.75.0
-VersionInfoCopyright=Copyright Ã‚Â© 2026 Valcore. Todos los derechos reservados.
+VersionInfoCopyright=Copyright Ãƒâ€šÃ‚Â© 2026 Valcore. Todos los derechos reservados.
 VersionInfoProductName=Valcore TICKETFY! POS Enterprise System
 VersionInfoProductVersion=3.0.75.0
 VersionInfoOriginalFileName=Ticketfy-Setup-v3.0.75-x64.exe
@@ -52,6 +52,7 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+
 
 
 

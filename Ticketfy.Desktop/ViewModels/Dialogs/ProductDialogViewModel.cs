@@ -330,7 +330,16 @@ public partial class ProductDialogViewModel : ObservableObject
         catch (Exception ex)
         {
             Log.Error(ex, "Error saving product");
-            ErrorMessage = ex.Message;
+            _db.ChangeTracker.Clear();
+            var baseMsg = ex.GetBaseException().Message;
+            if (baseMsg.Contains("UNIQUE constraint failed: products.barcode", StringComparison.OrdinalIgnoreCase))
+            {
+                ErrorMessage = $"El código de barras '{Barcode}' ya está registrado en otro producto.";
+            }
+            else
+            {
+                ErrorMessage = baseMsg;
+            }
         }
     }
 }

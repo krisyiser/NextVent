@@ -54,12 +54,34 @@ public sealed class ProductService : IProductService
 
     public async Task AddAsync(ProductDto product)
     {
+        _ctx.ChangeTracker.Clear();
+
+        if (!string.IsNullOrWhiteSpace(product.Barcode))
+        {
+            var existing = await _ctx.Products.AsNoTracking().FirstOrDefaultAsync(p => p.Barcode == product.Barcode);
+            if (existing != null)
+            {
+                throw new InvalidOperationException($"El código de barras '{product.Barcode}' ya está asignado al producto '{existing.Name}'.");
+            }
+        }
+
         _ctx.Products.Add(MapToEntity(product));
         await _ctx.SaveChangesAsync();
     }
 
     public async Task UpdateAsync(ProductDto product)
     {
+        _ctx.ChangeTracker.Clear();
+
+        if (!string.IsNullOrWhiteSpace(product.Barcode))
+        {
+            var existing = await _ctx.Products.AsNoTracking().FirstOrDefaultAsync(p => p.Barcode == product.Barcode && p.Id != product.Id);
+            if (existing != null)
+            {
+                throw new InvalidOperationException($"El código de barras '{product.Barcode}' ya está asignado al producto '{existing.Name}'.");
+            }
+        }
+
         var entity = await _ctx.Products.FindAsync(product.Id);
         if (entity is null) return;
 
