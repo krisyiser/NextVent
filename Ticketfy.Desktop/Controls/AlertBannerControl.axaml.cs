@@ -9,7 +9,7 @@ namespace Ticketfy.Controls;
 public partial class AlertBannerControl : UserControl
 {
     public static readonly StyledProperty<string> MessageProperty =
-        AvaloniaProperty.Register<AlertBannerControl, string>(nameof(Message), defaultValue: string.Empty);
+        AvaloniaProperty.Register<AlertBannerControl, string>(nameof(Message), defaultValue: string.Empty, defaultBindingMode: Avalonia.Data.BindingMode.TwoWay);
 
     public static readonly StyledProperty<bool> IsErrorProperty =
         AvaloniaProperty.Register<AlertBannerControl, bool>(nameof(IsError), defaultValue: false);

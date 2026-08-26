@@ -60,6 +60,8 @@ public partial class UsuariosSettingsViewModel : ObservableObject
 
         IsUsuariosTabVisible = (subIndex == 0);
         IsPermisosTabVisible = (subIndex == 1);
+        FeedbackMessage = string.Empty;
+        PermissionFeedbackMessage = string.Empty;
     }
 
     // ── Create new user form ───────────────────────────────────────────────
