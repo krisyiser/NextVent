@@ -338,17 +338,6 @@ public sealed class DialogWirer
 
     public void WirePromotionsVm(PromotionsViewModel promotionsVm, PosViewModel posVm)
     {
-        promotionsVm.OpenAddPromotionRequested += () =>
-        {
-            var dialog = new PromotionDialogViewModel(/* injected in caller */null!);
-            dialog.RequestClose += () =>
-            {
-                _dialogs.CloseDialog();
-                _ = promotionsVm.LoadPromotionsAsync();
-            };
-            _dialogs.ShowDialog(dialog);
-        };
-
         promotionsVm.OpenCreateItemKitRequested += () =>
         {
             var dialog = new ItemKitDialogViewModel(_kitService, _productService);

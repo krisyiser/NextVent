@@ -87,17 +87,20 @@ public class ItemKitService : IItemKitService
     {
         try
         {
-            var kitId = string.IsNullOrWhiteSpace(id) ? Guid.NewGuid().ToString() : id;
             var cleanBarcode = string.IsNullOrWhiteSpace(barcode) ? $"750{Random.Shared.Next(100000000, 999999999)}" : barcode.Trim();
             var cleanName = string.IsNullOrWhiteSpace(name) ? "Combo / Promoción" : name.Trim();
 
+            _db.ChangeTracker.Clear();
+
             // 1. Sync ProductEntity so it appears in POS Catalog under category "Promociones"
-            var product = await _db.Products.FirstOrDefaultAsync(p => p.Id == kitId || (p.Barcode != null && p.Barcode == cleanBarcode));
+            var product = await _db.Products.FirstOrDefaultAsync(p => (!string.IsNullOrEmpty(id) && p.Id == id) || (p.Barcode != null && p.Barcode == cleanBarcode));
+            var targetId = product?.Id ?? (string.IsNullOrWhiteSpace(id) ? Guid.NewGuid().ToString() : id);
+
             if (product == null)
             {
                 product = new ProductEntity
                 {
-                    Id = kitId,
+                    Id = targetId,
                     Barcode = cleanBarcode,
                     Name = cleanName,
                     Price = price,
@@ -120,59 +123,63 @@ public class ItemKitService : IItemKitService
                 product.IsKit = true;
                 _db.Products.Update(product);
             }
-            await _db.SaveChangesAsync();
 
             // 2. Sync ItemKitEntity & ItemKitItems
-            var existing = await _db.ItemKits.FirstOrDefaultAsync(k => k.Id == kitId || k.ParentProductId == kitId);
+            var existingKit = await _db.ItemKits.FirstOrDefaultAsync(k => k.Id == targetId || k.ParentProductId == targetId || k.KitBarcode == cleanBarcode);
+            string actualKitId = existingKit?.Id ?? targetId;
 
-            if (existing == null)
+            if (existingKit == null)
             {
-                existing = new ItemKitEntity
+                existingKit = new ItemKitEntity
                 {
-                    Id = kitId,
-                    ParentProductId = kitId,
+                    Id = actualKitId,
+                    ParentProductId = targetId,
                     KitBarcode = cleanBarcode,
                     Name = cleanName,
                     Price = price,
                     Description = description ?? string.Empty,
                     CreatedAt = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
                 };
-                _db.ItemKits.Add(existing);
+                _db.ItemKits.Add(existingKit);
             }
             else
             {
-                existing.ParentProductId = kitId;
-                existing.KitBarcode = cleanBarcode;
-                existing.Name = cleanName;
-                existing.Price = price;
-                existing.Description = description ?? string.Empty;
+                existingKit.ParentProductId = targetId;
+                existingKit.KitBarcode = cleanBarcode;
+                existingKit.Name = cleanName;
+                existingKit.Price = price;
+                existingKit.Description = description ?? string.Empty;
 
-                var oldItems = await _db.ItemKitItems.Where(ki => ki.ItemKitId == kitId).ToListAsync();
+                var oldItems = await _db.ItemKitItems.Where(ki => ki.ItemKitId == actualKitId).ToListAsync();
                 _db.ItemKitItems.RemoveRange(oldItems);
             }
 
-            foreach (var item in items)
+            if (items != null)
             {
-                _db.ItemKitItems.Add(new ItemKitItemEntity
+                foreach (var item in items)
                 {
-                    Id = Guid.NewGuid().ToString(),
-                    ItemKitId = kitId,
-                    ProductId = item.ProductId,
-                    Quantity = item.Quantity
-                });
+                    if (string.IsNullOrWhiteSpace(item.ProductId)) continue;
+                    _db.ItemKitItems.Add(new ItemKitItemEntity
+                    {
+                        Id = Guid.NewGuid().ToString(),
+                        ItemKitId = actualKitId,
+                        ProductId = item.ProductId,
+                        Quantity = item.Quantity > 0 ? item.Quantity : 1.0
+                    });
+                }
             }
 
             // 3. Sync PromotionEntity for unified Promotions module tracking
-            var promo = await _db.Promotions.FirstOrDefaultAsync(p => p.Id == kitId || p.TargetProductId == kitId);
+            var promo = await _db.Promotions.FirstOrDefaultAsync(p => p.Id == targetId || p.TargetProductId == targetId);
             if (promo == null)
             {
                 _db.Promotions.Add(new PromotionEntity
                 {
-                    Id = kitId,
+                    Id = targetId,
                     Name = cleanName,
                     Type = "product",
                     StrategyType = Ticketfy.Core.Enums.PromotionType.FixedAmountDiscount,
-                    TargetProductId = kitId,
+                    TargetProductId = targetId,
                     DiscountType = "fixed",
                     DiscountValue = price,
                     IsActive = 1,
@@ -185,15 +192,18 @@ public class ItemKitService : IItemKitService
                 promo.Name = cleanName;
                 promo.DiscountValue = price;
                 promo.IsActive = 1;
-                promo.TargetProductId = kitId;
+                promo.TargetProductId = targetId;
+                _db.Promotions.Update(promo);
             }
 
             await _db.SaveChangesAsync();
-            Log.Information("Saved ItemKit {Name} ({Barcode}) with {Count} items as Product in 'Promociones'", cleanName, cleanBarcode, items.Count);
+            Log.Information("Saved ItemKit {Name} ({Barcode}) with {Count} items as Product in 'Promociones'", cleanName, cleanBarcode, items?.Count ?? 0);
             return true;
         }
         catch (Exception ex)
         {
+            _db.ChangeTracker.Clear();
+            Console.WriteLine($"[ItemKitService.SaveAsync EXCEPTION]: {ex}");
             Log.Error(ex, "Error saving ItemKit {Name}", name);
             return false;
         }

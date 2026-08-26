@@ -81,6 +81,7 @@ public sealed class ProductService : IProductService
         entity.MinStock = product.MinStock;
         entity.DefaultSupplierId = product.DefaultSupplierId;
         entity.IsBulk = product.IsBulk;
+        entity.IsKit = product.IsKit;
 
         _ctx.Products.Update(entity);
         await _ctx.SaveChangesAsync();
@@ -129,6 +130,7 @@ public sealed class ProductService : IProductService
                 existing.SatUnitCode = p.SatUnitCode;
                 existing.MinStock = p.MinStock;
                 existing.IsBulk = p.IsBulk;
+                existing.IsKit = p.IsKit;
             }
         }
         await _ctx.SaveChangesAsync();
@@ -270,7 +272,7 @@ public sealed class ProductService : IProductService
         await connection.OpenAsync();
         
         // Consulta SQL cruda y estricta, mapeada a un DTO por el compilador AOT
-        const string sql = "SELECT Id, Barcode, Name, Cost, Price, WholesalePrice, WholesaleThreshold, Stock, Category, Unit, ExpiresSoon, CreatedAt, PointsRewarded, ReorderQuantity, LocationRack, sat_product_code AS SatProductCode, sat_unit_code AS SatUnitCode, MinStock, is_bulk AS IsBulk FROM products";
+        const string sql = "SELECT Id, Barcode, Name, Cost, Price, WholesalePrice, WholesaleThreshold, Stock, Category, Unit, ExpiresSoon, CreatedAt, PointsRewarded, ReorderQuantity, LocationRack, sat_product_code AS SatProductCode, sat_unit_code AS SatUnitCode, MinStock, is_bulk AS IsBulk, is_kit AS IsKit FROM products";
         return await Dapper.SqlMapper.QueryAsync<ProductDto>(connection, sql);
     }
 
@@ -279,7 +281,7 @@ public sealed class ProductService : IProductService
         e.WholesalePrice, e.WholesaleThreshold,
         e.Stock, e.Category, e.Unit, e.ExpiresSoon, e.CreatedAt,
         e.PointsRewarded, e.ReorderQuantity, e.LocationRack, e.SatProductCode, e.SatUnitCode, e.MinStock,
-        e.DefaultSupplierId, e.IsBulk);
+        e.DefaultSupplierId, e.IsBulk, e.IsKit);
 
     private static ProductEntity MapToEntity(ProductDto d) => new()
     {
@@ -302,6 +304,7 @@ public sealed class ProductService : IProductService
         SatProductCode = d.SatProductCode,
         SatUnitCode = d.SatUnitCode,
         DefaultSupplierId = d.DefaultSupplierId,
-        IsBulk = d.IsBulk
+        IsBulk = d.IsBulk,
+        IsKit = d.IsKit
     };
 }

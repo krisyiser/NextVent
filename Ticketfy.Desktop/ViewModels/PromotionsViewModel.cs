@@ -18,7 +18,6 @@ public partial class PromotionsViewModel : ObservableObject
 
     [ObservableProperty] private string _feedbackMessage = string.Empty;
 
-    public event Action? OpenAddPromotionRequested;
     public event Action? OpenCreateItemKitRequested;
 
     public PromotionsViewModel(IPromotionService promotionService, IItemKitService? kitService = null)
@@ -70,11 +69,7 @@ public partial class PromotionsViewModel : ObservableObject
     }
 
     [RelayCommand]
-    private void OpenAddPromotionDialog()
-    {
-        OpenAddPromotionRequested?.Invoke();
-        OpenCreateItemKitRequested?.Invoke();
-    }
+    private void OpenAddPromotionDialog() => OpenCreateItemKitRequested?.Invoke();
 
     [RelayCommand]
     private void OpenCreateItemKitDialog() => OpenCreateItemKitRequested?.Invoke();

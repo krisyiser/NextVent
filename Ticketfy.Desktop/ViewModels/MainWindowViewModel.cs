@@ -239,17 +239,7 @@ public partial class MainWindowViewModel : ObservableObject
         wirer.WirePromotionsVm(promotionsVm, posVm);
         wirer.WireExpensesVm(expensesVm);
 
-        // ── Fix PromotionsVm promotionService dependency ─────────────────────
-        promotionsVm.OpenAddPromotionRequested += () =>
-        {
-            var dialog = new PromotionDialogViewModel(promotionService);
-            dialog.RequestClose += () =>
-            {
-                Dialogs.CloseDialog();
-                _ = promotionsVm.LoadPromotionsAsync();
-            };
-            Dialogs.ShowDialog(dialog);
-        };
+        // Wirer handles promotionsVm event subscriptions cleanly via DialogWirer.
 
         // ── POS cashup shortcuts ──────────────────────────────────────────────
         posVm.OpenPartialCashupRequested += () => shiftCoordinator.OpenPartialCashup();

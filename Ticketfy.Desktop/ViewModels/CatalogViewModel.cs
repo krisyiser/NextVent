@@ -67,7 +67,16 @@ public partial class CatalogViewModel : ObservableObject
         CategoryChips.Clear();
         CategoryChips.Add(new CategoryChipDto("⭐ Top Ventas", Products.Count, $"⭐ TOP VENTAS ({Products.Count})"));
 
-        var groups = Products.GroupBy(p => p.Category ?? "General").OrderBy(g => g.Key);
+        var promoCount = Products.Count(p => string.Equals(p.Category, "Promociones", StringComparison.OrdinalIgnoreCase));
+        if (promoCount > 0)
+        {
+            CategoryChips.Add(new CategoryChipDto("Promociones", promoCount, $"🏷️ PROMOCIONES ({promoCount})"));
+        }
+
+        var groups = Products.Where(p => !string.Equals(p.Category, "Promociones", StringComparison.OrdinalIgnoreCase))
+                             .GroupBy(p => p.Category ?? "General")
+                             .OrderBy(g => g.Key);
+
         foreach (var g in groups)
         {
             CategoryChips.Add(new CategoryChipDto(g.Key, g.Count(), $"{g.Key.ToUpper()} ({g.Count()})"));
