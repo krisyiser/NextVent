@@ -52,6 +52,7 @@
         <DataTemplate DataType="vmDialogs:ConfigureMinStockDialogViewModel"><vDialogs:ConfigureMinStockDialog /></DataTemplate>
         <DataTemplate DataType="vmDialogs:ManageCategoriesDialogViewModel"><vDialogs:ManageCategoriesDialog /></DataTemplate>
         <DataTemplate DataType="vmDialogs:OpenShiftDialogViewModel"><vDialogs:OpenShiftDialog /></DataTemplate>
+        <DataTemplate DataType="vmDialogs:BulkWeightDialogViewModel"><vDialogs:BulkWeightDialog /></DataTemplate>
     </Window.DataTemplates>
 
     <Panel>
