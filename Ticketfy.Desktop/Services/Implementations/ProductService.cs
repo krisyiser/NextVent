@@ -56,57 +56,101 @@ public sealed class ProductService : IProductService
     {
         _ctx.ChangeTracker.Clear();
 
-        if (!string.IsNullOrWhiteSpace(product.Barcode))
+        try
         {
-            var existing = await _ctx.Products.AsNoTracking().FirstOrDefaultAsync(p => p.Barcode == product.Barcode);
-            if (existing != null)
+            if (!string.IsNullOrWhiteSpace(product.Barcode))
             {
-                throw new InvalidOperationException($"El código de barras '{product.Barcode}' ya está asignado al producto '{existing.Name}'.");
+                var existing = await _ctx.Products.AsNoTracking().FirstOrDefaultAsync(p => p.Barcode == product.Barcode);
+                if (existing != null)
+                {
+                    throw new InvalidOperationException($"El código de barras '{product.Barcode}' ya está asignado al producto '{existing.Name}'.");
+                }
             }
-        }
 
-        _ctx.Products.Add(MapToEntity(product));
-        await _ctx.SaveChangesAsync();
+            _ctx.Products.Add(MapToEntity(product));
+            await _ctx.SaveChangesAsync();
+        }
+        catch (Exception ex) when (ex.Message.Contains("no such column", StringComparison.OrdinalIgnoreCase) || ex.GetBaseException().Message.Contains("no such column", StringComparison.OrdinalIgnoreCase))
+        {
+            await EnsureProductSchemaPatchedAsync();
+            _ctx.ChangeTracker.Clear();
+            _ctx.Products.Add(MapToEntity(product));
+            await _ctx.SaveChangesAsync();
+        }
     }
 
     public async Task UpdateAsync(ProductDto product)
     {
         _ctx.ChangeTracker.Clear();
 
-        if (!string.IsNullOrWhiteSpace(product.Barcode))
+        try
         {
-            var existing = await _ctx.Products.AsNoTracking().FirstOrDefaultAsync(p => p.Barcode == product.Barcode && p.Id != product.Id);
-            if (existing != null)
+            if (!string.IsNullOrWhiteSpace(product.Barcode))
             {
-                throw new InvalidOperationException($"El código de barras '{product.Barcode}' ya está asignado al producto '{existing.Name}'.");
+                var existing = await _ctx.Products.AsNoTracking().FirstOrDefaultAsync(p => p.Barcode == product.Barcode && p.Id != product.Id);
+                if (existing != null)
+                {
+                    throw new InvalidOperationException($"El código de barras '{product.Barcode}' ya está asignado al producto '{existing.Name}'.");
+                }
             }
+
+            var entity = await _ctx.Products.FindAsync(product.Id);
+            if (entity is null) return;
+
+            entity.Barcode = product.Barcode;
+            entity.Name = product.Name;
+            entity.Cost = product.Cost;
+            entity.Price = product.Price;
+            entity.WholesalePrice = product.WholesalePrice;
+            entity.WholesaleThreshold = product.WholesaleThreshold;
+            entity.Stock = product.Stock;
+            entity.Category = product.Category;
+            entity.Unit = product.Unit;
+            entity.ExpiresSoon = product.ExpiresSoon;
+            entity.PointsRewarded = product.PointsRewarded;
+            entity.ReorderQuantity = product.ReorderQuantity;
+            entity.LocationRack = product.LocationRack;
+            entity.SatProductCode = product.SatProductCode;
+            entity.SatUnitCode = product.SatUnitCode;
+            entity.MinStock = product.MinStock;
+            entity.DefaultSupplierId = product.DefaultSupplierId;
+            entity.IsBulk = product.IsBulk;
+            entity.IsKit = product.IsKit;
+
+            _ctx.Products.Update(entity);
+            await _ctx.SaveChangesAsync();
         }
+        catch (Exception ex) when (ex.Message.Contains("no such column", StringComparison.OrdinalIgnoreCase) || ex.GetBaseException().Message.Contains("no such column", StringComparison.OrdinalIgnoreCase))
+        {
+            await EnsureProductSchemaPatchedAsync();
+            _ctx.ChangeTracker.Clear();
 
-        var entity = await _ctx.Products.FindAsync(product.Id);
-        if (entity is null) return;
+            var entity = await _ctx.Products.FindAsync(product.Id);
+            if (entity is null) return;
 
-        entity.Barcode = product.Barcode;
-        entity.Name = product.Name;
-        entity.Cost = product.Cost;
-        entity.Price = product.Price;
-        entity.WholesalePrice = product.WholesalePrice;
-        entity.WholesaleThreshold = product.WholesaleThreshold;
-        entity.Stock = product.Stock;
-        entity.Category = product.Category;
-        entity.Unit = product.Unit;
-        entity.ExpiresSoon = product.ExpiresSoon;
-        entity.PointsRewarded = product.PointsRewarded;
-        entity.ReorderQuantity = product.ReorderQuantity;
-        entity.LocationRack = product.LocationRack;
-        entity.SatProductCode = product.SatProductCode;
-        entity.SatUnitCode = product.SatUnitCode;
-        entity.MinStock = product.MinStock;
-        entity.DefaultSupplierId = product.DefaultSupplierId;
-        entity.IsBulk = product.IsBulk;
-        entity.IsKit = product.IsKit;
+            entity.Barcode = product.Barcode;
+            entity.Name = product.Name;
+            entity.Cost = product.Cost;
+            entity.Price = product.Price;
+            entity.WholesalePrice = product.WholesalePrice;
+            entity.WholesaleThreshold = product.WholesaleThreshold;
+            entity.Stock = product.Stock;
+            entity.Category = product.Category;
+            entity.Unit = product.Unit;
+            entity.ExpiresSoon = product.ExpiresSoon;
+            entity.PointsRewarded = product.PointsRewarded;
+            entity.ReorderQuantity = product.ReorderQuantity;
+            entity.LocationRack = product.LocationRack;
+            entity.SatProductCode = product.SatProductCode;
+            entity.SatUnitCode = product.SatUnitCode;
+            entity.MinStock = product.MinStock;
+            entity.DefaultSupplierId = product.DefaultSupplierId;
+            entity.IsBulk = product.IsBulk;
+            entity.IsKit = product.IsKit;
 
-        _ctx.Products.Update(entity);
-        await _ctx.SaveChangesAsync();
+            _ctx.Products.Update(entity);
+            await _ctx.SaveChangesAsync();
+        }
     }
 
     public async Task DeleteAsync(string id)
@@ -329,4 +373,36 @@ public sealed class ProductService : IProductService
         IsBulk = d.IsBulk,
         IsKit = d.IsKit
     };
+
+    private async Task EnsureProductSchemaPatchedAsync()
+    {
+        try
+        {
+            string[] patchQueries = new[]
+            {
+                "ALTER TABLE products ADD COLUMN is_bulk INTEGER NOT NULL DEFAULT 0;",
+                "ALTER TABLE products ADD COLUMN is_kit INTEGER NOT NULL DEFAULT 0;",
+                "ALTER TABLE products ADD COLUMN default_supplier_id TEXT NULL;",
+                "ALTER TABLE products ADD COLUMN minStock REAL NOT NULL DEFAULT 5.0;",
+                "ALTER TABLE products ADD COLUMN points_rewarded REAL NOT NULL DEFAULT 1.0;",
+                "ALTER TABLE products ADD COLUMN reorder_quantity REAL NOT NULL DEFAULT 10.0;",
+                "ALTER TABLE products ADD COLUMN location_rack TEXT NULL DEFAULT '';",
+                "ALTER TABLE products ADD COLUMN sat_product_code TEXT NULL DEFAULT '01010101';",
+                "ALTER TABLE products ADD COLUMN sat_unit_code TEXT NULL DEFAULT 'H87';"
+            };
+
+            foreach (var query in patchQueries)
+            {
+                try
+                {
+                    await _ctx.Database.ExecuteSqlRawAsync(query);
+                }
+                catch { /* Column already exists */ }
+            }
+        }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Product table column auto-patch failed");
+        }
+    }
 }

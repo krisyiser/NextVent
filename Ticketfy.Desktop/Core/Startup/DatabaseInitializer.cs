@@ -60,6 +60,15 @@ public static class DatabaseInitializer
                     "ALTER TABLE sales ADD COLUMN invoice_id TEXT NULL;",
                     "ALTER TABLE sales ADD COLUMN invoice_status TEXT NULL;",
                     "ALTER TABLE cashups ADD COLUMN type TEXT NOT NULL DEFAULT 'Final';",
+                    "ALTER TABLE products ADD COLUMN is_bulk INTEGER NOT NULL DEFAULT 0;",
+                    "ALTER TABLE products ADD COLUMN is_kit INTEGER NOT NULL DEFAULT 0;",
+                    "ALTER TABLE products ADD COLUMN default_supplier_id TEXT NULL;",
+                    "ALTER TABLE products ADD COLUMN minStock REAL NOT NULL DEFAULT 5.0;",
+                    "ALTER TABLE products ADD COLUMN points_rewarded REAL NOT NULL DEFAULT 1.0;",
+                    "ALTER TABLE products ADD COLUMN reorder_quantity REAL NOT NULL DEFAULT 10.0;",
+                    "ALTER TABLE products ADD COLUMN location_rack TEXT NULL DEFAULT '';",
+                    "ALTER TABLE products ADD COLUMN sat_product_code TEXT NULL DEFAULT '01010101';",
+                    "ALTER TABLE products ADD COLUMN sat_unit_code TEXT NULL DEFAULT 'H87';",
                     "CREATE TABLE IF NOT EXISTS InventorySnapshots (Id TEXT PRIMARY KEY, CreatedAt TEXT NOT NULL, Notes TEXT NOT NULL, TotalItems INTEGER NOT NULL, TotalValue TEXT NOT NULL);",
                     "CREATE TABLE IF NOT EXISTS InventorySnapshotItems (Id TEXT PRIMARY KEY, SnapshotId TEXT NOT NULL, ProductId TEXT NOT NULL, Barcode TEXT, Name TEXT NOT NULL, Quantity TEXT NOT NULL, CostPrice TEXT NOT NULL, SellingPrice TEXT NOT NULL, FOREIGN KEY(SnapshotId) REFERENCES InventorySnapshots(Id));"
                 };
