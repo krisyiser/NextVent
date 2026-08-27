@@ -185,7 +185,8 @@ public partial class CheckoutDialogViewModel
                 AppliedDiscountAmount: i.AppliedDiscountAmount,
                 AppliedPromotionId: i.AppliedPromotionId,
                 SatProductCode: i.SatProductCode,
-                SatUnitCode: i.SatUnitCode
+                SatUnitCode: i.SatUnitCode,
+                PointsRewarded: i.PointsRewarded
             )).ToList();
 
             var totalCost = snapshots.Sum(s => s.Cost * s.Quantity);

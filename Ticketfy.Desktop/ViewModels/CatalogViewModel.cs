@@ -247,11 +247,12 @@ public partial class CatalogViewModel : ObservableObject
     {
         if (product == null) return;
 
-        var cartItem = new CartItemDto(product.Id, product.Name, product.Price, qty, product.Unit)
+        var cartItem = new CartItemDto(product.Id, product.Name, product.Price, qty, product.Unit, product.PointsRewarded)
         {
             Category = product.Category ?? "General",
             Cost = product.Cost,
             OriginalUnitPrice = product.Price,
+            PointsRewarded = product.PointsRewarded,
             SatProductCode = product.SatProductCode ?? "01010101",
             SatUnitCode = product.SatUnitCode ?? "H87"
         };

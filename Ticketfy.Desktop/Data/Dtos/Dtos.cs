@@ -21,7 +21,7 @@ public record ProductDto(
     string Unit = "Pza",
     int ExpiresSoon = 0,
     string? CreatedAt = null,
-    double PointsRewarded = 1.0,
+    double PointsRewarded = 0.0,
     double ReorderQuantity = 10.0,
     string LocationRack = "Pasillo 1 - Anaquel A",
     string SatProductCode = "01010101",
@@ -129,6 +129,7 @@ public partial class CartItemDto : ObservableObject
     public string Category { get; set; } = "General";
     public string SatProductCode { get; set; } = "01010101";
     public string SatUnitCode { get; set; } = "H87";
+    public double PointsRewarded { get; set; } = 0.0;
 
     private double _quantity = 1.0;
     public double Quantity
@@ -198,7 +199,7 @@ public partial class CartItemDto : ObservableObject
 
     public CartItemDto() { }
 
-    public CartItemDto(string id, string name, double unitPrice, double quantity = 1.0, string unit = "Pza")
+    public CartItemDto(string id, string name, double unitPrice, double quantity = 1.0, string unit = "Pza", double pointsRewarded = 0.0)
     {
         Id = id;
         Name = name;
@@ -206,6 +207,7 @@ public partial class CartItemDto : ObservableObject
         OriginalUnitPrice = unitPrice;
         Quantity = quantity;
         Unit = unit;
+        PointsRewarded = pointsRewarded;
     }
 }
 
@@ -228,7 +230,8 @@ public record SaleItemSnapshotDto(
     string SatUnitCode = "H87",
     [property: JsonPropertyName("proratedGlobalDiscountAmount")] double ProratedGlobalDiscountAmount = 0.0,
     [property: JsonPropertyName("taxAmount")] double TaxAmount = 0.0,
-    [property: JsonPropertyName("returnedQuantity")] double ReturnedQuantity = 0.0
+    [property: JsonPropertyName("returnedQuantity")] double ReturnedQuantity = 0.0,
+    [property: JsonPropertyName("pointsRewarded")] double PointsRewarded = 0.0
 )
 {
     public string Id => ProductId;

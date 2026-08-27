@@ -63,7 +63,7 @@ public class ProductEntity
     public string? DefaultSupplierId { get; set; }
 
     [Column("points_rewarded")]
-    public double PointsRewarded { get; set; } = 1.0;
+    public double PointsRewarded { get; set; } = 0.0;
 
     [Column("reorder_quantity")]
     public double ReorderQuantity { get; set; } = 10.0;

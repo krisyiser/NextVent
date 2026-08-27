@@ -199,10 +199,12 @@ public partial class CheckoutDialogViewModel : ObservableObject
         PaidAmount = 0.0;
         ReceivedAmountInput = "0";
 
-        PointsEarnedThisSale = Math.Floor(total / 10.0);
+        PointsEarnedThisSale = _cartItems != null ? _cartItems.Sum(i => i.PointsRewarded * i.Quantity) : 0.0;
 
         _ = LoadCustomersAsync(preselectedCustomer);
     }
+
+    public bool HasPointsEarnedThisSale => PointsEarnedThisSale > 0;
 
     private async Task LoadCustomersAsync(CustomerDto? preselected = null)
     {

@@ -151,13 +151,14 @@
                                 <TextBlock Text="{Binding SelectedCustomer.Name, FallbackValue='Sin cliente asignado'}"
                                            FontWeight="Bold" FontSize="13"
                                            Foreground="{DynamicResource TextPrimaryBrush}"/>
-                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                <StackPanel Orientation="Horizontal" Spacing="4">
                                     <mi:MaterialIcon Kind="StarCircle" Width="12" Height="12"
                                                      Foreground="#F59E0B" VerticalAlignment="Center"/>
-                                    <TextBlock Text="{Binding CustomerPointsBalance, StringFormat='Puntos: {0:N0}  |  '}"
+                                    <TextBlock Text="{Binding CustomerPointsBalance, StringFormat='Puntos: {0:N0}'}"
                                                FontSize="11" Foreground="{DynamicResource TextMutedBrush}"/>
-                                    <TextBlock Text="{Binding PointsEarnedThisSale, StringFormat='Acumula: +{0:N0} pts esta compra'}"
-                                               FontSize="11" Foreground="#10B981"/>
+                                    <TextBlock Text="{Binding PointsEarnedThisSale, StringFormat='  |  Acumula: +{0:N0} pts'}"
+                                               IsVisible="{Binding HasPointsEarnedThisSale}"
+                                               FontSize="11" Foreground="#10B981" FontWeight="SemiBold"/>
                                 </StackPanel>
                             </StackPanel>
                             <Button Grid.Column="2" Content="Canjear Puntos"

@@ -54,7 +54,7 @@ public partial class ProductDialogViewModel : ObservableObject
     private string _attributesText = string.Empty;
 
     [ObservableProperty]
-    private double? _pointsRewarded;
+    private double? _pointsRewarded = 0.0;
 
     [ObservableProperty]
     private double? _reorderQuantity;
@@ -293,7 +293,7 @@ public partial class ProductDialogViewModel : ObservableObject
             var dto = new ProductDto(
                 _editingProductId ?? Guid.NewGuid().ToString(), Barcode, Name, CostPrice ?? 0, RetailPrice ?? 0,
                 Stock: Stock ?? 0, Category: Category, Unit: Unit,
-                PointsRewarded: PointsRewarded ?? 1.0,
+                PointsRewarded: PointsRewarded ?? 0.0,
                 ReorderQuantity: ReorderQuantity ?? 10.0,
                 LocationRack: LocationRack,
                 SatProductCode: SatProductCode,

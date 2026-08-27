@@ -140,7 +140,7 @@ public partial class SaleService : ISaleService
                     }
                     else
                     {
-                        double earnedPoints = Math.Floor(total / 10.0);
+                        double earnedPoints = processedItems.Sum(i => i.PointsRewarded * i.Quantity);
                         customer.PuntosSaldo += earnedPoints;
                     }
                 }
