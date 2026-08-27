@@ -63,7 +63,11 @@ public class InventorySnapshotService : IInventorySnapshotService
             .UseSqlite($"Data Source={System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "ticketfy", "Database", "ticketfy.db")};Password={Ticketfy.Services.Security.SecurityManager.GetMasterKey()};")
             .Options;
         using var context = new AppDbContext(options);
-        return await context.InventorySnapshots.AsNoTracking().OrderByDescending(s => s.CreatedAt).ToListAsync();
+        return await context.InventorySnapshots
+            .Include(s => s.Items)
+            .AsNoTracking()
+            .OrderByDescending(s => s.CreatedAt)
+            .ToListAsync();
     }
 
     public async Task<InventorySnapshotEntity?> GetSnapshotDetailsAsync(string snapshotId)

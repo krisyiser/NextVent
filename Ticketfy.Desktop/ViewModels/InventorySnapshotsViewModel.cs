@@ -28,20 +28,31 @@ public partial class InventorySnapshotsViewModel : ObservableObject
     {
         if (value != null && (value.Items == null || value.Items.Count == 0))
         {
-            _ = LoadSnapshotDetailsAsync(value.Id);
+            _ = LoadSnapshotDetailsAsync(value);
         }
     }
 
-    private async Task LoadSnapshotDetailsAsync(string id)
+    private async Task LoadSnapshotDetailsAsync(InventorySnapshotEntity target)
     {
         IsLoading = true;
         try
         {
-            var details = await _snapshotService.GetSnapshotDetailsAsync(id);
-            if (details != null && SelectedSnapshot?.Id == id)
+            var details = await _snapshotService.GetSnapshotDetailsAsync(target.Id);
+            if (details != null && details.Items != null)
             {
-                SelectedSnapshot = details;
+                await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    target.Items.Clear();
+                    foreach (var item in details.Items)
+                    {
+                        target.Items.Add(item);
+                    }
+                });
             }
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Error(ex, "Error loading snapshot details");
         }
         finally
         {

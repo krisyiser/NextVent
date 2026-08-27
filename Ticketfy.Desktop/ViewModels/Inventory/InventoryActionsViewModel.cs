@@ -132,7 +132,7 @@ public partial class InventoryActionsViewModel : ObservableObject
     {
         try
         {
-            string note = $"Snapshot congelado automático - {DateTime.Now:dd/MM/yyyy HH:mm}";
+            string note = $"Punto de guardado - {DateTime.Now:dd/MM/yyyy HH:mm}";
             var snapshot = await _snapshotService.CreateSnapshotAsync(note);
 
             IsFeedbackError = false;
