@@ -13,13 +13,14 @@
 
                 <DataGrid Grid.Row="1" ItemsSource="{Binding Cashups}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal" HeadersVisibility="Column" SelectionMode="Single">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Fecha / Hora" Binding="{Binding Timestamp}" Width="1.4*" />
-                        <DataGridTextColumn Header="Cajero / Usuario" Binding="{Binding CashierName}" Width="1.5*" />
-                        <DataGridTextColumn Header="Tipo" Binding="{Binding Type}" Width="1*" />
-                        <DataGridTextColumn Header="Fondo Inicial" Binding="{Binding OpenCashAmount, StringFormat='${0:N2}'}" Width="1.2*" />
-                        <DataGridTextColumn Header="Fondo Final" Binding="{Binding ClosedCashAmount, StringFormat='${0:N2}'}" Width="1.2*" />
-                        <DataGridTextColumn Header="Total Final" Binding="{Binding TheoreticalCash, StringFormat='${0:N2}'}" Width="1.2*" />
+                        <DataGridTextColumn Header="Fecha / Hora" Binding="{Binding Timestamp}" Width="1.3*" />
+                        <DataGridTextColumn Header="Cajero / Usuario" Binding="{Binding CashierName}" Width="1.4*" />
+                        <DataGridTextColumn Header="Tipo" Binding="{Binding Type}" Width="0.9*" />
+                        <DataGridTextColumn Header="Fondo Inicial" Binding="{Binding OpenCashAmount, StringFormat='${0:N2}'}" Width="1.1*" />
                         <DataGridTextColumn Header="Ingresos (Ventas)" Binding="{Binding TotalSales, StringFormat='${0:N2}'}" Width="1.2*" />
+                        <DataGridTextColumn Header="Egresos (Gastos)" Binding="{Binding TotalExpenses, StringFormat='${0:N2}'}" Width="1.1*" />
+                        <DataGridTextColumn Header="Diferencia" Binding="{Binding Difference, StringFormat='${0:N2}'}" Width="1.1*" />
+                        <DataGridTextColumn Header="Conteo Físico Total en Caja" Binding="{Binding ClosedCashAmount, StringFormat='${0:N2}'}" Width="1.5*" />
                         <DataGridTemplateColumn Header="Acciones" Width="Auto">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate x:DataType="entity:CashupEntity">
@@ -103,33 +104,40 @@
 
                                     <Border Height="1" Background="{DynamicResource BorderBrush}" />
 
-                                    <!-- 4 Key Metrics Cards Grid -->
-                                    <Grid ColumnDefinitions="*,*,*,*">
-                                        <Border Grid.Column="0" Margin="0,0,6,0" Padding="10" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="6" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                    <!-- 5 Key Metrics Cards Grid -->
+                                    <Grid ColumnDefinitions="*,*,*,*,*">
+                                        <Border Grid.Column="0" Margin="0,0,4,0" Padding="8" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="6" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                                             <StackPanel Spacing="4">
-                                                <TextBlock Text="Ingresos (Ventas)" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" />
-                                                <TextBlock Text="{Binding TotalSales, StringFormat='${0:N2}'}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource AccentPrimaryBrush}" />
+                                                <TextBlock Text="1. Fondo Inicial" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" />
+                                                <TextBlock Text="{Binding OpenCashAmount, StringFormat='${0:N2}'}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
                                             </StackPanel>
                                         </Border>
 
-                                        <Border Grid.Column="1" Margin="3,0" Padding="10" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="6" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                        <Border Grid.Column="1" Margin="2,0" Padding="8" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="6" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                                             <StackPanel Spacing="4">
-                                                <TextBlock Text="Fondo / Egresos" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" />
-                                                <TextBlock Text="{Binding TheoreticalCash, StringFormat='${0:N2}'}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextSecondaryBrush}" />
+                                                <TextBlock Text="2. Ingresos (Ventas)" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" />
+                                                <TextBlock Text="{Binding TotalSales, StringFormat='${0:N2}'}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource AccentSuccessBrush}" />
                                             </StackPanel>
                                         </Border>
 
-                                        <Border Grid.Column="2" Margin="3,0" Padding="10" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="6" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                        <Border Grid.Column="2" Margin="2,0" Padding="8" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="6" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                                             <StackPanel Spacing="4">
-                                                <TextBlock Text="Total Físico en Caja" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" />
-                                                <TextBlock Text="{Binding ClosedCashAmount, StringFormat='${0:N2}'}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource AccentSuccessBrush}" />
+                                                <TextBlock Text="3. Egresos (Gastos)" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" />
+                                                <TextBlock Text="{Binding TotalExpenses, StringFormat='${0:N2}'}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource AccentDangerBrush}" />
                                             </StackPanel>
                                         </Border>
 
-                                        <Border Grid.Column="3" Margin="6,0,0,0" Padding="10" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="6" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                        <Border Grid.Column="3" Margin="2,0" Padding="8" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="6" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                                             <StackPanel Spacing="4">
-                                                <TextBlock Text="Faltante / Sobrante" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" />
-                                                <TextBlock Text="{Binding Difference, StringFormat='${0:N2}'}" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource AccentWarningBrush}" />
+                                                <TextBlock Text="4. Diferencia" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" />
+                                                <TextBlock Text="{Binding Difference, StringFormat='${0:N2}'}" FontSize="14" FontWeight="Bold" Foreground="{DynamicResource AccentWarningBrush}" />
+                                            </StackPanel>
+                                        </Border>
+
+                                        <Border Grid.Column="4" Margin="4,0,0,0" Padding="8" Background="{DynamicResource BgSecondaryBrush}" CornerRadius="6" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                            <StackPanel Spacing="4">
+                                                <TextBlock Text="5. Conteo Físico" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource TextMutedBrush}" />
+                                                <TextBlock Text="{Binding ClosedCashAmount, StringFormat='${0:N2}'}" FontSize="14" FontWeight="ExtraBold" Foreground="{DynamicResource AccentPrimaryBrush}" />
                                             </StackPanel>
                                         </Border>
                                     </Grid>

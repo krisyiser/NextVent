@@ -75,4 +75,7 @@ public class CashupEntity
 
     [NotMapped]
     public double TotalSales => Math.Max(0, TheoreticalCash - OpenCashAmount);
+
+    [NotMapped]
+    public double TotalExpenses => Math.Max(0.0, OpenCashAmount + TotalSales - TheoreticalCash);
 }
