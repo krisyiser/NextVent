@@ -173,13 +173,24 @@ public partial class ProductDialogViewModel : ObservableObject
         "Pza", "Kg", "Gr", "Lt", "Ml", "Mt", "Paq"
     ];
 
+    public bool IsBulkAllowed => !string.Equals(Unit, "Pza", StringComparison.OrdinalIgnoreCase)
+                              && !string.Equals(Unit, "Paq", StringComparison.OrdinalIgnoreCase)
+                              && !string.Equals(Unit, "Pieza", StringComparison.OrdinalIgnoreCase)
+                              && !string.Equals(Unit, "Paquete", StringComparison.OrdinalIgnoreCase);
+
     partial void OnUnitChanged(string value)
     {
-        if (value.Equals("Kg", StringComparison.OrdinalIgnoreCase) ||
-            value.Equals("Gr", StringComparison.OrdinalIgnoreCase) ||
-            value.Equals("Lt", StringComparison.OrdinalIgnoreCase) ||
-            value.Equals("Ml", StringComparison.OrdinalIgnoreCase) ||
-            value.Equals("Mt", StringComparison.OrdinalIgnoreCase))
+        OnPropertyChanged(nameof(IsBulkAllowed));
+
+        if (!IsBulkAllowed)
+        {
+            IsBulk = false;
+        }
+        else if (value.Equals("Kg", StringComparison.OrdinalIgnoreCase) ||
+                 value.Equals("Gr", StringComparison.OrdinalIgnoreCase) ||
+                 value.Equals("Lt", StringComparison.OrdinalIgnoreCase) ||
+                 value.Equals("Ml", StringComparison.OrdinalIgnoreCase) ||
+                 value.Equals("Mt", StringComparison.OrdinalIgnoreCase))
         {
             IsBulk = true;
         }
@@ -196,7 +207,8 @@ public partial class ProductDialogViewModel : ObservableObject
         Stock = product.Stock;
         Category = product.Category;
         Unit = string.IsNullOrWhiteSpace(product.Unit) ? "Pza" : product.Unit;
-        IsBulk = product.IsBulk || Unit.Equals("Kg", StringComparison.OrdinalIgnoreCase) || Unit.Equals("Lt", StringComparison.OrdinalIgnoreCase) || Unit.Equals("Gr", StringComparison.OrdinalIgnoreCase);
+        OnPropertyChanged(nameof(IsBulkAllowed));
+        IsBulk = IsBulkAllowed && (product.IsBulk || Unit.Equals("Kg", StringComparison.OrdinalIgnoreCase) || Unit.Equals("Lt", StringComparison.OrdinalIgnoreCase) || Unit.Equals("Gr", StringComparison.OrdinalIgnoreCase));
 
         if (!string.IsNullOrEmpty(Category) && !Categories.Contains(Category))
         {

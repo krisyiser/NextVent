@@ -14,6 +14,85 @@ public partial class BulkWeightDialogViewModel : ObservableObject
     public string ProductName => _product.Name;
     public double UnitPrice => _product.Price;
     public string UnitLabel => string.IsNullOrWhiteSpace(_product.Unit) ? "Kg" : _product.Unit;
+    public double SubUnitFactor => UnitLabel.ToUpperInvariant() switch
+    {
+        "MT" or "METROS" or "CENTIMETROS" or "CM" => 100.0,
+        _ => 1000.0
+    };
+
+    public string PresetSectionTitle => UnitLabel.ToUpperInvariant() switch
+    {
+        "LT" or "ML" or "LITROS" or "MILILITROS" => "Acceso Rápido por Volumen:",
+        "MT" or "CM" or "METROS" or "CENTIMETROS" => "Acceso Rápido por Medida:",
+        "KG" or "GR" or "KILOS" or "GRAMOS" => "Acceso Rápido por Peso:",
+        _ => "Acceso Rápido por Cantidad:"
+    };
+
+    public string QuantityInputLabel => UnitLabel.ToUpperInvariant() switch
+    {
+        "KG" or "GR" or "KILOS" or "GRAMOS" => "Gramos (g)",
+        "LT" or "ML" or "LITROS" or "MILILITROS" => "Mililitros (ml)",
+        "MT" or "CM" or "METROS" or "CENTIMETROS" => "Centímetros (cm)",
+        _ => $"{UnitLabel}"
+    };
+
+    public string Preset1Label => UnitLabel.ToUpperInvariant() switch
+    {
+        "LT" or "ML" or "LITROS" or "MILILITROS" => "250ml (1/4)",
+        "MT" or "CM" or "METROS" or "CENTIMETROS" => "25cm (1/4)",
+        "KG" or "GR" or "KILOS" or "GRAMOS" => "250g (1/4)",
+        _ => $"0.25 {UnitLabel}"
+    };
+
+    public double Preset1Value => UnitLabel.ToUpperInvariant() switch
+    {
+        "MT" or "CM" or "METROS" or "CENTIMETROS" => 25.0,
+        _ => 250.0
+    };
+
+    public string Preset2Label => UnitLabel.ToUpperInvariant() switch
+    {
+        "LT" or "ML" or "LITROS" or "MILILITROS" => "500ml (1/2)",
+        "MT" or "CM" or "METROS" or "CENTIMETROS" => "50cm (1/2)",
+        "KG" or "GR" or "KILOS" or "GRAMOS" => "500g (1/2)",
+        _ => $"0.50 {UnitLabel}"
+    };
+
+    public double Preset2Value => UnitLabel.ToUpperInvariant() switch
+    {
+        "MT" or "CM" or "METROS" or "CENTIMETROS" => 50.0,
+        _ => 500.0
+    };
+
+    public string Preset3Label => UnitLabel.ToUpperInvariant() switch
+    {
+        "LT" or "ML" or "LITROS" or "MILILITROS" => "750ml (3/4)",
+        "MT" or "CM" or "METROS" or "CENTIMETROS" => "75cm (3/4)",
+        "KG" or "GR" or "KILOS" or "GRAMOS" => "750g (3/4)",
+        _ => $"0.75 {UnitLabel}"
+    };
+
+    public double Preset3Value => UnitLabel.ToUpperInvariant() switch
+    {
+        "MT" or "CM" or "METROS" or "CENTIMETROS" => 75.0,
+        _ => 750.0
+    };
+
+    public string Preset4Label => UnitLabel.ToUpperInvariant() switch
+    {
+        "LT" or "ML" or "LITROS" or "MILILITROS" => $"1,000ml (1 {UnitLabel})",
+        "MT" or "CM" or "METROS" or "CENTIMETROS" => $"100cm (1 {UnitLabel})",
+        "KG" or "GR" or "KILOS" or "GRAMOS" => $"1,000g (1 {UnitLabel})",
+        _ => $"1.00 {UnitLabel}"
+    };
+
+    public double Preset4Value => UnitLabel.ToUpperInvariant() switch
+    {
+        "MT" or "CM" or "METROS" or "CENTIMETROS" => 100.0,
+        _ => 1000.0
+    };
+
+    public string DispatchQuantityDisplay => $"{QuantityInKilos:N3} {UnitLabel}";
 
     [ObservableProperty]
     private double _quantityInGrams = 1000.0;
@@ -37,7 +116,7 @@ public partial class BulkWeightDialogViewModel : ObservableObject
         _product = product;
         _moneyAmount = product.Price;
         _quantityInKilos = 1.0;
-        _quantityInGrams = 1000.0;
+        _quantityInGrams = SubUnitFactor;
     }
 
     partial void OnQuantityInGramsChanged(double value)
@@ -46,8 +125,9 @@ public partial class BulkWeightDialogViewModel : ObservableObject
         _isUpdatingInternally = true;
         try
         {
-            QuantityInKilos = Math.Round(value / 1000.0, 4);
+            QuantityInKilos = Math.Round(value / SubUnitFactor, 4);
             MoneyAmount = Math.Round(QuantityInKilos * UnitPrice, 2);
+            OnPropertyChanged(nameof(DispatchQuantityDisplay));
         }
         finally
         {
@@ -61,8 +141,9 @@ public partial class BulkWeightDialogViewModel : ObservableObject
         _isUpdatingInternally = true;
         try
         {
-            QuantityInGrams = Math.Round(value * 1000.0, 1);
+            QuantityInGrams = Math.Round(value * SubUnitFactor, 1);
             MoneyAmount = Math.Round(value * UnitPrice, 2);
+            OnPropertyChanged(nameof(DispatchQuantityDisplay));
         }
         finally
         {
@@ -78,7 +159,8 @@ public partial class BulkWeightDialogViewModel : ObservableObject
         {
             double kilos = Math.Round(value / UnitPrice, 4);
             QuantityInKilos = kilos;
-            QuantityInGrams = Math.Round(kilos * 1000.0, 1);
+            QuantityInGrams = Math.Round(kilos * SubUnitFactor, 1);
+            OnPropertyChanged(nameof(DispatchQuantityDisplay));
         }
         finally
         {
