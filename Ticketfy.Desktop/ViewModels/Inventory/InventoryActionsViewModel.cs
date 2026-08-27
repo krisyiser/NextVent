@@ -136,7 +136,7 @@ public partial class InventoryActionsViewModel : ObservableObject
             var snapshot = await _snapshotService.CreateSnapshotAsync(note);
 
             IsFeedbackError = false;
-            FeedbackMessage = $"¡Copia de seguridad del inventario creada con éxito! ({snapshot.TotalItems} productos congelados - Valor Total: ${snapshot.TotalValue:N2})";
+            FeedbackMessage = "¡Copia de seguridad del inventario creada con éxito!";
         }
         catch (Exception ex)
         {

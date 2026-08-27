@@ -82,7 +82,7 @@
                             </Grid>
 
                             <!-- BULK / GRANEL SWITCH -->
-                            <Border IsEnabled="{Binding IsBulkAllowed}" Margin="0,6,0,0" Padding="10,8" CornerRadius="6" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                            <Border IsVisible="{Binding IsBulkAllowed}" Margin="0,6,0,0" Padding="10,8" CornerRadius="6" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
                                 <CheckBox IsChecked="{Binding IsBulk, Mode=TwoWay}" IsEnabled="{Binding IsBulkAllowed}" Cursor="Hand">
                                     <StackPanel Orientation="Horizontal" Spacing="8">
                                         <mi:MaterialIcon Kind="ScaleBalance" Width="18" Height="18" Foreground="{DynamicResource AccentPrimaryBrush}" />
