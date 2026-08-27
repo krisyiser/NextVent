@@ -3,10 +3,11 @@
              xmlns:vm="using:Ticketfy.ViewModels"
              xmlns:mi="using:Material.Icons.Avalonia"
              xmlns:history="using:Ticketfy.Views.History"
+             xmlns:controls="using:Ticketfy.Controls"
              x:Class="Ticketfy.Views.HistoryView"
              x:DataType="vm:HistoryViewModel">
 
-    <Grid RowDefinitions="Auto,Auto,*" Margin="16">
+    <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="16">
 
         <!-- ═══ 1. TOP FUNCTION BANNER BAR ═══ -->
         <Border Grid.Row="0" Margin="0,0,0,12" Padding="16,12"
@@ -23,35 +24,36 @@
                     </StackPanel>
                 </StackPanel>
 
-                <!-- Status Feedback & Action Buttons Header -->
-                <WrapPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center">
-                    <TextBlock Text="De:" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="4,0" />
-                    <CalendarDatePicker SelectedDate="{Binding StartDate}" Width="155" Margin="4,0" CustomDateFormatString="dd/MM/yyyy" />
-                    <TextBlock Text="A:" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="4,0" />
-                    <CalendarDatePicker SelectedDate="{Binding EndDate}" Width="155" Margin="4,0" CustomDateFormatString="dd/MM/yyyy" />
-                    <Button Command="{Binding FetchSalesHistoryCommand}" Margin="4,0" Padding="10,6" CornerRadius="{DynamicResource AppCornerRadius}">
+                <!-- Action Buttons Header -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Spacing="8">
+                    <TextBlock Text="De:" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="0,0,2,0" />
+                    <CalendarDatePicker SelectedDate="{Binding StartDate}" Width="150" CustomDateFormatString="dd/MM/yyyy" />
+                    <TextBlock Text="A:" Foreground="{DynamicResource TextSecondaryBrush}" VerticalAlignment="Center" Margin="4,0,2,0" />
+                    <CalendarDatePicker SelectedDate="{Binding EndDate}" Width="150" CustomDateFormatString="dd/MM/yyyy" />
+                    <Button Command="{Binding FetchSalesHistoryCommand}" Padding="10,6" CornerRadius="{DynamicResource AppCornerRadius}">
                         <StackPanel Orientation="Horizontal" Spacing="4">
                             <mi:MaterialIcon Kind="Filter" Width="14" Height="14" />
                             <TextBlock Text="FILTRAR" FontSize="11" FontWeight="Bold" />
                         </StackPanel>
                     </Button>
 
-                    <TextBlock Text="{Binding FeedbackMessage}" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource AccentSuccessBrush}" VerticalAlignment="Center" Margin="12,4" />
-
                     <!-- Cashup Audit Button -->
-                    <Button Command="{Binding PerformCashCutoffCommand}" Margin="0,2,0,2" Padding="12,6" CornerRadius="{DynamicResource AppCornerRadius}"
+                    <Button Command="{Binding PerformCashCutoffCommand}" Padding="12,6" CornerRadius="{DynamicResource AppCornerRadius}"
                             Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource AccentWarningBrush}" BorderThickness="2" ToolTip.Tip="Abrir matriz de arqueo físico por billetes y monedas">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <mi:MaterialIcon Kind="CashMultiple" Width="16" Height="16" Foreground="{DynamicResource AccentWarningBrush}" />
                             <TextBlock Text="ARQUEO DE CAJA" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource AccentWarningBrush}" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
-                </WrapPanel>
+                </StackPanel>
             </Grid>
         </Border>
 
+        <!-- ═══ 1.5 DISMISSIBLE NOTIFICATION BANNER ═══ -->
+        <controls:AlertBannerControl Grid.Row="1" Message="{Binding FeedbackMessage, Mode=TwoWay}" Margin="0,0,0,12" />
+
         <!-- ═══ 2. TABS CONTENT ═══ -->
-        <TabControl Grid.Row="1" Grid.RowSpan="2" Margin="0,0,0,0">
+        <TabControl Grid.Row="2" Grid.RowSpan="2" Margin="0,0,0,0">
             <TabItem x:Name="NavHistoryTab1">
                 <TabItem.Header>
                     <StackPanel Orientation="Horizontal" Spacing="8" Margin="4,2">
