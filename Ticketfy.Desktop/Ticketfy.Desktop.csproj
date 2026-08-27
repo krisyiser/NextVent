@@ -9,10 +9,10 @@
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <ImplicitUsings>enable</ImplicitUsings>
     <InterceptorsNamespaces>$(InterceptorsNamespaces);Dapper.AOT</InterceptorsNamespaces>
-    <Version>3.1.36</Version>
-    <AssemblyVersion>3.1.36.0</AssemblyVersion>
-    <FileVersion>3.1.36.0</FileVersion>
-    <InformationalVersion>3.1.36</InformationalVersion>
+    <Version>3.1.37</Version>
+    <AssemblyVersion>3.1.37.0</AssemblyVersion>
+    <FileVersion>3.1.37.0</FileVersion>
+    <InformationalVersion>3.1.37</InformationalVersion>
   </PropertyGroup>
 
   <!-- DEPLOYMENT PROFILE FOR WINDOWS X64 -->
