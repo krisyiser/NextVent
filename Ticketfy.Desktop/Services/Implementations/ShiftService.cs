@@ -84,10 +84,15 @@ public sealed class ShiftService : IShiftService
             .Where(m => m.ShiftId == entity.Id && m.MovementType == Ticketfy.Core.Enums.MovementType.DevolucionCliente)
             .SumAsync(m => m.Amount);
 
+        var cashWithdrawals = await _ctx.ShiftMovements
+            .AsNoTracking()
+            .Where(m => m.ShiftId == entity.Id && m.MovementType == Ticketfy.Core.Enums.MovementType.RetiroEfectivo)
+            .SumAsync(m => m.Amount);
+
         entity.EndTime = DateTimeOffset.Now.ToString("o");
         entity.TotalCashSales = cashSales;
         entity.TotalCreditSales = creditSales;
-        entity.ExpectedBalance = entity.OpeningBalance + cashSales + customerAbonosCash - cashExpenses - cashPurchases - cashReturns;
+        entity.ExpectedBalance = entity.OpeningBalance + cashSales + customerAbonosCash - cashExpenses - cashPurchases - cashReturns - cashWithdrawals;
         entity.ActualBalance = actualBalance;
         double diff = actualBalance - entity.ExpectedBalance;
         entity.Diff = diff;

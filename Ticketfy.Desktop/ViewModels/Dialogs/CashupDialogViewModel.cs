@@ -355,7 +355,9 @@ public partial class CashupDialogViewModel : ObservableObject
 
             double customerAbonosCash = 0.0;
             double cashExpenses = 0.0;
+            double cashPurchases = 0.0;
             double cashReturns = 0.0;
+            double cashWithdrawals = 0.0;
 
             if (!string.IsNullOrEmpty(shiftId))
             {
@@ -369,9 +371,19 @@ public partial class CashupDialogViewModel : ObservableObject
                     .Where(m => m.ShiftId == shiftId && m.MovementType == Ticketfy.Core.Enums.MovementType.GastoOperativo)
                     .SumAsync(m => m.Amount);
 
+                cashPurchases = await _db.ShiftMovements
+                    .AsNoTracking()
+                    .Where(m => m.ShiftId == shiftId && m.MovementType == Ticketfy.Core.Enums.MovementType.CompraEfectivo)
+                    .SumAsync(m => m.Amount);
+
                 cashReturns = await _db.ShiftMovements
                     .AsNoTracking()
                     .Where(m => m.ShiftId == shiftId && m.MovementType == Ticketfy.Core.Enums.MovementType.DevolucionCliente)
+                    .SumAsync(m => m.Amount);
+
+                cashWithdrawals = await _db.ShiftMovements
+                    .AsNoTracking()
+                    .Where(m => m.ShiftId == shiftId && m.MovementType == Ticketfy.Core.Enums.MovementType.RetiroEfectivo)
                     .SumAsync(m => m.Amount);
             }
 
@@ -379,15 +391,15 @@ public partial class CashupDialogViewModel : ObservableObject
             {
                 OpenCashAmount = openingBalance;
                 TotalIngresosShift = cashSales + customerAbonosCash;
-                TotalEgresosShift = cashExpenses + cashReturns;
+                TotalEgresosShift = cashExpenses + cashPurchases + cashReturns + cashWithdrawals;
                 TheoreticalCash = OpenCashAmount + TotalIngresosShift - TotalEgresosShift;
                 
                 double allSalesTotal = shiftSales.Sum(s => s.Total);
                 double allSalesCogs = shiftSales.Sum(s => s.TotalCost);
                 double allExpensesTotal = cashExpenses;
 
-                GrossProfit = allSalesTotal;
-                NetProfit = GrossProfit - allExpensesTotal - allSalesCogs;
+                GrossProfit = Math.Max(0.0, allSalesTotal - allSalesCogs);
+                NetProfit = GrossProfit - allExpensesTotal;
                 
                 RecalculatePhysicalTotal();
             });
