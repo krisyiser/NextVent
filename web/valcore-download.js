@@ -8,7 +8,7 @@
   async function fetchLatestReleaseInfo() {
     try {
       const timestamp = new Date().getTime();
-      const res = await fetch(`https://git.valcore/yersi/ticketfy-releases/raw/branch/main/releases.json?t=${timestamp}`, { cache: 'no-store' });
+      const res = await fetch(`https://raw.githubusercontent.com/krisyiser/NextVent/main/releases.json?t=${timestamp}`, { cache: 'no-store' });
       if (res.ok) {
         const data = await res.json();
         return data;
@@ -17,11 +17,11 @@
       console.warn('Valcore Release Sync: Fallback to direct raw endpoint query', e);
     }
     return {
-      version: '3.0.39',
+      version: '3.1.48',
       downloads: {
-        x64: 'Ticketfy-Setup-v3.0.39-x64.exe',
-        x86: 'Ticketfy-Setup-v3.0.39-x86.exe',
-        default: 'Ticketfy-Setup-v3.0.39.exe'
+        x64: 'https://raw.githubusercontent.com/krisyiser/NextVent/main/releases.json',
+        x86: 'https://raw.githubusercontent.com/krisyiser/NextVent/main/releases.json',
+        default: 'https://raw.githubusercontent.com/krisyiser/NextVent/main/releases.json'
       }
     };
   }
@@ -54,10 +54,10 @@
   async function syncValcoreWebsite() {
     const release = await fetchLatestReleaseInfo();
     const arch = await detectWindowsArchitecture();
-    const versionStr = release.version || '3.0.39';
+    const versionStr = release.version || '3.1.48';
 
-    const filename = release.downloads[arch] || `Ticketfy-Setup-v${versionStr}-${arch}.exe`;
-    const downloadUrl = `https://git.valcore/yersi/ticketfy-releases/raw/branch/main/${filename}`;
+    const filename = release.downloads && release.downloads[arch] ? release.downloads[arch] : `https://git.valcore/yersi/ticketfy-releases/raw/branch/main/Ticketfy-Setup-v${versionStr}-${arch}.exe`;
+    const downloadUrl = filename.startsWith('http') ? filename : `https://git.valcore/yersi/ticketfy-releases/raw/branch/main/${filename}`;
 
     const allElements = document.querySelectorAll('a, button, div, span');
     
