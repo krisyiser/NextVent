@@ -43,6 +43,12 @@ public class SaleEntity
     [Column("paymentMethod")]
     public string PaymentMethod { get; set; } = "Cash";
 
+    [Column("cashAmount")]
+    public double CashAmount { get; set; }
+
+    [Column("cardAmount")]
+    public double CardAmount { get; set; }
+
     [Column("customerId")]
     public string? CustomerId { get; set; }
 

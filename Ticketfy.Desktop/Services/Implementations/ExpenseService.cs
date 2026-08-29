@@ -94,14 +94,33 @@ public class ExpenseService : IExpenseService
 
     public async Task<bool> DeleteAsync(string id)
     {
-        var entity = await _context.Expenses.FindAsync(id);
-        if (entity != null)
+        using var transaction = await _context.Database.BeginTransactionAsync();
+        try
         {
-            _context.Expenses.Remove(entity);
-            await _context.SaveChangesAsync();
-            return true;
+            var entity = await _context.Expenses.FindAsync(id);
+            if (entity != null)
+            {
+                var linkedMovements = await _context.ShiftMovements
+                    .Where(m => m.ReferenceId == id)
+                    .ToListAsync();
+
+                if (linkedMovements.Count > 0)
+                {
+                    _context.ShiftMovements.RemoveRange(linkedMovements);
+                }
+
+                _context.Expenses.Remove(entity);
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return true;
+            }
+            return false;
         }
-        return false;
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
 
     public async Task<FinancialSummaryDto> GetFinancialSummaryAsync(DateTime? startDate = null, DateTime? endDate = null)
@@ -146,12 +165,12 @@ public class ExpenseService : IExpenseService
         double netProfit = grossProfit - totalExpenses;
 
         double cashRevenue = salesList
-            .Where(s => !string.IsNullOrEmpty(s.PaymentMethod) && (s.PaymentMethod.Equals("Cash", StringComparison.OrdinalIgnoreCase) || s.PaymentMethod.Equals("Efectivo", StringComparison.OrdinalIgnoreCase)))
-            .Sum(s => s.Total);
+            .Sum(s => s.CashAmount > 0 ? s.CashAmount :
+                (!string.IsNullOrEmpty(s.PaymentMethod) && (s.PaymentMethod.Equals("Cash", StringComparison.OrdinalIgnoreCase) || s.PaymentMethod.Equals("Efectivo", StringComparison.OrdinalIgnoreCase)) ? s.Total : 0.0));
 
         double cardRevenue = salesList
-            .Where(s => string.IsNullOrEmpty(s.PaymentMethod) || (!s.PaymentMethod.Equals("Cash", StringComparison.OrdinalIgnoreCase) && !s.PaymentMethod.Equals("Efectivo", StringComparison.OrdinalIgnoreCase)))
-            .Sum(s => s.Total);
+            .Sum(s => s.CardAmount > 0 ? s.CardAmount :
+                (string.IsNullOrEmpty(s.PaymentMethod) || (!s.PaymentMethod.Equals("Cash", StringComparison.OrdinalIgnoreCase) && !s.PaymentMethod.Equals("Efectivo", StringComparison.OrdinalIgnoreCase)) ? s.Total : 0.0));
 
         double cashExpenses = expensesList
             .Where(e => string.IsNullOrEmpty(e.PaymentMethod) || e.PaymentMethod.Equals("Cash", StringComparison.OrdinalIgnoreCase) || e.PaymentMethod.Equals("Efectivo", StringComparison.OrdinalIgnoreCase))

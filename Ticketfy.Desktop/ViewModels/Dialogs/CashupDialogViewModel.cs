@@ -350,8 +350,8 @@ public partial class CashupDialogViewModel : ObservableObject
                 .ToList();
 
             var cashSales = shiftSales
-                .Where(s => s.PaymentMethod != null && (s.PaymentMethod.Equals("Cash", StringComparison.OrdinalIgnoreCase) || s.PaymentMethod.Equals("Efectivo", StringComparison.OrdinalIgnoreCase)))
-                .Sum(s => s.Total);
+                .Sum(s => s.CashAmount > 0 ? s.CashAmount :
+                    (s.PaymentMethod != null && (s.PaymentMethod.Equals("Cash", StringComparison.OrdinalIgnoreCase) || s.PaymentMethod.Equals("Efectivo", StringComparison.OrdinalIgnoreCase)) ? s.Total : 0.0));
 
             double customerAbonosCash = 0.0;
             double cashExpenses = 0.0;

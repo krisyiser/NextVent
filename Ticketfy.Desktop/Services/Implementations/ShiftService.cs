@@ -57,8 +57,8 @@ public sealed class ShiftService : IShiftService
             .ToList();
 
         var cashSales = validSales
-            .Where(s => s.PaymentMethod != null && (s.PaymentMethod.Equals("Cash", StringComparison.OrdinalIgnoreCase) || s.PaymentMethod.Equals("Efectivo", StringComparison.OrdinalIgnoreCase)))
-            .Sum(s => s.Total);
+            .Sum(s => s.CashAmount > 0 ? s.CashAmount :
+                (s.PaymentMethod != null && (s.PaymentMethod.Equals("Cash", StringComparison.OrdinalIgnoreCase) || s.PaymentMethod.Equals("Efectivo", StringComparison.OrdinalIgnoreCase)) ? s.Total : 0.0));
 
         var creditSales = validSales
             .Where(s => s.IsCredit == 1 || (s.PaymentMethod != null && (s.PaymentMethod.Equals("Credit", StringComparison.OrdinalIgnoreCase) || s.PaymentMethod.Equals("Credito", StringComparison.OrdinalIgnoreCase) || s.PaymentMethod.Equals("Crédito", StringComparison.OrdinalIgnoreCase))))

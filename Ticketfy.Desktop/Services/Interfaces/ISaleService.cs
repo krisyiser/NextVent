@@ -10,6 +10,7 @@ namespace Ticketfy.Services.Interfaces;
 /// </summary>
 public interface ISaleService
 {
+    event System.Action<SaleDto>? SaleSaved;
     Task<SaleDto> SaveAsync(SaleDto sale);
     Task<SaleResultModel> ProcessSaleAsync(SaleCreationDto dto);
     Task<SaleDto?> GetByIdAsync(string saleId);

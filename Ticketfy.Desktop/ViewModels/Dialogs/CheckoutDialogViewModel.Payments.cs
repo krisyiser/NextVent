@@ -192,6 +192,25 @@ public partial class CheckoutDialogViewModel
             var totalCost = snapshots.Sum(s => s.Cost * s.Quantity);
             var profit = TotalToPay - totalCost;
 
+            double cashPortion = 0.0;
+            double cardPortion = 0.0;
+
+            if (PaymentMethod == "Mixto")
+            {
+                cashPortion = (double)CashAmount;
+                cardPortion = (double)CardAmount;
+            }
+            else if (PaymentMethod == "Efectivo" || PaymentMethod == "Cash")
+            {
+                cashPortion = TotalToPay;
+                cardPortion = 0.0;
+            }
+            else if (PaymentMethod == "Tarjeta Débito/Crédito" || PaymentMethod == "Tarjeta" || PaymentMethod == "Card")
+            {
+                cashPortion = 0.0;
+                cardPortion = TotalToPay;
+            }
+
             var saleDto = new SaleDto(
                 Id: Guid.NewGuid().ToString(),
                 Date: DateTimeOffset.Now.ToString("o"),
@@ -206,7 +225,9 @@ public partial class CheckoutDialogViewModel
                 IsCredit: isCredit,
                 IsCancelled: false,
                 CancelledAt: null,
-                EstadoFiscal: RequiresInvoice ? "TIMBRADO CFDI 4.0" : "PENDIENTE"
+                EstadoFiscal: RequiresInvoice ? "TIMBRADO CFDI 4.0" : "PENDIENTE",
+                CashAmount: cashPortion,
+                CardAmount: cardPortion
             );
 
             if (RequiresInvoice)

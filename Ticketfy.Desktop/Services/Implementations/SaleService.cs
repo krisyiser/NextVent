@@ -22,6 +22,7 @@ namespace Ticketfy.Services.Implementations;
 /// </summary>
 public partial class SaleService : ISaleService
 {
+    public event Action<SaleDto>? SaleSaved;
     private readonly IDbContextFactory<AppDbContext> _contextFactory;
     private readonly CoOccurrenceQueue _coOccurrenceQueue;
     private readonly Ticketfy.Services.Interfaces.IAuditService _auditService;
@@ -92,7 +93,9 @@ public partial class SaleService : ISaleService
                 SerieFolio = saleId,
                 Status = SaleStatus.Completed,
                 InvoiceId = sale.InvoiceId,
-                InvoiceStatus = sale.InvoiceStatus
+                InvoiceStatus = sale.InvoiceStatus,
+                CashAmount = sale.CashAmount,
+                CardAmount = sale.CardAmount
             };
 
             _ctx.Sales.Add(entity);
@@ -168,7 +171,7 @@ public partial class SaleService : ISaleService
                 throw new DbUpdateConcurrencyException("El inventario cambió durante la transacción. Intente cobrar de nuevo.");
             }
 
-            return sale with
+            var savedResult = sale with
             {
                 Id = saleId,
                 Items = processedItems,
@@ -180,6 +183,9 @@ public partial class SaleService : ISaleService
                 SerieFolio = saleId,
                 Status = SaleStatus.Completed
             };
+
+            SaleSaved?.Invoke(savedResult);
+            return savedResult;
         }
         catch
         {
@@ -375,7 +381,9 @@ public partial class SaleService : ISaleService
             InvoiceId: e.InvoiceId,
             InvoiceStatus: e.InvoiceStatus,
             CashierUserId: null,
-            CashierName: null
+            CashierName: null,
+            CashAmount: e.CashAmount,
+            CardAmount: e.CardAmount
         );
     }
 }

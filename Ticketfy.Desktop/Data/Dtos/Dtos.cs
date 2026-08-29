@@ -259,7 +259,9 @@ public record SaleDto(
     string? InvoiceId = null,
     string? InvoiceStatus = null,
     string? CashierUserId = null,
-    string? CashierName = null
+    string? CashierName = null,
+    double CashAmount = 0.0,
+    double CardAmount = 0.0
 )
 {
     public string LocalDateDisplay => DateTimeExtensions.ToLocalDisplayString(Date);

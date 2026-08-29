@@ -73,9 +73,16 @@ public partial class HistoryViewModel : ObservableObject
         _printerService = printerService;
         _db = db;
         _settingsService = settingsService;
+
+        _saleService.SaleSaved += OnSaleSaved;
         _ = LoadSavedCommissionAsync();
         _ = LoadSalesAsync();
         _ = LoadCashierPerformanceAsync();
+    }
+
+    private void OnSaleSaved(SaleDto sale)
+    {
+        _ = FetchSalesHistoryAsync();
     }
 
     private async Task LoadSavedCommissionAsync()
@@ -97,15 +104,17 @@ public partial class HistoryViewModel : ObservableObject
     [RelayCommand]
     private async Task FetchSalesHistoryAsync()
     {
-        if (!StartDate.HasValue || !EndDate.HasValue) return;
-
         IsLoading = true;
         try
         {
-            DateTime queryStart = StartDate.Value.Date;
-            DateTime queryEnd = EndDate.Value.Date.AddDays(1).AddTicks(-1);
+            DateTime queryStart = StartDate?.Date ?? DateTime.Today;
+            DateTime queryEnd = EndDate?.Date.AddDays(1).AddTicks(-1) ?? DateTime.Today.AddDays(1).AddTicks(-1);
 
             var salesList = await _saleService.GetSalesByDateRangeAsync(queryStart, queryEnd);
+            if (salesList.Count == 0 && StartDate == DateTime.Today && EndDate == DateTime.Today)
+            {
+                salesList = await _saleService.GetHistoryAsync(500);
+            }
 
             List<Ticketfy.Data.Entities.CashupEntity> cashupsQuery = [];
             try
