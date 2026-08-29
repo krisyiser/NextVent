@@ -42,6 +42,7 @@ public partial class PurchaseOrderViewModel : ObservableObject
     [ObservableProperty] private string _purchaseQuantity = "1";
     [ObservableProperty] private double _totalPurchaseCost;
     [ObservableProperty] private string _feedbackMessage = string.Empty;
+    [ObservableProperty] private bool _isFeedbackError = false;
     [ObservableProperty] private bool _isSubmitting = false;
 
     public string SubmitButtonText => IsSubmitting ? "GUARDANDO..." : "CONFIRMAR Y REGISTRAR COMPRA";
@@ -121,9 +122,24 @@ public partial class PurchaseOrderViewModel : ObservableObject
     [RelayCommand]
     private void AddItemToDraft()
     {
-        if (SelectedProduct == null) return;
-        if (!double.TryParse(PurchaseQuantity, out double qty) || qty <= 0) return;
-        if (!double.TryParse(PurchaseUnitPrice, out double price) || price < 0) return;
+        if (SelectedProduct == null)
+        {
+            IsFeedbackError = true;
+            FeedbackMessage = "Seleccione un producto para añadir";
+            return;
+        }
+        if (!double.TryParse(PurchaseQuantity, out double qty) || qty <= 0)
+        {
+            IsFeedbackError = true;
+            FeedbackMessage = "Ingrese una cantidad válida mayor a cero";
+            return;
+        }
+        if (!double.TryParse(PurchaseUnitPrice, out double price) || price < 0)
+        {
+            IsFeedbackError = true;
+            FeedbackMessage = "Ingrese un costo unitario válido";
+            return;
+        }
 
         var total = price * qty;
         DraftPurchaseItems.Add(new PurchaseItemDto(
@@ -137,6 +153,7 @@ public partial class PurchaseOrderViewModel : ObservableObject
         ));
 
         TotalPurchaseCost = DraftPurchaseItems.Sum(i => i.TotalPrice);
+        FeedbackMessage = string.Empty;
     }
 
     [RelayCommand] private void AddItemToPurchaseDraft() => AddItemToDraft();
@@ -155,13 +172,15 @@ public partial class PurchaseOrderViewModel : ObservableObject
     {
         if (SelectedSupplier == null)
         {
-            FeedbackMessage = "Seleccione un proveedor";
+            IsFeedbackError = true;
+            FeedbackMessage = "Seleccione un proveedor obligatorio para la compra";
             return;
         }
 
         if (DraftPurchaseItems.Count == 0)
         {
-            FeedbackMessage = "Agregue al menos un producto a la compra";
+            IsFeedbackError = true;
+            FeedbackMessage = "Agregue al menos un producto al borrador de la compra";
             return;
         }
 
@@ -180,16 +199,24 @@ public partial class PurchaseOrderViewModel : ObservableObject
             );
 
             var registered = await _purchaseService.RegisterPurchaseAsync(purchaseDto);
+
+            // COMPLETE FORM RESET UPON SAVE
             DraftPurchaseItems.Clear();
             TotalPurchaseCost = 0;
             InvoiceNumber = string.Empty;
+            SelectedSupplier = null;
+            SelectedProduct = null;
+            PurchaseUnitPrice = string.Empty;
+            PurchaseQuantity = "1";
 
-            FeedbackMessage = "¡Compra y reabastecimiento registrados correctamente!";
+            IsFeedbackError = false;
+            FeedbackMessage = "¡Compra y reabastecimiento de inventario registrados correctamente!";
             PurchaseConfirmed?.Invoke(registered);
         }
         catch (Exception ex)
         {
             Log.Error(ex, "PurchaseOrderViewModel: error registering purchase order");
+            IsFeedbackError = true;
             FeedbackMessage = "Error al procesar la entrada de mercancía";
         }
         finally

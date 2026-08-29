@@ -31,6 +31,7 @@ public partial class SupplierDirectoryViewModel : ObservableObject
     [ObservableProperty] private string _supplierContact = string.Empty;
 
     [ObservableProperty] private string _feedbackMessage = string.Empty;
+    [ObservableProperty] private bool _isFeedbackError = false;
     [ObservableProperty] private bool _isEditing = false;
     [ObservableProperty] private string _formTitle = "Registrar Nuevo Proveedor";
     [ObservableProperty] private string _saveButtonText = "GUARDAR PROVEEDOR";
@@ -86,6 +87,7 @@ public partial class SupplierDirectoryViewModel : ObservableObject
     {
         if (string.IsNullOrWhiteSpace(SupplierName))
         {
+            IsFeedbackError = true;
             FeedbackMessage = "El nombre del proveedor es obligatorio";
             return;
         }
@@ -108,6 +110,7 @@ public partial class SupplierDirectoryViewModel : ObservableObject
                 );
 
                 await _supplierService.UpdateAsync(updatedSupplier);
+                IsFeedbackError = false;
                 FeedbackMessage = "Proveedor actualizado con éxito";
                 CancelEdit();
             }
@@ -125,6 +128,7 @@ public partial class SupplierDirectoryViewModel : ObservableObject
                 );
 
                 await _supplierService.CreateAsync(newSupplier);
+                IsFeedbackError = false;
                 FeedbackMessage = "Proveedor guardado con éxito";
                 ClearForm();
             }
@@ -135,6 +139,7 @@ public partial class SupplierDirectoryViewModel : ObservableObject
         catch (Exception ex)
         {
             Log.Error(ex, "SupplierDirectoryViewModel: error saving supplier");
+            IsFeedbackError = true;
             FeedbackMessage = "Error al guardar el proveedor";
         }
     }

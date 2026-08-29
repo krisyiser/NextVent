@@ -81,17 +81,15 @@
                                 </StackPanel>
                             </Grid>
 
-                            <!-- BULK / GRANEL SWITCH -->
-                            <Border IsVisible="{Binding IsBulkAllowed}" Margin="0,6,0,0" Padding="10,8" CornerRadius="6" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
-                                <CheckBox IsChecked="{Binding IsBulk, Mode=TwoWay}" IsEnabled="{Binding IsBulkAllowed}" Cursor="Hand">
-                                    <StackPanel Orientation="Horizontal" Spacing="8">
-                                        <mi:MaterialIcon Kind="ScaleBalance" Width="18" Height="18" Foreground="{DynamicResource AccentPrimaryBrush}" />
-                                        <StackPanel VerticalAlignment="Center">
-                                            <TextBlock Text="Permitir Venta a Granel / Fraccionado" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
-                                            <TextBlock Text="Abre la calculadora de peso (Gramos/Litros/$ Dinero) al seleccionar en POS" FontSize="10" Foreground="{DynamicResource TextMutedBrush}" />
-                                        </StackPanel>
+                            <!-- BULK / GRANEL INFORMATIVE BANNER (SIN CHECKBOX REDUNDANTE) -->
+                            <Border IsVisible="{Binding IsBulkAllowed}" Margin="0,6,0,0" Padding="12,10" CornerRadius="6" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1">
+                                <StackPanel Orientation="Horizontal" Spacing="10">
+                                    <mi:MaterialIcon Kind="ScaleBalance" Width="20" Height="20" Foreground="{DynamicResource AccentPrimaryBrush}" VerticalAlignment="Center" />
+                                    <StackPanel VerticalAlignment="Center" Spacing="2">
+                                        <TextBlock Text="Venta a Granel / Fraccionada Activada" FontSize="12" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
+                                        <TextBlock Text="Este producto activará la calculadora de equivalente en peso, volumen o monto al seleccionarlo en caja (POS)." FontSize="11" Foreground="{DynamicResource TextSecondaryBrush}" />
                                     </StackPanel>
-                                </CheckBox>
+                                </StackPanel>
                             </Border>
                         </StackPanel>
                     </Border>

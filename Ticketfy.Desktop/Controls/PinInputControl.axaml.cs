@@ -104,21 +104,31 @@ public partial class PinInputControl : UserControl
         });
     }
 
+    private bool _isUpdatingVisualState = false;
+
     private void UpdateVisualState(string val)
     {
         val ??= string.Empty;
 
-        Pin1 = val.Length > 0 ? val[0].ToString() : string.Empty;
-        Pin2 = val.Length > 1 ? val[1].ToString() : string.Empty;
-        Pin3 = val.Length > 2 ? val[2].ToString() : string.Empty;
-        Pin4 = val.Length > 3 ? val[3].ToString() : string.Empty;
+        _isUpdatingVisualState = true;
+        try
+        {
+            Pin1 = val.Length > 0 ? val[0].ToString() : string.Empty;
+            Pin2 = val.Length > 1 ? val[1].ToString() : string.Empty;
+            Pin3 = val.Length > 2 ? val[2].ToString() : string.Empty;
+            Pin4 = val.Length > 3 ? val[3].ToString() : string.Empty;
+        }
+        finally
+        {
+            _isUpdatingVisualState = false;
+        }
 
         Dot1.Text = val.Length > 0 ? "●" : string.Empty;
         Dot2.Text = val.Length > 1 ? "●" : string.Empty;
         Dot3.Text = val.Length > 2 ? "●" : string.Empty;
         Dot4.Text = val.Length > 3 ? "●" : string.Empty;
 
-        bool hasFocus = MasterInput.IsFocused;
+        bool hasFocus = MasterInput?.IsFocused ?? false;
         
         // Rules for active highlight box:
         // 0 chars (empty) => Box 1 (index 0)
@@ -128,10 +138,10 @@ public partial class PinInputControl : UserControl
         // 4 chars => Box 4 (index 3)
         int activeIndex = val.Length == 0 ? 0 : val.Length - 1;
 
-        HighlightBox(Box1, hasFocus && activeIndex == 0, val.Length > 0);
-        HighlightBox(Box2, hasFocus && activeIndex == 1, val.Length > 1);
-        HighlightBox(Box3, hasFocus && activeIndex == 2, val.Length > 2);
-        HighlightBox(Box4, hasFocus && activeIndex == 3, val.Length > 3);
+        if (Box1 != null) HighlightBox(Box1, hasFocus && activeIndex == 0, val.Length > 0);
+        if (Box2 != null) HighlightBox(Box2, hasFocus && activeIndex == 1, val.Length > 1);
+        if (Box3 != null) HighlightBox(Box3, hasFocus && activeIndex == 2, val.Length > 2);
+        if (Box4 != null) HighlightBox(Box4, hasFocus && activeIndex == 3, val.Length > 3);
     }
 
     private void HighlightBox(Border box, bool isActive, bool hasValue)
@@ -155,20 +165,52 @@ public partial class PinInputControl : UserControl
 
     public void ClearPin()
     {
+        _isUpdatingVisualState = true;
+        try
+        {
+            Pin1 = string.Empty;
+            Pin2 = string.Empty;
+            Pin3 = string.Empty;
+            Pin4 = string.Empty;
+        }
+        finally
+        {
+            _isUpdatingVisualState = false;
+        }
         PinValue = string.Empty;
-        MasterInput.Text = string.Empty;
+        if (MasterInput != null)
+        {
+            MasterInput.Text = string.Empty;
+        }
+        UpdateVisualState(string.Empty);
         FocusMasterInput();
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
         base.OnPropertyChanged(change);
+        if (_isUpdatingVisualState) return;
+
         if (change.Property == Pin1Property || change.Property == Pin2Property || change.Property == Pin3Property || change.Property == Pin4Property)
         {
-            string combined = $"{Pin1}{Pin2}{Pin3}{Pin4}";
-            if (PinValue != combined)
+            if (string.IsNullOrEmpty(Pin1) || (string.IsNullOrEmpty(Pin1) && string.IsNullOrEmpty(Pin2) && string.IsNullOrEmpty(Pin3) && string.IsNullOrEmpty(Pin4)))
             {
-                PinValue = combined;
+                if (PinValue != string.Empty)
+                {
+                    PinValue = string.Empty;
+                }
+                else
+                {
+                    UpdateVisualState(string.Empty);
+                }
+            }
+            else
+            {
+                string combined = $"{Pin1}{Pin2}{Pin3}{Pin4}";
+                if (PinValue != combined)
+                {
+                    PinValue = combined;
+                }
             }
         }
     }

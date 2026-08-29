@@ -144,6 +144,7 @@ public partial class MainWindowViewModel : ObservableObject
         var tutorialService = new TutorialService(settingsService);
 
         _deviceRegistrationService = new DeviceRegistrationService(settingsService, sessionManager);
+        _deviceRegistrationService.StartPeriodicHeartbeat();
         sessionManager.CashierChanged += (user) =>
             _ = _deviceRegistrationService.PingServerAsync(new BusinessProfile());
 

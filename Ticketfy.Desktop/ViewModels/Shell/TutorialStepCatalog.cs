@@ -131,12 +131,9 @@ internal static class TutorialStepCatalog
         },
         "Module.Promotions" => new()
         {
-            new("📦 Crear Combo / Paquete",
-                "Arma paquetes de productos combinados con precio especial de venta.",
+            new("🏷️ Nuevo Combo / Promoción",
+                "Crea combos, paquetes de productos y promociones con precio especial de venta.",
                 TargetName: "CreateKitBtn", AnchorSide: TutorialAnchorSide.Bottom),
-            new("🏷️ Nueva Promoción",
-                "Crea promociones de descuento por porcentaje o monto fijo en tus productos.",
-                TargetName: "AddPromoBtn", AnchorSide: TutorialAnchorSide.Bottom),
         },
         _ => new()
     };

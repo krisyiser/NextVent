@@ -3,6 +3,7 @@
              xmlns:vm="using:Ticketfy.ViewModels.Suppliers"
              xmlns:dto="using:Ticketfy.Data.Dtos"
              xmlns:mi="using:Material.Icons.Avalonia"
+             xmlns:controls="using:Ticketfy.Controls"
              x:Class="Ticketfy.Views.Suppliers.PurchaseOrderView"
              x:DataType="vm:PurchaseOrderViewModel">
 
@@ -11,6 +12,7 @@
             Background="{DynamicResource BgSecondaryBrush}"
             BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="{DynamicResource AppCornerRadius}">
         <DockPanel LastChildFill="True">
+            <controls:AlertBannerControl DockPanel.Dock="Top" Message="{Binding FeedbackMessage, Mode=TwoWay}" IsError="{Binding IsFeedbackError}" Margin="0,0,0,10" />
             <StackPanel DockPanel.Dock="Top" Spacing="10" Margin="0,0,0,12">
                 <TextBlock Text="Nueva Orden de Compra (Reabastecimiento)" FontSize="15" FontWeight="Bold" Foreground="{DynamicResource TextPrimaryBrush}" />
                 

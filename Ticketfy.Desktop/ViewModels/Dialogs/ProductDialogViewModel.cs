@@ -181,19 +181,7 @@ public partial class ProductDialogViewModel : ObservableObject
     partial void OnUnitChanged(string value)
     {
         OnPropertyChanged(nameof(IsBulkAllowed));
-
-        if (!IsBulkAllowed)
-        {
-            IsBulk = false;
-        }
-        else if (value.Equals("Kg", StringComparison.OrdinalIgnoreCase) ||
-                 value.Equals("Gr", StringComparison.OrdinalIgnoreCase) ||
-                 value.Equals("Lt", StringComparison.OrdinalIgnoreCase) ||
-                 value.Equals("Ml", StringComparison.OrdinalIgnoreCase) ||
-                 value.Equals("Mt", StringComparison.OrdinalIgnoreCase))
-        {
-            IsBulk = true;
-        }
+        IsBulk = IsBulkAllowed;
     }
 
     public void LoadProductForEdit(ProductDto product)
@@ -208,7 +196,7 @@ public partial class ProductDialogViewModel : ObservableObject
         Category = product.Category;
         Unit = string.IsNullOrWhiteSpace(product.Unit) ? "Pza" : product.Unit;
         OnPropertyChanged(nameof(IsBulkAllowed));
-        IsBulk = IsBulkAllowed && (product.IsBulk || Unit.Equals("Kg", StringComparison.OrdinalIgnoreCase) || Unit.Equals("Lt", StringComparison.OrdinalIgnoreCase) || Unit.Equals("Gr", StringComparison.OrdinalIgnoreCase));
+        IsBulk = IsBulkAllowed;
 
         if (!string.IsNullOrEmpty(Category) && !Categories.Contains(Category))
         {
@@ -243,8 +231,24 @@ public partial class ProductDialogViewModel : ObservableObject
         }
         else
         {
+            _editingProductId = null;
             Title = "Nuevo Producto";
             ShowAutoFillBanner = parameters.ShowAutoFillBanner;
+            ErrorMessage = string.Empty;
+            Name = string.Empty;
+            CostPrice = null;
+            RetailPrice = null;
+            Stock = null;
+            Category = "General";
+            Unit = "Pza";
+            PointsRewarded = 0.0;
+            MinStock = 5.0;
+            SelectedSupplier = null;
+            SerialNumber = string.Empty;
+            AttributesText = string.Empty;
+            LocationRack = string.Empty;
+            SatProductCode = string.Empty;
+            SatUnitCode = string.Empty;
             
             if (parameters.PreFilledData != null)
             {
@@ -263,6 +267,10 @@ public partial class ProductDialogViewModel : ObservableObject
             else if (!string.IsNullOrEmpty(parameters.PreFilledBarcode))
             {
                 Barcode = parameters.PreFilledBarcode;
+            }
+            else
+            {
+                Barcode = string.Empty;
             }
         }
     }

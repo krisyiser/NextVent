@@ -279,4 +279,27 @@ public class DeviceRegistrationService
             Log.Error(ex, "Error en inicialización de Phone Home");
         }
     }
+
+    private System.Threading.Timer? _heartbeatTimer;
+
+    /// <summary>
+    /// Inicia el envío periódico de telemetría en segundo plano (Heartbeat cada 2 minutos).
+    /// </summary>
+    public void StartPeriodicHeartbeat()
+    {
+        if (_heartbeatTimer != null) return;
+
+        _heartbeatTimer = new System.Threading.Timer(async _ =>
+        {
+            try
+            {
+                await PingServerAsync(new BusinessProfile());
+            }
+            catch (Exception ex)
+            {
+                Log.Warning(ex, "Error en heartbeat periódico de telemetría.");
+            }
+        }, null, TimeSpan.FromSeconds(5), TimeSpan.FromMinutes(2));
+    }
 }
+

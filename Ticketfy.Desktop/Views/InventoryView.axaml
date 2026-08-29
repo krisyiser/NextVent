@@ -3,6 +3,7 @@
              xmlns:vm="using:Ticketfy.ViewModels"
              xmlns:dto="using:Ticketfy.Data.Dtos"
              xmlns:mi="using:Material.Icons.Avalonia"
+             xmlns:controls="using:Ticketfy.Controls"
              x:Class="Ticketfy.Views.InventoryView"
              x:DataType="vm:InventoryViewModel">
 
@@ -87,31 +88,7 @@
         </Border>
 
         <!-- ═══ FEEDBACK MESSAGE BANNER ═══ -->
-        <Panel Grid.Row="1" Margin="0,0,0,16" IsVisible="{Binding FeedbackMessage, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
-            
-            <!-- Success Banner -->
-            <Border Padding="16,12" Background="{DynamicResource AccentSuccessBrush}" CornerRadius="8" IsVisible="{Binding !IsFeedbackError}">
-                <Grid ColumnDefinitions="Auto,*,Auto">
-                    <mi:MaterialIcon Kind="CheckCircleOutline" Width="24" Height="24" Foreground="White" VerticalAlignment="Center" Margin="0,0,16,0" />
-                    <TextBlock Grid.Column="1" Text="{Binding FeedbackMessage}" FontSize="14" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" TextWrapping="Wrap" />
-                    <Button Grid.Column="2" Background="Transparent" BorderThickness="0" Padding="4" Command="{Binding ClearFeedbackCommand}">
-                        <mi:MaterialIcon Kind="Close" Width="18" Height="18" Foreground="White" />
-                    </Button>
-                </Grid>
-            </Border>
-
-            <!-- Error Banner -->
-            <Border Padding="16,12" Background="{DynamicResource AccentDangerBrush}" CornerRadius="8" IsVisible="{Binding IsFeedbackError}">
-                <Grid ColumnDefinitions="Auto,*,Auto">
-                    <mi:MaterialIcon Kind="AlertCircleOutline" Width="24" Height="24" Foreground="White" VerticalAlignment="Center" Margin="0,0,16,0" />
-                    <TextBlock Grid.Column="1" Text="{Binding FeedbackMessage}" FontSize="14" FontWeight="Bold" Foreground="White" VerticalAlignment="Center" TextWrapping="Wrap" />
-                    <Button Grid.Column="2" Background="Transparent" BorderThickness="0" Padding="4" Command="{Binding ClearFeedbackCommand}">
-                        <mi:MaterialIcon Kind="Close" Width="18" Height="18" Foreground="White" />
-                    </Button>
-                </Grid>
-            </Border>
-            
-        </Panel>
+        <controls:AlertBannerControl Grid.Row="1" Message="{Binding FeedbackMessage, Mode=TwoWay}" IsError="{Binding IsFeedbackError}" Margin="0,0,0,16" />
 
         <!-- ═══ INTELLIGENCE SUPPLY CHAIN PANEL ═══ -->
         <Border Grid.Row="2" Margin="0,0,0,16" Padding="16,12"

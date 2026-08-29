@@ -80,10 +80,10 @@ public partial class BulkWeightDialogViewModel : ObservableObject
 
     public string Preset4Label => UnitLabel.ToUpperInvariant() switch
     {
-        "LT" or "ML" or "LITROS" or "MILILITROS" => $"1,000ml (1 {UnitLabel})",
+        "LT" or "ML" or "LITROS" or "MILILITROS" => $"1000ml (1 {UnitLabel})",
         "MT" or "CM" or "METROS" or "CENTIMETROS" => $"100cm (1 {UnitLabel})",
-        "KG" or "GR" or "KILOS" or "GRAMOS" => $"1,000g (1 {UnitLabel})",
-        _ => $"1.00 {UnitLabel}"
+        "KG" or "GR" or "KILOS" or "GRAMOS" => $"1000g (1 {UnitLabel})",
+        _ => $"1 {UnitLabel}"
     };
 
     public double Preset4Value => UnitLabel.ToUpperInvariant() switch
@@ -92,7 +92,36 @@ public partial class BulkWeightDialogViewModel : ObservableObject
         _ => 1000.0
     };
 
-    public string DispatchQuantityDisplay => $"{QuantityInKilos:N3} {UnitLabel}";
+    public string DispatchQuantityDisplay
+    {
+        get
+        {
+            double k = QuantityInKilos;
+            string unitUpper = UnitLabel.ToUpperInvariant();
+
+            if (k < 1.0 && k > 0)
+            {
+                if (unitUpper is "KG" or "GR" or "KILOS" or "GRAMOS")
+                {
+                    double grams = Math.Round(QuantityInGrams, 1);
+                    return grams % 1 == 0 ? $"{grams:F0}g" : $"{grams:F1}g";
+                }
+                else if (unitUpper is "LT" or "ML" or "LITROS" or "MILILITROS")
+                {
+                    double ml = Math.Round(QuantityInGrams, 1);
+                    return ml % 1 == 0 ? $"{ml:F0}ml" : $"{ml:F1}ml";
+                }
+                else if (unitUpper is "MT" or "CM" or "METROS" or "CENTIMETROS")
+                {
+                    double cm = Math.Round(QuantityInGrams, 1);
+                    return cm % 1 == 0 ? $"{cm:F0}cm" : $"{cm:F1}cm";
+                }
+            }
+
+            string formattedValue = k.ToString("0.###", System.Globalization.CultureInfo.InvariantCulture);
+            return $"{formattedValue} {UnitLabel}";
+        }
+    }
 
     [ObservableProperty]
     private double _quantityInGrams = 1000.0;

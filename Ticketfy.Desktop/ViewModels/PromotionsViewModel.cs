@@ -17,6 +17,7 @@ public partial class PromotionsViewModel : ObservableObject
     public ObservableCollection<PromotionDto> Promotions { get; } = [];
 
     [ObservableProperty] private string _feedbackMessage = string.Empty;
+    [ObservableProperty] private bool _isFeedbackError = false;
 
     public event Action? OpenCreateItemKitRequested;
 

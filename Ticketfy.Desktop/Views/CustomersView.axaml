@@ -3,13 +3,14 @@
              xmlns:vm="using:Ticketfy.ViewModels"
              xmlns:dto="using:Ticketfy.Data.Dtos"
              xmlns:mi="using:Material.Icons.Avalonia"
+             xmlns:controls="using:Ticketfy.Controls"
              x:Class="Ticketfy.Views.CustomersView"
              x:DataType="vm:CustomersViewModel">
 
-    <Grid RowDefinitions="Auto,Auto,*" Margin="16">
+    <Grid RowDefinitions="Auto,Auto,Auto,*" Margin="16">
 
         <!-- ═══ TOP FUNCTION BANNER BAR ═══ -->
-        <Border Grid.Row="0" Margin="0,0,0,16" Padding="16,12"
+        <Border Grid.Row="0" Margin="0,0,0,12" Padding="16,12"
                 Background="{DynamicResource BgSecondaryBrush}"
                 BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8">
             <Grid ColumnDefinitions="*,Auto">
@@ -35,8 +36,11 @@
             </Grid>
         </Border>
 
+        <!-- Notification Banner -->
+        <controls:AlertBannerControl Grid.Row="1" Message="{Binding FeedbackMessage, Mode=TwoWay}" IsError="{Binding IsFeedbackError}" Margin="0,0,0,12" />
+
         <!-- Search Bar -->
-        <Border x:Name="CustomersSearchBorder" Grid.Row="1" Margin="0,0,0,16" Padding="12,8"
+        <Border x:Name="CustomersSearchBorder" Grid.Row="2" Margin="0,0,0,16" Padding="12,8"
                 Background="{DynamicResource BgSecondaryBrush}"
                 BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8">
             <Grid ColumnDefinitions="*,Auto">
@@ -50,7 +54,7 @@
         </Border>
 
         <!-- Customers DataGrid -->
-        <Border x:Name="CustomersDataGridBorder" Grid.Row="2" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="1">
+        <Border x:Name="CustomersDataGridBorder" Grid.Row="3" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="8" Padding="1">
             <DataGrid ItemsSource="{Binding Customers}" AutoGenerateColumns="False" IsReadOnly="True" GridLinesVisibility="Horizontal">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Nombre del Cliente" Binding="{Binding Name}" Width="2.5*" />

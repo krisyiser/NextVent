@@ -68,6 +68,7 @@ public partial class ExpensesViewModel : ObservableObject
     public string UtilidadNetaColor => UtilidadNeta >= 0 ? "#059669" : "#EF4444";
 
     [ObservableProperty] private string _feedbackMessage = string.Empty;
+    [ObservableProperty] private bool _isFeedbackError = false;
 
     public ExpensesViewModel(IExpenseService expenseService, IShiftService shiftService)
     {
@@ -166,7 +167,8 @@ public partial class ExpensesViewModel : ObservableObject
     {
         if (ExpenseAmount <= 0)
         {
-            FeedbackMessage = "Ingrese un monto mayor a cero";
+            IsFeedbackError = true;
+            FeedbackMessage = "Ingrese un monto de gasto válido mayor a cero";
             return;
         }
 
@@ -185,16 +187,19 @@ public partial class ExpensesViewModel : ObservableObject
             var created = await _expenseService.CreateAsync(dto);
             Expenses.Insert(0, created);
 
+            // COMPLETE FORM RESET UPON SAVE
             ExpenseAmount = 0;
             ExpenseDescription = string.Empty;
-            FeedbackMessage = "Gasto registrado correctamente";
+            IsFeedbackError = false;
+            FeedbackMessage = "¡Gasto operativo registrado correctamente!";
 
             await LoadExpensesAsync();
         }
         catch (Exception ex)
         {
             Log.Error(ex, "Error adding expense");
-            FeedbackMessage = "Error al registrar gasto";
+            IsFeedbackError = true;
+            FeedbackMessage = "Error al registrar gasto operativo";
         }
     }
 

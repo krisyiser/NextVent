@@ -28,7 +28,7 @@
                     <Button Command="{Binding SaveSupplierCommand}" Content="{Binding SaveButtonText}" Padding="16,8" CornerRadius="{DynamicResource AppCornerRadius}" Background="{DynamicResource AccentPrimaryBrush}" Foreground="White" FontWeight="Bold" />
                 </StackPanel>
 
-                <TextBlock Text="{Binding FeedbackMessage}" FontSize="12" Foreground="{DynamicResource AccentSuccessBrush}" Margin="0,4,0,0" />
+                <controls:AlertBannerControl Message="{Binding FeedbackMessage, Mode=TwoWay}" IsError="{Binding IsFeedbackError}" Margin="0,4,0,8" />
 
                 <Border Height="1" Background="{DynamicResource BorderBrush}" Margin="0,8,0,0" />
 

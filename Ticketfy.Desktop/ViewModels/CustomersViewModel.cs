@@ -18,6 +18,8 @@ public partial class CustomersViewModel : ObservableObject
     public ObservableCollection<CustomerDto> Customers { get; } = [];
 
     [ObservableProperty] private string _searchQuery = string.Empty;
+    [ObservableProperty] private string _feedbackMessage = string.Empty;
+    [ObservableProperty] private bool _isFeedbackError = false;
     public event Action? OpenAddCustomerRequested;
     public event Action<CustomerDto>? OpenEditCustomerRequested;
     public event Action<CustomerDto>? OpenAddPaymentRequested;

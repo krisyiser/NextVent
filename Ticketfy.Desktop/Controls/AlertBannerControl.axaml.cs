@@ -1,8 +1,9 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Media;
+using Avalonia.Threading;
 using Material.Icons;
-using System.Windows.Input;
+using System;
 
 namespace Ticketfy.Controls;
 
@@ -59,9 +60,27 @@ public partial class AlertBannerControl : UserControl
         ? MaterialIconKind.AlertCircleOutline
         : MaterialIconKind.CheckCircleOutline;
 
+    private readonly DispatcherTimer _autoDismissTimer;
+
     public AlertBannerControl()
     {
         InitializeComponent();
+
+        _autoDismissTimer = new DispatcherTimer
+        {
+            Interval = TimeSpan.FromSeconds(5)
+        };
+        _autoDismissTimer.Tick += (s, e) =>
+        {
+            _autoDismissTimer.Stop();
+            Dismiss();
+        };
+
+        Unloaded += (s, e) =>
+        {
+            _autoDismissTimer.Stop();
+            Dismiss();
+        };
     }
 
     protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
@@ -75,11 +94,21 @@ public partial class AlertBannerControl : UserControl
             RaisePropertyChanged(BannerBorderBrushProperty, null, BannerBorderBrush);
             RaisePropertyChanged(BannerForegroundProperty, null, BannerForeground);
             RaisePropertyChanged(BannerIconKindProperty, MaterialIconKind.Help, BannerIconKind);
+
+            if (change.Property == MessageProperty)
+            {
+                _autoDismissTimer.Stop();
+                if (!string.IsNullOrWhiteSpace(Message))
+                {
+                    _autoDismissTimer.Start();
+                }
+            }
         }
     }
 
     public void Dismiss()
     {
+        _autoDismissTimer.Stop();
         Message = string.Empty;
     }
 }
