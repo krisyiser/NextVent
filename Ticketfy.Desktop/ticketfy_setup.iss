@@ -1,4 +1,4 @@
-#define MyAppName "TICKETFY!"
+﻿#define MyAppName "TICKETFY!"
 #define MyAppVersion "3.1.48"
 #define MyAppPublisher "Valcore"
 #define MyAppURL "https://valcore.cloud"
@@ -32,7 +32,7 @@ RestartApplications=no
 VersionInfoCompany=Valcore
 VersionInfoDescription=Valcore TICKETFY! Punto de Venta - Instalador Nivel Industrial
 VersionInfoVersion=3.0.75.0
-VersionInfoCopyright=Copyright Ãƒâ€šÃ‚Â© 2026 Valcore. Todos los derechos reservados.
+VersionInfoCopyright=Copyright ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â© 2026 Valcore. Todos los derechos reservados.
 VersionInfoProductName=Valcore TICKETFY! POS Enterprise System
 VersionInfoProductVersion=3.0.75.0
 VersionInfoOriginalFileName=Ticketfy-Setup-v3.0.75-x64.exe
@@ -52,6 +52,7 @@ Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: de
 
 [Run]
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
+
 
 
 

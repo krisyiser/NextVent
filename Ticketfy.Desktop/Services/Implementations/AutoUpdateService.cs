@@ -87,6 +87,29 @@ public class AutoUpdateService
                 }
             }
 
+            // Fallback 2 to GitHub raw manifest endpoint
+            if (string.IsNullOrEmpty(jsonString))
+            {
+                var githubManifestUrl = $"https://raw.githubusercontent.com/krisyiser/NextVent/main/releases.json?cb={DateTime.UtcNow.Ticks}";
+                Log.Information("AutoUpdateService: Attempting GitHub fallback update manifest at {Url}", githubManifestUrl);
+                try
+                {
+                    var resp3 = await httpClient.GetAsync(githubManifestUrl);
+                    if (resp3.IsSuccessStatusCode)
+                    {
+                        var raw3 = await resp3.Content.ReadAsStringAsync();
+                        if (!string.IsNullOrWhiteSpace(raw3) && raw3.Trim().StartsWith("{"))
+                        {
+                            jsonString = raw3;
+                        }
+                    }
+                }
+                catch (Exception ex3)
+                {
+                    Log.Warning("AutoUpdateService: GitHub fallback manifest {Url} query threw exception: {Msg}", githubManifestUrl, ex3.Message);
+                }
+            }
+
             if (string.IsNullOrEmpty(jsonString))
             {
                 Log.Warning("AutoUpdateService: No valid JSON release manifest obtained from server.");
