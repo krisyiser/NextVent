@@ -1,10 +1,10 @@
 {
-  "version": "3.1.48",
-  "updated_at": "2026-08-29T01:48:00Z",
+  "version": "3.1.49",
+  "updated_at": "2026-09-01T02:43:00Z",
   "downloads": {
-    "x64": "https://github.com/krisyiser/NextVent/releases/download/v3.1.48/Ticketfy-Setup-v3.1.48-x64.exe",
-    "x86": "https://github.com/krisyiser/NextVent/releases/download/v3.1.48/Ticketfy-Setup-v3.1.48-x86.exe",
-    "exe": "https://github.com/krisyiser/NextVent/releases/download/v3.1.48/Ticketfy-Setup-v3.1.48-x64.exe",
-    "default": "https://github.com/krisyiser/NextVent/releases/download/v3.1.48/Ticketfy-Setup-v3.1.48-x64.exe"
+    "x64": "https://raw.githubusercontent.com/krisyiser/NextVent/main/releases.json",
+    "x86": "https://raw.githubusercontent.com/krisyiser/NextVent/main/releases.json",
+    "exe": "https://raw.githubusercontent.com/krisyiser/NextVent/main/releases.json",
+    "default": "https://raw.githubusercontent.com/krisyiser/NextVent/main/releases.json"
   }
 }
