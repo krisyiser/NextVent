@@ -271,12 +271,16 @@ public partial class SaleService : ISaleService
     public async Task<List<SaleDto>> GetSalesByDateRangeAsync(DateTime start, DateTime end)
     {
         using var _ctx = await _contextFactory.CreateDbContextAsync();
-        var allEntities = await _ctx.Sales
+        string startIso = start.ToString("yyyy-MM-dd");
+        string endIso = end.AddDays(1).ToString("yyyy-MM-dd");
+
+        var entities = await _ctx.Sales
             .AsNoTracking()
+            .Where(s => string.Compare(s.Date, startIso) >= 0 && string.Compare(s.Date, endIso) <= 0)
             .OrderByDescending(s => s.Date)
             .ToListAsync();
 
-        var filtered = allEntities
+        var filtered = entities
             .Where(s => s.Date.IsInDateRange(start, end))
             .ToList();
 
@@ -291,10 +295,23 @@ public partial class SaleService : ISaleService
         try
         {
             using var _ctx = await _contextFactory.CreateDbContextAsync();
-            var allSales = await _ctx.Sales
+            var query = _ctx.Sales
                 .AsNoTracking()
-                .Where(s => s.IsCancelled == 0)
-                .ToListAsync();
+                .Where(s => s.IsCancelled == 0);
+
+            if (startDate.HasValue)
+            {
+                string startIso = startDate.Value.ToString("yyyy-MM-dd");
+                query = query.Where(s => string.Compare(s.Date, startIso) >= 0);
+            }
+
+            if (endDate.HasValue)
+            {
+                string endIso = endDate.Value.AddDays(1).ToString("yyyy-MM-dd");
+                query = query.Where(s => string.Compare(s.Date, endIso) <= 0);
+            }
+
+            var allSales = await query.ToListAsync();
 
             var validSales = allSales
                 .Where(s => s.Date.IsInDateRange(startDate, endDate))

@@ -13,5 +13,7 @@ public interface IUserRepository
     Task<bool> ValidateAdminPinAsync(string pin4Digits);
     Task<bool> HasAnyUsersAsync();
     Task CreateUserAsync(UserEntity user);
+    Task SaveOrUpdateAdminUserAsync(UserEntity user);
     Task<UserEntity?> GetByUsernameAsync(string username);
+    Task<UserEntity?> GetAdminUserAsync();
 }

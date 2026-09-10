@@ -232,7 +232,16 @@ public partial class CheckoutDialogViewModel
 
             if (RequiresInvoice)
             {
-                var facturamaService = Microsoft.Extensions.DependencyInjection.ServiceProviderServiceExtensions.GetRequiredService<IFacturamaService>(App.Current!.Services!);
+                IFacturamaService facturamaService;
+                try
+                {
+                    facturamaService = (App.Current?.Services?.GetService(typeof(IFacturamaService)) as IFacturamaService)
+                                       ?? new Ticketfy.Services.Implementations.FacturamaService(new System.Net.Http.HttpClient());
+                }
+                catch
+                {
+                    facturamaService = new Ticketfy.Services.Implementations.FacturamaService(new System.Net.Http.HttpClient());
+                }
                 var (success, invId, invStatus, estFiscal, errMsg) = await Checkout.CheckoutInvoiceHandler.ProcessInvoiceAsync(
                     facturamaService, FiscalRfc, FiscalRazonSocial, FiscalUsoCfdi, FiscalRegime, FiscalZipCode, snapshots);
 

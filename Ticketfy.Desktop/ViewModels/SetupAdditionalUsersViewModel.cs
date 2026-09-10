@@ -15,6 +15,7 @@ public partial class SetupAdditionalUsersViewModel : ValidatableViewModelBase
 {
     private readonly IUserRepository _userRepository;
     private readonly Action _finishSetup;
+    private readonly Action? _navigateToPreviousStep;
 
     [ObservableProperty] private string _fullName = string.Empty;
     [ObservableProperty] private string _username = string.Empty;
@@ -34,10 +35,17 @@ public partial class SetupAdditionalUsersViewModel : ValidatableViewModelBase
     [ObservableProperty] private string _errorMessage = string.Empty;
     [ObservableProperty] private string _successMessage = string.Empty;
 
-    public SetupAdditionalUsersViewModel(IUserRepository userRepository, Action finishSetup)
+    public SetupAdditionalUsersViewModel(IUserRepository userRepository, Action finishSetup, Action? navigateToPreviousStep = null)
     {
         _userRepository = userRepository;
         _finishSetup = finishSetup;
+        _navigateToPreviousStep = navigateToPreviousStep;
+    }
+
+    [RelayCommand]
+    private void GoBack()
+    {
+        _navigateToPreviousStep?.Invoke();
     }
 
     [RelayCommand]

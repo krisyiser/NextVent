@@ -4,8 +4,13 @@
              xmlns:dto="using:Ticketfy.Data.Dtos"
              xmlns:mi="using:Material.Icons.Avalonia"
              xmlns:controls="using:Ticketfy.Controls"
+             xmlns:converters="using:Ticketfy.Converters"
              x:Class="Ticketfy.Views.Dialogs.CheckoutDialog"
              x:DataType="vm:CheckoutDialogViewModel">
+
+    <UserControl.Resources>
+        <converters:StringToDoubleConverter x:Key="StringToDoubleConverter"/>
+    </UserControl.Resources>
 
     <Border Width="520" Padding="24" Background="{DynamicResource BgSecondaryBrush}" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" CornerRadius="12">
         <Grid>
@@ -107,17 +112,17 @@
                             <Grid ColumnDefinitions="*,*,*">
                                 <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,4,0">
                                     <TextBlock Text="Efectivo ($):" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                    <controls:NumericTextBox AllowDecimals="True" Text="{Binding CashAmount, Mode=TwoWay}" FontSize="14" FontWeight="Bold" 
+                                    <controls:NumericTextBox AllowDecimals="True" Text="{Binding CashAmount, Mode=TwoWay, Converter={StaticResource StringToDoubleConverter}}" FontSize="14" FontWeight="Bold" 
                                                              Background="{DynamicResource BgTertiaryBrush}" Padding="8" Watermark="0.00" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="1" Spacing="4" Margin="4,0,4,0">
                                     <TextBlock Text="Tarjeta ($):" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                    <controls:NumericTextBox AllowDecimals="True" Text="{Binding CardAmount, Mode=TwoWay}" FontSize="14" FontWeight="Bold" 
+                                    <controls:NumericTextBox AllowDecimals="True" Text="{Binding CardAmount, Mode=TwoWay, Converter={StaticResource StringToDoubleConverter}}" FontSize="14" FontWeight="Bold" 
                                                              Background="{DynamicResource BgTertiaryBrush}" Padding="8" Watermark="0.00" />
                                 </StackPanel>
                                 <StackPanel Grid.Column="2" Spacing="4" Margin="4,0,0,0">
                                     <TextBlock Text="Monedero ($):" FontSize="11" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}"/>
-                                    <controls:NumericTextBox AllowDecimals="True" Text="{Binding WalletAmount, Mode=TwoWay}" FontSize="14" FontWeight="Bold" 
+                                    <controls:NumericTextBox AllowDecimals="True" Text="{Binding WalletAmount, Mode=TwoWay, Converter={StaticResource StringToDoubleConverter}}" FontSize="14" FontWeight="Bold" 
                                                              Background="{DynamicResource BgTertiaryBrush}" Padding="8" Watermark="0.00" />
                                 </StackPanel>
                             </Grid>

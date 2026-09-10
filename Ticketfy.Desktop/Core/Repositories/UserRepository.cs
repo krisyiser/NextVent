@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Ticketfy.Core.Enums;
 using Ticketfy.Core.Models;
 using Ticketfy.Core.Services;
 using Ticketfy.Data;
@@ -79,10 +80,36 @@ public class UserRepository : IUserRepository
         await _context.SaveChangesAsync();
     }
 
+    public async Task SaveOrUpdateAdminUserAsync(UserEntity user)
+    {
+        var existing = await _context.Users.FirstOrDefaultAsync(u => u.Role == UserRole.Admin || u.Username.ToLower() == user.Username.ToLower() || u.Id == user.Id);
+        if (existing != null)
+        {
+            existing.FullName = user.FullName;
+            existing.Username = user.Username;
+            existing.PasswordHash = user.PasswordHash;
+            existing.PasswordHint = user.PasswordHint;
+            existing.PinCode = user.PinCode;
+            existing.IsActive = true;
+            _context.Users.Update(existing);
+        }
+        else
+        {
+            _context.Users.Add(user);
+        }
+        await _context.SaveChangesAsync();
+    }
+
     public async Task<UserEntity?> GetByUsernameAsync(string username)
     {
         return await _context.Users
             .FirstOrDefaultAsync(u => u.Username.ToLower() == username.ToLower());
+    }
+
+    public async Task<UserEntity?> GetAdminUserAsync()
+    {
+        return await _context.Users
+            .FirstOrDefaultAsync(u => u.Role == UserRole.Admin);
     }
 
     private UserModel MapToModel(UserEntity entity)

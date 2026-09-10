@@ -12,6 +12,7 @@ public partial class SetupBusinessDataViewModel : ValidatableViewModelBase
 {
     private readonly ISettingsService _settingsService;
     private readonly Action _navigateToNextStep;
+    private readonly Action? _navigateToPreviousStep;
 
     [ObservableProperty] private string _businessName = string.Empty;
     [ObservableProperty] private string _email = string.Empty;
@@ -20,10 +21,54 @@ public partial class SetupBusinessDataViewModel : ValidatableViewModelBase
     
     [ObservableProperty] private string _errorMessage = string.Empty;
 
-    public SetupBusinessDataViewModel(ISettingsService settingsService, Action navigateToNextStep)
+    public SetupBusinessDataViewModel(ISettingsService settingsService, Action navigateToNextStep, Action? navigateToPreviousStep = null)
     {
         _settingsService = settingsService;
         _navigateToNextStep = navigateToNextStep;
+        _navigateToPreviousStep = navigateToPreviousStep;
+
+        _ = LoadExistingSettingsAsync();
+    }
+
+    private async Task LoadExistingSettingsAsync()
+    {
+        try
+        {
+            var appSettings = await _settingsService.GetAppSettingsAsync();
+            if (appSettings?.Company != null)
+            {
+                if (!string.IsNullOrEmpty(appSettings.Company.CommercialName))
+                    BusinessName = appSettings.Company.CommercialName;
+                if (!string.IsNullOrEmpty(appSettings.Company.Phone))
+                    Phone = appSettings.Company.Phone;
+                if (!string.IsNullOrEmpty(appSettings.Company.Email))
+                    Email = appSettings.Company.Email;
+                if (!string.IsNullOrEmpty(appSettings.Company.Address))
+                    Address = appSettings.Company.Address;
+            }
+
+            if (string.IsNullOrEmpty(BusinessName))
+                BusinessName = await _settingsService.GetAsync("BusinessName") ?? string.Empty;
+            if (string.IsNullOrEmpty(Phone))
+                Phone = await _settingsService.GetAsync("BusinessPhone") ?? string.Empty;
+            if (string.IsNullOrEmpty(Email))
+                Email = await _settingsService.GetAsync("BusinessEmail") ?? string.Empty;
+            if (string.IsNullOrEmpty(Address))
+                Address = await _settingsService.GetAsync("BusinessAddress") ?? string.Empty;
+
+            // Sanitize legacy demo values so fields start completely empty with Watermarks
+            if (BusinessName.Equals("TICKETFY! DEMO STORE", StringComparison.OrdinalIgnoreCase)) BusinessName = string.Empty;
+            if (Phone.Equals("5512345678", StringComparison.OrdinalIgnoreCase)) Phone = string.Empty;
+            if (Email.Equals("contacto@valcore.cloud", StringComparison.OrdinalIgnoreCase)) Email = string.Empty;
+            if (Address.Equals("Av. Insurgentes Sur 1234, CDMX", StringComparison.OrdinalIgnoreCase)) Address = string.Empty;
+        }
+        catch { }
+    }
+
+    [RelayCommand]
+    private void GoBack()
+    {
+        _navigateToPreviousStep?.Invoke();
     }
 
     [RelayCommand]

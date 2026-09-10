@@ -14,6 +14,10 @@ public class StringToDoubleConverter : IValueConverter
         {
             return d.ToString("G", culture);
         }
+        if (value is decimal dec)
+        {
+            return dec.ToString("G", culture);
+        }
         return string.Empty;
     }
 
@@ -23,28 +27,26 @@ public class StringToDoubleConverter : IValueConverter
         {
             if (string.IsNullOrWhiteSpace(s))
             {
-                return 0.0;
+                return targetType == typeof(decimal) ? 0m : 0.0;
             }
 
             s = s.Trim();
 
-            if (double.TryParse(s, NumberStyles.Any, culture, out double d))
+            if (targetType == typeof(decimal))
             {
-                return d;
+                if (decimal.TryParse(s, NumberStyles.Any, culture, out decimal dec)) return dec;
+                if (decimal.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal decInv)) return decInv;
+                string altDec = s.Contains('.') ? s.Replace('.', ',') : s.Replace(',', '.');
+                if (decimal.TryParse(altDec, NumberStyles.Any, culture, out decimal decAlt)) return decAlt;
+                return 0m;
             }
 
-            if (double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out double dInv))
-            {
-                return dInv;
-            }
-
+            if (double.TryParse(s, NumberStyles.Any, culture, out double d)) return d;
+            if (double.TryParse(s, NumberStyles.Any, CultureInfo.InvariantCulture, out double dInv)) return dInv;
             string altS = s.Contains('.') ? s.Replace('.', ',') : s.Replace(',', '.');
-            if (double.TryParse(altS, NumberStyles.Any, culture, out double dAlt))
-            {
-                return dAlt;
-            }
+            if (double.TryParse(altS, NumberStyles.Any, culture, out double dAlt)) return dAlt;
         }
 
-        return 0.0;
+        return targetType == typeof(decimal) ? 0m : 0.0;
     }
 }

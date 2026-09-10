@@ -46,7 +46,10 @@ public static class AppBootstrapper
             var bEmail = await tempCtx.Settings.FirstOrDefaultAsync(s => s.Key == "ContactEmail");
             if (bEmail != null && !string.IsNullOrWhiteSpace(bEmail.Value)) contactEmail = bEmail.Value;
         }
-        catch { }
+        catch (Exception ex)
+        {
+            Log.Warning(ex, "Aviso leyendo el perfil del negocio durante el arranque");
+        }
 
         return (businessName, contactEmail);
     }

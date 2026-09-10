@@ -17,6 +17,7 @@ public partial class FirstTimeSetupViewModel : ValidatableViewModelBase
     private readonly IUserRepository _userRepository;
     private readonly IDialogService _dialogService;
     private readonly Action _navigateToNextStep;
+    private readonly Action? _navigateToPreviousStep;
 
     [ObservableProperty] private string _adminFullName = string.Empty;
     [ObservableProperty] private string _adminUsername = string.Empty;
@@ -32,13 +33,42 @@ public partial class FirstTimeSetupViewModel : ValidatableViewModelBase
 
     [ObservableProperty] private string _errorMessage = string.Empty;
 
-    // Removed OnAdminPinChanged as we are using 4 separate text boxes
-
-    public FirstTimeSetupViewModel(IUserRepository userRepository, IDialogService dialogService, Action navigateToNextStep)
+    public FirstTimeSetupViewModel(IUserRepository userRepository, IDialogService dialogService, Action navigateToNextStep, Action? navigateToPreviousStep = null)
     {
         _userRepository = userRepository;
         _dialogService = dialogService;
         _navigateToNextStep = navigateToNextStep;
+        _navigateToPreviousStep = navigateToPreviousStep;
+
+        _ = LoadExistingAdminUserAsync();
+    }
+
+    private async Task LoadExistingAdminUserAsync()
+    {
+        try
+        {
+            var admin = await _userRepository.GetAdminUserAsync();
+            if (admin != null)
+            {
+                AdminFullName = admin.FullName;
+                AdminUsername = admin.Username;
+                PasswordHint = admin.PasswordHint ?? string.Empty;
+                if (!string.IsNullOrEmpty(admin.PinCode) && admin.PinCode.Length == 4)
+                {
+                    AdminPin1 = admin.PinCode[0].ToString();
+                    AdminPin2 = admin.PinCode[1].ToString();
+                    AdminPin3 = admin.PinCode[2].ToString();
+                    AdminPin4 = admin.PinCode[3].ToString();
+                }
+            }
+        }
+        catch { }
+    }
+
+    [RelayCommand]
+    private void GoBack()
+    {
+        _navigateToPreviousStep?.Invoke();
     }
 
     [RelayCommand]
@@ -78,7 +108,7 @@ public partial class FirstTimeSetupViewModel : ValidatableViewModelBase
                 IsActive = true
             };
 
-            await _userRepository.CreateUserAsync(adminUser);
+            await _userRepository.SaveOrUpdateAdminUserAsync(adminUser);
             
             // Advance to the next wizard step instead of logging in directly
             _navigateToNextStep();

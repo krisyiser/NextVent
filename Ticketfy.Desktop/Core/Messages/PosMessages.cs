@@ -16,3 +16,5 @@ public record CustomerDisplayIdleStateMessage(bool IsIdle);
 public record FocusSearchMessage();
 
 public record UserDeletedMessage(string UserId);
+
+public record CashupSavedMessage();

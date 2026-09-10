@@ -78,16 +78,16 @@ public partial class VisualCustomizationConfig : ObservableObject
 
 public sealed class CompanyProfileConfig
 {
-    public string CommercialName { get; set; } = "TICKETFY! DEMO STORE";
-    public string LegalName { get; set; } = "TICKETFY ENTERPRISE S.A. DE C.V.";
-    public string Rfc { get; set; } = "XAXX010101000";
-    public string FiscalRegime { get; set; } = "601 - General de Ley Personas Morales";
-    public string ZipCode { get; set; } = "06000";
-    public string Phone { get; set; } = "5512345678";
-    public string Email { get; set; } = "contacto@valcore.cloud";
-    public string Address { get; set; } = "Av. Insurgentes Sur 1234, CDMX";
+    public string CommercialName { get; set; } = string.Empty;
+    public string LegalName { get; set; } = string.Empty;
+    public string Rfc { get; set; } = string.Empty;
+    public string FiscalRegime { get; set; } = string.Empty;
+    public string ZipCode { get; set; } = string.Empty;
+    public string Phone { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Address { get; set; } = string.Empty;
     public string LogoPath { get; set; } = string.Empty;
-    public string Website { get; set; } = "https://valcore.cloud";
+    public string Website { get; set; } = string.Empty;
 }
 
 public sealed class TicketLayoutConfig

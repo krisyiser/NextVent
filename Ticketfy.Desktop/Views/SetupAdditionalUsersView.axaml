@@ -37,11 +37,19 @@
 
                 <StackPanel Spacing="10">
                     <Button Command="{Binding CreateUserCommand}" Classes="primary-action" Height="44" HorizontalAlignment="Stretch">
-                        <TextBlock Text="CREAR USUARIO" FontWeight="Bold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        <TextBlock Text="AGREGAR USUARIO ADICIONAL" FontWeight="Bold" FontSize="13" HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Button>
-                    <Button Command="{Binding SkipCommand}" Background="Transparent" BorderBrush="{DynamicResource BorderBrush}" BorderThickness="1" Height="44" HorizontalAlignment="Stretch">
-                        <TextBlock Text="FINALIZAR / OMITIR" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource TextSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                    </Button>
+                    <Grid ColumnDefinitions="*,12,*">
+                        <Button Grid.Column="0" Command="{Binding GoBackCommand}" Background="{DynamicResource BgTertiaryBrush}" Foreground="{DynamicResource TextPrimaryBrush}" Height="44" HorizontalAlignment="Stretch">
+                            <StackPanel Orientation="Horizontal" Spacing="6" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <mi:MaterialIcon Kind="ArrowLeft" Width="18" Height="18" />
+                                <TextBlock Text="VOLVER" FontWeight="Bold" FontSize="13" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+                        <Button Grid.Column="2" Command="{Binding SkipCommand}" Background="{DynamicResource AccentPrimaryBrush}" Height="44" HorizontalAlignment="Stretch">
+                            <TextBlock Text="FINALIZAR CONFIGURACIÓN" FontWeight="Bold" FontSize="13" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Button>
+                    </Grid>
                 </StackPanel>
             </StackPanel>
         </Border>

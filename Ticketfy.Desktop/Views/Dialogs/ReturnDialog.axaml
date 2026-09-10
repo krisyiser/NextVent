@@ -4,8 +4,13 @@
              xmlns:dto="using:Ticketfy.Data.Dtos"
              xmlns:mi="using:Material.Icons.Avalonia"
              xmlns:controls="using:Ticketfy.Controls"
+             xmlns:converters="using:Ticketfy.Converters"
              x:Class="Ticketfy.Views.Dialogs.ReturnDialog"
              x:DataType="vm:ReturnDialogViewModel">
+
+    <UserControl.Resources>
+        <converters:StringToDoubleConverter x:Key="StringToDoubleConverter"/>
+    </UserControl.Resources>
 
     <Grid Background="#80000000">
         <Border Width="500" HorizontalAlignment="Center" VerticalAlignment="Center"
@@ -52,7 +57,7 @@
                 <Grid RowDefinitions="Auto" ColumnDefinitions="*,*">
                     <StackPanel Grid.Column="0" Margin="0,0,4,0" Spacing="4">
                         <TextBlock Text="Cantidad a Devolver *" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource TextSecondaryBrush}" />
-                        <controls:NumericTextBox AllowDecimals="True" Text="{Binding ReturnQuantity, Mode=TwoWay}" Watermark="1.0" Padding="8" FontSize="14" FontWeight="Bold" />
+                        <controls:NumericTextBox AllowDecimals="True" Text="{Binding ReturnQuantity, Mode=TwoWay, Converter={StaticResource StringToDoubleConverter}}" Watermark="1.0" Padding="8" FontSize="14" FontWeight="Bold" />
                     </StackPanel>
 
                     <StackPanel Grid.Column="1" Margin="4,0,0,0" Spacing="4">

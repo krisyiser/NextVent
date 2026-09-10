@@ -358,15 +358,26 @@ public partial class MainWindowViewModel : ObservableObject
                     await settingsService.SetAsync("IsOnboardingCompleted", "true");
                     Navigation.GoToLogin();
                 };
-                Action goToAdditionalUsers = () =>
-                    Navigation.GoTo(new SetupAdditionalUsersViewModel(userRepository, finishSetup));
-                Action goToBusinessData = () =>
-                    Navigation.GoTo(new SetupBusinessDataViewModel(settingsService, goToAdditionalUsers));
-                Action goToAdminAccount = () =>
-                    Navigation.GoTo(new FirstTimeSetupViewModel(userRepository, dialogService, goToBusinessData));
+
+                Action goToWelcome = null!;
+                Action goToAdminAccount = null!;
+                Action goToBusinessData = null!;
+                Action goToAdditionalUsers = null!;
+
+                goToWelcome = () =>
+                    Navigation.GoTo(new WelcomeLicenseViewModel(licenseService, goToAdminAccount));
+
+                goToAdminAccount = () =>
+                    Navigation.GoTo(new FirstTimeSetupViewModel(userRepository, dialogService, goToBusinessData, goToWelcome));
+
+                goToBusinessData = () =>
+                    Navigation.GoTo(new SetupBusinessDataViewModel(settingsService, goToAdditionalUsers, goToAdminAccount));
+
+                goToAdditionalUsers = () =>
+                    Navigation.GoTo(new SetupAdditionalUsersViewModel(userRepository, finishSetup, goToBusinessData));
 
                 // OOBE Onboarding Step 1: Friendly Welcome & License Activation Screen
-                Navigation.GoTo(new WelcomeLicenseViewModel(licenseService, goToAdminAccount));
+                goToWelcome();
             }
             else
             {

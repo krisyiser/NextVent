@@ -1,5 +1,6 @@
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
 using Ticketfy.Data;
 using Ticketfy.Data.Entities;
 using Serilog;
@@ -26,6 +27,25 @@ public partial class CashupHistoryViewModel : ObservableObject
     public CashupHistoryViewModel(AppDbContext db)
     {
         _db = db;
+        WeakReferenceMessenger.Default.Register<Ticketfy.Core.Messages.CashupSavedMessage>(this, (r, m) =>
+        {
+            Dispatcher.UIThread.Post(() => _ = LoadCashupsAsync(DateTime.Today, DateTime.Today.AddDays(1).AddTicks(-1)));
+        });
+    }
+
+    private static bool TryParseCashupDate(string? timestampStr, out DateTime dt)
+    {
+        dt = DateTime.MinValue;
+        if (string.IsNullOrWhiteSpace(timestampStr)) return false;
+
+        if (DateTime.TryParse(timestampStr, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out dt))
+            return true;
+        if (DateTime.TryParse(timestampStr, System.Globalization.CultureInfo.CurrentCulture, System.Globalization.DateTimeStyles.None, out dt))
+            return true;
+        if (DateTime.TryParse(timestampStr, out dt))
+            return true;
+
+        return false;
     }
 
     public async Task LoadCashupsAsync(DateTime start, DateTime end)
@@ -37,18 +57,30 @@ public partial class CashupHistoryViewModel : ObservableObject
             var filtered = allCashups
                 .Where(c =>
                 {
-                    if (DateTime.TryParse(c.Timestamp, out var dt))
+                    if (TryParseCashupDate(c.Timestamp, out var dt))
                     {
                         return dt >= start && dt <= end;
                     }
-                    return false;
+                    return true;
                 })
                 .OrderByDescending(c =>
                 {
-                    DateTime.TryParse(c.Timestamp, out var dt);
+                    TryParseCashupDate(c.Timestamp, out var dt);
                     return dt;
                 })
                 .ToList();
+
+            if (filtered.Count == 0 && start.Date == DateTime.Today)
+            {
+                filtered = allCashups
+                    .OrderByDescending(c =>
+                    {
+                        TryParseCashupDate(c.Timestamp, out var dt);
+                        return dt;
+                    })
+                    .Take(500)
+                    .ToList();
+            }
 
             await Dispatcher.UIThread.InvokeAsync(() =>
             {

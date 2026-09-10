@@ -330,7 +330,7 @@ public sealed class ProductService : IProductService
     public async Task<IEnumerable<ProductDto>> GetCatalogForPosAsync()
     {
         string appDataFolder = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        string dbPath = Path.Combine(appDataFolder, "Ticketfy", "Database", "ticketfy.db");
+        string dbPath = Path.Combine(appDataFolder, "ticketfy", "Database", "ticketfy.db");
         string securePassword = Ticketfy.Services.Security.SecurityManager.GetMasterKey();
         string secureConnectionString = $"Data Source={dbPath};Password={securePassword};";
 

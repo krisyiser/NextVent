@@ -1,6 +1,7 @@
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Ticketfy.Data.Dtos;
 using Ticketfy.Services.Interfaces;
 using Ticketfy.Core.Helpers;
@@ -75,9 +76,29 @@ public partial class HistoryViewModel : ObservableObject
         _settingsService = settingsService;
 
         _saleService.SaleSaved += OnSaleSaved;
+        WeakReferenceMessenger.Default.Register<Ticketfy.Core.Messages.CashupSavedMessage>(this, (r, m) =>
+        {
+            Dispatcher.UIThread.Post(() => _ = FetchSalesHistoryAsync());
+        });
+
         _ = LoadSavedCommissionAsync();
         _ = LoadSalesAsync();
         _ = LoadCashierPerformanceAsync();
+    }
+
+    private static bool TryParseCashupDate(string? timestampStr, out DateTime dt)
+    {
+        dt = DateTime.MinValue;
+        if (string.IsNullOrWhiteSpace(timestampStr)) return false;
+
+        if (DateTime.TryParse(timestampStr, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out dt))
+            return true;
+        if (DateTime.TryParse(timestampStr, System.Globalization.CultureInfo.CurrentCulture, System.Globalization.DateTimeStyles.None, out dt))
+            return true;
+        if (DateTime.TryParse(timestampStr, out dt))
+            return true;
+
+        return false;
     }
 
     private void OnSaleSaved(SaleDto sale)
@@ -123,18 +144,30 @@ public partial class HistoryViewModel : ObservableObject
                 cashupsQuery = allCashups
                     .Where(c => 
                     {
-                        if (DateTime.TryParse(c.Timestamp, out var dt))
+                        if (TryParseCashupDate(c.Timestamp, out var dt))
                         {
                             return dt >= queryStart && dt <= queryEnd;
                         }
-                        return false;
+                        return true;
                     })
                     .OrderByDescending(c => 
                     {
-                        DateTime.TryParse(c.Timestamp, out var dt);
+                        TryParseCashupDate(c.Timestamp, out var dt);
                         return dt;
                     })
                     .ToList();
+
+                if (cashupsQuery.Count == 0 && StartDate == DateTime.Today && EndDate == DateTime.Today)
+                {
+                    cashupsQuery = allCashups
+                        .OrderByDescending(c => 
+                        {
+                            TryParseCashupDate(c.Timestamp, out var dt);
+                            return dt;
+                        })
+                        .Take(500)
+                        .ToList();
+                }
             }
             catch (Exception ex)
             {

@@ -7,12 +7,18 @@ sys.stdout.reconfigure(encoding='utf-8')
 
 def safe_put(sftp, local_path, remote_path):
     try:
+        tmp_path = remote_path + ".tmp"
+        try:
+            sftp.remove(tmp_path)
+        except IOError:
+            pass
+        sftp.put(local_path, tmp_path)
         try:
             sftp.remove(remote_path)
         except IOError:
             pass
-        sftp.put(local_path, remote_path)
-        print(f"  -> Uploaded: {remote_path}")
+        sftp.rename(tmp_path, remote_path)
+        print(f"  -> Atomic Upload Completed: {remote_path}")
     except Exception as ex:
         print(f"  -> Warning uploading {remote_path}: {ex}")
 
@@ -71,14 +77,16 @@ def deploy_release(version):
 
     # 3. Write and upload releases.json web manifest
     now_utc = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ')
+    now_ts = int(datetime.datetime.now().timestamp())
     releases_json = f'''{{
   "version": "{version}",
   "updated_at": "{now_utc}",
   "downloads": {{
-    "x64": "/downloads/Ticketfy-Instalador-v{version}-x64.zip?v={version}",
-    "exe": "/downloads/Ticketfy-Setup-v{version}-x64.exe?v={version}",
-    "x86": "/downloads/Ticketfy-Setup-v{version}-x86.exe?v={version}",
-    "default": "/downloads/Ticketfy-Instalador-v{version}-x64.zip?v={version}"
+    "x64": "/downloads/Ticketfy-Setup-v{version}-x64.exe?v={version}&t={now_ts}",
+    "exe": "/downloads/Ticketfy-Setup-v{version}-x64.exe?v={version}&t={now_ts}",
+    "x86": "/downloads/Ticketfy-Setup-v{version}-x86.exe?v={version}&t={now_ts}",
+    "zip": "/downloads/Ticketfy-Instalador-v{version}-x64.zip?v={version}&t={now_ts}",
+    "default": "/downloads/Ticketfy-Setup-v{version}-x64.exe?v={version}&t={now_ts}"
   }}
 }}'''
 

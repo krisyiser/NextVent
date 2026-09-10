@@ -184,12 +184,14 @@ public partial class CashupDialogViewModel : ObservableObject
                 Type = IsFinalZCut ? "Final" : "Parcial",
                 CashierName = _sessionManager?.CurrentCashier?.FullName ?? "Cajero en turno",
                 CashierRole = _sessionManager?.CurrentCashier?.DisplayRole ?? "CAJERO",
-                Timestamp = DateTime.Now.ToString("g")
+                Timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")
             };
 
             _db.Cashups.Add(entity);
             await _db.SaveChangesAsync();
             dbSavedSuccessfully = true;
+
+            WeakReferenceMessenger.Default.Send(new Ticketfy.Core.Messages.CashupSavedMessage());
 
             IsFeedbackError = false;
             FeedbackMessage = IsFinalZCut 
@@ -340,10 +342,17 @@ public partial class CashupDialogViewModel : ObservableObject
                 shiftStart = DateTime.Today;
             }
 
-            var allSales = await _db.Sales
+            var query = _db.Sales
                 .AsNoTracking()
-                .Where(s => s.Status == Ticketfy.Core.Enums.SaleStatus.Completed && s.IsCancelled == 0)
-                .ToListAsync();
+                .Where(s => s.Status == Ticketfy.Core.Enums.SaleStatus.Completed && s.IsCancelled == 0);
+
+            if (shiftStart.HasValue)
+            {
+                string startIso = shiftStart.Value.ToString("yyyy-MM-dd");
+                query = query.Where(s => string.Compare(s.Date, startIso) >= 0);
+            }
+
+            var allSales = await query.ToListAsync();
 
             var shiftSales = allSales
                 .Where(s => s.Date.IsInDateRange(shiftStart, null))
