@@ -1,5 +1,5 @@
-﻿#define MyAppName "TICKETFY!"
-#define MyAppVersion "3.1.55"
+#define MyAppName "TICKETFY!"
+#define MyAppVersion "3.1.56"
 #define MyAppPublisher "Valcore"
 #define MyAppURL "https://valcore.cloud"
 #define MyAppExeName "Ticketfy.Desktop.exe"
@@ -17,7 +17,7 @@ DefaultDirName={userappdata}\Ticketfy.Desktop\current
 DisableDirPage=yes
 DefaultGroupName={#MyAppName}
 DisableProgramGroupPage=yes
-OutputBaseFilename=Ticketfy-Setup-v3.1.55-x64
+OutputBaseFilename=Ticketfy-Setup-v3.1.56-x64
 OutputDir=c:\Users\YERSI\.gemini\antigravity-ide\scratch\NextVent\Ticketfy.Desktop\Output\Releases
 Compression=lzma2/fast
 SolidCompression=no
@@ -31,11 +31,11 @@ RestartApplications=no
 ; Metadatos Empresariales de Firma e Identidad Windows PE - VALCORE
 VersionInfoCompany=Valcore
 VersionInfoDescription=Valcore TICKETFY! Punto de Venta - Instalador Nivel Industrial
-VersionInfoVersion=3.1.54.0
-VersionInfoCopyright=Copyright Ã‚Â© 2026 Valcore. Todos los derechos reservados.
+VersionInfoVersion=3.1.56.0
+VersionInfoCopyright=Copyright © 2026 Valcore. Todos los derechos reservados.
 VersionInfoProductName=Valcore TICKETFY! POS Enterprise System
-VersionInfoProductVersion=3.1.54.0
-VersionInfoOriginalFileName=Ticketfy-Setup-v3.1.54-x64.exe
+VersionInfoProductVersion=3.1.56.0
+VersionInfoOriginalFileName=Ticketfy-Setup-v3.1.56-x64.exe
 
 [Languages]
 Name: "spanish"; MessagesFile: "compiler:Languages\Spanish.isl"
